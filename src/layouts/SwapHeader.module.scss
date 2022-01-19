@@ -4,6 +4,7 @@
 .header {
   position: sticky;
   top: 0;
+  border-bottom: 1px solid rgba($color: #ffffff, $alpha: 0.15);
 }
 
 @include mobile {
@@ -17,18 +18,18 @@
 }
 
 .container {
-  @include desktop {
-    @include flex(space-between);
-  }
+  @include flex(space-between);
 }
 
 .wrapper {
   @include flex;
+  font-size: 20px;
+  color: #ffffff;
 }
 
 .logo,
 .connect {
   @include flex;
   @include desktop;
-  margin-top: 46px;
+  margin-left: 20px;
 }

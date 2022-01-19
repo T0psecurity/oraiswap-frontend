@@ -12,12 +12,6 @@ export enum Type {
   'WITHDRAW' = 'Withdraw'
 }
 
-// const tabs = [
-//   { type: Type.SWAP, slang: "swap", name: "Swap" },
-//   { type: Type.PROVIDE, slang: "provide", name: "Provide" },
-//   { type: Type.WITHDRAW, slang: "withdraw", name: "Withdraw" },
-// ];
-
 const Swap = () => {
   const { hash: type } = useHash<Type>(Type.SWAP);
   const tabs = {
@@ -29,17 +23,13 @@ const Swap = () => {
     selectedTabName: type
   };
 
-  console.log(tabs);
-
   return (
     <Fragment>
-      <div id="terra">
-        <SwapHeader />
-        <Container>
-          {/* <SwapPage>{type && <SwapForm type={type} tabs={tabs} />}</SwapPage> */}
-        </Container>
-        <SwapFooter />
-      </div>
+      <SwapHeader />
+      <Container>
+        <SwapPage>{type && <SwapForm type={type} tabs={tabs} />}</SwapPage>
+      </Container>
+      <SwapFooter />
     </Fragment>
   );
 };

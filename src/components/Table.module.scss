@@ -1,4 +1,4 @@
-@import "variables";
+@import 'variables';
 
 .wrapper {
   width: 100%;
@@ -10,7 +10,7 @@
 }
 
 .cell {
-  background: $darkblue;
+  background: $white;
   padding: 20px;
   white-space: nowrap;
 }

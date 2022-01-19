@@ -1,12 +1,13 @@
 /* Colors */
 $bg: #121a2f;
-$darkblue: #ffffff;
+$darkblue: #001212;
 $realblue: #0222ba;
 $semiblue: #e2e7ff;
 
 $gray: #cccccc;
 $brown: #a0a0a0;
 $light: #f0f0f0;
+$white: #ffffff;
 $battleship: #6d738c;
 $slate: #505466;
 $deepgray: #5c5c5c;
@@ -26,7 +27,7 @@ $colors: (
   blue: $blue,
   aqua: $aqua,
   red: $red,
-  orange: $orange,
+  orange: $orange
 );
 
 $hr-shadow: fade-out(black, 0.8);
@@ -35,8 +36,8 @@ $border: 1px solid fade-out($slate, 0.8);
 
 /* Fonts */
 $font-size: 14px;
-$font-family: "Poppins";
-$font-family-swap: "Open Sans", arial, sans-serif;
+$font-family: 'Poppins';
+$font-family-swap: 'Open Sans', arial, sans-serif;
 
 /* Sizes */
 $breakpoint: 992px;

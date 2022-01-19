@@ -14,7 +14,7 @@ import TabView from 'components/TabView';
 import networks from 'constants/networks';
 import { useLocation } from 'react-router-dom';
 import { UST, DEFAULT_MAX_SPREAD, ULUNA } from 'constants/constants';
-import { useContractsAddress, useContract, useConnectModal } from 'hooks';
+import { useContractsAddress, useContract } from 'hooks';
 import { lookup, decimal, toAmount } from 'libs/parse';
 import calc from 'helpers/calc';
 import { PriceKey, BalanceKey, AssetInfoKey } from 'hooks/contractKeys';
@@ -53,6 +53,7 @@ import { useModal } from 'components/Modal';
 import Settings, { SettingValues } from 'components/Settings';
 import useLocalStorage from 'libs/useLocalStorage';
 import useAutoRouter from 'rest/useAutoRouter';
+import Cosmos from '@oraichain/cosmosjs';
 
 enum Key {
   token1 = 'token1',
@@ -75,6 +76,7 @@ enum Key {
 
 const priceKey = PriceKey.PAIR;
 const infoKey = AssetInfoKey.COMMISSION;
+const { Coin } = Cosmos.message.cosmos.base.v1beta1;
 
 const Wrapper = styled.div`
   width: 100%;
@@ -89,15 +91,13 @@ const Warning = {
 };
 
 const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
-  const connectModal = useConnectModal();
   const { getSymbol, isNativeToken } = useContractsAddress();
   const { loadTaxInfo, loadTaxRate, generateContractMessages } = useAPI();
   const { state } = useLocation<{ symbol: string }>();
   const fee = networks.testnet.fee;
-  const { find } = useContract();
+
   const walletAddress = 'useAddress();';
-  const { post: terraExtensionPost } = useWallet();
-  const { terra } = useLCDClient();
+
   const settingsModal = useModal();
   const [slippageSettings, setSlippageSettings] = useLocalStorage<
     SettingValues
@@ -282,7 +282,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
     balance1
   );
 
-  const [tax, setTax] = useState<Coins>(new Coins());
+  const [tax, setTax] = useState([]);
 
   const simulationContents = useMemo(() => {
     if (
@@ -299,7 +299,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
       ? calc.minimumReceived({
           expectedAmount: `${profitableQuery?.simulatedAmount}`,
           max_spread: String(slippageTolerance),
-          commission: find(infoKey, formData[Key.symbol2]),
+          commission: '0.003',
           decimals: tokenInfo1?.decimals
         })
       : '0';
@@ -429,7 +429,6 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
       })
     ];
   }, [
-    find,
     formData,
     poolResult,
     profitableQuery,
@@ -461,7 +460,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
           10
         ).toString();
         if (isNativeToken(symbol || '')) {
-          msg.coins = Coins.fromString(toAmount(`${amount}`) + symbol);
+          msg.coins = [new Coin()]; //Coins.fromString(toAmount(`${amount}`) + symbol);
         }
 
         msg.execute_msg.send.msg = btoa(
@@ -483,7 +482,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
         );
 
         if (isNativeToken(symbol || '')) {
-          msg.coins = Coins.fromString(toAmount(`${amount}`) + symbol);
+          msg.coins = [new Coin()]; // Coins.fromString(toAmount(`${amount}`) + symbol);
         }
       }
       return [msg];
@@ -821,7 +820,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
               ? calc.minimumReceived({
                   expectedAmount: `${profitableQuery?.simulatedAmount}`,
                   max_spread: String(slippageTolerance),
-                  commission: find(infoKey, formData[Key.symbol2]),
+                  commission: '0.003', //find(infoKey, formData[Key.symbol2]),
                   decimals: tokenInfo1?.decimals
                 })
               : '0',
@@ -858,13 +857,14 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
           gasPrices: `${gasPrice}${getSymbol(feeSymbol)}`
         };
 
-        const signMsg = await terra.tx.create(
-          [{ address: walletAddress }],
-          txOptions
-        );
+        const signMsg = new Cosmos.message.cosmos.tx.v1beta1.Tx();
+        // const signMsg = await terra.tx.create(
+        //   [{ address: walletAddress }],
+        //   txOptions
+        // );
         txOptions.fee = signMsg.auth_info.fee;
 
-        const extensionResult = await terraExtensionPost(txOptions);
+        const extensionResult = 'extensionResult';
 
         if (extensionResult) {
           setResult(extensionResult);
@@ -878,18 +878,17 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
       settingsModal,
       type,
       getSymbol,
-      terraExtensionPost,
+
       generateContractMessages,
       walletAddress,
       slippageTolerance,
       profitableQuery,
       getMsgs,
       formData,
-      find,
+      // find,
       lpContract,
       tokenInfo1,
-      tokenInfo2,
-      terra.tx
+      tokenInfo2
     ]
   );
 
@@ -1143,23 +1142,17 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
                 </p>
               </div>
               <Button
-                {...(walletAddress
-                  ? {
-                      children: type || 'Submit',
-                      loading: formState.isSubmitting,
-                      disabled:
-                        !formState.isValid ||
-                        formState.isValidating ||
-                        simulationContents?.length <= 0 ||
-                        (type === Type.SWAP &&
-                          (!profitableQuery || isAutoRouterLoading)),
-                      type: 'submit'
-                    }
-                  : {
-                      onClick: () => connectModal.open(),
-                      type: 'button',
-                      children: MESSAGE.Form.Button.ConnectWallet
-                    })}
+                {...{
+                  children: type || 'Submit',
+                  loading: formState.isSubmitting,
+                  disabled:
+                    !formState.isValid ||
+                    formState.isValidating ||
+                    simulationContents?.length <= 0 ||
+                    (type === Type.SWAP &&
+                      (!profitableQuery || isAutoRouterLoading)),
+                  type: 'submit'
+                }}
                 size="swap"
                 submit
               />

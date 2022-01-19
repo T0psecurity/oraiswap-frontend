@@ -10,6 +10,7 @@ const Header = () => {
     <header className={styles.header}>
       <Container className={styles.container}>
         <section className={styles.wrapper}>
+          Oraiswap
           <a href="https://swap.orai.io">
             <img height={38} className={styles.logo} src={logo} />
           </a>
