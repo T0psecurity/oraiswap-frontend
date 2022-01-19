@@ -1,12 +1,11 @@
 {
-  "name": "terraswap-web-app",
+  "name": "oraiswap-web-app",
   "version": "1.0.0",
-  "homepage": "https://app.terraswap.com",
-  "repository": "github:terraswap/terraswap-web-app",
+  "homepage": "https://app.oraiswap.com",
+  "repository": "github:oraiswap/oraiswap-web-app",
   "author": "DELIGHT <member@delightlabs.io>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@apollo/client": "^3.2.4",
     "@material-ui/core": "^4.11.0",
     "@terra-money/terra.js": "^2.0.16",
     "@terra-money/wallet-provider": "^2.2.0",
@@ -24,14 +23,8 @@
     "@types/react-modal": "^3.10.6",
     "@types/react-router-dom": "^5.1.7",
     "axios": "^0.21.1",
-    "axios-cache-adapter": "^2.7.3",
     "bignumber.js": "^9.0.1",
     "classnames": "^2.2.6",
-    "graphql": "^15.3.0",
-    "http-proxy-middleware": "^2.0.0",
-    "husky": "^4.3.0",
-    "lint-staged": "^10.4.2",
-    "node-sass": "^4.14.1",
     "numeral": "^2.0.6",
     "prettier": "^2.1.2",
     "ramda": "^0.27.1",
@@ -40,7 +33,7 @@
     "react-hook-form": "^7.1.1",
     "react-modal": "^3.11.2",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.3",
+    "react-scripts": "4.0.3",
     "source-map-explorer": "^2.5.0",
     "styled-components": "^5.2.3",
     "typescript": "^4.2.4"
@@ -55,16 +48,6 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --no-semi --write"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -78,6 +61,7 @@
     ]
   },
   "devDependencies": {
-    "@types/styled-components": "^5.1.9"
+    "@types/styled-components": "^5.1.9",
+    "node-sass": "^6.0.0"
   }
 }

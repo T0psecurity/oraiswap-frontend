@@ -1,20 +1,21 @@
-import React, { FC } from "react"
-import { useContractsAddressState } from "../hooks/useContractsAddress"
-import { ContractsAddressProvider } from "../hooks/useContractsAddress"
-import { useContractsAddressTokenState } from "../hooks/useContractsAddressToken"
-import { ContractsAddressTokenProvider } from "../hooks/useContractsAddressToken"
+import React, { FC } from 'react';
+import { useContractsAddressState } from '../hooks/useContractsAddress';
+import { ContractsAddressProvider } from '../hooks/useContractsAddress';
+import { useContractsAddressTokenState } from '../hooks/useContractsAddressToken';
+import { ContractsAddressTokenProvider } from '../hooks/useContractsAddressToken';
 
 const Contract: FC = ({ children }) => {
-  const contractsAddress = useContractsAddressState()
-  const contractsAddressToken = useContractsAddressTokenState()
+  return <div>contract</div>;
+  // const contractsAddress = useContractsAddressState()
+  // const contractsAddressToken = useContractsAddressTokenState()
 
-  return !contractsAddress ? null : (
-    <ContractsAddressProvider value={contractsAddress}>
-      <ContractsAddressTokenProvider value={contractsAddressToken}>
-        {children}
-      </ContractsAddressTokenProvider>
-    </ContractsAddressProvider>
-  )
-}
+  // return !contractsAddress ? null : (
+  //   <ContractsAddressProvider value={contractsAddress}>
+  //     <ContractsAddressTokenProvider value={contractsAddressToken}>
+  //       {children}
+  //     </ContractsAddressTokenProvider>
+  //   </ContractsAddressProvider>
+  // )
+};
 
-export default Contract
+export default Contract;

@@ -1,85 +1,82 @@
-import { LazyQueryResult } from "@apollo/client"
-import { Dictionary } from "ramda"
+// @ts-nocheck
 
-import { UUSD } from "constants/constants"
-import { sum } from "libs/math"
+import { Dictionary } from 'ramda';
 
-import usePairPool from "graphql/queries/usePairPool"
-import useOraclePrice from "graphql/queries/useOraclePrice"
+import { UUSD } from 'constants/constants';
+import { sum } from 'libs/math';
 
-import usePairConfig from "graphql/queries/usePairConfig"
-import useMintInfo from "graphql/queries/useMintInfo"
-import useLpTokenInfo from "graphql/queries/useLpTokenInfo"
+import usePairPool from 'queries/usePairPool';
+import useOraclePrice from 'queries/useOraclePrice';
 
-import useBankBalances from "graphql/queries/useBankBalances"
-import useMintPositions from "graphql/queries/useMintPositions"
+import usePairConfig from 'queries/usePairConfig';
+import useMintInfo from 'queries/useMintInfo';
+import useLpTokenInfo from 'queries/useLpTokenInfo';
 
-import useTokenBalance from "graphql/queries/useTokenBalance"
-import useLpTokenBalance from "graphql/queries/useLpTokenBalance"
-import useStakingReward from "graphql/queries/useStakingReward"
-import useStakingPool from "graphql/queries/useStakingPool"
-import useGovStake from "graphql/queries/useGovStake"
+import useBankBalances from 'queries/useBankBalances';
+import useMintPositions from 'queries/useMintPositions';
 
-import useNormalize from "graphql/useNormalize"
+import useTokenBalance from 'queries/useTokenBalance';
+import useLpTokenBalance from 'queries/useLpTokenBalance';
+import useStakingReward from 'queries/useStakingReward';
+import useStakingPool from 'queries/useStakingPool';
+import useGovStake from 'queries/useGovStake';
 
-import createContext from "./createContext"
-import { useContractsAddress } from "./useContractsAddress"
-import { PriceKey, AssetInfoKey } from "./contractKeys"
-import { BalanceKey, AccountInfoKey } from "./contractKeys"
+import useNormalize from './useNormalize';
 
-export type DictionaryKey = PriceKey | BalanceKey | AssetInfoKey
-export type DataKey = PriceKey | BalanceKey | AssetInfoKey | AccountInfoKey
+import createContext from './createContext';
+import { useContractsAddress } from './useContractsAddress';
+import { PriceKey, AssetInfoKey } from './contractKeys';
+import { BalanceKey, AccountInfoKey } from './contractKeys';
 
-export type QueryResult = LazyQueryResult<any, any> & {
-  load: () => void
-}
+export type DictionaryKey = PriceKey | BalanceKey | AssetInfoKey;
+export type DataKey = PriceKey | BalanceKey | AssetInfoKey | AccountInfoKey;
 
 interface Data extends Record<DictionaryKey, Dictionary<string> | undefined> {
-  [AccountInfoKey.UUSD]: string
-  [AccountInfoKey.MINTPOSITIONS]?: MintPosition[]
+  [AccountInfoKey.UUSD]: string;
+  [AccountInfoKey.MINTPOSITIONS]?: MintPosition[];
 }
 
 interface Helpers {
   /** Find the value of the symbol in the data of the given key */
-  find: (key: DictionaryKey, symbol: string) => string
+  find: (key: DictionaryKey, symbol: string) => string;
   /** Sum */
-  rewards: string
+  rewards: string;
 }
 
-type Result = Record<DataKey, QueryResult>
-type Parsed = Record<PriceKey | BalanceKey, any>
+type Result = Record<DataKey, any>;
+type Parsed = Record<PriceKey | BalanceKey, any>;
 
 interface Contract extends Data, Helpers {
-  result: Result
-  parsed: Parsed
+  result: Result;
+  parsed: Parsed;
 }
 
-const contract = createContext<Contract>("useContract")
-export const [useContract, ContractProvider] = contract
+const contract = createContext<Contract>('useContract');
+export const [useContract, ContractProvider] = contract;
 
 /* state */
 export const useContractState = (address: string): Contract => {
-  const { getListedItem } = useContractsAddress()
+  const { getListedItem } = useContractsAddress();
 
   /* price */
-  const pairPool = usePairPool()
-  const oraclePrices = useOraclePrice()
+  const pairPool = usePairPool();
+  const oraclePrices = useOraclePrice();
 
   /* contract info */
-  const pairConfig = usePairConfig()
-  const mintInfo = useMintInfo()
-  const lpTokenInfo = useLpTokenInfo()
+  const pairConfig = usePairConfig();
+  const mintInfo = useMintInfo();
+  const lpTokenInfo = useLpTokenInfo();
 
   /* balance */
-  const tokenBalance = useTokenBalance(address)
-  const lpTokenBalance = useLpTokenBalance(address)
-  const stakingReward = useStakingReward(address)
-  const govStake = useGovStake(address)
-  const stakingPool = useStakingPool()
+  const tokenBalance = useTokenBalance(address);
+  const lpTokenBalance = useLpTokenBalance(address);
+  const stakingReward = useStakingReward(address);
+  const govStake = useGovStake(address);
+  const stakingPool = useStakingPool();
 
   /* account info */
-  const bankBalance = useBankBalances(address)
-  const mintPositions = useMintPositions(address)
+  const bankBalance = useBankBalances(address);
+  const mintPositions = useMintPositions(address);
 
   /* result */
   const result: Result = {
@@ -100,8 +97,8 @@ export const useContractState = (address: string): Contract => {
     [BalanceKey.REWARD]: stakingPool.result, // with LPSTAKE
 
     [AccountInfoKey.UUSD]: bankBalance,
-    [AccountInfoKey.MINTPOSITIONS]: mintPositions.result,
-  }
+    [AccountInfoKey.MINTPOSITIONS]: mintPositions.result
+  };
 
   /* parsed */
   const parsed = {
@@ -113,11 +110,11 @@ export const useContractState = (address: string): Contract => {
     [BalanceKey.LPSTAKABLE]: lpTokenBalance.parsed,
     [BalanceKey.LPSTAKED]: stakingReward.parsed,
     [BalanceKey.MIRGOVSTAKED]: govStake.parsed,
-    [BalanceKey.REWARD]: stakingPool.parsed,
-  }
+    [BalanceKey.REWARD]: stakingPool.parsed
+  };
 
   /* Dictionary<string> */
-  const { price, contractInfo, balance, accountInfo } = useNormalize()
+  const { price, contractInfo, balance, accountInfo } = useNormalize();
   const dictionary = {
     [PriceKey.PAIR]: pairPool.parsed && price[PriceKey.PAIR](pairPool.parsed),
     [PriceKey.ORACLE]:
@@ -155,8 +152,8 @@ export const useContractState = (address: string): Contract => {
     [BalanceKey.REWARD]:
       stakingPool.parsed &&
       stakingReward.parsed &&
-      balance[BalanceKey.REWARD](stakingPool.parsed, stakingReward.parsed),
-  }
+      balance[BalanceKey.REWARD](stakingPool.parsed, stakingReward.parsed)
+  };
 
   const data = {
     ...dictionary,
@@ -164,28 +161,28 @@ export const useContractState = (address: string): Contract => {
       bankBalance.data && accountInfo[AccountInfoKey.UUSD](bankBalance.data),
     [AccountInfoKey.MINTPOSITIONS]:
       mintPositions.parsed &&
-      accountInfo[AccountInfoKey.MINTPOSITIONS](mintPositions.parsed),
-  }
+      accountInfo[AccountInfoKey.MINTPOSITIONS](mintPositions.parsed)
+  };
 
   /* utils */
-  const find: Contract["find"] = (key, value) => {
-    const { token } = getListedItem(value)
-    const result = dictionary[key]?.[token]
+  const find: Contract['find'] = (key, value) => {
+    const { token } = getListedItem(value);
+    const result = dictionary[key]?.[token];
 
-    const USTPrice = "1"
+    const USTPrice = '1';
     const isUSTPrice =
-      value === UUSD && Object.values<string>(PriceKey).includes(key)
+      value === UUSD && Object.values<string>(PriceKey).includes(key);
 
-    const USTBalance = data[AccountInfoKey.UUSD]
+    const USTBalance = data[AccountInfoKey.UUSD];
     const isUSTBalance =
-      value === UUSD && Object.values<string>(BalanceKey).includes(key)
+      value === UUSD && Object.values<string>(BalanceKey).includes(key);
 
-    return result ?? (isUSTPrice ? USTPrice : isUSTBalance ? USTBalance : "0")
-  }
+    return result ?? (isUSTPrice ? USTPrice : isUSTBalance ? USTBalance : '0');
+  };
 
-  const rewards = sum(Object.values(dictionary[BalanceKey.REWARD] ?? {}))
-  return { result, parsed, ...data, find, rewards }
-}
+  const rewards = sum(Object.values(dictionary[BalanceKey.REWARD] ?? {}));
+  return { result, parsed, ...data, find, rewards };
+};
 
 /*
 Terra Mantle returns the stringified JSON for the WasmContract query.
@@ -196,6 +193,6 @@ Developers should take out `data` according to `result`.
 */
 
 export const useResult = () => {
-  const { result } = useContract()
-  return result
-}
+  const { result } = useContract();
+  return result;
+};

@@ -14,13 +14,11 @@
     "Liquidity": "Total value of assets and UST in this liquidity pool",
     "Volume": "Value of assets traded in the last 24 hours"
   },
-
   "My": {
     "TotalValue": "Sum of all \"Value\"",
     "Balance": "Amount of asset",
     "Value": "Product of \"Balance\" and \"Price\"",
     "PortfolioRatio": "Weight of the asset in portfolio",
-
     "TotalAssetValue": "Sum of minted asset \"Value\"",
     "TotalCollateralValue": "Sum of collateral \"Value\"",
     "MintedBalance": "Amount of minted asset",
@@ -30,22 +28,18 @@
     "CollateralRatio": "Ratio of collateral value to minted asset value",
     "PositionWarning": "Position is close to liquidation. Close the position or deposit more collateral.",
     "PositionDanger": "Position can be liquidated anytime upon request. Close the position or deposit more collateral.",
-
     "TotalWithdrawableValue": "Sum of UST value in all pools",
     "LP": "Amount of LP",
     "Withdrawable": "Amount of assets redeemable from buring \"LP\"",
     "PoolShare": "Ratio of pool balance to total pool balance.",
-
     "APR": "Annualized staking return",
     "Staked": "Amount of staked tokens",
     "StakingRatio": "Ratio of staked LP to total staked LP",
     "Reward": "Amount of claimable rewards"
   },
-
   "Forms": {
     "TxFee": "Paid to execute transaction"
   },
-
   "Trade": {
     "General": "The amount of asset traded is automatically calculated based on the current price, spread and commission",
     "Price": "Price is based on the pool ratio. The effective price changes dynamically depending on the trade size.\n\n• Spread: Fee paid due to the difference between market price and estimated price.\n• Commission: Deducted from the assets that user receives.",
@@ -53,26 +47,21 @@
   },
   "Mint": {
     "Open": "New assets will be minted when collateral is deposited. Any price change of either collateral or minted assets may lead to liquidation.",
-
     "Collateral": "Current amount of collateral",
     "Asset": "Current amount of minted asset",
-
     "ExpectedMintedAsset": "The expected amount of asset minted",
     "CollateralRatio": "Ratio of collateral value to minted asset value",
     "MinCollateralRatio": "Liquidated below this ratio",
     "SafeCollateralRatio": "(Minimum collateral ratio) + 50%",
-
     "Price": "Oracle price of minted asset"
   },
   "Pool": {
     "Provide": "Receive LP by providing liquidity. LP can be staked to earn MIR as rewards.",
     "Withdraw": "Withdraw pool share by burning LP",
-
     "InputAsset": "Amount to add to the pool",
     "InputUST": "Equivalent amount of UST added to the pool",
     "LP": "Amount of LP to burn",
     "Output": "Estimated amount of redeemed mAsset and UST",
-
     "PoolPrice": "The price determined by the pool ratio",
     "PoolShare": "Contribution percentage to the pool",
     "LPfromTx": "LP received from providing liquidity"
@@ -89,9 +78,7 @@
     "TotalStaked": "Amount of all MIR staked",
     "StakingRatio": "Ratio of staked MIR to total MIR",
     "APR": "Annualized MIR staking return based on MIR distribution and staking ratio",
-
     "Polls": "Staked MIR can be used as voting power",
-
     "Weight": "Weight which MIR is distributed",
     "LPcommission": "Percentage of the receiving amount from the trade sent to the liquidity pool",
     "OwnerCommission": "Percentage of the receiving amont from the trade distributed to MIR holders",
@@ -102,7 +89,7 @@
   "Swap": {
     "Rate": "Swap price is calculated based on the pool price and spread",
     "MinimumReceived": "Expected minimum quantity to be received based on the current price, maximum spread, and trading fee",
-    "TradingFee": "0.3% of asset received by the user is paid to Terraswap pool",
+    "TradingFee": "0.3% of asset received by the user is paid to Oraiswap pool",
     "TxFee": "Fee paid to execute this transaction",
     "Spread": "Fee paid due to the difference between market price and estimated price"
   }

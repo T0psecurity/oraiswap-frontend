@@ -1,20 +1,20 @@
-import { Dictionary } from "ramda"
-import { MIR, UUSD } from "constants/constants"
-import { plus, div, floor, gt } from "libs/math"
-import calc from "helpers/calc"
-import { useContractsAddress } from "hooks"
-import { PriceKey, AssetInfoKey } from "hooks/contractKeys"
-import { BalanceKey, AccountInfoKey } from "hooks/contractKeys"
+import { Dictionary } from 'ramda';
+import { MIR, UUSD } from 'constants/constants';
+import { plus, div, floor, gt } from 'libs/math';
+import calc from 'helpers/calc';
+import { useContractsAddress } from 'hooks';
+import { PriceKey, AssetInfoKey } from 'hooks/contractKeys';
+import { BalanceKey, AccountInfoKey } from 'hooks/contractKeys';
 
 export default () => {
-  const { getListedItem, listed } = useContractsAddress()
+  const { getListedItem, listed } = useContractsAddress();
 
   const price = {
     [PriceKey.PAIR]: (pairPool: Dictionary<PairPool>) =>
       dict(pairPool, calcPairPrice),
     [PriceKey.ORACLE]: (oraclePrice: Dictionary<Price>) =>
-      dict(oraclePrice, ({ price }) => price),
-  }
+      dict(oraclePrice, ({ price }) => price)
+  };
 
   const contractInfo = {
     [AssetInfoKey.COMMISSION]: (pairConfig: Dictionary<PairConfig>) =>
@@ -28,8 +28,8 @@ export default () => {
     [AssetInfoKey.LPTOTALSTAKED]: (stakingPool: Dictionary<StakingPool>) =>
       dict(stakingPool, ({ total_bond_amount }) => total_bond_amount),
     [AssetInfoKey.LPTOTALSUPPLY]: (lpTokenInfo: Dictionary<TotalSupply>) =>
-      dict(lpTokenInfo, ({ total_supply }) => total_supply),
-  }
+      dict(lpTokenInfo, ({ total_supply }) => total_supply)
+  };
 
   const balance = {
     [BalanceKey.TOKEN]: (tokenBalance: Dictionary<Balance>) =>
@@ -43,29 +43,29 @@ export default () => {
     [BalanceKey.LPSTAKED]: (stakingReward: StakingReward) =>
       reduceBondAmount(stakingReward),
     [BalanceKey.MIRGOVSTAKED]: (govStake: Balance) => {
-      const { token } = getListedItem(MIR)
-      return { [token]: govStake.balance }
+      const { token } = getListedItem(MIR);
+      return { [token]: govStake.balance };
     },
     [BalanceKey.REWARD]: (
       stakingPool: Dictionary<StakingPool>,
       stakingReward: StakingReward
     ) =>
       dict(stakingPool, ({ reward_index: globalIndex }, token) => {
-        const { reward_infos } = stakingReward
-        const info = reward_infos?.find((info) => info.asset_token === token)
-        return floor(calc.reward(globalIndex, info))
-      }),
-  }
+        const { reward_infos } = stakingReward;
+        const info = reward_infos?.find((info) => info.asset_token === token);
+        return floor(calc.reward(globalIndex, info));
+      })
+  };
 
   const accountInfo = {
     [AccountInfoKey.UUSD]: (bankBalance: BankBalance) =>
       findBalance(UUSD, bankBalance),
     [AccountInfoKey.MINTPOSITIONS]: (mintPosition: MintPositions) =>
-      mintPosition.positions.filter(({ asset }) => gt(asset.amount, 0)),
-  }
+      mintPosition.positions.filter(({ asset }) => gt(asset.amount, 0))
+  };
 
-  return { price, contractInfo, balance, accountInfo }
-}
+  return { price, contractInfo, balance, accountInfo };
+};
 
 /* utils */
 export const dict = <Data, Item = string>(
@@ -75,23 +75,23 @@ export const dict = <Data, Item = string>(
   Object.entries(dictionary).reduce<Dict<Item>>(
     (acc, [token, data]) => ({ ...acc, [token]: selector(data, token) }),
     {}
-  )
+  );
 
 /* helpers */
 const calcPairPrice = (param: PairPool) => {
-  const { uusd, asset } = parsePairPool(param)
-  return [uusd, asset].every((v) => v && gt(v, 0)) ? div(uusd, asset) : "0"
-}
+  const { uusd, asset } = parsePairPool(param);
+  return [uusd, asset].every((v) => v && gt(v, 0)) ? div(uusd, asset) : '0';
+};
 
 export const parsePairPool = ({ assets, total_share }: PairPool) => ({
-  uusd: assets.find(({ info }) => "native_token" in info)?.amount ?? "0",
-  asset: assets.find(({ info }) => "token" in info)?.amount ?? "0",
-  total: total_share,
-})
+  uusd: assets.find(({ info }) => 'native_token' in info)?.amount ?? '0',
+  asset: assets.find(({ info }) => 'token' in info)?.amount ?? '0',
+  total: total_share
+});
 
 interface LPParams {
-  lpTokenBalance: Dictionary<Balance>
-  stakingReward: StakingReward
+  lpTokenBalance: Dictionary<Balance>;
+  stakingReward: StakingReward;
 }
 
 const reduceLP = (
@@ -106,19 +106,19 @@ const reduceLP = (
         stakingReward.reward_infos.find(
           ({ asset_token }) => asset_token === token
         )?.bond_amount
-      ),
+      )
     }),
     {}
-  )
+  );
 
 const reduceBondAmount = ({ reward_infos }: StakingReward) =>
   reward_infos.reduce<Dictionary<string>>(
     (acc, { asset_token, bond_amount }) => {
-      return { ...acc, [asset_token]: bond_amount }
+      return { ...acc, [asset_token]: bond_amount };
     },
     {}
-  )
+  );
 
 const findBalance = (denom: string, { BankBalancesAddress }: BankBalance) =>
   BankBalancesAddress?.Result.find(({ Denom }) => Denom === denom)?.Amount ??
-  "0"
+  '0';

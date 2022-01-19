@@ -1,31 +1,31 @@
-import React from "react"
+import React from 'react';
 import {
   CHROME,
   TERRA_STATION_EXTENSION,
-  XDEFI_EXTENSION,
-} from "constants/constants"
-import Modal from "components/Modal"
-import Card from "components/Card"
-import ExtLinkButton from "components/ExtLinkButton"
-import styles from "./SupportModal.module.scss"
-import styled from "styled-components"
+  XDEFI_EXTENSION
+} from 'constants/constants';
+import Modal from 'components/Modal';
+import Card from 'components/Card';
+import ExtLinkButton from 'components/ExtLinkButton';
+import styles from './SupportModal.module.scss';
+import styled from 'styled-components';
 
 const DownloadExtButton = styled(ExtLinkButton)`
   margin: 10px 0px !important;
-`
+`;
 
 const SupportModal = (modal: Modal) => {
   const handleInstalled = () => {
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   return (
     <Modal {...modal}>
-      {!navigator.userAgent.includes("Chrome") ? (
+      {!navigator.userAgent.includes('Chrome') ? (
         <Card>
           <article className={styles.article}>
             <p className={styles.desc}>
-              {"Terraswap currently\nonly support Chrome"}
+              {'Oraiswap currently\nonly support Chrome'}
             </p>
 
             <ExtLinkButton href={CHROME} size="lg" block>
@@ -38,7 +38,7 @@ const SupportModal = (modal: Modal) => {
           <Card>
             <article className={styles.article}>
               <p className={styles.desc}>
-                {"Download Terra Station Extension\nto connect your wallet"}
+                {'Download Terra Station Extension\nto connect your wallet'}
               </p>
 
               <DownloadExtButton href={TERRA_STATION_EXTENSION} size="lg" block>
@@ -59,7 +59,7 @@ const SupportModal = (modal: Modal) => {
         </>
       )}
     </Modal>
-  )
-}
+  );
+};
 
-export default SupportModal
+export default SupportModal;
