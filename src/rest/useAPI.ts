@@ -1,6 +1,5 @@
 //@ts-nocheck
 
-import { useAddress, useContractsAddress, useNetwork } from 'hooks';
 import {
   UAUD,
   UCAD,
@@ -24,7 +23,6 @@ import useURL from 'hooks/useURL';
 import oraiswapConfig from 'constants/oraiswap.json';
 import axios from './request';
 import { Type } from 'pages/Swap';
-import { Msg } from '@terra-money/terra.js';
 import { AxiosError } from 'axios';
 interface DenomBalanceResponse {
   height: string;
@@ -161,17 +159,16 @@ export function isNativeInfo(object: any): object is NativeInfo {
 }
 
 export default () => {
-  const { fcd, factory, service } = useNetwork();
-  const address = useAddress();
-  const { getSymbol } = useContractsAddress();
+  const address = process.env.REACT_APP_CONTRACT_ROUTER;
+  // const { getSymbol } = useContractsAddress();
   const getURL = useURL();
 
   // useBalance
   const loadDenomBalance = useCallback(async () => {
-    const url = `${fcd}/bank/balances/${address}`;
+    const url = `${process.env.REACT_APP_LCD}/bank/balances/${address}`;
     const res: DenomBalanceResponse = (await axios.get(url)).data;
     return res.result;
-  }, [address, fcd]);
+  }, [address]);
 
   const loadContractBalance = useCallback(
     async (localContractAddr: string) => {
@@ -184,40 +181,37 @@ export default () => {
 
   // useGasPrice
 
-  const loadGasPrice = useCallback(
-    async (symbol: string) => {
-      const symbolName = getSymbol(symbol) || symbol;
-      const url = `${fcd}/v1/txs/gas_prices`;
-      const res: GasPriceResponse = (await axios.get(url)).data;
+  const loadGasPrice = useCallback(async (symbol: string) => {
+    const symbolName = symbol;
+    const url = `${process.env.REACT_APP_LCD}/provider/minfees?valNum=0&OracleScriptName=min_gas_prices`;
+    const res: GasPriceResponse = (await axios.get(url)).data;
 
-      let gasPrice = '0';
-      if (
-        [
-          UUSD,
-          UKRW,
-          UMNT,
-          ULUNA,
-          USDR,
-          UAUD,
-          UCAD,
-          UCHF,
-          UCNY,
-          UEUR,
-          UGBP,
-          UHKD,
-          UINR,
-          UJPY,
-          USGD,
-          UTHB
-        ].includes(symbolName)
-      ) {
-        gasPrice = (res as any)?.[symbolName];
-      }
+    let gasPrice = '0';
+    if (
+      [
+        UUSD,
+        UKRW,
+        UMNT,
+        ULUNA,
+        USDR,
+        UAUD,
+        UCAD,
+        UCHF,
+        UCNY,
+        UEUR,
+        UGBP,
+        UHKD,
+        UINR,
+        UJPY,
+        USGD,
+        UTHB
+      ].includes(symbolName)
+    ) {
+      gasPrice = (res as any)?.[symbolName];
+    }
 
-      return gasPrice;
-    },
-    [fcd, getSymbol]
-  );
+    return gasPrice;
+  }, []);
 
   // usePairs
   const loadPairs = useCallback(async () => {
@@ -227,7 +221,7 @@ export default () => {
     let lastPair: (NativeInfo | AssetInfo)[] | null = null;
 
     try {
-      const url = `${service}/pairs`;
+      const url = `${process.env.REACT_APP_LCD}/pairs`;
       const res: PairsResult = (await axios.get(url)).data;
 
       if (res.pairs.length !== 0) {
@@ -248,7 +242,7 @@ export default () => {
     }
 
     while (true) {
-      const url = getURL(factory, {
+      const url = getURL(process.env.REACT_APP_CONTRACT_FACTORY, {
         pairs: { limit: 30, start_after: lastPair }
       });
       const pairs: PairsResponse = (await axios.get(url)).data;
@@ -274,23 +268,22 @@ export default () => {
       lastPair = pairs.result.pairs.slice(-1)[0]?.asset_infos;
     }
     return result;
-  }, [service, factory, getURL]);
+  }, [getURL]);
 
   const loadTokensInfo = useCallback(async (): Promise<TokenResult[]> => {
-    const url = `${service}/tokens`;
+    const url = `${process.env.REACT_APP_LCD}/tokens`;
     const res: TokenResult[] = (await axios.get(url)).data;
     return res;
-  }, [service]);
+  }, []);
 
-  const loadSwappableTokenAddresses = useCallback(
-    async (from: string) => {
-      const res: string[] = (
-        await axios.get(`${service}/tokens/swap`, { params: { from } })
-      ).data;
-      return res;
-    },
-    [service]
-  );
+  const loadSwappableTokenAddresses = useCallback(async (from: string) => {
+    const res: string[] = (
+      await axios.get(`${process.env.REACT_APP_LCD}/tokens/swap`, {
+        params: { from }
+      })
+    ).data;
+    return res;
+  }, []);
 
   const loadTokenInfo = useCallback(
     async (contract: string): Promise<TokenResult> => {
@@ -356,7 +349,7 @@ export default () => {
           }
     ) => {
       const { type, ...params } = query;
-      const url = `${service}/tx/${type}`.toLowerCase();
+      const url = `${process.env.REACT_APP_LCD}/tx/${type}`.toLowerCase();
       const res = (await axios.get(url, { params })).data;
       return res.map((data: Msg.Amino | Msg.Amino[]) => {
         return (Array.isArray(data) ? data : [data]).map((item: Msg.Amino) => {
@@ -364,35 +357,38 @@ export default () => {
         });
       });
     },
-    [service]
+    []
   );
 
   // useTax
-  const loadTaxInfo = useCallback(
-    async (contract_addr: string) => {
-      if (!contract_addr) {
-        return '';
-      }
+  const loadTaxInfo = useCallback(async (contract_addr: string) => {
+    if (!contract_addr) {
+      return '';
+    }
 
-      let taxCap = '';
-      try {
-        const url = `${fcd}/treasury/tax_cap/${contract_addr}`;
-        const res: TaxResponse = (await axios.get(url)).data;
-        taxCap = res.result;
-      } catch (error) {
-        console.log(error);
-      }
+    let taxCap = '';
+    try {
+      const url = `${process.env.REACT_APP_LCD}/treasury/tax_cap/${contract_addr}`;
+      const res: TaxResponse = (await axios.get(url)).data;
+      taxCap = res.result;
+    } catch (error) {
+      console.log(error);
+    }
 
-      return taxCap;
-    },
-    [fcd]
-  );
+    return taxCap;
+  }, []);
 
   const loadTaxRate = useCallback(async () => {
-    const url = `${fcd}/treasury/tax_rate`;
+    const url = `${process.env.REACT_APP_LCD}/treasury/tax_rate`;
     const res: TaxResponse = (await axios.get(url)).data;
     return res.result;
-  }, [fcd]);
+  }, []);
+
+  const signinWithSSOToken = useCallback(async ({ accessToken, orgToken }) => {
+    const url = `${process.env.REACT_APP_SSO_SERVER}/user/access-token-login`;
+    const res: any = (await axios.post(url, { accessToken, orgToken })).data;
+    return res.result;
+  }, []);
 
   return {
     loadDenomBalance,
@@ -406,6 +402,7 @@ export default () => {
     querySimulate,
     generateContractMessages,
     loadTaxInfo,
-    loadTaxRate
+    loadTaxRate,
+    signinWithSSOToken
   };
 };

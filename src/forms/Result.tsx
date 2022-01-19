@@ -1,97 +1,91 @@
-import React, { useEffect, useRef, useState } from "react"
-import classNames from "classnames/bind"
+import React, { useEffect, useRef, useState } from 'react';
+import classNames from 'classnames/bind';
 
-import { MAX_TX_POLLING_RETRY, TX_POLLING_INTERVAL } from "constants/constants"
-import MESSAGE from "lang/MESSAGE.json"
-import { useNetwork } from "hooks"
+import { MAX_TX_POLLING_RETRY, TX_POLLING_INTERVAL } from 'constants/constants';
+import MESSAGE from 'lang/MESSAGE.json';
 
-import SwapCard from "components/SwapCard"
-import Icon from "components/Icon"
-import Loading from "components/Loading"
-import Button from "components/Button"
-import SwapTxHash from "./SwapTxHash"
-import SwapTxInfo from "./SwapTxInfo"
-import styles from "./Result.module.scss"
-import {
-  CreateTxFailed,
-  TxFailed,
-  TxResult,
-  TxUnspecifiedError,
-  UserDenied,
-} from "@terra-dev/wallet-types"
-import axios from "rest/request"
+import SwapCard from 'components/SwapCard';
+import Icon from 'components/Icon';
+import Loading from 'components/Loading';
+import Button from 'components/Button';
+import SwapTxHash from './SwapTxHash';
+import SwapTxInfo from './SwapTxInfo';
+import styles from './Result.module.scss';
+
+import axios from 'rest/request';
 
 export interface ResultProps {
-  response?: TxResult
-  error?: UserDenied | CreateTxFailed | TxFailed | TxUnspecifiedError | Error
-  onFailure: () => void
-  parserKey: string
+  response?: any;
+  error?: Error;
+  onFailure: () => void;
+  parserKey: string;
 }
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
 
 enum STATUS {
-  SUCCESS = "success",
-  LOADING = "loading",
-  FAILURE = "failure",
+  SUCCESS = 'success',
+  LOADING = 'loading',
+  FAILURE = 'failure'
 }
 
 const Result = ({ response, error, onFailure, parserKey }: ResultProps) => {
-  const txHash = response?.result?.txhash ?? ""
-  const raw_log = response?.result?.raw_log ?? ""
+  const txHash = response?.result?.txhash ?? '';
+  const raw_log = response?.result?.raw_log ?? '';
   /* polling */
-  const [txInfo, setTxInfo] = useState<SwapTxInfo>()
+  const [txInfo, setTxInfo] = useState<SwapTxInfo>();
 
-  const [status, setStatus] = useState<STATUS>(STATUS.LOADING)
-  const { fcd } = useNetwork()
+  const [status, setStatus] = useState<STATUS>(STATUS.LOADING);
 
-  const retryCount = useRef(0)
+  const retryCount = useRef(0);
 
   useEffect(() => {
     const load = async () => {
       if (!txHash) {
-        setStatus(STATUS.FAILURE)
-        return
+        setStatus(STATUS.FAILURE);
+        return;
       }
       try {
-        const { data: res } = await axios.get(`${fcd}/txs/${txHash}`)
+        const { data: res } = await axios.get(
+          `${process.env.REACT_APP_LCD}/txs/${txHash}`
+        );
         if (res?.code) {
-          setTxInfo(res)
-          setStatus(STATUS.FAILURE)
-          return
+          setTxInfo(res);
+          setStatus(STATUS.FAILURE);
+          return;
         }
         if (res?.txhash) {
-          setTxInfo(res)
-          setStatus(STATUS.SUCCESS)
+          setTxInfo(res);
+          setStatus(STATUS.SUCCESS);
         }
       } catch (error) {
         if (retryCount.current >= MAX_TX_POLLING_RETRY) {
-          setStatus(STATUS.FAILURE)
-          retryCount.current = 0
-          return
+          setStatus(STATUS.FAILURE);
+          retryCount.current = 0;
+          return;
         }
-        retryCount.current += 1
+        retryCount.current += 1;
         setTimeout(() => {
-          load()
-        }, TX_POLLING_INTERVAL)
+          load();
+        }, TX_POLLING_INTERVAL);
       }
-    }
-    load()
+    };
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   /* render */
   const name = {
-    [STATUS.SUCCESS]: "check_circle_outline",
-    [STATUS.LOADING]: "",
-    [STATUS.FAILURE]: "highlight_off",
-  }[status]
+    [STATUS.SUCCESS]: 'check_circle_outline',
+    [STATUS.LOADING]: '',
+    [STATUS.FAILURE]: 'highlight_off'
+  }[status];
 
   const icon = name ? (
     <Icon name={name} className={cx(status)} size={50} />
   ) : (
     <Loading size={40} />
-  )
+  );
 
   const title = {
     [STATUS.SUCCESS]: (
@@ -100,13 +94,10 @@ const Result = ({ response, error, onFailure, parserKey }: ResultProps) => {
     [STATUS.LOADING]: MESSAGE.Result.LOADING,
     [STATUS.FAILURE]: (
       <span className={styles.failure}>{MESSAGE.Result.FAILURE}</span>
-    ),
-  }[status]
+    )
+  }[status];
 
-  const message =
-    raw_log ??
-    error?.message ??
-    (error instanceof UserDenied && MESSAGE.Result.DENIED)
+  const message = raw_log ?? error?.message ?? MESSAGE.Result.DENIED;
 
   const content = {
     [STATUS.SUCCESS]: txInfo && (
@@ -127,8 +118,8 @@ const Result = ({ response, error, onFailure, parserKey }: ResultProps) => {
         {txInfo && <SwapTxInfo txInfo={txInfo} parserKey={parserKey} />}
         <p className={styles.feedback}>{txInfo?.raw_log || message}</p>
       </>
-    ),
-  }[status]
+    )
+  }[status];
 
   const button = {
     [STATUS.SUCCESS]: (
@@ -141,15 +132,15 @@ const Result = ({ response, error, onFailure, parserKey }: ResultProps) => {
       <Button onClick={onFailure} size="swap" submit>
         {MESSAGE.Result.Button.FAILURE}
       </Button>
-    ),
-  }[status]
+    )
+  }[status];
 
   return (
     <SwapCard icon={icon} title={title} lg>
       <section className={styles.contents}>{content}</section>
       <footer>{button}</footer>
     </SwapCard>
-  )
-}
+  );
+};
 
-export default Result
+export default Result;

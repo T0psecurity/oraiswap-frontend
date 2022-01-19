@@ -1,5 +1,5 @@
-@import "mixins";
-@import "variables";
+@import 'mixins';
+@import 'variables';
 
 .header {
   position: sticky;
@@ -26,7 +26,8 @@
   @include flex;
 }
 
-.logo, .connect {
+.logo,
+.connect {
   @include flex;
   @include desktop;
   margin-top: 46px;

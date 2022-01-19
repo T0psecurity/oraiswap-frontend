@@ -5,17 +5,16 @@ import { useContractsAddressTokenState } from '../hooks/useContractsAddressToken
 import { ContractsAddressTokenProvider } from '../hooks/useContractsAddressToken';
 
 const Contract: FC = ({ children }) => {
-  return <div>contract</div>;
-  // const contractsAddress = useContractsAddressState()
-  // const contractsAddressToken = useContractsAddressTokenState()
-
-  // return !contractsAddress ? null : (
-  //   <ContractsAddressProvider value={contractsAddress}>
-  //     <ContractsAddressTokenProvider value={contractsAddressToken}>
-  //       {children}
-  //     </ContractsAddressTokenProvider>
-  //   </ContractsAddressProvider>
-  // )
+  const contractsAddress = useContractsAddressState();
+  const contractsAddressToken = useContractsAddressTokenState();
+  console.log(contractsAddress);
+  return !contractsAddress ? null : (
+    <ContractsAddressProvider value={contractsAddress}>
+      <ContractsAddressTokenProvider value={contractsAddressToken}>
+        {children}
+      </ContractsAddressTokenProvider>
+    </ContractsAddressProvider>
+  );
 };
 
 export default Contract;

@@ -1,14 +1,13 @@
 {
   "name": "oraiswap-web-app",
   "version": "1.0.0",
-  "homepage": "https://app.oraiswap.com",
-  "repository": "github:oraiswap/oraiswap-web-app",
-  "author": "DELIGHT <member@delightlabs.io>",
+  "homepage": "https://swap.orai.io",
+  "repository": "github:oraichain/oraiswap-frontend",
+  "author": "Thanh Tu <tu@orai.io>",
   "license": "Apache-2.0",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
-    "@terra-money/terra.js": "^2.0.16",
-    "@terra-money/wallet-provider": "^2.2.0",
+    "@oraichain/cosmosjs": "0.0.72",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.8",
@@ -61,7 +60,10 @@
     ]
   },
   "devDependencies": {
+    "@cosmjs/launchpad": "^0.27.0",
+    "@cosmjs/proto-signing": "^0.27.0",
     "@types/styled-components": "^5.1.9",
-    "node-sass": "^6.0.0"
+    "node-sass": "^6.0.0",
+    "secretjs": "^0.17.5"
   }
 }

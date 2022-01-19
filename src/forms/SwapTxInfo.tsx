@@ -4,7 +4,6 @@ import ConfirmDetails from './ConfirmDetails';
 import TxHash from './SwapTxHash';
 import { tokenInfos } from '../rest/usePairs';
 import { formatAsset } from '../libs/parse';
-import { useNetwork } from 'hooks';
 
 interface Props {
   txInfo: SwapTxInfo;
@@ -15,7 +14,7 @@ const TxInfo = ({ txInfo, parserKey }: Props) => {
   const { txhash: hash, tx } = txInfo;
   const logs = txInfo?.logs;
 
-  const { router } = useNetwork();
+  const router = 'useNetwork';
 
   let contents: Content[][] = [];
   contents.push([{ title: 'Tx Hash', content: <TxHash>{hash}</TxHash> }]);

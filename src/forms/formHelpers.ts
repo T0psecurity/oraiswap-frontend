@@ -1,19 +1,18 @@
-import { AccAddress } from "@terra-money/terra.js"
-import MESSAGE from "lang/MESSAGE.json"
-import { ceil, gt, gte, lte, min, times, minus, plus } from "libs/math"
-import { getLength, omitEmpty } from "libs/utils"
-import { lookup, format, toAmount, formatAsset, validateDp } from "libs/parse"
-import { hasTaxToken } from "helpers/token"
-import { Type } from "pages/Swap"
+import MESSAGE from 'lang/MESSAGE.json';
+import { ceil, gt, gte, lte, min, times, minus, plus } from 'libs/math';
+import { checkPrefixAndLength, getLength, omitEmpty } from 'libs/utils';
+import { lookup, format, toAmount, formatAsset, validateDp } from 'libs/parse';
+import { hasTaxToken } from 'helpers/token';
+import { Type } from 'pages/Swap';
 
 /* forms */
 export const step = (decimals = 6) => {
-  return (1 / Math.pow(10, decimals)).toFixed(decimals)
-}
+  return (1 / Math.pow(10, decimals)).toFixed(decimals);
+};
 
 export const placeholder = (decimals?: number) => {
-  return step(decimals).replace("1", "0")
-}
+  return step(decimals).replace('1', '0');
+};
 
 export const renderBalance = (
   balance?: string,
@@ -22,61 +21,65 @@ export const renderBalance = (
 ) =>
   balance && symbol
     ? {
-        title: [affix, "Balance"].filter(Boolean).join(" "),
-        content: format(balance, symbol),
+        title: [affix, 'Balance'].filter(Boolean).join(' '),
+        content: format(balance, symbol)
       }
-    : undefined
+    : undefined;
 
 /* validate */
 interface NumberRange {
-  min?: number
-  max?: number
+  min?: number;
+  max?: number;
 }
 
 interface AmountRange {
-  optional?: boolean
-  symbol?: string
-  min?: string
-  max?: string
-  refvalue?: string
-  refsymbol?: string
-  isFrom?: boolean
-  taxCap?: string
-  taxRate?: string
-  feeValue?: string
-  feeSymbol?: string
-  maxFee?: string
-  type?: string
-  decimals?: number
-  token?: string
+  optional?: boolean;
+  symbol?: string;
+  min?: string;
+  max?: string;
+  refvalue?: string;
+  refsymbol?: string;
+  isFrom?: boolean;
+  taxCap?: string;
+  taxRate?: string;
+  feeValue?: string;
+  feeSymbol?: string;
+  maxFee?: string;
+  type?: string;
+  decimals?: number;
+  token?: string;
 }
 
 export const validate = {
-  required: (value: string) => (!value ? "Required" : ""),
+  required: (value: string) => (!value ? 'Required' : ''),
 
   length: (value: string, { min, max }: NumberRange, label: string) =>
     min && getLength(value) < min
       ? `${label} must be longer than ${min} bytes.`
       : max && getLength(value) > max
       ? `${label} must be shorter than ${max} bytes.`
-      : "",
+      : '',
 
   address: (value: string) =>
-    !value ? "Required" : !AccAddress.validate(value) ? "Invalid address" : "",
+    !value
+      ? 'Required'
+      : !checkPrefixAndLength('orai', value, 44)
+      ? 'Invalid address'
+      : '',
 
   url: (value: string) => {
     try {
-      const { hostname } = new URL(value)
-      return hostname.includes(".") ? "" : "Invalid URL"
+      const { hostname } = new URL(value);
+      return hostname.includes('.') ? '' : 'Invalid URL';
     } catch (error) {
-      const protocol = ["https://", "http://"]
+      const protocol = ['https://', 'http://'];
       return !protocol.some((p) => value.startsWith(p))
-        ? `URL must start with ${protocol.join(" or ")}`
-        : "Invalid URL"
+        ? `URL must start with ${protocol.join(' or ')}`
+        : 'Invalid URL';
     }
   },
 
-  amount: (value: string, range: AmountRange = {}, label = "Amount") => {
+  amount: (value: string, range: AmountRange = {}, label = 'Amount') => {
     const {
       optional,
       symbol,
@@ -92,17 +95,17 @@ export const validate = {
       maxFee,
       type,
       decimals,
-      token,
-    } = range
-    const amount = symbol ? toAmount(value, symbol) : value
-    let tax = "0"
+      token
+    } = range;
+    const amount = symbol ? toAmount(value, symbol) : value;
+    let tax = '0';
 
     if (symbol && taxRate && taxCap && token && hasTaxToken(token)) {
-      tax = calcTax(amount, taxCap, taxRate)
+      tax = calcTax(amount, taxCap, taxRate);
     }
 
     if (
-      maxFee === "" ||
+      maxFee === '' ||
       maxFee === undefined ||
       feeValue === undefined ||
       gt(feeValue, maxFee)
@@ -110,19 +113,19 @@ export const validate = {
       return `You don't have enough balance to pay for ${formatAsset(
         feeValue,
         feeSymbol
-      )} fee.`
+      )} fee.`;
     }
 
     if (type === Type.PROVIDE) {
       if (max && gt(max, 0) && !(gte(amount, 0) && lte(amount, max))) {
-        return `${label} must be between 0 and ${lookup(max, symbol)}`
+        return `${label} must be between 0 and ${lookup(max, symbol)}`;
       }
     }
 
-    return (optional && !value) || symbol === "" || symbol === undefined
-      ? ""
-      : !(value || value === "")
-      ? "Required"
+    return (optional && !value) || symbol === '' || symbol === undefined
+      ? ''
+      : !(value || value === '')
+      ? 'Required'
       : isFrom && !gt(amount, 0)
       ? `${label} must be greater than 0`
       : min && !gte(amount, min)
@@ -131,9 +134,9 @@ export const validate = {
       ? `${label} must be within ${decimals} decimal points`
       : (type === Type.SWAP &&
           isFrom === true &&
-          (max === "" || max === "0")) ||
+          (max === '' || max === '0')) ||
         ((type === Type.PROVIDE || type === Type.WITHDRAW) &&
-          (max === "" || max === "0"))
+          (max === '' || max === '0'))
       ? MESSAGE.Form.Validate.InsufficientBalance
       : isFrom === true &&
         max &&
@@ -150,42 +153,44 @@ export const validate = {
           (symbol === feeSymbol &&
             gt(minus(tax, minus(max, plus(amount, feeValue))), 0)))
       ? `You must leave at least ${format(tax, symbol)} ${symbol} tax value`
-      : refvalue === "0" && refsymbol !== ""
-      ? "Not enough pool balance"
-      : ""
+      : refvalue === '0' && refsymbol !== ''
+      ? 'Not enough pool balance'
+      : '';
   },
 
   symbol: (symbol: string) => {
-    const regex = RegExp(/[a-zA-Z+-]/)
-    return Array.from(symbol).some((char) => !regex.test(char)) ? "Invalid" : ""
+    const regex = RegExp(/[a-zA-Z+-]/);
+    return Array.from(symbol).some((char) => !regex.test(char))
+      ? 'Invalid'
+      : '';
   },
 
   isTrue: (src: boolean | string) => {
-    return src && src !== "false" ? "calculating..." : ""
-  },
-}
+    return src && src !== 'false' ? 'calculating...' : '';
+  }
+};
 
 export const calcTax = (amount: string, taxCap: string, taxRate: string) => {
-  if (taxCap === "") {
-    return ceil(times(amount, taxRate))
+  if (taxCap === '') {
+    return ceil(times(amount, taxRate));
   }
 
-  return ceil(min([times(amount, taxRate), taxCap]))
-}
+  return ceil(min([times(amount, taxRate), taxCap]));
+};
 
 /* data (utf-8) */
 export const toBase64 = (object: object) => {
   try {
-    return Buffer.from(JSON.stringify(omitEmpty(object))).toString("base64")
+    return Buffer.from(JSON.stringify(omitEmpty(object))).toString('base64');
   } catch (error) {
-    return ""
+    return '';
   }
-}
+};
 
 export const fromBase64 = <T>(string: string): T => {
   try {
-    return JSON.parse(Buffer.from(string, "base64").toString())
+    return JSON.parse(Buffer.from(string, 'base64').toString());
   } catch (error) {
-    return {} as T
+    return {} as T;
   }
-}
+};

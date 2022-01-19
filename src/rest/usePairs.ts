@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from "react"
+//@ts-nocheck
+
+import { useCallback, useEffect, useState } from 'react';
 import {
   KRT,
   LUNA,
@@ -31,55 +33,55 @@ import {
   UINR,
   UJPY,
   USGD,
-  UTHB,
-} from "constants/constants"
-import useAPI from "./useAPI"
-import { useNetwork } from "hooks"
-import mainnetTokens from "constants/mainnet-tokens.json"
-import testnetTokens from "constants/testnet-tokens.json"
+  UTHB
+} from 'constants/constants';
+import useAPI from './useAPI';
+
+import mainnetTokens from 'constants/mainnet-tokens.json';
+import testnetTokens from 'constants/testnet-tokens.json';
 
 interface Pairs {
-  pairs: Pair[]
+  pairs: Pair[];
 }
 
 export interface Pair {
-  pair: TokenInfo[]
-  contract: string
-  liquidity_token: string
+  pair: TokenInfo[];
+  contract: string;
+  liquidity_token: string;
 }
 
 interface TokenInfo {
-  symbol: string
-  name: string
-  contract_addr: string
-  decimals: number
-  icon: string
-  verified: boolean
+  symbol: string;
+  name: string;
+  contract_addr: string;
+  decimals: number;
+  icon: string;
+  verified: boolean;
 }
 
 interface PairsResponse {
-  height: string
-  result: PairsResult
+  height: string;
+  result: PairsResult;
 }
 
 interface PairsResult {
-  pairs: PairResult[]
+  pairs: PairResult[];
 }
 
 interface PairResult {
-  liquidity_token: string
-  contract_addr: string
-  asset_infos: (NativeInfo | AssetInfo)[]
+  liquidity_token: string;
+  contract_addr: string;
+  asset_infos: (NativeInfo | AssetInfo)[];
 }
 
 interface TokenResult {
-  name: string
-  symbol: string
-  decimals: number
-  total_supply: string
-  contract_addr: string
-  icon: string
-  verified: boolean
+  name: string;
+  symbol: string;
+  decimals: number;
+  total_supply: string;
+  contract_addr: string;
+  icon: string;
+  verified: boolean;
 }
 
 export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
@@ -90,9 +92,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: LUNA,
       name: ULUNA,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     KRT,
@@ -101,9 +103,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: KRT,
       name: UKRW,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     MNT,
@@ -112,9 +114,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: MNT,
       name: UMNT,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     SDT,
@@ -123,9 +125,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: SDT,
       name: USDR,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     UST,
@@ -134,9 +136,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: UST,
       name: UUSD,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     AUT,
@@ -145,9 +147,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: AUT,
       name: UAUD,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     CAT,
@@ -156,9 +158,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: CAT,
       name: UCAD,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     CHT,
@@ -167,9 +169,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: CHT,
       name: UCHF,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     CNT,
@@ -178,9 +180,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: CNT,
       name: UCNY,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     EUT,
@@ -189,9 +191,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: EUT,
       name: UEUR,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     GBT,
@@ -200,9 +202,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: GBT,
       name: UGBP,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     HKT,
@@ -211,9 +213,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: HKT,
       name: UHKD,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     INT,
@@ -222,9 +224,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: INT,
       name: UINR,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     JPT,
@@ -233,9 +235,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: JPT,
       name: UJPY,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     SGT,
@@ -244,9 +246,9 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: SGT,
       name: USGD,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
+      icon: '',
+      verified: true
+    }
   ],
   [
     THT,
@@ -255,43 +257,43 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
       symbol: THT,
       name: UTHB,
       decimals: 6,
-      icon: "",
-      verified: true,
-    },
-  ],
-])
+      icon: '',
+      verified: true
+    }
+  ]
+]);
 
 export let lpTokenInfos: Map<string, TokenInfo[]> = new Map<
   string,
   TokenInfo[]
->()
+>();
 
-export let InitLP = ""
+export let InitLP = '';
 
 export default () => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<Pairs>({ pairs: [] })
-  const { loadPairs, loadTokenInfo, loadTokensInfo } = useAPI()
-  const { name: networkName } = useNetwork()
-  const [currentNetworkName, setCurrentNetworkName] = useState("")
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<Pairs>({ pairs: [] });
+  const { loadPairs, loadTokenInfo, loadTokensInfo } = useAPI();
+  const networkName = process.env.REACT_APP_NETWORK;
+  const [currentNetworkName, setCurrentNetworkName] = useState('');
 
   const getTokenInfo = useCallback(
     async (info: NativeInfo | AssetInfo) => {
-      let tokenInfo: TokenInfo | undefined
+      let tokenInfo: TokenInfo | undefined;
       if (isAssetInfo(info)) {
-        tokenInfo = tokenInfos.get(info.token.contract_addr)
+        tokenInfo = tokenInfos.get(info.token.contract_addr);
         if (!tokenInfo) {
           const tokenResult: TokenResult | undefined = await loadTokenInfo(
             info.token.contract_addr
-          )
+          );
           tokenInfo = {
-            symbol: "",
-            name: "",
+            symbol: '',
+            name: '',
             contract_addr: info.token.contract_addr,
             decimals: 6,
-            icon: "",
-            verified: false,
-          }
+            icon: '',
+            verified: false
+          };
           if (tokenResult) {
             tokenInfo = {
               symbol: tokenResult.symbol,
@@ -299,19 +301,19 @@ export default () => {
               contract_addr: info.token.contract_addr,
               decimals: tokenResult.decimals,
               icon: tokenResult.icon,
-              verified: tokenResult.verified,
-            }
+              verified: tokenResult.verified
+            };
           }
-          tokenInfos.set(info.token.contract_addr, tokenInfo)
+          tokenInfos.set(info.token.contract_addr, tokenInfo);
         }
       } else if (isNativeInfo(info)) {
-        tokenInfo = tokenInfos.get(info.native_token.denom)
+        tokenInfo = tokenInfos.get(info.native_token.denom);
       }
 
-      return tokenInfo
+      return tokenInfo;
     },
     [loadTokenInfo]
-  )
+  );
 
   useEffect(() => {
     try {
@@ -319,22 +321,22 @@ export default () => {
         isLoading ||
         (result?.pairs.length > 0 && currentNetworkName === networkName)
       ) {
-        return
+        return;
       }
-      setIsLoading(true)
-      setCurrentNetworkName(networkName)
+      setIsLoading(true);
+      setCurrentNetworkName(networkName);
 
       const fetchTokensInfo = async () => {
         try {
-          const res = await loadTokensInfo()
+          const res = await loadTokensInfo();
           res.forEach((tokenInfo: TokenResult) => {
-            tokenInfos.set(tokenInfo.contract_addr, tokenInfo)
-          })
+            tokenInfos.set(tokenInfo.contract_addr, tokenInfo);
+          });
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
 
-        ;(networkName === "testnet" ? testnetTokens : mainnetTokens).forEach(
+        (networkName === 'testnet' ? testnetTokens : mainnetTokens).forEach(
           (token) => {
             if (
               token !== undefined &&
@@ -346,38 +348,38 @@ export default () => {
                 symbol: token.symbol,
                 name: token.name,
                 decimals: token.decimals ? token.decimals : 6,
-                icon: "",
-                verified: false,
-              })
+                icon: '',
+                verified: false
+              });
             }
           }
-        )
-      }
+        );
+      };
 
       const fetchPairs = async () => {
-        const res: PairsResult = await loadPairs()
+        const res: PairsResult = await loadPairs();
         const pairs = await Promise.all(
           res.pairs.map(async (pairResult: PairResult) => {
             try {
-              const tokenInfo1 = await getTokenInfo(pairResult.asset_infos[0])
-              const tokenInfo2 = await getTokenInfo(pairResult.asset_infos[1])
+              const tokenInfo1 = await getTokenInfo(pairResult.asset_infos[0]);
+              const tokenInfo2 = await getTokenInfo(pairResult.asset_infos[1]);
               if (tokenInfo1 === undefined || tokenInfo2 === undefined) {
-                return
+                return;
               }
 
               const lpTokenInfo = await getTokenInfo({
-                token: { contract_addr: pairResult.liquidity_token },
-              })
+                token: { contract_addr: pairResult.liquidity_token }
+              });
 
               lpTokenInfos.set(pairResult.liquidity_token, [
                 tokenInfo1,
-                tokenInfo2,
-              ])
+                tokenInfo2
+              ]);
               if (
                 (tokenInfo1.symbol === LUNA && tokenInfo2.symbol === UST) ||
                 (tokenInfo1.symbol === UST && tokenInfo2.symbol === LUNA)
               ) {
-                InitLP = pairResult.liquidity_token
+                InitLP = pairResult.liquidity_token;
               }
 
               lpTokenInfo &&
@@ -386,36 +388,36 @@ export default () => {
                   name: lpTokenInfo.name,
                   symbol: lpTokenInfo.symbol,
                   decimals: lpTokenInfo.decimals,
-                  icon: "",
-                  verified: false,
-                })
+                  icon: '',
+                  verified: false
+                });
 
               let pair: Pair = {
                 contract: pairResult.contract_addr,
                 pair: [tokenInfo1, tokenInfo2],
-                liquidity_token: pairResult.liquidity_token,
-              }
+                liquidity_token: pairResult.liquidity_token
+              };
 
-              return pair
+              return pair;
             } catch (error) {
-              console.log(error)
+              console.log(error);
             }
-            return undefined
+            return undefined;
           })
-        )
+        );
 
         if (pairs) {
           setResult({
-            pairs: pairs.filter((pair) => !!pair) as Pair[],
-          })
-          setIsLoading(false)
+            pairs: pairs.filter((pair) => !!pair) as Pair[]
+          });
+          setIsLoading(false);
         }
-      }
+      };
 
-      fetchTokensInfo().then(() => fetchPairs())
+      fetchTokensInfo().then(() => fetchPairs());
     } catch (error) {
-      console.log(error)
-      setIsLoading(false)
+      console.log(error);
+      setIsLoading(false);
     }
   }, [
     currentNetworkName,
@@ -424,16 +426,16 @@ export default () => {
     loadPairs,
     loadTokensInfo,
     networkName,
-    result,
-  ])
+    result
+  ]);
 
-  return { ...result, isLoading }
-}
+  return { ...result, isLoading };
+};
 
 export function isAssetInfo(object: any): object is AssetInfo {
-  return "token" in object
+  return 'token' in object;
 }
 
 export function isNativeInfo(object: any): object is NativeInfo {
-  return "native_token" in object
+  return 'native_token' in object;
 }

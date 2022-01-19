@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useNetwork } from '../hooks';
 
 const toQueryMsg = (msg: string) => {
   try {
@@ -10,16 +9,12 @@ const toQueryMsg = (msg: string) => {
 };
 
 export default () => {
-  const { fcd } = useNetwork();
-  const getUrl = useCallback(
-    (contract: string, msg: string | object) => {
-      const query_msg =
-        typeof msg === 'string'
-          ? toQueryMsg(msg)
-          : encodeURIComponent(JSON.stringify(msg));
-      return `${fcd}/wasm/contracts/${contract}/store?query_msg=${query_msg}`;
-    },
-    [fcd]
-  );
+  const getUrl = useCallback((contract: string, msg: string | object) => {
+    const query_msg =
+      typeof msg === 'string'
+        ? toQueryMsg(msg)
+        : encodeURIComponent(JSON.stringify(msg));
+    return `${process.env.REACT_APP_LCD}/wasm/contracts/${contract}/store?query_msg=${query_msg}`;
+  }, []);
   return getUrl;
 };

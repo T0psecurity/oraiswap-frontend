@@ -1,88 +1,92 @@
-import { useEffect, useState } from "react"
-import { Dictionary } from "ramda"
-import { UUSD } from "constants/constants"
-import createContext from "./createContext"
-import { useNetwork } from "hooks"
+import { useEffect, useState } from 'react';
+import { Dictionary } from 'ramda';
+import { UUSD } from 'constants/constants';
+import createContext from './createContext';
 
 interface ContractAddressTokenJSON {
   /** Contract addresses */
-  contracts: Dictionary<string>
+  contracts: Dictionary<string>;
   /** Token addresses */
-  whitelist: Dictionary<ListedItem>
+  whitelist: Dictionary<ListedItem>;
 }
 
 interface ContractAddressTokenHelpers {
   /** Array of listed item */
-  listed: ListedItem[]
+  listed: ListedItem[];
   /** Find contract address with any key */
-  getListedItem: (key?: string) => ListedItem
-  getSymbol: (key?: string) => string
+  getListedItem: (key?: string) => ListedItem;
+  getSymbol: (key?: string) => string;
   /** Convert structure for chain */
-  toAssetInfo: (symbol: string) => AssetInfo | NativeInfo
-  toToken: (params: Asset) => Token
+  toAssetInfo: (symbol: string) => AssetInfo | NativeInfo;
+  toToken: (params: Asset) => Token;
   /** Convert from token of structure for chain */
-  parseAssetInfo: (info: AssetInfo | NativeInfo) => string
-  parseToken: (token: AssetToken | NativeToken) => Asset
+  parseAssetInfo: (info: AssetInfo | NativeInfo) => string;
+  parseToken: (token: AssetToken | NativeToken) => Asset;
 }
 
 export type ContractsAddressToken = ContractAddressTokenJSON &
-  ContractAddressTokenHelpers
-const context = createContext<ContractsAddressToken>("useContractsAddressToken")
-export const [useContractsAddressToken, ContractsAddressTokenProvider] = context
+  ContractAddressTokenHelpers;
+const context = createContext<ContractsAddressToken>(
+  'useContractsAddressToken'
+);
+export const [
+  useContractsAddressToken,
+  ContractsAddressTokenProvider
+] = context;
 
 /* state */
 export const useContractsAddressTokenState = ():
   | ContractsAddressToken
   | undefined => {
-  const { contract: url } = useNetwork()
-  const [data, setData] = useState<ContractAddressTokenJSON>()
+  const url = 'tequila.json';
+  const [data, setData] = useState<ContractAddressTokenJSON>();
 
   useEffect(() => {
     const load = async () => {
-      const response = await fetch(url)
-      const json: ContractAddressTokenJSON = await response.json()
-      setData(json)
-    }
+      const response = await fetch(url);
+      const json: ContractAddressTokenJSON = await response.json();
+      setData(json);
+    };
 
-    load()
-  }, [url])
+    load();
+  }, [url]);
 
   const helpers = ({
-    whitelist,
+    whitelist
   }: ContractAddressTokenJSON): ContractAddressTokenHelpers => {
-    const listed = Object.values(whitelist)
+    const listed = Object.values(whitelist);
 
     const getListedItem = (key?: string) =>
       listed.find((item) => Object.values(item).includes(key)) ?? {
-        symbol: "",
-        name: "",
-        token: "",
-        pair: "",
-        lpToken: "",
-      }
+        symbol: '',
+        name: '',
+        token: '',
+        pair: '',
+        lpToken: ''
+      };
 
     const getSymbol = (key?: string) =>
-      key === UUSD ? key : getListedItem(key).symbol
+      key === UUSD ? key : getListedItem(key).symbol;
 
     const toAssetInfo = (symbol: string) =>
       symbol === UUSD
         ? { native_token: { denom: symbol } }
-        : { token: { contract_addr: getListedItem(symbol)["token"] } }
+        : { token: { contract_addr: getListedItem(symbol)['token'] } };
 
     const toToken = ({ amount, symbol }: Asset) => ({
       amount,
-      info: toAssetInfo(symbol),
-    })
+      info: toAssetInfo(symbol)
+    });
 
     const parseAssetInfo = (info: AssetInfo | NativeInfo) =>
-      "native_token" in info
+      'native_token' in info
         ? info.native_token.denom
-        : getSymbol(info.token.contract_addr)
+        : getSymbol(info.token.contract_addr);
 
     const parseToken = ({ amount, info }: AssetToken | NativeToken) => ({
       amount,
-      symbol: parseAssetInfo(info),
-    })
+      symbol: parseAssetInfo(info)
+    });
 
     return {
       listed,
@@ -91,9 +95,9 @@ export const useContractsAddressTokenState = ():
       toAssetInfo,
       toToken,
       parseAssetInfo,
-      parseToken,
-    }
-  }
+      parseToken
+    };
+  };
 
-  return data && { ...data, ...helpers(data) }
-}
+  return data && { ...data, ...helpers(data) };
+};

@@ -1,12 +1,9 @@
-import { NetworkInfo } from '@terra-dev/wallet-types';
-
 export enum NetworkKey {
   MAINNET = 'mainnet',
   TESTNET = 'testnet'
 }
-type MirrorNetworkInfo = NetworkInfo & NetworkConfig;
 
-const networks: Record<string, MirrorNetworkInfo> = {
+const networks = {
   mainnet: {
     name: 'mainnet',
     chainID: 'columbus-5',

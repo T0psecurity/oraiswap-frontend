@@ -1,8 +1,9 @@
 import React from 'react';
 import logo from '../images/logo.png';
 import Container from '../components/Container';
-import Connect from './Connect';
 import styles from './SwapHeader.module.scss';
+import LoginWidget from 'components/LoginWidget';
+import MESSAGE from 'lang/MESSAGE.json';
 
 const Header = () => {
   return (
@@ -16,7 +17,10 @@ const Header = () => {
 
         <section className={styles.support}>
           <div className={styles.connect}>
-            <Connect />
+            <LoginWidget
+              type="inline"
+              text={MESSAGE.Form.Button.ConnectWallet}
+            />
           </div>
         </section>
       </Container>
