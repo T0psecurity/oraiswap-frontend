@@ -3,6 +3,7 @@ import { BIP32Interface, fromPrivateKey } from 'bip32';
 import { Buffer } from 'buffer';
 import { sha256 } from 'js-sha256';
 import { getMobileOperatingSystem } from './utils';
+import { network } from 'constants/networks';
 
 /** basically query and execute, with param : contract, lcd, and simulate is true or false
  */
@@ -177,6 +178,7 @@ class Wasm {
    * @returns string
    */
   getAddress(childKey: any): string {
+    if (!childKey) return '';
     return this.cosmos.getAddress(childKey);
   }
 
@@ -284,14 +286,11 @@ class Wasm {
 }
 
 export default Wasm;
-window.Wasm = new Wasm(
-  process.env.REACT_APP_LCD ?? 'https://lcd.orai.io',
-  process.env.REACT_APP_NETWORK
-);
+window.Wasm = new Wasm(network.lcd, network.name);
 
 if (!window.Wallet) {
   window.Wallet = new window.Keystation({
     keystationUrl: process.env.REACT_APP_WALLET_URL,
-    lcd: process.env.REACT_APP_LCD
+    lcd: network.lcd
   });
 }

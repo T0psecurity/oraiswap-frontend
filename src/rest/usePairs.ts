@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import useAPI from './useAPI';
 import { AIRI, UAIRI } from 'constants/constants';
-import mainnetTokens from 'constants/mainnet-tokens.json';
-import testnetTokens from 'constants/testnet-tokens.json';
+import { network } from 'constants/networks';
 
 interface Pairs {
   pairs: Pair[];
@@ -74,9 +73,7 @@ export let InitLP = '';
 export default () => {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<Pairs>({ pairs: [] });
-  const { loadPairs, loadTokenInfo, loadTokensInfo } = useAPI();
-  const networkName = process.env.REACT_APP_NETWORK;
-  const [currentNetworkName, setCurrentNetworkName] = useState('');
+  const { loadPairs, loadTokenInfo } = useAPI();
 
   const getTokenInfo = useCallback(
     async (info: NativeInfo | AssetInfo) => {
@@ -118,29 +115,21 @@ export default () => {
 
   useEffect(() => {
     try {
-      if (
-        isLoading ||
-        (result?.pairs.length > 0 && currentNetworkName === networkName)
-      ) {
+      if (isLoading || result?.pairs.length > 0) {
         return;
       }
       setIsLoading(true);
-      setCurrentNetworkName(networkName);
 
       const fetchTokensInfo = async () => {
         try {
-          const res = await loadTokensInfo();
-          res.forEach((tokenInfo: TokenResult) => {
+          network.tokens.forEach((tokenInfo: TokenResult) => {
             tokenInfos.set(tokenInfo.contract_addr, tokenInfo);
           });
         } catch (error) {
           console.log(error);
         }
 
-        (networkName?.indexOf('testnet') !== -1
-          ? testnetTokens
-          : mainnetTokens
-        ).forEach((token) => {
+        network.tokens.forEach((token) => {
           if (
             token !== undefined &&
             token.symbol &&
@@ -221,15 +210,7 @@ export default () => {
       console.log(error);
       setIsLoading(false);
     }
-  }, [
-    currentNetworkName,
-    getTokenInfo,
-    isLoading,
-    loadPairs,
-    loadTokensInfo,
-    networkName,
-    result
-  ]);
+  }, [getTokenInfo, loadPairs, result]);
 
   return { ...result, isLoading };
 };

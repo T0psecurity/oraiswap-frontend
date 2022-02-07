@@ -9,8 +9,7 @@ import { AxiosError } from 'axios';
 import { network } from 'constants/networks';
 import { UAIRI } from 'constants/constants';
 interface DenomBalanceResponse {
-  height: string;
-  result: DenomInfo[];
+  balances: DenomInfo[];
 }
 
 interface DenomInfo {
@@ -57,6 +56,7 @@ interface PairsResult {
 }
 
 interface PairResult {
+  oracle_addr: string;
   liquidity_token: string;
   contract_addr: string;
   asset_infos: (NativeInfo | AssetInfo)[];
@@ -103,10 +103,10 @@ interface SimulatedData {
   spread_amount: string;
 }
 interface TaxRateResponse {
-  data: { rate: string };
+  rate: string;
 }
 interface TaxCapResponse {
-  data: { cap: string };
+  cap: string;
 }
 
 const blacklist = oraiswapConfig.blacklist.map(
@@ -129,6 +129,14 @@ export function isNativeInfo(object: any): object is NativeInfo {
   return 'native_token' in object;
 }
 
+export async function querySmart(contract, input) {
+  const params = Buffer.from(input).toString('base64');
+  const url = `${network.lcd}/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const res = (await axios.get(url)).data;
+  if (res.code) throw new Error(res.message);
+  return res.data;
+}
+
 export default () => {
   const address = window.Wasm.getAddress(window.Wasm.testChildKey());
   // const { getSymbol } = useContractsAddress();
@@ -136,15 +144,16 @@ export default () => {
 
   // useBalance
   const loadDenomBalance = useCallback(async () => {
+    if (!address) return [];
     const url = `${network.lcd}/cosmos/bank/v1beta1/balances/${address}`;
     const res: DenomBalanceResponse = (await axios.get(url)).data;
-    return res.result;
+    return res.balances;
   }, [address]);
 
   const loadContractBalance = useCallback(
     async (localContractAddr: string) => {
       const url = getURL(localContractAddr, { balance: { address: address } });
-      const res: ContractBalanceResponse = (await axios.get(url)).data;
+      const res: ContractBalanceResponse = (await axios.get(url)).data.data;
       return res.result;
     },
     [address, getURL]
@@ -173,8 +182,10 @@ export default () => {
     let lastPair: (NativeInfo | AssetInfo)[] | null = null;
 
     try {
-      const url = `${process.env.REACT_APP_LCD}/pairs`;
-      const res: PairsResult = (await axios.get(url)).data;
+      const res: PairsResult = await querySmart(
+        network.factory,
+        '{"pairs":{}}'
+      );
 
       if (res.pairs.length !== 0) {
         res.pairs
@@ -197,7 +208,7 @@ export default () => {
       const url = getURL(process.env.REACT_APP_CONTRACT_FACTORY, {
         pairs: { limit: 30, start_after: lastPair }
       });
-      const pairs: PairsResponse = (await axios.get(url)).data;
+      const pairs: PairsResponse = (await axios.get(url)).data.data;
 
       if (!Array.isArray(pairs?.result?.pairs)) {
         // node might be down
@@ -221,12 +232,6 @@ export default () => {
     }
     return result;
   }, [getURL]);
-
-  const loadTokensInfo = useCallback(async (): Promise<TokenResult[]> => {
-    const url = `${process.env.REACT_APP_LCD}/tokens`;
-    const res: TokenResult[] = (await axios.get(url)).data;
-    return res;
-  }, []);
 
   const loadSwappableTokenAddresses = useCallback(async (from: string) => {
     const res: string[] = (
@@ -313,17 +318,18 @@ export default () => {
   );
 
   // useTax
-  const loadTaxInfo = useCallback(async (contract_addr: string) => {
-    if (!contract_addr) {
+  const loadTaxInfo = useCallback(async (denom: string) => {
+    if (!denom) {
       return '';
     }
 
     let taxCap = '';
     try {
-      const url = `${network.lcd}/wasm/v1beta1/contract/${network.oracle}/smart/${contract_addr}`;
-      const res: TaxCapResponse = (await axios.get(url)).data;
-
-      taxCap = res.data.cap;
+      const res: TaxCapResponse = await querySmart(
+        network.oracle,
+        `{"treasury":{"tax_cap":{"denom":"${denom}"}}}`
+      );
+      taxCap = res.cap;
     } catch (error) {
       console.log(error);
     }
@@ -332,12 +338,11 @@ export default () => {
   }, []);
 
   const loadTaxRate = useCallback(async () => {
-    const param = Buffer.from('{"treasury":{"tax_rate":{}}}').toString(
-      'base64'
+    const res: TaxRateResponse = await querySmart(
+      network.oracle,
+      '{"treasury":{"tax_rate":{}}}'
     );
-    const url = `${network.lcd}/wasm/v1beta1/contract/${network.oracle}/smart/${param}`;
-    const res: TaxRateResponse = (await axios.get(url)).data;
-    return res.data.rate;
+    return res.rate;
   }, []);
 
   return {
@@ -345,7 +350,6 @@ export default () => {
     loadContractBalance,
     loadGasPrice,
     loadPairs,
-    loadTokensInfo,
     loadSwappableTokenAddresses,
     loadTokenInfo,
     loadPool,

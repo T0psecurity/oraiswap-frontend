@@ -40,7 +40,7 @@ export default (contract_addr: string, symbol: string) => {
         loadDenomBalance().then((denomInfos) => {
           let hasDenom: boolean = false;
           if (denomInfos !== undefined) {
-            denomInfos.forEach((denomInfo) => {
+            denomInfos.forEach((denomInfo: DenomInfo) => {
               if (denomInfo.denom === localContractAddr) {
                 setBalance(denomInfo.amount);
                 hasDenom = true;
