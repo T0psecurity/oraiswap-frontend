@@ -1,74 +1,44 @@
 //@ts-nocheck
-import React, { useEffect, useRef } from 'react';
-import url from 'url';
+import React, { useEffect, useState } from 'react';
+import CenterEllipsis from './CenterEllipsis';
 import classNames from 'classnames';
 import styles from './LoginWidget.module.scss';
-import useAuthenticate from 'hooks/useAuthenticate';
+import Button from 'components/Button';
+import Icon from './Icon';
 
 export const LoginWidget = ({ type = 'onPage', text, style = {} }) => {
-  const { loginWithSSO } = useAuthenticate();
-  const windowRef = useRef();
-
-  useEffect(() => {
-    const queryData = url.parse(window.location.href, {
-      parseQueryString: true
-    }).query;
-    const handler = async (event) => {
-      if (event.origin !== process.env.REACT_APP_SSO_ORIGIN) return;
-
-      const receivedData = event.data;
-
-      if (receivedData === 'logout') {
-        window.wasm?.removeChildKey();
-        return;
-      }
-
-      if (
-        !receivedData ||
-        typeof receivedData !== 'string' ||
-        receivedData === 'ready' ||
-        receivedData === 'logout'
-      ) {
-        return;
-      }
-
-      if (windowRef?.current) {
-        windowRef.current.close();
-      }
-      if (window.lockLoginSSO) {
-        return;
-      }
-      window.lockLoginSSO = true;
-      try {
-        const parsedData = JSON.parse(receivedData);
-        await loginWithSSO(queryData.token, parsedData?.token);
-      } catch (ex) {
-        console.log(ex);
-      }
-      window.lockLoginSSO = false;
-    };
-    // Listen to event from sub-window
-    const authentication = async () => {
-      window.addEventListener('message', handler, false);
-
-      return;
-    };
-
-    authentication();
-    return () => {
-      window.removeEventListener('message', handler);
-    };
-  }, []);
+  const [childKey, setChildKey] = useState(window.Wasm.testChildKey());
+  const connectWallet = async () => {
+    setChildKey(await window.Wasm.getChildKey());
+  };
+  const disconnectWallet = () => {
+    window.Wasm.removeChildkey();
+    setChildKey(undefined);
+  };
 
   return (
     <div className={classNames(styles.container)}>
-      <iframe
-        src={`${
-          process.env.REACT_APP_SSO_SERVER
-        }/login/embeded/${type}?serviceURL=${
-          window.location.origin
-        }&text=${text}&style=${JSON.stringify(style)}`}
-      />
+      {childKey ? (
+        <Button
+          onClick={disconnectWallet}
+          className={classNames(styles.connected)}
+        >
+          <Icon size={16} name="account_balance_wallet" />
+          <p className={classNames(styles.address)}>
+            <CenterEllipsis
+              size={10}
+              text={window.Wasm.getAddress(childKey) ?? '0x'}
+            />
+            {' | '}
+            {process.env.REACT_APP_NETWORK}
+          </p>
+          <Icon size={20} name="close" />
+        </Button>
+      ) : (
+        <Button className={classNames(styles.connect)} onClick={connectWallet}>
+          Connect Wallet
+        </Button>
+      )}
     </div>
   );
 };

@@ -13,7 +13,7 @@ const message = Cosmos.message;
  */
 class Wasm {
   public cosmos: Cosmos;
-
+  private childKeys: Map<string, BIP32Interface | undefined> = new Map();
   constructor(baseUrl: string, chainId = 'Simulate') {
     this.cosmos = new Cosmos(baseUrl.replace(/\/$/, ''), chainId);
     this.cosmos.setBech32MainPrefix('orai');
@@ -79,27 +79,39 @@ class Wasm {
     );
   }
 
-  async getChildKey(
-    path?: string,
-    noCache?: boolean
-  ): Promise<BIP32Interface | undefined> {
+  testChildKey(path?: string): BIP32Interface | undefined {
+    const key = path ?? 'default';
+    return this.childKeys.get(key);
+  }
+
+  removeChildkey(path?: string): boolean {
+    const key = path ?? 'default';
+    return this.childKeys.delete(key);
+  }
+
+  async getChildKey(path?: string): Promise<BIP32Interface | undefined> {
     if (window.Wallet) {
-      let childKeyValue;
-      // @ts-ignore
-      if (window?.ReactNativeWebView?.postMessage) {
-        childKeyValue = await window.Wasm.getChildKeyFromMobile();
-      } else {
-        childKeyValue = await window.Wallet.getChildKey(path);
+      const key = path ?? 'default';
+      let childKey = this.childKeys.get(key);
+      if (!childKey) {
+        let childKeyValue;
+        // @ts-ignore
+        if (window?.ReactNativeWebView?.postMessage) {
+          childKeyValue = await window.Wasm.getChildKeyFromMobile();
+        } else {
+          childKeyValue = await window.Wallet.getChildKey(path);
+        }
+
+        // @ts-ignore
+        const { privateKey, chainCode, network } = childKeyValue || {};
+
+        childKey = fromPrivateKey(
+          Buffer.from(privateKey),
+          Buffer.from(chainCode),
+          network
+        );
+        this.childKeys.set(key, childKey);
       }
-
-      // @ts-ignore
-      const { privateKey, chainCode, network } = childKeyValue || {};
-
-      const childKey = fromPrivateKey(
-        Buffer.from(privateKey),
-        Buffer.from(chainCode),
-        network
-      );
 
       return childKey;
     }

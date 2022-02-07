@@ -1,3 +1,5 @@
+@import 'variables';
+
 .container {
   display: flex;
   justify-content: center;
@@ -8,4 +10,18 @@
     width: 200px;
     height: 100%;
   }
+}
+
+.address {
+  color: $white;
+  margin: 0 10px 0 8px;
+}
+
+.connected {
+  border: 1px solid $white;
+  text-transform: none;
+}
+
+.connect {
+  text-transform: none;
 }

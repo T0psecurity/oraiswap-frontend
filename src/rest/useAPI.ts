@@ -384,12 +384,6 @@ export default () => {
     return res.result;
   }, []);
 
-  const signinWithSSOToken = useCallback(async ({ accessToken, orgToken }) => {
-    const url = `${process.env.REACT_APP_SSO_SERVER}/user/access-token-login`;
-    const res: any = (await axios.post(url, { accessToken, orgToken })).data;
-    return res.result;
-  }, []);
-
   return {
     loadDenomBalance,
     loadContractBalance,
@@ -402,7 +396,6 @@ export default () => {
     querySimulate,
     generateContractMessages,
     loadTaxInfo,
-    loadTaxRate,
-    signinWithSSOToken
+    loadTaxRate
   };
 };

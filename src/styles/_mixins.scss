@@ -1,4 +1,4 @@
-@import "variables";
+@import 'variables';
 
 @mixin desktop {
   @media (min-width: ($breakpoint)) {
@@ -7,7 +7,7 @@
 }
 
 @mixin mobile {
-  @media (max-width: $breakpoint - 0.02) {
+  @media (max-width: ($breakpoint - 0.02)) {
     @content;
   }
 }
