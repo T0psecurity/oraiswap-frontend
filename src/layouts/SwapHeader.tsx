@@ -18,10 +18,7 @@ const Header = () => {
 
         <section className={styles.support}>
           <div className={styles.connect}>
-            <LoginWidget
-              type="inline"
-              text={MESSAGE.Form.Button.ConnectWallet}
-            />
+            <LoginWidget text={MESSAGE.Form.Button.ConnectWallet} />
           </div>
         </section>
       </Container>

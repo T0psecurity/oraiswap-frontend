@@ -1,5 +1,5 @@
 import { Dictionary } from 'ramda';
-import { MIR, UUSD } from 'constants/constants';
+import { ORAI, UAIRI } from 'constants/constants';
 import { plus, div, floor, gt } from 'libs/math';
 import calc from 'helpers/calc';
 import { useContractsAddress } from 'hooks';
@@ -43,7 +43,7 @@ export default () => {
     [BalanceKey.LPSTAKED]: (stakingReward: StakingReward) =>
       reduceBondAmount(stakingReward),
     [BalanceKey.MIRGOVSTAKED]: (govStake: Balance) => {
-      const { token } = getListedItem(MIR);
+      const { token } = getListedItem(UAIRI);
       return { [token]: govStake.balance };
     },
     [BalanceKey.REWARD]: (
@@ -58,8 +58,8 @@ export default () => {
   };
 
   const accountInfo = {
-    [AccountInfoKey.UUSD]: (bankBalance: BankBalance) =>
-      findBalance(UUSD, bankBalance),
+    [AccountInfoKey.ORAI]: (bankBalance: BankBalance) =>
+      findBalance(ORAI, bankBalance),
     [AccountInfoKey.MINTPOSITIONS]: (mintPosition: MintPositions) =>
       mintPosition.positions.filter(({ asset }) => gt(asset.amount, 0))
   };
@@ -79,12 +79,12 @@ export const dict = <Data, Item = string>(
 
 /* helpers */
 const calcPairPrice = (param: PairPool) => {
-  const { uusd, asset } = parsePairPool(param);
-  return [uusd, asset].every((v) => v && gt(v, 0)) ? div(uusd, asset) : '0';
+  const { orai, asset } = parsePairPool(param);
+  return [orai, asset].every((v) => v && gt(v, 0)) ? div(orai, asset) : '0';
 };
 
 export const parsePairPool = ({ assets, total_share }: PairPool) => ({
-  uusd: assets.find(({ info }) => 'native_token' in info)?.amount ?? '0',
+  orai: assets.find(({ info }) => 'native_token' in info)?.amount ?? '0',
   asset: assets.find(({ info }) => 'token' in info)?.amount ?? '0',
   total: total_share
 });

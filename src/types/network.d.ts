@@ -1,34 +1,34 @@
 interface Network extends NetworkConfig {
   /** Get finder link */
-  finder: (address: string, path?: string) => string
+  finder: (address: string, path?: string) => string;
 
   /** Refresh the network from the extension */
-  refresh: () => void
+  refresh: () => void;
 }
 
-type NetworkConfig = ExtNetworkConfig & LocalNetworkConfig
+type NetworkConfig = ExtNetworkConfig & LocalNetworkConfig;
 
 interface NetworkConfig {
   /** Chain ID */
-  id: string
+  id: string;
   /** Contract Addresses JSON URL */
-  contract: string
+  contract: string;
   /** Swap Contract Addresses JSON URL */
-  swap: string
+  swap: string;
   /** Graphql server URL */
-  mantle: string
-  stats: string
+  mantle: string;
+  stats: string;
   /** LCDClientConfig */
-  lcd: LCDClientConfig
+  lcd: LCDClientConfig;
   /** Fixed fee */
-  fee: { gasPrice: string; amount: string; gas: string }
-  factory: string
-  service: string
+  fee: { gasPrice: string; amount: string; gas: string };
+  factory: string;
+  service: string;
 }
 
 interface ExtNetworkConfig {
-  name: string
-  chainID: string
-  lcd: string
-  fcd: string
+  name: string;
+  chainID: string;
+  rpc: string;
+  lcd: string;
 }

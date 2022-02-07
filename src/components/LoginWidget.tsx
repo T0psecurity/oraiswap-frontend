@@ -1,19 +1,37 @@
 //@ts-nocheck
 import React, { useEffect, useState } from 'react';
+import { fromPrivateKey } from 'bip32';
 import CenterEllipsis from './CenterEllipsis';
 import classNames from 'classnames';
 import styles from './LoginWidget.module.scss';
 import Button from 'components/Button';
 import Icon from './Icon';
+import useLocalStorage from 'libs/useLocalStorage';
 
-export const LoginWidget = ({ type = 'onPage', text, style = {} }) => {
-  const [childKey, setChildKey] = useState(window.Wasm.testChildKey());
+export const LoginWidget = ({ text }) => {
+  const [childKeyData, setChildKeyData] = useLocalStorage<ChildKeyData>(
+    'childkey'
+  );
+
+  let childKey;
+  if (childKeyData) {
+    const { privateKey, chainCode, network } = childKeyData;
+    childKey = fromPrivateKey(
+      Buffer.from(Object.values(privateKey)),
+      Buffer.from(Object.values(chainCode)),
+      network
+    );
+
+    window.Wasm.setChildkey(childKey);
+  } else {
+    window.Wasm.removeChildkey();
+  }
+
   const connectWallet = async () => {
-    setChildKey(await window.Wasm.getChildKey());
+    setChildKeyData(await window.Wasm.getChildKeyValue());
   };
   const disconnectWallet = () => {
-    window.Wasm.removeChildkey();
-    setChildKey(undefined);
+    setChildKeyData(undefined);
   };
 
   return (
@@ -36,7 +54,7 @@ export const LoginWidget = ({ type = 'onPage', text, style = {} }) => {
         </Button>
       ) : (
         <Button className={classNames(styles.connect)} onClick={connectWallet}>
-          Connect Wallet
+          {text}
         </Button>
       )}
     </div>

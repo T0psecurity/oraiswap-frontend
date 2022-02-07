@@ -1,29 +1,13 @@
 //@ts-nocheck
 
-import {
-  UAUD,
-  UCAD,
-  UCHF,
-  UCNY,
-  UEUR,
-  UGBP,
-  UHKD,
-  UINR,
-  UJPY,
-  UKRW,
-  ULUNA,
-  UMNT,
-  USDR,
-  USGD,
-  UTHB,
-  UUSD
-} from 'constants/constants';
 import { useCallback } from 'react';
 import useURL from 'hooks/useURL';
 import oraiswapConfig from 'constants/oraiswap.json';
 import axios from './request';
 import { Type } from 'pages/Swap';
 import { AxiosError } from 'axios';
+import { network } from 'constants/networks';
+import { UAIRI } from 'constants/constants';
 interface DenomBalanceResponse {
   height: string;
   result: DenomInfo[];
@@ -44,22 +28,7 @@ interface ContractBalance {
 }
 
 interface GasPriceResponse {
-  uluna: string;
-  uusd: string;
-  usdr: string;
-  ukrw: string;
-  umnt: string;
-  uaud: string;
-  ucad: string;
-  uchf: string;
-  ucny: string;
-  ueur: string;
-  ugbp: string;
-  uhkd: string;
-  uinr: string;
-  ujpy: string;
-  usgd: string;
-  uthb: string;
+  orai: string;
 }
 
 interface Pairs {
@@ -133,9 +102,11 @@ interface SimulatedData {
   commission_amount: string;
   spread_amount: string;
 }
-interface TaxResponse {
-  height: string;
-  result: string;
+interface TaxRateResponse {
+  data: { rate: string };
+}
+interface TaxCapResponse {
+  data: { cap: string };
 }
 
 const blacklist = oraiswapConfig.blacklist.map(
@@ -159,13 +130,13 @@ export function isNativeInfo(object: any): object is NativeInfo {
 }
 
 export default () => {
-  const address = process.env.REACT_APP_CONTRACT_ROUTER;
+  const address = window.Wasm.getAddress(window.Wasm.testChildKey());
   // const { getSymbol } = useContractsAddress();
   const getURL = useURL();
 
   // useBalance
   const loadDenomBalance = useCallback(async () => {
-    const url = `${process.env.REACT_APP_LCD}/bank/balances/${address}`;
+    const url = `${network.lcd}/cosmos/bank/v1beta1/balances/${address}`;
     const res: DenomBalanceResponse = (await axios.get(url)).data;
     return res.result;
   }, [address]);
@@ -183,30 +154,11 @@ export default () => {
 
   const loadGasPrice = useCallback(async (symbol: string) => {
     const symbolName = symbol;
-    const url = `${process.env.REACT_APP_LCD}/provider/minfees?valNum=0&OracleScriptName=min_gas_prices`;
+    const url = `${network.lcd}/provider/minfees?valNum=0&OracleScriptName=min_gas_prices`;
     const res: GasPriceResponse = (await axios.get(url)).data;
 
     let gasPrice = '0';
-    if (
-      [
-        UUSD,
-        UKRW,
-        UMNT,
-        ULUNA,
-        USDR,
-        UAUD,
-        UCAD,
-        UCHF,
-        UCNY,
-        UEUR,
-        UGBP,
-        UHKD,
-        UINR,
-        UJPY,
-        USGD,
-        UTHB
-      ].includes(symbolName)
-    ) {
+    if ([UAIRI].includes(symbolName)) {
       gasPrice = (res as any)?.[symbolName];
     }
 
@@ -368,9 +320,10 @@ export default () => {
 
     let taxCap = '';
     try {
-      const url = `${process.env.REACT_APP_LCD}/treasury/tax_cap/${contract_addr}`;
-      const res: TaxResponse = (await axios.get(url)).data;
-      taxCap = res.result;
+      const url = `${network.lcd}/wasm/v1beta1/contract/${network.oracle}/smart/${contract_addr}`;
+      const res: TaxCapResponse = (await axios.get(url)).data;
+
+      taxCap = res.data.cap;
     } catch (error) {
       console.log(error);
     }
@@ -379,9 +332,12 @@ export default () => {
   }, []);
 
   const loadTaxRate = useCallback(async () => {
-    const url = `${process.env.REACT_APP_LCD}/treasury/tax_rate`;
-    const res: TaxResponse = (await axios.get(url)).data;
-    return res.result;
+    const param = Buffer.from('{"treasury":{"tax_rate":{}}}').toString(
+      'base64'
+    );
+    const url = `${network.lcd}/wasm/v1beta1/contract/${network.oracle}/smart/${param}`;
+    const res: TaxRateResponse = (await axios.get(url)).data;
+    return res.data.rate;
   }, []);
 
   return {

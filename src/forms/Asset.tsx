@@ -1,11 +1,11 @@
-import React from "react"
-import { UST } from "constants/constants"
-import { gt } from "libs/math"
-import { format, lookupSymbol } from "libs/parse"
-import styles from "./Asset.module.scss"
+import React from 'react';
+import { ORAI } from 'constants/constants';
+import { gt } from 'libs/math';
+import { format, lookupSymbol } from 'libs/parse';
+import styles from './Asset.module.scss';
 
 interface Props extends AssetItem {
-  formatTokenName?: (symbol: string) => string
+  formatTokenName?: (symbol: string) => string;
 }
 
 const Asset = ({ symbol, name, price, balance, formatTokenName }: Props) => (
@@ -15,13 +15,13 @@ const Asset = ({ symbol, name, price, balance, formatTokenName }: Props) => (
         {formatTokenName?.(symbol) ?? lookupSymbol(symbol)}
       </h1>
 
-      {name !== UST && <h2 className={styles.name}>{name}</h2>}
+      {name !== ORAI && <h2 className={styles.name}>{name}</h2>}
     </header>
 
     <footer className={styles.footer}>
-      {price && gt(price, 0) && name !== UST && (
+      {price && gt(price, 0) && name !== ORAI && (
         <p className={styles.price}>
-          {format(price)} {UST}
+          {format(price)} {ORAI}
         </p>
       )}
 
@@ -32,6 +32,6 @@ const Asset = ({ symbol, name, price, balance, formatTokenName }: Props) => (
       )}
     </footer>
   </article>
-)
+);
 
-export default Asset
+export default Asset;

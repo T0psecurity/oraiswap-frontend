@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Dictionary } from 'ramda';
-import { UUSD } from 'constants/constants';
+import { ORAI } from 'constants/constants';
 import createContext from './createContext';
 
 interface ContractAddressTokenJSON {
@@ -66,10 +66,10 @@ export const useContractsAddressTokenState = ():
       };
 
     const getSymbol = (key?: string) =>
-      key === UUSD ? key : getListedItem(key).symbol;
+      key === ORAI ? key : getListedItem(key).symbol;
 
     const toAssetInfo = (symbol: string) =>
-      symbol === UUSD
+      symbol === ORAI
         ? { native_token: { denom: symbol } }
         : { token: { contract_addr: getListedItem(symbol)['token'] } };
 

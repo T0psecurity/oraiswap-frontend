@@ -89,21 +89,32 @@ class Wasm {
     return this.childKeys.delete(key);
   }
 
+  setChildkey(childKey: BIP32Interface, path?: string) {
+    const key = path ?? 'default';
+    this.childKeys.set(key, childKey);
+  }
+
+  async getChildKeyValue(path?: string): Promise<ChildKeyData> {
+    let childKeyValue;
+    // @ts-ignore
+    if (window?.ReactNativeWebView?.postMessage) {
+      childKeyValue = await window.Wasm.getChildKeyFromMobile();
+    } else {
+      childKeyValue = await window.Wallet.getChildKey(path);
+    }
+    // @ts-ignore
+    return childKeyValue || {};
+  }
+
   async getChildKey(path?: string): Promise<BIP32Interface | undefined> {
     if (window.Wallet) {
       const key = path ?? 'default';
       let childKey = this.childKeys.get(key);
       if (!childKey) {
-        let childKeyValue;
         // @ts-ignore
-        if (window?.ReactNativeWebView?.postMessage) {
-          childKeyValue = await window.Wasm.getChildKeyFromMobile();
-        } else {
-          childKeyValue = await window.Wallet.getChildKey(path);
-        }
-
-        // @ts-ignore
-        const { privateKey, chainCode, network } = childKeyValue || {};
+        const { privateKey, chainCode, network } = await this.getChildKeyValue(
+          path
+        );
 
         childKey = fromPrivateKey(
           Buffer.from(privateKey),
@@ -272,7 +283,7 @@ class Wasm {
   }
 }
 
-// export default Wasm;
+export default Wasm;
 window.Wasm = new Wasm(
   process.env.REACT_APP_LCD ?? 'https://lcd.orai.io',
   process.env.REACT_APP_NETWORK

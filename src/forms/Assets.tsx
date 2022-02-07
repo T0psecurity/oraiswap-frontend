@@ -1,39 +1,39 @@
-import React, { useState } from "react"
-import classNames from "classnames/bind"
-import { UST, UUSD } from "constants/constants"
-import { gt } from "libs/math"
-import { insertIf } from "libs/utils"
-import { useContractsAddress, useContract, useCombineKeys } from "hooks"
-import Icon from "components/Icon"
-import { Config } from "./useSelectAsset"
-import Asset from "./Asset"
-import styles from "./Assets.module.scss"
+import React, { useState } from 'react';
+import classNames from 'classnames/bind';
+import { ORAI } from 'constants/constants';
+import { gt } from 'libs/math';
+import { insertIf } from 'libs/utils';
+import { useContractsAddress, useContract, useCombineKeys } from 'hooks';
+import Icon from 'components/Icon';
+import { Config } from './useSelectAsset';
+import Asset from './Asset';
+import styles from './Assets.module.scss';
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
 
 interface Props extends Config {
-  selected?: string
-  onSelect: (asset: string) => void
+  selected?: string;
+  onSelect: (asset: string) => void;
 }
 
 const Assets = ({ selected, onSelect, ...props }: Props) => {
-  const { priceKey, balanceKey } = props
-  const { useUST, skip, formatTokenName } = props
+  const { priceKey, balanceKey } = props;
+  const { useORAI, skip, formatTokenName } = props;
 
-  const { listed } = useContractsAddress()
-  const { uusd, find } = useContract()
-  const { loading } = useCombineKeys([priceKey, balanceKey])
+  const { listed } = useContractsAddress();
+  const { orai, find } = useContract();
+  const { loading } = useCombineKeys([priceKey, balanceKey]);
 
   /* search */
-  const [value, setValue] = useState("")
+  const [value, setValue] = useState('');
 
   /* list */
   const list: AssetItem[] = [
-    ...insertIf(useUST, {
-      symbol: UUSD,
-      name: UST,
-      price: "1",
-      balance: uusd,
+    ...insertIf(useORAI, {
+      symbol: ORAI,
+      name: ORAI,
+      price: '1',
+      balance: orai
     }),
     ...listed
       .filter(({ symbol }) => !skip?.includes(symbol))
@@ -41,9 +41,9 @@ const Assets = ({ selected, onSelect, ...props }: Props) => {
         symbol,
         name,
         price: priceKey && find(priceKey, token),
-        balance: balanceKey && find(balanceKey, token),
-      })),
-  ]
+        balance: balanceKey && find(balanceKey, token)
+      }))
+  ];
 
   return (
     <div className={styles.component}>
@@ -70,13 +70,13 @@ const Assets = ({ selected, onSelect, ...props }: Props) => {
             )
           )
           .sort(({ symbol: a }, { symbol: b }) => {
-            const hasA = balanceKey && gt(find(balanceKey, a), 0) ? 1 : 0
-            const hasB = balanceKey && gt(find(balanceKey, b), 0) ? 1 : 0
-            return hasB - hasA
+            const hasA = balanceKey && gt(find(balanceKey, a), 0) ? 1 : 0;
+            const hasB = balanceKey && gt(find(balanceKey, b), 0) ? 1 : 0;
+            return hasB - hasA;
           })
           .map((item) => {
-            const { symbol, price } = item
-            const isSelected = symbol === selected
+            const { symbol, price } = item;
+            const isSelected = symbol === selected;
 
             return (
               <li key={symbol}>
@@ -89,11 +89,11 @@ const Assets = ({ selected, onSelect, ...props }: Props) => {
                   <Asset {...item} formatTokenName={formatTokenName} />
                 </button>
               </li>
-            )
+            );
           })}
       </ul>
     </div>
-  )
-}
+  );
+};
 
-export default Assets
+export default Assets;

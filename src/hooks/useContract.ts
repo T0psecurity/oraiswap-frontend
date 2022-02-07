@@ -2,7 +2,7 @@
 
 import { Dictionary } from 'ramda';
 
-import { UUSD } from 'constants/constants';
+import { ORAI } from 'constants/constants';
 import { sum } from 'libs/math';
 
 import usePairPool from 'queries/usePairPool';
@@ -32,7 +32,7 @@ export type DictionaryKey = PriceKey | BalanceKey | AssetInfoKey;
 export type DataKey = PriceKey | BalanceKey | AssetInfoKey | AccountInfoKey;
 
 interface Data extends Record<DictionaryKey, Dictionary<string> | undefined> {
-  [AccountInfoKey.UUSD]: string;
+  [AccountInfoKey.ORAI]: string;
   [AccountInfoKey.MINTPOSITIONS]?: MintPosition[];
 }
 
@@ -96,7 +96,7 @@ export const useContractState = (address: string): Contract => {
     [BalanceKey.MIRGOVSTAKED]: govStake.result,
     [BalanceKey.REWARD]: stakingPool.result, // with LPSTAKE
 
-    [AccountInfoKey.UUSD]: bankBalance,
+    [AccountInfoKey.ORAI]: bankBalance,
     [AccountInfoKey.MINTPOSITIONS]: mintPositions.result
   };
 
@@ -157,8 +157,8 @@ export const useContractState = (address: string): Contract => {
 
   const data = {
     ...dictionary,
-    [AccountInfoKey.UUSD]:
-      bankBalance.data && accountInfo[AccountInfoKey.UUSD](bankBalance.data),
+    [AccountInfoKey.ORAI]:
+      bankBalance.data && accountInfo[AccountInfoKey.ORAI](bankBalance.data),
     [AccountInfoKey.MINTPOSITIONS]:
       mintPositions.parsed &&
       accountInfo[AccountInfoKey.MINTPOSITIONS](mintPositions.parsed)
@@ -169,15 +169,17 @@ export const useContractState = (address: string): Contract => {
     const { token } = getListedItem(value);
     const result = dictionary[key]?.[token];
 
-    const USTPrice = '1';
-    const isUSTPrice =
-      value === UUSD && Object.values<string>(PriceKey).includes(key);
+    const ORAIPrice = '1';
+    const isORAIPrice =
+      value === ORAI && Object.values<string>(PriceKey).includes(key);
 
-    const USTBalance = data[AccountInfoKey.UUSD];
-    const isUSTBalance =
-      value === UUSD && Object.values<string>(BalanceKey).includes(key);
+    const ORAIBalance = data[AccountInfoKey.ORAI];
+    const isORAIBalance =
+      value === ORAI && Object.values<string>(BalanceKey).includes(key);
 
-    return result ?? (isUSTPrice ? USTPrice : isUSTBalance ? USTBalance : '0');
+    return (
+      result ?? (isORAIPrice ? ORAIPrice : isORAIBalance ? ORAIBalance : '0')
+    );
   };
 
   const rewards = sum(Object.values(dictionary[BalanceKey.REWARD] ?? {}));

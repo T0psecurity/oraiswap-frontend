@@ -1,9 +1,9 @@
 import { BroadCastMode } from '@oraichain/cosmosjs';
 import { Network } from 'bip32';
 import { Buffer } from 'buffer';
-import Keplr from '../lib/kelpr';
+import Keplr from '../libs/kelpr';
 import { Keplr as keplr } from './kelpr/wallet';
-import Wasm from '../lib/wasm';
+import Wasm from '../libs/wasm';
 
 declare global {
   type ExecuteOptions = {

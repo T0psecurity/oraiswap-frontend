@@ -1,42 +1,39 @@
 export enum NetworkKey {
-  MAINNET = 'mainnet',
-  TESTNET = 'testnet'
+  MAINNET = 'Oraichain',
+  TESTNET = 'Oraichain-testnet'
 }
 
 const networks = {
   mainnet: {
-    name: 'mainnet',
-    chainID: 'columbus-5',
-    lcd: 'https://lcd.terra.dev',
-    fcd: 'https://fcd.terra.dev',
-    id: 'columbus-5',
+    name: NetworkKey.MAINNET,
+    lcd: 'https://lcd.orai.io',
+    rpc: 'https://rpc.orai.io',
+    id: 'mainnet',
     contract: '/tequila.json',
     swap: '/swap.json',
-    mantle: 'https://fcd.terra.dev/',
-    stats: 'https://fcd.terra.dev/',
-    fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 UST
-    factory: 'terra1ulgw0td86nvs4wtpsc80thv6xelk76ut7a7apj',
-    service:
-      process.env.REACT_APP_MAINNET_SERVICE_URL || 'https://api.oraiswap.io/',
-    router: 'terra19qx5xe6q9ll4w0890ux7lv2p4mf3csd4qvt3ex'
+    fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 ORAI
+    factory: 'orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra',
+    router: 'orai1g0pwp3rgzqywvt0xdut08gknyj5q37rtn5aecx',
+    oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn'
   },
   testnet: {
-    name: 'testnet',
-    chainID: 'bombay-12',
-    lcd: 'https://bombay-lcd.terra.dev',
-    fcd: 'https://bombay-fcd.terra.dev',
-    id: 'bombay-12',
+    name: NetworkKey.TESTNET,
+    lcd: 'https://testnet.lcd.orai.io',
+    rpc: 'https://testnet.rpc.orai.io',
+    id: 'testnet',
     contract: '/tequila.json',
     swap: '/swap.json',
-    mantle: 'https://bombay-mantle.terra.dev/',
-    stats: 'https://bombay-fcd.terra.dev/',
-    fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.050000 UST
-    factory: 'terra18qpjm4zkvqnpjpw0zn0tdr8gdzvt8au35v45xf',
-    service:
-      process.env.REACT_APP_TESTNET_SERVICE_URL ||
-      'https://api-bombay.oraiswap.io/',
-    router: 'terra14z80rwpd0alzj4xdtgqdmcqt9wd9xj5ffd60wp'
+    fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.050000 ORAI
+    factory: 'orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra',
+    router: 'orai1g0pwp3rgzqywvt0xdut08gknyj5q37rtn5aecx',
+    oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn'
   }
 };
 
 export default networks;
+
+// @ts-ignore
+export const network =
+  process.env.REACT_APP_NETWORK === 'mainnet'
+    ? networks.mainnet
+    : networks.testnet;

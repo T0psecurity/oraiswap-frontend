@@ -11,9 +11,9 @@ import Container from 'components/Container';
 import { useForm } from 'react-hook-form';
 import Result from './Result';
 import TabView from 'components/TabView';
-import networks from 'constants/networks';
+import { network } from 'constants/networks';
 import { useLocation } from 'react-router-dom';
-import { UST, DEFAULT_MAX_SPREAD, ULUNA } from 'constants/constants';
+import { ORAI, DEFAULT_MAX_SPREAD, UAIRI } from 'constants/constants';
 import { useContractsAddress, useContract } from 'hooks';
 import { lookup, decimal, toAmount } from 'libs/parse';
 import calc from 'helpers/calc';
@@ -94,7 +94,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
   const { getSymbol, isNativeToken } = useContractsAddress();
   const { loadTaxInfo, loadTaxRate, generateContractMessages } = useAPI();
   const { state } = useLocation<{ symbol: string }>();
-  const fee = networks.testnet.fee;
+  const fee = network.fee;
 
   const walletAddress = 'useAddress();';
 
@@ -127,10 +127,10 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
     defaultValues: {
       [Key.value1]: '',
       [Key.value2]: '',
-      [Key.token1]: type !== Type.WITHDRAW ? state?.symbol ?? ULUNA : InitLP,
+      [Key.token1]: type !== Type.WITHDRAW ? state?.symbol ?? UAIRI : InitLP,
       [Key.token2]: state?.symbol ?? '',
       [Key.feeValue]: '',
-      [Key.feeSymbol]: UST,
+      [Key.feeSymbol]: ORAI,
       [Key.load]: '',
       [Key.symbol1]: '',
       [Key.symbol2]: '',
@@ -638,7 +638,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
   useEffect(() => {
     setValue(
       Key.token1,
-      type !== Type.WITHDRAW ? state?.symbol ?? ULUNA : InitLP
+      type !== Type.WITHDRAW ? state?.symbol ?? UAIRI : InitLP
     );
 
     if (type === Type.WITHDRAW) {

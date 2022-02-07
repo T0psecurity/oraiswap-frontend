@@ -1,42 +1,8 @@
 //@ts-nocheck
 
 import { useCallback, useEffect, useState } from 'react';
-import {
-  KRT,
-  LUNA,
-  MNT,
-  SDT,
-  UKRW,
-  ULUNA,
-  UMNT,
-  UST,
-  UUSD,
-  USDR,
-  AUT,
-  CAT,
-  CHT,
-  CNT,
-  EUT,
-  GBT,
-  HKT,
-  INT,
-  JPT,
-  SGT,
-  THT,
-  UAUD,
-  UCAD,
-  UCHF,
-  UCNY,
-  UEUR,
-  UGBP,
-  UHKD,
-  UINR,
-  UJPY,
-  USGD,
-  UTHB
-} from 'constants/constants';
 import useAPI from './useAPI';
-
+import { AIRI, UAIRI } from 'constants/constants';
 import mainnetTokens from 'constants/mainnet-tokens.json';
 import testnetTokens from 'constants/testnet-tokens.json';
 
@@ -86,176 +52,11 @@ interface TokenResult {
 
 export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
   [
-    LUNA,
+    AIRI,
     {
-      contract_addr: ULUNA,
-      symbol: LUNA,
-      name: ULUNA,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    KRT,
-    {
-      contract_addr: UKRW,
-      symbol: KRT,
-      name: UKRW,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    MNT,
-    {
-      contract_addr: UMNT,
-      symbol: MNT,
-      name: UMNT,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    SDT,
-    {
-      contract_addr: USDR,
-      symbol: SDT,
-      name: USDR,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    UST,
-    {
-      contract_addr: UUSD,
-      symbol: UST,
-      name: UUSD,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    AUT,
-    {
-      contract_addr: UAUD,
-      symbol: AUT,
-      name: UAUD,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    CAT,
-    {
-      contract_addr: UCAD,
-      symbol: CAT,
-      name: UCAD,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    CHT,
-    {
-      contract_addr: UCHF,
-      symbol: CHT,
-      name: UCHF,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    CNT,
-    {
-      contract_addr: UCNY,
-      symbol: CNT,
-      name: UCNY,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    EUT,
-    {
-      contract_addr: UEUR,
-      symbol: EUT,
-      name: UEUR,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    GBT,
-    {
-      contract_addr: UGBP,
-      symbol: GBT,
-      name: UGBP,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    HKT,
-    {
-      contract_addr: UHKD,
-      symbol: HKT,
-      name: UHKD,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    INT,
-    {
-      contract_addr: UINR,
-      symbol: INT,
-      name: UINR,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    JPT,
-    {
-      contract_addr: UJPY,
-      symbol: JPT,
-      name: UJPY,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    SGT,
-    {
-      contract_addr: USGD,
-      symbol: SGT,
-      name: USGD,
-      decimals: 6,
-      icon: '',
-      verified: true
-    }
-  ],
-  [
-    THT,
-    {
-      contract_addr: UTHB,
-      symbol: THT,
-      name: UTHB,
+      contract_addr: UAIRI,
+      symbol: AIRI,
+      name: UAIRI,
       decimals: 6,
       icon: '',
       verified: true
@@ -336,24 +137,25 @@ export default () => {
           console.log(error);
         }
 
-        (networkName === 'testnet' ? testnetTokens : mainnetTokens).forEach(
-          (token) => {
-            if (
-              token !== undefined &&
-              token.symbol &&
-              !tokenInfos.has(token.contract_addr)
-            ) {
-              tokenInfos.set(token.contract_addr, {
-                contract_addr: token.contract_addr,
-                symbol: token.symbol,
-                name: token.name,
-                decimals: token.decimals ? token.decimals : 6,
-                icon: '',
-                verified: false
-              });
-            }
+        (networkName?.indexOf('testnet') !== -1
+          ? testnetTokens
+          : mainnetTokens
+        ).forEach((token) => {
+          if (
+            token !== undefined &&
+            token.symbol &&
+            !tokenInfos.has(token.contract_addr)
+          ) {
+            tokenInfos.set(token.contract_addr, {
+              contract_addr: token.contract_addr,
+              symbol: token.symbol,
+              name: token.name,
+              decimals: token.decimals ? token.decimals : 6,
+              icon: '',
+              verified: false
+            });
           }
-        );
+        });
       };
 
       const fetchPairs = async () => {
@@ -376,8 +178,8 @@ export default () => {
                 tokenInfo2
               ]);
               if (
-                (tokenInfo1.symbol === LUNA && tokenInfo2.symbol === UST) ||
-                (tokenInfo1.symbol === UST && tokenInfo2.symbol === LUNA)
+                (tokenInfo1.symbol === ORAI && tokenInfo2.symbol === ORAI) ||
+                (tokenInfo1.symbol === ORAI && tokenInfo2.symbol === ORAI)
               ) {
                 InitLP = pairResult.liquidity_token;
               }
