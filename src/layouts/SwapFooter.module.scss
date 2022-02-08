@@ -1,5 +1,5 @@
-@import "mixins";
-@import "variables";
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
 
 .footer {
   color: $slate;
@@ -66,7 +66,7 @@
   }
 
   &:disabled i::after {
-    content: " ";
+    content: ' ';
     position: absolute;
     width: 14px;
     height: 14px;

@@ -1,8 +1,8 @@
-@import 'mixins';
-@import 'variables';
-@import 'reboot';
-@import 'colors';
-@import 'utils';
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/reboot';
+@import 'src/styles/colors';
+@import 'src/styles/utils';
 
 #oraiswap {
   font-size: $font-size;

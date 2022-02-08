@@ -1,5 +1,5 @@
-@import "mixins";
-@import "variables";
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
 
 .wrapper {
   width: 100%;
@@ -57,7 +57,7 @@
     &:last-child {
       margin-right: unset;
     }
-    & input[type="radio"] {
+    & input[type='radio'] {
       width: 0%;
       height: 0%;
       position: absolute;

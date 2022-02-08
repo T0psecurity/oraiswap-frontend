@@ -1,4 +1,5 @@
-export class Keplr {
+import { network } from 'constants/networks';
+class Keplr {
   public chainId: string;
   private rpc: string;
   private lcd: string;
@@ -221,12 +222,12 @@ export class Keplr {
   }
 }
 
-// export default Keplr;
+export default Keplr;
 // global Keplr
 window.Keplr = new Keplr(
-  process.env.REACT_APP_NETWORK ?? 'Oraichain',
-  process.env.REACT_APP_RPC_URL ?? 'https://lcd.orai.io',
-  process.env.REACT_APP_LCD ?? 'https://rpc.orai.io',
+  network.name,
+  network.rpc,
+  network.lcd,
   'ORAI',
   'orai'
 );

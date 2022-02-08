@@ -1,5 +1,5 @@
-@import "mixins";
-@import "variables";
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
 
 .component {
   user-select: none;
@@ -26,7 +26,7 @@ $axis-height: 25px;
   transform: translate(-50%, 0);
 
   &:after {
-    content: "";
+    content: '';
     display: block;
     width: 1px;
     height: 5px;

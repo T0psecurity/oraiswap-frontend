@@ -7,48 +7,60 @@ import styles from './LoginWidget.module.scss';
 import Button from 'components/Button';
 import Icon from './Icon';
 import useLocalStorage from 'libs/useLocalStorage';
+import { network } from 'constants/networks';
 
 export const LoginWidget = ({ text }) => {
-  const [childKeyData, setChildKeyData] = useLocalStorage<ChildKeyData>(
-    'childkey'
-  );
+  // const [childKeyData, setChildKeyData] = useLocalStorage<ChildKeyData>(
+  //   'childkey'
+  // );
 
-  let childKey;
-  if (childKeyData) {
-    const { privateKey, chainCode, network } = childKeyData;
-    childKey = fromPrivateKey(
-      Buffer.from(Object.values(privateKey)),
-      Buffer.from(Object.values(chainCode)),
-      network
-    );
+  // let childKey;
+  // if (childKeyData) {
+  //   const { privateKey, chainCode, network } = childKeyData;
+  //   childKey = fromPrivateKey(
+  //     Buffer.from(Object.values(privateKey)),
+  //     Buffer.from(Object.values(chainCode)),
+  //     network
+  //   );
 
-    window.Wasm.setChildkey(childKey);
-  } else {
-    window.Wasm.removeChildkey();
-  }
+  //   window.Wasm.setChildkey(childKey);
+  // } else {
+  //   window.Wasm.removeChildkey();
+  // }
+
+  // const connectWallet = async () => {
+  //   setChildKeyData(await window.Wasm.getChildKeyValue());
+  // };
+  // const disconnectWallet = () => {
+  //   setChildKeyData(undefined);
+  // };
+
+  const [address, setAddress] = useLocalStorage<string>('address');
 
   const connectWallet = async () => {
-    setChildKeyData(await window.Wasm.getChildKeyValue());
+    const keplrAddr = await window.Keplr.getKeplrAddr();
+    if (!keplrAddr) {
+      alert('You must install Keplr to continue');
+      return;
+    }
+    setAddress(keplrAddr);
   };
   const disconnectWallet = () => {
-    setChildKeyData(undefined);
+    setAddress('');
   };
 
   return (
     <div className={classNames(styles.container)}>
-      {childKey ? (
+      {address ? (
         <Button
           onClick={disconnectWallet}
           className={classNames(styles.connected)}
         >
           <Icon size={16} name="account_balance_wallet" />
           <p className={classNames(styles.address)}>
-            <CenterEllipsis
-              size={10}
-              text={window.Wasm.getAddress(childKey) ?? '0x'}
-            />
+            <CenterEllipsis size={10} text={address} />
             {' | '}
-            {process.env.REACT_APP_NETWORK}
+            {network.id}
           </p>
           <Icon size={20} name="close" />
         </Button>

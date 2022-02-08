@@ -1,5 +1,5 @@
-@import "mixins";
-@import "variables";
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
 
 $radius: 10px;
 
@@ -48,7 +48,7 @@ $radius: 10px;
     font-weight: 400;
     transition: font-weight 0.2s ease-in-out;
     &::after {
-      content: "";
+      content: '';
       position: absolute;
       left: 50%;
       top: 100%;
