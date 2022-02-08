@@ -94,9 +94,10 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
   const { getSymbol, isNativeToken } = useContractsAddress();
   const { loadTaxInfo, loadTaxRate, generateContractMessages } = useAPI();
   const { state } = useLocation<{ symbol: string }>();
+  const { find } = useContract();
   const fee = network.fee;
 
-  const walletAddress = 'useAddress();';
+  const [walletAddress] = useLocalStorage<string>('address');
 
   const settingsModal = useModal();
   const [slippageSettings, setSlippageSettings] = useLocalStorage<
@@ -117,6 +118,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
   }, [slippageSettings]);
 
   const { pairs } = usePairs();
+
   const balanceKey = {
     [Type.SWAP]: BalanceKey.TOKEN,
     [Type.PROVIDE]: BalanceKey.TOKEN,
@@ -127,7 +129,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
     defaultValues: {
       [Key.value1]: '',
       [Key.value2]: '',
-      [Key.token1]: type !== Type.WITHDRAW ? state?.symbol ?? UAIRI : InitLP,
+      [Key.token1]: type !== Type.WITHDRAW ? state?.symbol ?? ORAI : InitLP,
       [Key.token2]: state?.symbol ?? '',
       [Key.feeValue]: '',
       [Key.feeSymbol]: ORAI,
@@ -299,7 +301,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
       ? calc.minimumReceived({
           expectedAmount: `${profitableQuery?.simulatedAmount}`,
           max_spread: String(slippageTolerance),
-          commission: '0.003',
+          commission: find(infoKey, formData[Key.symbol2]),
           decimals: tokenInfo1?.decimals
         })
       : '0';
@@ -638,7 +640,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
   useEffect(() => {
     setValue(
       Key.token1,
-      type !== Type.WITHDRAW ? state?.symbol ?? UAIRI : InitLP
+      type !== Type.WITHDRAW ? state?.symbol ?? ORAI : InitLP
     );
 
     if (type === Type.WITHDRAW) {

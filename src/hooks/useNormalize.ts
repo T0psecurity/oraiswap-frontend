@@ -2,7 +2,8 @@ import { Dictionary } from 'ramda';
 import { ORAI, UAIRI } from 'constants/constants';
 import { plus, div, floor, gt } from 'libs/math';
 import calc from 'helpers/calc';
-import { useContractsAddress } from 'hooks';
+// if use cycle import can make error: use before initilized
+import { useContractsAddress } from 'hooks/useContractsAddress';
 import { PriceKey, AssetInfoKey } from 'hooks/contractKeys';
 import { BalanceKey, AccountInfoKey } from 'hooks/contractKeys';
 

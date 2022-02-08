@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import useAPI from './useAPI';
-import { AIRI, UAIRI } from 'constants/constants';
+import { AIRI, ORAI, UAIRI } from 'constants/constants';
 import { network } from 'constants/networks';
 
 interface Pairs {
@@ -36,6 +36,7 @@ interface PairsResult {
 interface PairResult {
   liquidity_token: string;
   contract_addr: string;
+  oracle_addr: string;
   asset_infos: (NativeInfo | AssetInfo)[];
 }
 
@@ -51,13 +52,13 @@ interface TokenResult {
 
 export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
   [
-    AIRI,
+    ORAI,
     {
-      contract_addr: UAIRI,
-      symbol: AIRI,
-      name: UAIRI,
+      contract_addr: ORAI,
+      symbol: ORAI,
+      name: ORAI,
       decimals: 6,
-      icon: '',
+      icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png',
       verified: true
     }
   ]

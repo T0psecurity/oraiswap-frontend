@@ -1,13 +1,15 @@
 //@ts-nocheck
 
 import { useCallback } from 'react';
-import useURL from 'hooks/useURL';
+import useURL from 'hooks/useQuerySmart';
 import oraiswapConfig from 'constants/oraiswap.json';
 import axios from './request';
 import { Type } from 'pages/Swap';
 import { AxiosError } from 'axios';
 import { network } from 'constants/networks';
 import { UAIRI } from 'constants/constants';
+import useQuerySmart from 'hooks/useQuerySmart';
+import useLocalStorage from 'libs/useLocalStorage';
 interface DenomBalanceResponse {
   balances: DenomInfo[];
 }
@@ -15,11 +17,6 @@ interface DenomBalanceResponse {
 interface DenomInfo {
   denom: string;
   amount: string;
-}
-
-interface ContractBalanceResponse {
-  height: string;
-  result: ContractBalance;
 }
 
 interface ContractBalance {
@@ -72,11 +69,6 @@ interface TokenResult {
   verified: boolean;
 }
 
-interface PoolResponse {
-  height: string;
-  result: Pool;
-}
-
 interface Pool {
   assets: Token[];
   total_share: string;
@@ -92,10 +84,6 @@ interface PoolResult {
   // text: string
 }
 
-interface SimulatedResponse {
-  height: string;
-  result: SimulatedData;
-}
 interface SimulatedData {
   return_amount: string;
   offer_amount: string;
@@ -129,18 +117,9 @@ export function isNativeInfo(object: any): object is NativeInfo {
   return 'native_token' in object;
 }
 
-export async function querySmart(contract, input) {
-  const params = Buffer.from(input).toString('base64');
-  const url = `${network.lcd}/wasm/v1beta1/contract/${contract}/smart/${params}`;
-  const res = (await axios.get(url)).data;
-  if (res.code) throw new Error(res.message);
-  return res.data;
-}
-
 export default () => {
-  const address = window.Wasm.getAddress(window.Wasm.testChildKey());
-  // const { getSymbol } = useContractsAddress();
-  const getURL = useURL();
+  const [address] = useLocalStorage<string>('address');
+  const querySmart = useQuerySmart();
 
   // useBalance
   const loadDenomBalance = useCallback(async () => {
@@ -152,11 +131,12 @@ export default () => {
 
   const loadContractBalance = useCallback(
     async (localContractAddr: string) => {
-      const url = getURL(localContractAddr, { balance: { address: address } });
-      const res: ContractBalanceResponse = (await axios.get(url)).data.data;
-      return res.result;
+      const res: ContractBalance = await querySmart(localContractAddr, {
+        balance: { address: address }
+      });
+      return res;
     },
-    [address, getURL]
+    [address, querySmart]
   );
 
   // useGasPrice
@@ -182,10 +162,7 @@ export default () => {
     let lastPair: (NativeInfo | AssetInfo)[] | null = null;
 
     try {
-      const res: PairsResult = await querySmart(
-        network.factory,
-        '{"pairs":{}}'
-      );
+      const res: PairsResult = await querySmart(network.factory, { pairs: {} });
 
       if (res.pairs.length !== 0) {
         res.pairs
@@ -205,10 +182,9 @@ export default () => {
     }
 
     while (true) {
-      const url = getURL(process.env.REACT_APP_CONTRACT_FACTORY, {
+      const pairs: PairsResponse = await querySmart(network.factory, {
         pairs: { limit: 30, start_after: lastPair }
       });
-      const pairs: PairsResponse = (await axios.get(url)).data.data;
 
       if (!Array.isArray(pairs?.result?.pairs)) {
         // node might be down
@@ -231,7 +207,7 @@ export default () => {
       lastPair = pairs.result.pairs.slice(-1)[0]?.asset_infos;
     }
     return result;
-  }, [getURL]);
+  }, [querySmart]);
 
   const loadSwappableTokenAddresses = useCallback(async (from: string) => {
     const res: string[] = (
@@ -244,21 +220,19 @@ export default () => {
 
   const loadTokenInfo = useCallback(
     async (contract: string): Promise<TokenResult> => {
-      const url = getURL(contract, { token_info: {} });
-      const res = (await axios.get(url)).data;
-      return res.result;
+      const res: TokenResult = await querySmart(contract, { token_info: {} });
+      return res;
     },
-    [getURL]
+    [querySmart]
   );
 
   // usePool
   const loadPool = useCallback(
     async (contract: string) => {
-      const url = getURL(contract, { pool: {} });
-      const res: PoolResponse = (await axios.get(url)).data;
-      return res.result;
+      const res: Pool = await querySmart(contract, { pool: {} });
+      return res;
     },
-    [getURL]
+    [querySmart]
   );
 
   // useSwapSimulate
@@ -266,15 +240,14 @@ export default () => {
     async (variables: { contract: string; msg: any }) => {
       try {
         const { contract, msg } = variables;
-        const url = getURL(contract, msg);
-        const res: SimulatedResponse = (await axios.get(url)).data;
+        const res: SimulatedData = await querySmart(contract, msg);
         return res;
       } catch (error) {
         const { response }: AxiosError = error;
         return response?.data;
       }
     },
-    [getURL]
+    [querySmart]
   );
 
   const generateContractMessages = useCallback(

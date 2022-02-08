@@ -7,7 +7,7 @@ import { ContractsAddressTokenProvider } from '../hooks/useContractsAddressToken
 const Contract: FC = ({ children }) => {
   const contractsAddress = useContractsAddressState();
   const contractsAddressToken = useContractsAddressTokenState();
-  console.log(contractsAddress);
+
   return !contractsAddress ? null : (
     <ContractsAddressProvider value={contractsAddress}>
       <ContractsAddressTokenProvider value={contractsAddressToken}>

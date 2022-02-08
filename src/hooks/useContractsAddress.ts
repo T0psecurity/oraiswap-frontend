@@ -40,6 +40,7 @@ export const useContractsAddressState = (): ContractsAddress | undefined => {
     const load = async () => {
       const response = await fetch(url);
       const json: ContractAddressJSON = await response.json();
+      // console.log(json);
       setData(json);
     };
 

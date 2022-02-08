@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from "react"
-import classNames from "classnames/bind"
-import { useCombineKeys, useContractsAddress } from "../hooks"
-import { Config } from "./useSelectAsset"
-import SwapToken from "./SwapToken"
-import styles from "./SwapTokens.module.scss"
-import { lpTokenInfos, Pair } from "../rest/usePairs"
-import { Type } from "../pages/Swap"
-import { tokenInfos } from "../rest/usePairs"
-import Loading from "components/Loading"
-import useAPI from "rest/useAPI"
+import React, { useEffect, useState } from 'react';
+import classNames from 'classnames/bind';
+import { useCombineKeys, useContractsAddress } from '../hooks';
+import { Config } from './useSelectAsset';
+import SwapToken from './SwapToken';
+import styles from './SwapTokens.module.scss';
+import { lpTokenInfos, Pair } from '../rest/usePairs';
+import { Type } from '../pages/Swap';
+import { tokenInfos } from '../rest/usePairs';
+import Loading from 'components/Loading';
+import useAPI from 'rest/useAPI';
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
 
 interface Props extends Config {
-  isFrom: boolean
-  selected?: string
-  onSelect: (asset: string) => void
-  oppositeValue?: string
-  onSelectOpposite: (symbol: string) => void
-  pairs: Pair[]
-  type: string
+  isFrom: boolean;
+  selected?: string;
+  onSelect: (asset: string) => void;
+  oppositeValue?: string;
+  onSelectOpposite: (symbol: string) => void;
+  pairs: Pair[];
+  type: string;
 }
 
 const SwapTokens = ({
@@ -32,85 +32,85 @@ const SwapTokens = ({
   type,
   ...props
 }: Props) => {
-  const { priceKey, balanceKey, formatTokenName } = props
+  const { priceKey, balanceKey, formatTokenName } = props;
 
-  const { loading } = useCombineKeys([priceKey, balanceKey])
-  const { loadSwappableTokenAddresses } = useAPI()
+  const { loading } = useCombineKeys([priceKey, balanceKey]);
+  const { loadSwappableTokenAddresses } = useAPI();
 
-  const { isNativeToken } = useContractsAddress()
+  const { isNativeToken } = useContractsAddress();
 
   /* search */
-  const [value, setValue] = useState("")
+  const [value, setValue] = useState('');
 
-  const [addressList, setAddressList] = useState<string[]>([])
+  const [addressList, setAddressList] = useState<string[]>([]);
 
   useEffect(() => {
-    let isCancelled = false
+    let isCancelled = false;
     const fetchAddressList = async () => {
       if (oppositeValue) {
         if (type === Type.SWAP) {
-          const res = await loadSwappableTokenAddresses(oppositeValue)
+          const res = await loadSwappableTokenAddresses(oppositeValue);
           if (Array.isArray(res)) {
             if (!isCancelled) {
-              setAddressList(res)
+              setAddressList(res);
             }
           }
-          return
+          return;
         }
 
-        const assetItemMap: Set<string> = new Set<string>()
+        const assetItemMap: Set<string> = new Set<string>();
         pairs.forEach((pair) => {
           if (
             oppositeValue === pair.pair[0].contract_addr &&
             !assetItemMap.has(pair.pair[1].contract_addr)
           ) {
-            assetItemMap.add(pair.pair[1].contract_addr)
+            assetItemMap.add(pair.pair[1].contract_addr);
           }
 
           if (
             oppositeValue === pair.pair[1].contract_addr &&
             !assetItemMap.has(pair.pair[0].contract_addr)
           ) {
-            assetItemMap.add(pair.pair[0].contract_addr)
+            assetItemMap.add(pair.pair[0].contract_addr);
           }
-        })
+        });
 
         if (!isCancelled) {
-          setAddressList(Array.from(assetItemMap.values()))
+          setAddressList(Array.from(assetItemMap.values()));
         }
       } else {
-        const assetItemMap: Set<string> = new Set<string>()
+        const assetItemMap: Set<string> = new Set<string>();
         pairs.forEach((pair) => {
           if (type === Type.WITHDRAW) {
-            const tokeninfo = tokenInfos.get(pair.liquidity_token)
+            const tokeninfo = tokenInfos.get(pair.liquidity_token);
             if (tokeninfo !== undefined) {
-              assetItemMap.add(tokeninfo.contract_addr)
+              assetItemMap.add(tokeninfo.contract_addr);
             }
           } else {
             pair.pair.forEach((tokenInfo) => {
               if (!assetItemMap.has(tokenInfo.symbol)) {
-                assetItemMap.add(tokenInfo.contract_addr)
+                assetItemMap.add(tokenInfo.contract_addr);
               }
-            })
+            });
           }
-        })
+        });
 
         if (!isCancelled) {
-          setAddressList(Array.from(assetItemMap.values()))
+          setAddressList(Array.from(assetItemMap.values()));
         }
       }
-    }
+    };
 
-    fetchAddressList()
+    fetchAddressList();
 
     return () => {
-      isCancelled = true
-    }
-  }, [loadSwappableTokenAddresses, oppositeValue, pairs, type])
+      isCancelled = true;
+    };
+  }, [loadSwappableTokenAddresses, oppositeValue, pairs, type]);
 
   const handleSelect = (contractAddr: string) => {
-    onSelect(contractAddr)
-  }
+    onSelect(contractAddr);
+  };
 
   return (
     <div className={styles.component}>
@@ -129,65 +129,65 @@ const SwapTokens = ({
         {addressList && addressList.length > 0 ? (
           addressList
             .filter((contractAddr) => {
-              let symbol = ""
+              let symbol = '';
               if (type === Type.WITHDRAW) {
-                const tokenInfoList = lpTokenInfos.get(contractAddr)
+                const tokenInfoList = lpTokenInfos.get(contractAddr);
                 symbol = tokenInfoList
-                  ? tokenInfoList[0].symbol + "-" + tokenInfoList[1].symbol
-                  : ""
+                  ? tokenInfoList[0].symbol + '-' + tokenInfoList[1].symbol
+                  : '';
               } else {
-                const tokenInfo = tokenInfos.get(contractAddr)
-                symbol = tokenInfo ? tokenInfo.symbol : ""
+                const tokenInfo = tokenInfos.get(contractAddr);
+                symbol = tokenInfo ? tokenInfo.symbol : '';
               }
 
               return [symbol].some(
                 (text) => !!text?.toLowerCase().includes(value?.toLowerCase())
-              )
+              );
             })
             .sort((a, b) => {
-              const vA = tokenInfos.get(a)?.verified
-              const vB = tokenInfos.get(b)?.verified
+              const vA = tokenInfos.get(a)?.verified;
+              const vB = tokenInfos.get(b)?.verified;
 
-              return vA && vB ? 0 : vB === true ? 1 : vA === true ? -1 : 0
+              return vA && vB ? 0 : vB === true ? 1 : vA === true ? -1 : 0;
             })
             .map((item) => {
-              const isSelected = item === selected
+              const isSelected = item === selected;
 
               let swapToken = {
-                symbol: "",
-                name: "",
-                contract_addr: "",
-                icon: [""],
-                verified: false,
-              }
+                symbol: '',
+                name: '',
+                contract_addr: '',
+                icon: [''],
+                verified: false
+              };
 
               if (type === Type.WITHDRAW) {
-                const tokenInfoList = lpTokenInfos.get(item)
+                const tokenInfoList = lpTokenInfos.get(item);
                 swapToken = {
                   symbol: tokenInfoList
-                    ? tokenInfoList[0].symbol + "-" + tokenInfoList[1].symbol
-                    : "",
-                  name: "",
+                    ? tokenInfoList[0].symbol + '-' + tokenInfoList[1].symbol
+                    : '',
+                  name: '',
                   contract_addr: item,
                   icon: tokenInfoList
                     ? [tokenInfoList[0].icon, tokenInfoList[1].icon]
-                    : ["", ""],
-                  verified: false,
-                }
+                    : ['', ''],
+                  verified: false
+                };
               } else {
-                const tokenInfo = tokenInfos.get(item)
+                const tokenInfo = tokenInfos.get(item);
 
                 swapToken = {
-                  symbol: tokenInfo?.symbol || "",
-                  name: tokenInfo?.name || "",
-                  contract_addr: isNativeToken(item) ? "" : item,
-                  icon: [tokenInfo ? tokenInfo.icon : ""],
-                  verified: tokenInfo?.verified || false,
-                }
+                  symbol: tokenInfo?.symbol || '',
+                  name: tokenInfo?.name || '',
+                  contract_addr: isNativeToken(item) ? '' : item,
+                  icon: [tokenInfo ? tokenInfo.icon : ''],
+                  verified: tokenInfo?.verified || false
+                };
               }
 
               if (!swapToken.symbol) {
-                return undefined
+                return undefined;
               }
 
               return (
@@ -203,15 +203,15 @@ const SwapTokens = ({
                     />
                   </button>
                 </li>
-              )
+              );
             })
         ) : (
           <div
             style={{
-              position: "absolute",
-              width: "100%",
-              top: "50%",
-              left: 0,
+              position: 'absolute',
+              width: '100%',
+              top: '50%',
+              left: 0
             }}
           >
             <Loading />
@@ -219,7 +219,7 @@ const SwapTokens = ({
         )}
       </ul>
     </div>
-  )
-}
+  );
+};
 
-export default SwapTokens
+export default SwapTokens;

@@ -1,3 +1,4 @@
+import useLocalStorage from 'libs/useLocalStorage';
 import { useEffect, useState } from 'react';
 
 import useAPI from './useAPI';
@@ -22,7 +23,7 @@ interface ContractBalance {
 }
 
 export default (contract_addr: string, symbol: string) => {
-  const address = 'useAddress()';
+  const [address] = useLocalStorage<string>('address');
 
   const { loadDenomBalance, loadContractBalance } = useAPI();
 
@@ -35,7 +36,7 @@ export default (contract_addr: string, symbol: string) => {
       if (
         localContractAddr === '' ||
         localContractAddr === undefined ||
-        !localContractAddr.startsWith('terra')
+        !localContractAddr.match(/^orai\w+/)
       ) {
         loadDenomBalance().then((denomInfos) => {
           let hasDenom: boolean = false;

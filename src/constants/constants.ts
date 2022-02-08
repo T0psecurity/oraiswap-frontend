@@ -1,7 +1,7 @@
 export const CHROME = 'https://google.com/chrome';
 
 /* oraiswap:unit */
-export const ORAI = 'ORAI';
+export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
 export const AIRI = 'AIRI';
 export const LP = 'LP';

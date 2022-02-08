@@ -22,6 +22,7 @@
     .header {
       @include flex;
       width: 67px;
+      text-transform: uppercase;
       justify-content: space-between;
       flex-wrap: wrap;
       font-size: 12px;

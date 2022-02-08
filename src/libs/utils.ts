@@ -33,8 +33,6 @@ export const capitalize = (text: string) =>
 export function getMobileOperatingSystem() {
   const userAgent = navigator.userAgent || navigator.vendor;
 
-  console.log(userAgent);
-
   // Windows Phone must come first because its UA also contains "Android"
   if (/windows phone/i.test(userAgent)) {
     return 'Windows Phone';
