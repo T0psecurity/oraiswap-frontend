@@ -2,90 +2,20 @@
   "contracts": {
     "gov": "orai102pll8yzs4knwvz0x20ymwauwvq46zk0adkwd8",
     "mirrorToken": "orai1dw9sjfvzm9udg3uqtnrr3cph8ce3welc9ljr83",
-    "factory": "orai1um0l5ufa44v8nqj022tvvmyd6g4nqfy4y9ryk9",
-    "oracle": "orai187un3r3c59dav3y5l8n47ekp5rpgrh08ttd04x",
+    "factory": "orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra",
+    "oracle": "orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn",
     "mint": "orai1ptrsap5h4n0ee29qxqjpgkmhqjc4pewe8j6lxz",
     "staking": "orai1wt65k5ugrpujen6r4unh3lddzr0678erny3f4q",
     "tokenFactory": "orai1n0mdp2fcwuk6mkhuwtwp65upza9z5v0deawvma",
     "collector": "orai18skkp9lsrv3sq0urf682nfk0cs49xdlfx3a0a8"
   },
   "whitelist": {
-    "orai1sjw2wpak38g7595lhh95m2es78muzzaql850ss": {
-      "symbol": "mAAPL",
-      "name": "Apple",
-      "token": "orai1sjw2wpak38g7595lhh95m2es78muzzaql850ss",
-      "pair": "orai13qyg6hrztrl2gmx9l3h463pjladeup86cs8g2j",
+    "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2": {
+      "symbol": "uAIRI",
+      "name": "aiRight Token",
+      "token": "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2",
+      "pair": "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
       "lpToken": "orai12dtk9pwlwyum9em2nkeefphsvg0c4ks88a2aju"
-    },
-    "orai18xmyk8tqhrcgekxf0z69mkrna8rvgp5n8wzjx6": {
-      "symbol": "mGOOGL",
-      "name": "Google",
-      "token": "orai18xmyk8tqhrcgekxf0z69mkrna8rvgp5n8wzjx6",
-      "pair": "orai180dsn37yx3qul3qm5t9f0kd58950r663ekc3mg",
-      "lpToken": "orai1pnq3stlvvn597fkfwdf5ur2mffqq59an4rj88e"
-    },
-    "orai147eejpkvujqyj02zm6gs6rmql4yjmht56hkjdj": {
-      "symbol": "mTSLA",
-      "name": "Tesla",
-      "token": "orai147eejpkvujqyj02zm6gs6rmql4yjmht56hkjdj",
-      "pair": "orai1pq5sy6dhzuvdyges2454vm7csx8y08lhjvnt64",
-      "lpToken": "orai1v85p94we3wp56almy3qzzpqskp0yu8amnpccey"
-    },
-    "orai1lp6p2wuvlzv54s6a28k5mfd6spzg7mvdcfyavj": {
-      "symbol": "mNFLX",
-      "name": "Netflix",
-      "token": "orai1lp6p2wuvlzv54s6a28k5mfd6spzg7mvdcfyavj",
-      "pair": "orai1k33nulqk4mhvx3zh7dn87cv537k73elfptnela",
-      "lpToken": "orai1vgcyf0fmhnshl45qrrqjgjwzkvptnjdm6wcqe3"
-    },
-    "orai10k5y7j85ajgg92grtvht30uqlrn64t2ayhexmk": {
-      "symbol": "mQQQ",
-      "name": "Invesco QQQ Trust",
-      "token": "orai10k5y7j85ajgg92grtvht30uqlrn64t2ayhexmk",
-      "pair": "orai1wvywrtd9aqsej6j74fa80umjkz0xwkuk6uan9w",
-      "lpToken": "orai1pju0hte482vqku5zgthdgly2j64tz6gm2s7p00"
-    },
-    "orai1nkcss7j5umfuh0sjzmsk2l5xn2nlynumyz63wj": {
-      "symbol": "mTWTR",
-      "name": "Twitter",
-      "token": "orai1nkcss7j5umfuh0sjzmsk2l5xn2nlynumyz63wj",
-      "pair": "orai15hpqv732702rv9e34k9zcfv5f7rs3pyj5kjqmh",
-      "lpToken": "orai15gd9umv09spet6u7rhvqheknhcrxazvg9adjlj"
-    },
-    "orai1x7f9dd465clkj6cu8ll4z4l9v643xhpkgx0jm3": {
-      "symbol": "mBABA",
-      "name": "Alibaba Group Holdings Ltd ADR",
-      "token": "orai1x7f9dd465clkj6cu8ll4z4l9v643xhpkgx0jm3",
-      "pair": "orai19src9qxfgaxan4st23s2hz4axq6ypkdffzn5qw",
-      "lpToken": "orai1vwj824y645u80l22kkqtp7qfr4n74lkhzss6s3"
-    },
-    "orai100gxsglqfc7uz3uppet5ytl3cp03lmkcqx9njn": {
-      "symbol": "mIAU",
-      "name": "iShares Gold Trust",
-      "token": "orai100gxsglqfc7uz3uppet5ytl3cp03lmkcqx9njn",
-      "pair": "orai1djcthczd5nvhqjqdfuzzugyxuq34924kmtcgpm",
-      "lpToken": "orai1uk8kkm2kjs68ygyyn68kev67n0dmsfq6vspjx6"
-    },
-    "orai1dqy7hjqx7c9qx92t308ylfgmmlq0eg9gtp5wvc": {
-      "symbol": "mSLV",
-      "name": "iShares Silver Trust",
-      "token": "orai1dqy7hjqx7c9qx92t308ylfgmmlq0eg9gtp5wvc",
-      "pair": "orai19dw9fxmcmte5w2l4m0wwfw9yngtl3gj2awmfr9",
-      "lpToken": "orai12z3lpeq4gvxfsftrcj9yfkmx9elwjh0xxf2fhc"
-    },
-    "orai10rz7tjtduxam6nmaxm83ts6s7uprtraautrtwd": {
-      "symbol": "mUSO",
-      "name": "United States Oil Fund, LP",
-      "token": "orai10rz7tjtduxam6nmaxm83ts6s7uprtraautrtwd",
-      "pair": "orai13zrgavrjcffxfde7dp0uppdzw2ppjqupmrr3qk",
-      "lpToken": "orai153ptn9uudypurdlcsx58eg6wdxfhhe04qrw0tn"
-    },
-    "orai1y3ja7tu658x7f0twm3vpzsf4ee2vjm9xr4n0m2": {
-      "symbol": "mVIXY",
-      "name": "ProShares VIX",
-      "token": "orai1y3ja7tu658x7f0twm3vpzsf4ee2vjm9xr4n0m2",
-      "pair": "orai16th48uswly2gt6dg4m48el9wkt42g4vlfj69vj",
-      "lpToken": "orai1ceamc3dpkm6f8mvkzrmx3pdt8rdmqc6w46cc5l"
     }
   }
 }

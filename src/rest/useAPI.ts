@@ -1,15 +1,15 @@
-//@ts-nocheck
-
 import { useCallback } from 'react';
-import useURL from 'hooks/useQuerySmart';
 import oraiswapConfig from 'constants/oraiswap.json';
 import axios from './request';
 import { Type } from 'pages/Swap';
 import { AxiosError } from 'axios';
 import { network } from 'constants/networks';
-import { UAIRI } from 'constants/constants';
+import { ORAI, UAIRI } from 'constants/constants';
 import useQuerySmart from 'hooks/useQuerySmart';
 import useLocalStorage from 'libs/useLocalStorage';
+import { useContractsAddress } from 'hooks/useContractsAddress';
+import Cosmos from '@oraichain/cosmosjs';
+
 interface DenomBalanceResponse {
   balances: DenomInfo[];
 }
@@ -84,7 +84,7 @@ interface PoolResult {
   // text: string
 }
 
-interface SimulatedData {
+export interface SimulatedData {
   return_amount: string;
   offer_amount: string;
   commission_amount: string;
@@ -119,6 +119,7 @@ export function isNativeInfo(object: any): object is NativeInfo {
 
 export default () => {
   const [address] = useLocalStorage<string>('address');
+  const { getSymbol } = useContractsAddress();
   const querySmart = useQuerySmart();
 
   // useBalance
@@ -209,14 +210,19 @@ export default () => {
     return result;
   }, [querySmart]);
 
-  const loadSwappableTokenAddresses = useCallback(async (from: string) => {
-    const res: string[] = (
-      await axios.get(`${process.env.REACT_APP_LCD}/tokens/swap`, {
-        params: { from }
-      })
-    ).data;
-    return res;
-  }, []);
+  const loadSwappableTokenAddresses = useCallback(
+    async (from: string) => {
+      const response = await fetch(network.swap);
+      const data = await response.json();
+
+      const res: string[] = data[from]
+        ?.filter((item: any) => item.token)
+        .map((item: any) => item.token.contract_addr);
+
+      return res;
+    },
+    [network.swap]
+  );
 
   const loadTokenInfo = useCallback(
     async (contract: string): Promise<TokenResult> => {
@@ -237,14 +243,37 @@ export default () => {
 
   // useSwapSimulate
   const querySimulate = useCallback(
-    async (variables: { contract: string; msg: any }) => {
+    async (variables: { msg: any }) => {
       try {
-        const { contract, msg } = variables;
-        const res: SimulatedData = await querySmart(contract, msg);
+        const { msg } = variables;
+
+        const {
+          simulate_swap_operations: { offer_amount: amount, operations }
+        } = msg;
+
+        const swapInfo = operations[0].orai_swap;
+
+        const input = {
+          simulation: {
+            offer_asset: {
+              info: swapInfo.offer_asset_info,
+              amount
+            }
+          }
+        };
+
+        const info: PairResult = await querySmart(network.factory, {
+          pair: {
+            asset_infos: [swapInfo.offer_asset_info, swapInfo.ask_asset_info]
+          }
+        });
+
+        const res: SimulatedData = await querySmart(info.contract_addr, input);
+        res.offer_amount = amount;
         return res;
-      } catch (error) {
-        const { response }: AxiosError = error;
-        return response?.data;
+      } catch (error: any) {
+        console.log(error);
+        return error.message;
       }
     },
     [querySmart]
@@ -278,14 +307,44 @@ export default () => {
             sender: string;
           }
     ) => {
-      const { type, ...params } = query;
-      const url = `${process.env.REACT_APP_LCD}/tx/${type}`.toLowerCase();
-      const res = (await axios.get(url, { params })).data;
-      return res.map((data: Msg.Amino | Msg.Amino[]) => {
-        return (Array.isArray(data) ? data : [data]).map((item: Msg.Amino) => {
-          return Msg.fromAmino(item);
-        });
-      });
+      // @ts-ignore
+      const { type, amount, sender, from, to, ...params } = query;
+      let input;
+      switch (type) {
+        case Type.SWAP:
+          input = {
+            execute_swap_operations: {
+              operations: [
+                {
+                  orai_swap: {
+                    offer_asset_info: { native_token: { denom: from } },
+                    ask_asset_info: {
+                      token: {
+                        contract_addr: to
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          };
+          break;
+        // TODO: provide liquidity and withdraw liquidity
+        default:
+          break;
+      }
+
+      const sent_funds = amount ? [{ denom: ORAI, amount }] : null;
+      const msgs = [
+        new Cosmos.message.cosmwasm.wasm.v1beta1.MsgExecuteContract({
+          contract: network.router,
+          msg: Buffer.from(JSON.stringify(input)),
+          sender,
+          sent_funds
+        })
+      ];
+
+      return msgs;
     },
     []
   );
@@ -298,10 +357,13 @@ export default () => {
 
     let taxCap = '';
     try {
-      const res: TaxCapResponse = await querySmart(
-        network.oracle,
-        `{"treasury":{"tax_cap":{"denom":"${denom}"}}}`
-      );
+      const params = {
+        treasury: {
+          tax_cap: { denom: denom.match(/^orai\w+/) ? getSymbol(denom) : denom }
+        }
+      };
+
+      const res: TaxCapResponse = await querySmart(network.oracle, params);
       taxCap = res.cap;
     } catch (error) {
       console.log(error);

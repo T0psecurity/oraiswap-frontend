@@ -2,13 +2,13 @@ import { useResult, DataKey } from './useContract';
 
 export const useCombineKeys = (keys: (DataKey | undefined)[]): Result => {
   const result = useResult();
-  console.log(result, keys);
-  const errorKey = keys.find((key) => key && result[key].error);
+
+  const errorKey = keys.find((key) => key && result[key]?.error);
 
   return {
-    data: keys.every((key) => key && result[key].data),
-    loading: keys.some((key) => key && result[key].loading),
-    error: errorKey && result[errorKey].error
+    data: keys.every((key) => key && result[key]?.data),
+    loading: keys.some((key) => key && result[key]?.loading),
+    error: errorKey && result[errorKey]?.error
   };
 };
 

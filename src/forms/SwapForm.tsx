@@ -388,9 +388,9 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
           </Count>
         )
       },
-      ...insertIf(taxs.toArray().length > 0, {
+      ...insertIf(taxs?.length > 0, {
         title: `Tax`,
-        content: taxs.toArray().map((coin, index) => {
+        content: taxs.map((coin, index) => {
           return index === 0 ? (
             <Count symbol={coin.denom}>{lookup(coin.amount.toString())}</Count>
           ) : (
@@ -512,6 +512,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
 
       const taxCap1 = await loadTaxInfo(token1);
       const taxCap2 = await loadTaxInfo(token2);
+
       const taxRate = await loadTaxRate();
       if (
         token1 &&

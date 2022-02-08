@@ -1,5 +1,5 @@
-import React from "react"
-import styles from "./SwapConfirm.module.scss"
+import React from 'react';
+import styles from './SwapConfirm.module.scss';
 
 const SwapConfirm = ({ list }: { list: Content[] }) => (
   <ul className={styles.list}>
@@ -9,11 +9,11 @@ const SwapConfirm = ({ list }: { list: Content[] }) => (
         <li className={styles.item} key={key}>
           <article className={styles.article}>
             <h1 className={styles.title}>{title}</h1>
-            <p className={styles.content}>{content}</p>
+            <div className={styles.content}>{content}</div>
           </article>
         </li>
       ))}
   </ul>
-)
+);
 
-export default SwapConfirm
+export default SwapConfirm;

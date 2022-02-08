@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Dictionary } from 'ramda';
 import createContext from './createContext';
-import { NATIVE_TOKENS } from 'constants/constants';
-import { getSymbol } from 'helpers/token';
+import { NATIVE_TOKENS, ORAI } from 'constants/constants';
+import { network } from 'constants/networks';
 
 interface ContractAddressJSON {
   /** Contract addresses */
@@ -33,33 +33,38 @@ export const [useContractsAddress, ContractsAddressProvider] = context;
 
 /* state */
 export const useContractsAddressState = (): ContractsAddress | undefined => {
-  const url = 'tequila.json';
   const [data, setData] = useState<ContractAddressJSON>();
 
   useEffect(() => {
     const load = async () => {
-      const response = await fetch(url);
+      const response = await fetch(network.contract);
       const json: ContractAddressJSON = await response.json();
       // console.log(json);
       setData(json);
     };
 
     load();
-  }, [url]);
+  }, [network.contract]);
 
   const helpers = ({
     whitelist
   }: ContractAddressJSON): ContractAddressHelpers => {
     const listed = Object.values(whitelist);
 
-    const getListedItem = (key?: string) =>
-      listed.find((item) => Object.values(item).includes(key)) ?? {
-        symbol: '',
-        name: '',
-        token: '',
-        pair: '',
-        lpToken: ''
-      };
+    const getListedItem = (key?: string) => {
+      return (
+        listed.find((item) => Object.values(item).includes(key)) ?? {
+          symbol: '',
+          name: '',
+          token: '',
+          pair: '',
+          lpToken: ''
+        }
+      );
+    };
+
+    const getSymbol = (key?: string) =>
+      key === ORAI ? key : getListedItem(key).symbol;
 
     const isNativeToken = (key: string) =>
       NATIVE_TOKENS.indexOf(key) > -1 ? true : false;

@@ -1,14 +1,14 @@
-import React from "react"
-import { gt } from "../libs/math"
-import { format, lookupSymbol } from "../libs/parse"
-import styles from "./SwapToken.module.scss"
-import { GetTokenSvg } from "../helpers/token"
+import React from 'react';
+import { gt } from '../libs/math';
+import { format, lookupSymbol } from '../libs/parse';
+import styles from './SwapToken.module.scss';
+import { GetTokenSvg } from '../helpers/token';
 
 interface Props extends AssetItem {
-  contract_addr?: string
-  icon: string[]
-  verified: boolean
-  formatTokenName?: (symbol: string) => string
+  contract_addr?: string;
+  icon: string[];
+  verified: boolean;
+  formatTokenName?: (symbol: string) => string;
 }
 
 const SwapToken = ({
@@ -17,61 +17,65 @@ const SwapToken = ({
   contract_addr,
   icon,
   verified,
-  formatTokenName,
+  formatTokenName
 }: Props) => {
-  const symbols = symbol.split("-")
+  const symbols = symbol.split('-');
 
   return (
     <article className={styles.asset}>
       <header className={styles.header}>
-        <div className={styles.symbol_name}>
-          <div className={styles.symbol}>
-            <img
-              className={styles.logo}
-              src={GetTokenSvg(icon[0], symbols[0])}
-              width={25}
-              height={25}
-              alt=""
-            />
-            <div className={styles.name}>
-              <p>{formatTokenName?.(symbols[0]) ?? lookupSymbol(symbols[0])}</p>
-            </div>
-            {verified ? (
-              <div className={styles.verified_box}>
-                <p className={styles.verified}>verified</p>
-              </div>
-            ) : undefined}
-
-            {symbols.length > 1 ? (
-              <div className={styles.divide}>
-                <span>-</span>
-              </div>
-            ) : undefined}
-            {symbols.length > 1 ? (
-              <img
-                className={styles.logo}
-                src={GetTokenSvg(icon[1], symbols[1])}
-                width={25}
-                height={25}
-                alt=""
-              />
-            ) : undefined}
-            {symbols.length > 1 ? (
+        <img
+          className={styles.logo}
+          src={GetTokenSvg(icon[0], symbols[0])}
+          width={25}
+          height={25}
+          alt=""
+        />
+        <div className={styles.description}>
+          <div className={styles.symbol_name}>
+            <div className={styles.symbol}>
               <div className={styles.name}>
                 <p>
-                  {formatTokenName?.(symbols[1]) ?? lookupSymbol(symbols[1])}
+                  {formatTokenName?.(symbols[0]) ?? lookupSymbol(symbols[0])}
                 </p>
               </div>
-            ) : undefined}
-            {symbols.length > 1 && verified ? (
-              <div className={styles.verified_box}>
-                <p className={styles.verified}>verified</p>
-              </div>
-            ) : undefined}
+              {verified ? (
+                <div className={styles.verified_box}>
+                  <p className={styles.verified}>verified</p>
+                </div>
+              ) : undefined}
+
+              {symbols.length > 1 ? (
+                <div className={styles.divide}>
+                  <span>-</span>
+                </div>
+              ) : undefined}
+              {symbols.length > 1 ? (
+                <img
+                  className={styles.logo}
+                  src={GetTokenSvg(icon[1], symbols[1])}
+                  width={25}
+                  height={25}
+                  alt=""
+                />
+              ) : undefined}
+              {symbols.length > 1 ? (
+                <div className={styles.name}>
+                  <p>
+                    {formatTokenName?.(symbols[1]) ?? lookupSymbol(symbols[1])}
+                  </p>
+                </div>
+              ) : undefined}
+              {symbols.length > 1 && verified ? (
+                <div className={styles.verified_box}>
+                  <p className={styles.verified}>verified</p>
+                </div>
+              ) : undefined}
+            </div>
           </div>
-        </div>
-        <div className={styles.token_address}>
-          <p className={styles.address}>{contract_addr}</p>
+          <div className={styles.token_address}>
+            <p className={styles.address}>{contract_addr}</p>
+          </div>
         </div>
       </header>
 
@@ -83,7 +87,7 @@ const SwapToken = ({
         )}
       </footer>
     </article>
-  )
-}
+  );
+};
 
-export default SwapToken
+export default SwapToken;

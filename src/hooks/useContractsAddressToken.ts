@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Dictionary } from 'ramda';
 import { ORAI } from 'constants/constants';
 import createContext from './createContext';
+import { network } from 'constants/networks';
 
 interface ContractAddressTokenJSON {
   /** Contract addresses */
@@ -38,18 +39,17 @@ export const [
 export const useContractsAddressTokenState = ():
   | ContractsAddressToken
   | undefined => {
-  const url = 'tequila.json';
   const [data, setData] = useState<ContractAddressTokenJSON>();
 
   useEffect(() => {
     const load = async () => {
-      const response = await fetch(url);
+      const response = await fetch(network.contract);
       const json: ContractAddressTokenJSON = await response.json();
       setData(json);
     };
 
     load();
-  }, [url]);
+  }, [network.contract]);
 
   const helpers = ({
     whitelist

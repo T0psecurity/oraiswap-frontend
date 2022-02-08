@@ -1,34 +1,34 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { div, gt } from "../libs/math"
-import { useContractsAddress } from "../hooks"
-import useAPI from "./useAPI"
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { div, gt } from '../libs/math';
+import { useContractsAddress } from '../hooks';
+import useAPI from './useAPI';
 interface Params {
-  amount: string
-  token: string
-  pair: string
-  reverse: boolean
+  amount: string;
+  token: string;
+  pair: string;
+  reverse: boolean;
 }
 
 interface SimulatedResponse {
-  height: string
-  result: SimulatedData
+  height: string;
+  result: SimulatedData;
 }
 interface SimulatedData {
-  return_amount: string
-  offer_amount: string
-  commission_amount: string
-  spread_amount: string
+  return_amount: string;
+  offer_amount: string;
+  commission_amount: string;
+  spread_amount: string;
 }
 interface Simulated {
-  amount: string
-  spread: string
-  commission: string
-  price: string
+  amount: string;
+  spread: string;
+  commission: string;
+  price: string;
 }
 export default ({ amount, token, pair, reverse }: Params) => {
-  const [simulated, setSimulated] = useState<Simulated>()
+  const [simulated, setSimulated] = useState<Simulated>();
   /* context */
-  const { toToken } = useContractsAddress()
+  const { toToken } = useContractsAddress();
   /* query */
   const variables = useMemo(() => {
     return {
@@ -37,64 +37,64 @@ export default ({ amount, token, pair, reverse }: Params) => {
         ? { simulation: { offer_asset: toToken({ symbol: token, amount }) } }
         : {
             reverse_simulation: {
-              ask_asset: toToken({ symbol: token, amount }),
-            },
-          },
-    }
-  }, [amount, pair, reverse, toToken, token])
-  const { querySimulate } = useAPI()
+              ask_asset: toToken({ symbol: token, amount })
+            }
+          }
+    };
+  }, [amount, pair, reverse, toToken, token]);
+  const { querySimulate } = useAPI();
   const isValidToSimulate = useMemo(() => {
-    return amount && gt(amount, 0) && token && pair
-  }, [amount, pair, token])
+    return amount && gt(amount, 0) && token && pair;
+  }, [amount, pair, token]);
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<SimulatedData>()
-  const [error, setError] = useState<Error | undefined>(undefined)
-  const isError: boolean = useMemo(() => !!error, [error])
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<SimulatedData>();
+  const [error, setError] = useState<Error | undefined>(undefined);
+  const isError: boolean = useMemo(() => !!error, [error]);
 
   const fetchSimulatedData = useCallback(async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     const defaultValues: SimulatedData = {
-      return_amount: "0",
-      offer_amount: "0",
-      commission_amount: "0",
-      spread_amount: "0",
-    }
+      return_amount: '0',
+      offer_amount: '0',
+      commission_amount: '0',
+      spread_amount: '0'
+    };
     try {
       if (isValidToSimulate) {
-        const res = await querySimulate(variables)
-        if (!res?.height) {
-          setResult(defaultValues)
+        const res: SimulatedData = await querySimulate(variables);
+        if (!res) {
+          setResult(defaultValues);
         } else {
-          setResult(res.result)
+          setResult(res);
         }
       } else {
-        setResult(defaultValues)
+        setResult(defaultValues);
       }
-      setError(undefined)
-    } catch (error) {
-      setResult(defaultValues)
-      setError(error)
+      setError(undefined);
+    } catch (error: any) {
+      setResult(defaultValues);
+      setError(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [isValidToSimulate, querySimulate, variables])
+  }, [isValidToSimulate, querySimulate, variables]);
 
   useEffect(() => {
-    fetchSimulatedData()
-  }, [fetchSimulatedData])
+    fetchSimulatedData();
+  }, [fetchSimulatedData]);
 
   const { simulatedAmount, spread, commission, price } = useMemo(() => {
     const simulatedAmount = !reverse
       ? result?.return_amount
-      : result?.offer_amount
-    const spread = result?.spread_amount
-    const commission = result?.commission_amount
+      : result?.offer_amount;
+    const spread = result?.spread_amount;
+    const commission = result?.commission_amount;
     const price = !reverse
       ? div(amount, simulatedAmount)
-      : div(simulatedAmount, amount)
-    return { simulatedAmount, spread, commission, price }
-  }, [amount, result, reverse])
+      : div(simulatedAmount, amount);
+    return { simulatedAmount, spread, commission, price };
+  }, [amount, result, reverse]);
 
   useEffect(() => {
     isError
@@ -103,7 +103,7 @@ export default ({ amount, token, pair, reverse }: Params) => {
         spread &&
         commission &&
         price &&
-        setSimulated({ amount: simulatedAmount, spread, commission, price })
-  }, [simulatedAmount, spread, commission, price, error, isError])
-  return { ...result, simulating: isLoading, simulated, error }
-}
+        setSimulated({ amount: simulatedAmount, spread, commission, price });
+  }, [simulatedAmount, spread, commission, price, error, isError]);
+  return { ...result, simulating: isLoading, simulated, error };
+};

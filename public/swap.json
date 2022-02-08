@@ -1,25 +1,11 @@
 {
-    "pairs": [
+    "orai": [
         {
-            "owner": "orai1a9azdnvp60nkajc2mwejvqlh5wj08q93zlv7qv",
-            "contract_addr": "orai1cvdn5wrfqmjts9qy845y9yjyhcqa39ve4gl273",
-            "lpToken": "orai132kvrlzltqp2frg85yps8jnelpw6auvf5g3qgu",
-            "asset_infos": [
-                {
-                    "token": {
-                        "contract_addr": "orai18sl63stqew9kd9g0f2ngw0cdxud7236xt7ydh9",
-                        "symbol": "AIRI",
-                        "name": "aiRight Token"
-                    }
-                },
-                {
-                    "native_token": {
-                        "denom": "orai",
-                        "symbol": "ORAI",
-                        "name": "orai"
-                    }
-                }
-            ]
+            "token": {
+                "contract_addr": "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2",
+                "symbol": "AIRI",
+                "name": "aiRight Token"
+            }
         }
     ]
 }

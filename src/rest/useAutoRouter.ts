@@ -3,7 +3,8 @@ import { div, times } from 'libs/math';
 import { toAmount } from 'libs/parse';
 import { Type } from 'pages/Swap';
 import { useEffect, useMemo, useState } from 'react';
-import useAPI from './useAPI';
+import Cosmos from '@oraichain/cosmosjs';
+import useAPI, { SimulatedData } from './useAPI';
 import { tokenInfos } from './usePairs';
 
 type Params = {
@@ -97,15 +98,17 @@ const useAutoRouter = (params: Params) => {
       if (type === Type.PROVIDE || type === Type.WITHDRAW) {
         return;
       }
-      const res: MsgExecuteContract[] = await generateContractMessages({
-        type: Type.SWAP,
-        amount,
-        from,
-        to,
-        sender: '-',
-        max_spread: 0,
-        belief_price: 0
-      });
+      const res: Cosmos.message.cosmwasm.wasm.v1beta1.MsgExecuteContract[] = await generateContractMessages(
+        {
+          type: Type.SWAP,
+          amount,
+          from,
+          to,
+          sender: '-',
+          max_spread: 0,
+          belief_price: 0
+        }
+      );
       if (Array.isArray(res) && !isCanceled) {
         setMsgs(res);
       }
@@ -137,10 +140,10 @@ const useAutoRouter = (params: Params) => {
   useEffect(() => {
     let isCanceled = false;
     const request = async () => {
-      const simulateQueries = msgs.map((msg) => {
-        let { contract, execute_msg } = (Array.isArray(msg)
-          ? msg[0]
-          : msg) as any;
+      const simulateQueries = msgs.map((item) => {
+        let { contract, msg } = (Array.isArray(item) ? item[0] : item) as any;
+
+        const execute_msg = JSON.parse(msg.toString());
 
         if (execute_msg?.send) {
           contract = execute_msg?.send?.contract;
@@ -179,15 +182,15 @@ const useAutoRouter = (params: Params) => {
       });
 
       const result: any[] = [];
+
       simulateQueries.forEach(async (query, index) => {
         if (isCanceled) {
           return;
         }
+
         await sleep(100 * index);
-        const res = await querySimulate({
-          contract: `${query?.contract}`,
-          msg: query?.msg
-        });
+
+        const res: SimulatedData = await querySimulate(query);
         if (res) {
           result[index] = res;
         }
@@ -205,12 +208,12 @@ const useAutoRouter = (params: Params) => {
 
           setSimulatedAmounts(
             result
-              .map((item) => {
-                if (item?.result?.return_amount) {
-                  return parseInt(item?.result?.return_amount, 10);
+              .map((result) => {
+                if (result?.return_amount) {
+                  return parseInt(result?.return_amount, 10);
                 }
-                if (item?.result?.amount) {
-                  return parseInt(item?.result?.amount, 10);
+                if (result?.amount) {
+                  return parseInt(result?.amount, 10);
                 }
                 return -1;
               })
