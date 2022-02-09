@@ -58,7 +58,7 @@ export const LoginWidget = ({ text }) => {
         >
           <Icon size={16} name="account_balance_wallet" />
           <p className={classNames(styles.address)}>
-            <CenterEllipsis size={10} text={address} />
+            <CenterEllipsis size={6} text={address} />
             {' | '}
             {network.id}
           </p>

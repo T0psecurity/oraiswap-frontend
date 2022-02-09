@@ -3,17 +3,6 @@
 
 .footer {
   color: $slate;
-
-  @include desktop {
-    height: $footer-height;
-  }
-
-  @include mobile {
-    height: $footer-height-mobile;
-  }
-
-  position: absolute;
-  bottom: 0;
   width: 100%;
 }
 
@@ -27,7 +16,7 @@
 .network {
   @include flex;
   @include desktop;
-  margin-top: -29px;
+  color: $light;
 }
 
 .button {
@@ -83,15 +72,14 @@
 /* author */
 .community {
   @include flex;
-  margin: -10px;
   margin-bottom: 10px;
 
   @include mobile {
-    margin-top: 40px;
+    margin-top: 10px;
   }
   span {
     font-size: 12px;
-    color: #fff;
+    color: $white;
     margin-right: 10px;
   }
   svg {

@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from '../images/logo.png';
 import Container from '../components/Container';
-import styles from './SwapHeader.module.scss';
+import styles from './Header.module.scss';
 import LoginWidget from 'components/LoginWidget';
 import MESSAGE from 'lang/MESSAGE.json';
 
@@ -10,10 +10,10 @@ const Header = () => {
     <header className={styles.header}>
       <Container className={styles.container}>
         <section className={styles.wrapper}>
-          <a href="https://swap.orai.io">
-            <img height={38} className={styles.logo} src={logo} />
+          <a className={styles.logo} href="https://swap.orai.io">
+            <img src={logo} />
           </a>
-          Oraiswap
+          <span>Oraiswap</span>
         </section>
 
         <section className={styles.support}>

@@ -15,19 +15,9 @@
   background-repeat: no-repeat;
   background-position: 50% calc(100% + 180px);
   font-family: $font-family-swap;
-  padding-bottom: $footer-height;
   background-attachment: fixed;
-
-  @include mobile {
-    padding-bottom: $footer-height-mobile;
-  }
 }
 
 #basement {
   min-height: 100vh;
-  padding-bottom: $footer-height;
-
-  @include mobile {
-    padding-bottom: $footer-height-mobile;
-  }
 }
