@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <footer className={styles.footer}>
       <Container className={styles.container}>
-        <section className={styles.network}>{network.name}</section>
+        <section className={styles.network}>{network.chainId}</section>
 
         <section className={styles.community}>
           <a href="https://delightlabs.io">

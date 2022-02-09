@@ -1,85 +1,35 @@
-import React, { FC, useEffect, useState } from "react"
-import classNames from "classnames/bind"
-import styles from "./FeeCombobox.module.scss"
-import { NATIVE_TOKENS } from "constants/constants"
-import Icon from "components/Icon"
-import { tokenInfos } from "rest/usePairs"
+import React, { FC } from 'react';
+import { NATIVE_TOKENS } from 'constants/constants';
+import { tokenInfos } from 'rest/usePairs';
+import ComboBox from 'components/ComboBox';
 
-const cx = classNames.bind(styles)
-
-interface Props {
-  selected?: string
-  onSelect: (asset: string) => void
+interface FeeComboBoxProps {
+  selected?: string;
+  onSelect: (asset: string) => void;
 }
 
-const FeeCombobox: FC<Props> = ({ selected, onSelect }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedOption, setSelectedOption] = useState(selected)
+const FeeComboBox: FC<FeeComboBoxProps> = ({ selected, onSelect }) => {
+  const getValue = (value: string) => tokenInfos.get(value)?.symbol ?? '';
 
-  const toggling = () => setIsOpen(!isOpen)
-
-  const onOptionClicked = (value: string) => {
-    setSelectedOption(value)
-    const tokenInfo = tokenInfos.get(value)
-    onSelect(tokenInfo ? tokenInfo.symbol : "")
-    setIsOpen(false)
-  }
-
-  useEffect(() => {
-    const handleWindowClick = () => {
-      setIsOpen(false)
+  const items = NATIVE_TOKENS.filter((value) => {
+    if (
+      tokenInfos.get(value)?.name === selected ||
+      tokenInfos.get(value)?.symbol === selected
+    ) {
+      return false;
     }
-    if (isOpen) {
-      window.addEventListener("click", handleWindowClick)
-    }
-    return () => {
-      window.removeEventListener("click", handleWindowClick)
-    }
-  }, [isOpen])
+    return true;
+  });
 
   return (
-    <div className={cx(styles.body)}>
-      <div className={cx(styles.label)}>Fee:</div>
-      <div className={cx(styles.container)} onClick={toggling}>
-        <div
-          className={[
-            cx(styles.header),
-            isOpen ? cx(styles["header--open"]) : "",
-          ].join(" ")}
-        >
-          <div>
-            {selectedOption ? tokenInfos.get(selectedOption)?.symbol : ""}
-          </div>
-          <Icon name={isOpen ? "expand_less" : "expand_more"} size={24} />
-        </div>
-        {isOpen && (
-          <div className={cx(styles.listcontainer)}>
-            <ul className={cx(styles.list)}>
-              {NATIVE_TOKENS.filter((value) => {
-                if (
-                  tokenInfos.get(value)?.name === selectedOption ||
-                  tokenInfos.get(value)?.symbol === selectedOption
-                ) {
-                  return false
-                }
-                return true
-              }).map((value) => {
-                return (
-                  <li
-                    key={value}
-                    className={styles.listitem}
-                    onClick={() => onOptionClicked(value)}
-                  >
-                    {tokenInfos.get(value)?.symbol}
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+    <ComboBox
+      // label="Fee:"
+      items={items}
+      selected={selected}
+      onSelect={onSelect}
+      getValue={getValue}
+    />
+  );
+};
 
-export default FeeCombobox
+export default FeeComboBox;

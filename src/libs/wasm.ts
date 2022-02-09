@@ -9,6 +9,27 @@ import { network } from 'constants/networks';
  */
 const message = Cosmos.message;
 
+const loadKeyStation = (lcd: string, keystationUrl: string) => {
+  if (window.Wallet) {
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = `${keystationUrl}/lib/keystation.js?v=0.0.3`;
+  script.async = true;
+  script.onload = () => {
+    window.Wallet = new window.Keystation({
+      keystationUrl,
+      lcd
+    });
+  };
+  script.onerror = (error) => {
+    // handle error
+    console.log('Can not load keystation library!');
+  };
+
+  document.body.appendChild(script);
+};
+
 /**
  * If there is chainId it will interacte with blockchain, otherwise using simulator
  */
@@ -18,6 +39,7 @@ class Wasm {
   constructor(baseUrl: string, chainId = 'Simulate') {
     this.cosmos = new Cosmos(baseUrl.replace(/\/$/, ''), chainId);
     this.cosmos.setBech32MainPrefix('orai');
+    loadKeyStation(baseUrl, network.walletUrl.replace(/\/$/, ''));
   }
 
   /**
@@ -286,11 +308,4 @@ class Wasm {
 }
 
 export default Wasm;
-window.Wasm = new Wasm(network.lcd, network.name);
-
-if (!window.Wallet) {
-  window.Wallet = new window.Keystation({
-    keystationUrl: process.env.REACT_APP_WALLET_URL,
-    lcd: network.lcd
-  });
-}
+window.Wasm = new Wasm(network.lcd, network.chainId);

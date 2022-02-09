@@ -225,7 +225,7 @@ class Keplr {
 export default Keplr;
 // global Keplr
 window.Keplr = new Keplr(
-  network.name,
+  network.chainId,
   network.rpc,
   network.lcd,
   'ORAI',

@@ -8,6 +8,10 @@ import './libs/kelpr';
 import ScrollToTop from './layouts/ScrollToTop';
 import Contract from './layouts/Contract';
 import App from './layouts/App';
+import { network } from 'constants/networks';
+
+// enable Keplr
+window.keplr.enable(network.chainId);
 
 render(
   <StrictMode>

@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from 'react';
 
-import classNames from "classnames/bind"
-import styles from "./SwapFormGroup.module.scss"
-import Button from "../components/Button"
-import FeeCombobox from "./FeeCombobox"
-import Loading from "components/Loading"
+import classNames from 'classnames/bind';
+import styles from './SwapFormGroup.module.scss';
+import Button from '../components/Button';
+import FeeComboBox from './FeeComboBox';
+import Loading from 'components/Loading';
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
 
 const SwapFormGroup = ({
   input,
@@ -26,49 +26,49 @@ const SwapFormGroup = ({
     error,
     type = 1,
     feeSymbol,
-    feeSelect,
-  } = props
-  const { skipFeedback } = props
+    feeSelect
+  } = props;
+  const { skipFeedback } = props;
 
-  const border = cx(styles.border, { focused, error, readOnly: value })
+  const border = cx(styles.border, { focused, error, readOnly: value });
   const maxProps = {
-    type: "button",
+    type: 'button',
     className: styles.max,
     onClick: max,
-    color: "#0222ba00",
-    size: "xs",
+    color: '#0222ba00',
+    size: 'xs',
     outline: true,
-    children: "Max",
-  }
-  const inputRef = useRef<HTMLInputElement | null>()
-  const [inputFontSize, setInputFontSize] = useState(24)
+    children: 'Max'
+  };
+  const inputRef = useRef<HTMLInputElement | null>();
+  const [inputFontSize, setInputFontSize] = useState(24);
   useEffect(() => {
     if (inputRef?.current) {
-      const computedStyle = window.getComputedStyle(inputRef.current)
-      const elSpan = document.createElement("span")
-      elSpan.innerText = inputRef?.current?.value
-      elSpan.style.visibility = "hidden"
-      elSpan.style.position = "absolute"
-      elSpan.style.left = "-9999px"
-      elSpan.style.font = computedStyle.font
-      elSpan.style.fontSize = "24px"
-      document.body.appendChild(elSpan)
+      const computedStyle = window.getComputedStyle(inputRef.current);
+      const elSpan = document.createElement('span');
+      elSpan.innerText = inputRef?.current?.value;
+      elSpan.style.visibility = 'hidden';
+      elSpan.style.position = 'absolute';
+      elSpan.style.left = '-9999px';
+      elSpan.style.font = computedStyle.font;
+      elSpan.style.fontSize = '24px';
+      document.body.appendChild(elSpan);
       const calculatedFontSize =
-        (24 * inputRef.current.clientWidth) / elSpan.clientWidth
-      document.body.removeChild(elSpan)
+        (24 * inputRef.current.clientWidth) / elSpan.clientWidth;
+      document.body.removeChild(elSpan);
       if (calculatedFontSize > 24) {
-        setInputFontSize(24)
-        return
+        setInputFontSize(24);
+        return;
       }
       if (calculatedFontSize < 12) {
-        setInputFontSize(12)
-        return
+        setInputFontSize(12);
+        return;
       }
-      setInputFontSize(calculatedFontSize)
-      return
+      setInputFontSize(calculatedFontSize);
+      return;
     }
-    setInputFontSize(24)
-  }, [input])
+    setInputFontSize(24);
+  }, [input]);
 
   return (
     <div className={styles.component}>
@@ -96,13 +96,13 @@ const SwapFormGroup = ({
                 <input
                   {...input}
                   ref={(e) => {
-                    input?.ref && input.ref(e)
-                    inputRef.current = e
+                    input?.ref && input.ref(e);
+                    inputRef.current = e;
                   }}
                   style={{
                     fontSize: inputFontSize,
                     height: 38,
-                    lineHeight: "38px",
+                    lineHeight: '38px'
                   }}
                 />
               ) : textarea ? (
@@ -122,11 +122,11 @@ const SwapFormGroup = ({
       <div className={styles.bottom}>
         {!skipFeedback && <p className={styles.feedback}>{error}</p>}
         {feeSymbol && feeSelect && (
-          <FeeCombobox selected={feeSymbol} onSelect={feeSelect} />
+          <FeeComboBox selected={feeSymbol} onSelect={feeSelect} />
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SwapFormGroup
+export default SwapFormGroup;

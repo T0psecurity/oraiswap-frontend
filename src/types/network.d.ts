@@ -1,34 +1,33 @@
-interface Network extends NetworkConfig {
-  /** Get finder link */
-  finder: (address: string, path?: string) => string;
+import { TokenInfoResponse } from './ow20/token_info_response';
 
-  /** Refresh the network from the extension */
-  refresh: () => void;
+interface ExtNetworkConfig {
+  chainId: string;
+  rpc: string;
+  lcd: string;
 }
 
-type NetworkConfig = ExtNetworkConfig & LocalNetworkConfig;
-
-interface NetworkConfig {
+interface NetworkConfig extends ExtNetworkConfig {
   /** Chain ID */
   id: string;
   /** Contract Addresses JSON URL */
   contract: string;
   /** Swap Contract Addresses JSON URL */
   swap: string;
-  /** Graphql server URL */
-  mantle: string;
-  stats: string;
-  /** LCDClientConfig */
-  lcd: LCDClientConfig;
+  /** Wallet URL */
+  walletUrl: string;
+
   /** Fixed fee */
   fee: { gasPrice: string; amount: string; gas: string };
   factory: string;
-  service: string;
+  oracle: string;
+  router: string;
+  tokens: TokenInfoResponse[];
 }
 
-interface ExtNetworkConfig {
-  name: string;
-  chainID: string;
-  rpc: string;
-  lcd: string;
+interface Network extends NetworkConfig {
+  /** Get finder link */
+  finder: (address: string, path?: string) => string;
+
+  /** Refresh the network from the extension */
+  refresh: () => void;
 }
