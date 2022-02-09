@@ -27,14 +27,13 @@ $padding: 10px 10px;
   border-radius: 10px;
   border-width: 1px;
   border-style: solid;
-  border-color: #b5b5b5;
+  border-color: $bggray;
   padding: $padding;
   position: relative;
 
   &.readOnly {
-    $bg: #b5b5b5;
-    border-color: $bg;
-    background: $bg;
+    border-color: $bggray;
+    background: $bggray;
   }
 
   &.focused {

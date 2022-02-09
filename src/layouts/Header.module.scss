@@ -4,7 +4,9 @@
 .header {
   position: sticky;
   top: 0;
-  border-bottom: 1px solid rgba($color: #ffffff, $alpha: 0.15);
+  border-bottom: 1px solid rgba($color: $white, $alpha: 0.15);
+  background-color: $darkblue;
+  z-index: 9999;
 }
 
 @include mobile {

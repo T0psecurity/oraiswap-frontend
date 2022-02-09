@@ -10,19 +10,17 @@
 
   .label {
     margin-top: 1px;
+    margin-right: 10px;
     font-size: 14px;
     color: $deepgray;
   }
 
   .container {
-    margin-left: 12px;
-    background-color: white;
     position: relative;
-
+    width: 100%;
     .header {
       @include flex;
-      width: 67px;
-      text-transform: uppercase;
+      text-transform: capitalize;
       justify-content: space-between;
       flex-wrap: wrap;
       font-size: 12px;
@@ -32,7 +30,8 @@
       padding-left: 11px;
       cursor: pointer;
       border-style: solid;
-      border-color: #b5b5b5;
+      background-color: $white;
+      border-color: $bggray;
       border-radius: 7px;
       border-width: 1px;
 
@@ -47,10 +46,10 @@
       position: absolute;
       width: 100%;
       height: auto;
-      background-color: white;
+      background-color: $white;
 
       border-style: solid;
-      border-color: #b5b5b5;
+      border-color: $bggray;
       border-bottom-left-radius: 7px;
       border-bottom-right-radius: 7px;
       border-width: 1px;

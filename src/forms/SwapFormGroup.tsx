@@ -5,6 +5,7 @@ import styles from './SwapFormGroup.module.scss';
 import Button from '../components/Button';
 import FeeComboBox from './FeeComboBox';
 import Loading from 'components/Loading';
+import NetworkComboBox from './NetworkComboBox';
 
 const cx = classNames.bind(styles);
 
@@ -26,9 +27,9 @@ const SwapFormGroup = ({
     error,
     type = 1,
     feeSymbol,
-    feeSelect
+    feeSelect,
+    skipFeedback
   } = props;
-  const { skipFeedback } = props;
 
   const border = cx(styles.border, { focused, error, readOnly: value });
   const maxProps = {
@@ -119,12 +120,13 @@ const SwapFormGroup = ({
           {assets && <section className={styles.assets}>{assets}</section>}
         </section>
       </div>
-      <div className={styles.bottom}>
-        {!skipFeedback && <p className={styles.feedback}>{error}</p>}
-        {feeSymbol && feeSelect && (
+      {!skipFeedback && <p className={styles.feedback}>{error}</p>}
+      {feeSymbol && feeSelect && (
+        <div className={styles.bottom}>
+          <NetworkComboBox />
           <FeeComboBox selected={feeSymbol} onSelect={feeSelect} />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

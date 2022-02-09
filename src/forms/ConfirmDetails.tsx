@@ -1,38 +1,34 @@
-import React from "react"
-import classNames from "classnames/bind"
-import styles from "./ConfirmDetails.module.scss"
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const cx = classNames.bind(styles)
+import React from 'react';
+import styles from './ConfirmDetails.module.scss';
 
 interface Props {
-  contents?: Content[][]
-  result?: boolean
+  contents?: Content[][];
+  result?: boolean;
 }
 
 const displayStr = (content: any, index: number) => {
   if (!Array.isArray(content)) {
-    content = [content]
+    content = [content];
   }
 
-  const strArray: any[] = []
+  const strArray: any[] = [];
 
   content.forEach((src: any) => {
-    if (typeof src !== "string" || index !== 0) {
-      return
+    if (typeof src !== 'string' || index !== 0) {
+      return;
     }
-    const strList = src.split(" ")
+    const strList = src.split(' ');
     if (strList.length === 2) {
-      strArray.push({ first: strList[0], second: strList[1] })
+      strArray.push({ first: strList[0], second: strList[1] });
     }
-  })
+  });
 
   if (strArray.length === 0) {
     return (
       <section className={index !== 0 ? styles.content : styles.txhash}>
         {content}
       </section>
-    )
+    );
   } else {
     return (
       <div className={styles.content}>
@@ -43,9 +39,9 @@ const displayStr = (content: any, index: number) => {
           </div>
         ))}
       </div>
-    )
+    );
   }
-}
+};
 
 const ConfirmDetails = ({ contents, result }: Props) =>
   !contents ? null : (
@@ -63,6 +59,6 @@ const ConfirmDetails = ({ contents, result }: Props) =>
         </li>
       ))}
     </ul>
-  )
+  );
 
-export default ConfirmDetails
+export default ConfirmDetails;

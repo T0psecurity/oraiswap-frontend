@@ -6,27 +6,31 @@ import Icon from 'components/Icon';
 const cx = classNames.bind(styles);
 
 interface Props {
-  selected?: string;
+  className?: string;
+  selected?: any;
   label?: string;
-  onSelect: (asset: string) => void;
-  getValue?: (value: string) => string;
-  items: string[];
+  onSelect: (value: any) => void;
+  getId?: (value: any) => string;
+  getValue?: (value: any) => string;
+  items: any[];
 }
 
 const ComboBox: FC<Props> = ({
   selected,
   onSelect,
-  getValue = (value) => value,
+  className,
+  getValue = (value) => value.name ?? value,
+  getId = (value) => value.id ?? value,
   label,
   items
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(selected);
+  const [selectedOption, setSelectedOption] = useState<any>(selected);
   const toggling = () => setIsOpen(!isOpen);
 
   const onOptionClicked = (value: string) => {
     setSelectedOption(value);
-    onSelect(getValue(value));
+    onSelect(value);
     setIsOpen(false);
   };
 
@@ -43,7 +47,7 @@ const ComboBox: FC<Props> = ({
   }, [isOpen]);
 
   return (
-    <div className={cx(styles.body)}>
+    <div className={classNames(cx(styles.body), className)}>
       {label && <div className={cx(styles.label)}>{label}</div>}
       <div className={cx(styles.container)} onClick={toggling}>
         <div
@@ -52,23 +56,23 @@ const ComboBox: FC<Props> = ({
             isOpen ? cx(styles['header--open']) : ''
           ].join(' ')}
         >
-          <div>{selectedOption ? getValue(selectedOption) : ''}</div>
+          <div>{getValue(selectedOption)}</div>
           <Icon name={isOpen ? 'expand_less' : 'expand_more'} size={24} />
         </div>
         {isOpen && (
           <div className={cx(styles.listcontainer)}>
             <ul className={cx(styles.list)}>
-              {items.map((value) => {
-                return (
+              {items
+                .filter((value) => getId(value) !== getId(selectedOption))
+                .map((value) => (
                   <li
-                    key={value}
+                    key={getId(value)}
                     className={styles.listitem}
                     onClick={() => onOptionClicked(value)}
                   >
                     {getValue(value)}
                   </li>
-                );
-              })}
+                ))}
             </ul>
           </div>
         )}

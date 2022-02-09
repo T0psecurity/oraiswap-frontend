@@ -2,13 +2,13 @@
 @import 'src/styles/variables';
 
 .item {
-  border-top: 1px solid #b5b5b5;
+  border-top: 1px solid $bggray;
   padding-top: 10px;
   padding-bottom: 13px;
 }
 
 .item:last-child {
-  border-bottom: 1px solid #b5b5b5;
+  border-bottom: 1px solid $bggray;
 }
 
 .article {
