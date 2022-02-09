@@ -363,8 +363,11 @@ export default () => {
         }
       };
 
-      const res: TaxCapResponse = await querySmart(network.oracle, params);
-      taxCap = res.cap;
+      // check denom
+      if (params.treasury.tax_cap.denom) {
+        const res: TaxCapResponse = await querySmart(network.oracle, params);
+        taxCap = res.cap;
+      }
     } catch (error) {
       console.log(error);
     }

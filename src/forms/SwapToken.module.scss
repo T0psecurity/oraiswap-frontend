@@ -7,7 +7,7 @@ $name: 14px;
 .asset {
   @include flex(space-between);
   // Because only one line of data can exist, fix the height.
-  height: (($symbol + $name) * $line-height);
+  min-height: (($symbol + $name) * $line-height);
 }
 
 .header {
@@ -15,8 +15,9 @@ $name: 14px;
   width: 100%;
   margin-left: 1rem;
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .description {
@@ -49,6 +50,7 @@ $name: 14px;
 
 .token_address {
   display: flex;
+  margin: 5px;
 }
 
 .name {
@@ -58,6 +60,7 @@ $name: 14px;
   color: $deepgray;
   font-size: $symbol;
   font-weight: 500;
+  margin-left: 5px;
 }
 
 .address {

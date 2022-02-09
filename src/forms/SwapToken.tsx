@@ -24,58 +24,54 @@ const SwapToken = ({
   return (
     <article className={styles.asset}>
       <header className={styles.header}>
-        <img
-          className={styles.logo}
-          src={GetTokenSvg(icon[0], symbols[0])}
-          width={25}
-          height={25}
-          alt=""
-        />
-        <div className={styles.description}>
-          <div className={styles.symbol_name}>
-            <div className={styles.symbol}>
+        <div className={styles.symbol_name}>
+          <div className={styles.symbol}>
+            <img
+              className={styles.logo}
+              src={GetTokenSvg(icon[0], symbols[0])}
+              width={25}
+              height={25}
+              alt=""
+            />
+            <div className={styles.name}>
+              <p>{formatTokenName?.(symbols[0]) ?? lookupSymbol(symbols[0])}</p>
+            </div>
+            {verified ? (
+              <div className={styles.verified_box}>
+                <p className={styles.verified}>verified</p>
+              </div>
+            ) : undefined}
+
+            {symbols.length > 1 ? (
+              <div className={styles.divide}>
+                <span>-</span>
+              </div>
+            ) : undefined}
+            {symbols.length > 1 ? (
+              <img
+                className={styles.logo}
+                src={GetTokenSvg(icon[1], symbols[1])}
+                width={25}
+                height={25}
+                alt=""
+              />
+            ) : undefined}
+            {symbols.length > 1 ? (
               <div className={styles.name}>
                 <p>
-                  {formatTokenName?.(symbols[0]) ?? lookupSymbol(symbols[0])}
+                  {formatTokenName?.(symbols[1]) ?? lookupSymbol(symbols[1])}
                 </p>
               </div>
-              {verified ? (
-                <div className={styles.verified_box}>
-                  <p className={styles.verified}>verified</p>
-                </div>
-              ) : undefined}
-
-              {symbols.length > 1 ? (
-                <div className={styles.divide}>
-                  <span>-</span>
-                </div>
-              ) : undefined}
-              {symbols.length > 1 ? (
-                <img
-                  className={styles.logo}
-                  src={GetTokenSvg(icon[1], symbols[1])}
-                  width={25}
-                  height={25}
-                  alt=""
-                />
-              ) : undefined}
-              {symbols.length > 1 ? (
-                <div className={styles.name}>
-                  <p>
-                    {formatTokenName?.(symbols[1]) ?? lookupSymbol(symbols[1])}
-                  </p>
-                </div>
-              ) : undefined}
-              {symbols.length > 1 && verified ? (
-                <div className={styles.verified_box}>
-                  <p className={styles.verified}>verified</p>
-                </div>
-              ) : undefined}
-            </div>
+            ) : undefined}
+            {symbols.length > 1 && verified ? (
+              <div className={styles.verified_box}>
+                <p className={styles.verified}>verified</p>
+              </div>
+            ) : undefined}
           </div>
-          <div className={styles.token_address}>
-            <p className={styles.address}>{contract_addr}</p>
-          </div>
+        </div>
+        <div className={styles.token_address}>
+          <p className={styles.address}>{contract_addr}</p>
         </div>
       </header>
 

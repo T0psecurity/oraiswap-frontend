@@ -4,18 +4,14 @@
 @import 'src/styles/colors';
 @import 'src/styles/utils';
 
+html {
+  background-image: url(images/BackgroundPattern.svg);
+}
+
 #oraiswap {
   font-size: $font-size;
-
   position: relative;
   min-height: 100vh;
-  min-height: 100vh;
-  background-color: $darkblue;
-  background-image: url(images/BackgroundPattern.svg);
-  background-repeat: no-repeat;
-  background-position: 50% calc(100% + 180px);
-  font-family: $font-family-swap;
-  background-attachment: fixed;
 }
 
 #basement {

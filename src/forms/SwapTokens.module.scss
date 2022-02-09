@@ -46,12 +46,13 @@
 .list {
   flex: 1;
   margin: 0;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .button {
   padding: 8px 0;
   width: 100%;
+  border-radius: 8px;
 
   &:not(.disabled):hover {
     background-color: $semiblue;

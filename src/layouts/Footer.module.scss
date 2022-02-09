@@ -4,6 +4,7 @@
 .footer {
   color: $slate;
   width: 100%;
+  margin: 10px 0;
 }
 
 .container {
@@ -72,7 +73,6 @@
 /* author */
 .community {
   @include flex;
-  margin-bottom: 10px;
 
   @include mobile {
     margin-top: 10px;
