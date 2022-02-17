@@ -1,10 +1,12 @@
-import React, { FC } from "react"
-import { Link, useLocation } from "react-router-dom"
-import classNames from "classnames"
-import Card from "./Card"
-import { TooltipIcon } from "./Tooltip"
-import styles from "./TabView.module.scss"
-import Modal from "./Modal"
+import React, { FC } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import classNames from 'classnames';
+import Card from './Card';
+import { TooltipIcon } from './Tooltip';
+import styles from './TabView.module.scss';
+import Modal from './Modal';
+import { Type } from 'pages/Swap';
+import TransferForm from './TransferForm';
 
 const TabView: FC<TabViewProps> = ({
   tabs,
@@ -12,9 +14,9 @@ const TabView: FC<TabViewProps> = ({
   shadow,
   extra,
   children,
-  side,
+  side
 }) => {
-  const { search, state } = useLocation()
+  const { search, state } = useLocation();
 
   return !selectedTabName ? null : (
     <div className={styles.wrapper}>
@@ -22,15 +24,15 @@ const TabView: FC<TabViewProps> = ({
         <div className={styles.header}>
           <div className={styles.tabs}>
             {tabs.map((tab) => {
-              const to = { hash: tab.name, search, state }
-              const tooltip = tab.tooltip
+              const to = { hash: tab.name, search, state };
+              const tooltip = tab.tooltip;
               const label = tooltip ? (
                 <TooltipIcon content={tooltip}>
                   {tab.title || tab.name}
                 </TooltipIcon>
               ) : (
                 tab.title || tab.name
-              )
+              );
 
               return (
                 <Link
@@ -39,7 +41,7 @@ const TabView: FC<TabViewProps> = ({
                   className={classNames(
                     ...[
                       styles.tabs__item,
-                      tab.name === selectedTabName && styles.active,
+                      tab.name === selectedTabName && styles.active
                     ]
                   )}
                   key={tab.name}
@@ -47,7 +49,7 @@ const TabView: FC<TabViewProps> = ({
                   <span className={styles.tabs__item__sizer}>{label}</span>
                   <span className={styles.tabs__item__label}>{label}</span>
                 </Link>
-              )
+              );
             })}
           </div>
           {extra?.length && (
@@ -66,7 +68,9 @@ const TabView: FC<TabViewProps> = ({
           )}
         </div>
 
-        <section className={styles.content}>{children}</section>
+        <section className={styles.content}>
+          {selectedTabName === Type.TRANSFER ? <TransferForm /> : children}
+        </section>
       </Card>
       {side && (
         <div
@@ -74,7 +78,7 @@ const TabView: FC<TabViewProps> = ({
             ...[
               styles.side,
               !side.filter(({ visible }) => visible).length &&
-                styles["side--invisible"],
+                styles['side--invisible']
             ]
           )}
         >
@@ -84,9 +88,8 @@ const TabView: FC<TabViewProps> = ({
                 className={classNames(
                   ...[
                     styles.side__view,
-                    !item.visible && styles["side__view--invisible"],
-                    item.isModalOnMobile &&
-                      styles["side__view--hide-on-mobile"],
+                    !item.visible && styles['side__view--invisible'],
+                    item.isModalOnMobile && styles['side__view--hide-on-mobile']
                   ]
                 )}
               >
@@ -94,7 +97,7 @@ const TabView: FC<TabViewProps> = ({
               </div>
               {item.isModalOnMobile && (
                 <Modal
-                  className={styles["side__view--hide-on-desktop"]}
+                  className={styles['side__view--hide-on-desktop']}
                   isOpen={item.visible}
                   isCloseBtn={false}
                   open={() => item.onOpen && item.onOpen()}
@@ -108,7 +111,7 @@ const TabView: FC<TabViewProps> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default TabView
+export default TabView;

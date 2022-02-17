@@ -5,6 +5,7 @@ import Container from '../components/Container';
 import useHash from './useHash';
 
 export enum Type {
+  'TRANSFER' = 'Transfer',
   'SWAP' = 'Swap',
   'PROVIDE' = 'Provide',
   'WITHDRAW' = 'Withdraw'
@@ -14,6 +15,7 @@ const Swap = () => {
   const { hash: type } = useHash<Type>(Type.SWAP);
   const tabs = {
     tabs: [
+      { name: Type.TRANSFER },
       { name: Type.SWAP },
       { name: Type.PROVIDE },
       { name: Type.WITHDRAW }
