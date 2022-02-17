@@ -1,16 +1,27 @@
-import React from "react"
-import { CircularProgress } from "@material-ui/core"
-import styles from "./Loading.module.scss"
+import React from 'react';
+import styles from './Loading.module.scss';
+import classNames from 'classnames';
 
 interface Props {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
-const Loading = ({ size, className }: Props) => (
-  <div className={styles.center}>
-    <CircularProgress color="inherit" size={size ?? 24} className={className} />
-  </div>
-)
+const Loading = ({ size, className }: Props) => {
+  const style: any = {};
+  if (size) {
+    style.width = size;
+    style.height = size;
+  }
+  return (
+    <div
+      className={classNames(styles.loading, styles['lds-ripple'], className)}
+      style={style}
+    >
+      <div></div>
+      <div></div>
+    </div>
+  );
+};
 
-export default Loading
+export default Loading;

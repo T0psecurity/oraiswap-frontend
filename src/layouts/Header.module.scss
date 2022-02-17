@@ -40,4 +40,8 @@
 .connect {
   @include flex;
   @include desktop;
+  // like flex box, start from next item
+  > * + * {
+    margin-left: 10px;
+  }
 }

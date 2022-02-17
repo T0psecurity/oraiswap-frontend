@@ -1,8 +1,9 @@
 {
   "Component": {
-    "Tab": { "All": "All" }
+    "Tab": {
+      "All": "All"
+    }
   },
-
   "Form": {
     "Validate": {
       "InsufficientBalance": "Insufficient balance",
@@ -13,7 +14,8 @@
       }
     },
     "Button": {
-      "ConnectWallet": "Connect Wallet",
+      "ConnectKeplr": "Connect Keplr",
+      "ConnectMetamask": "Connect Metamask",
       "ConnectTheWallet": "Connect the Wallet",
       "SelectAsset": "Select an asset",
       "SelectToken": "Token"
@@ -38,18 +40,18 @@
     "FAILURE": "Failed",
     "TIMEOUT": "The execution of this transaction is taking a little longer than usual. It has been successfully broadcasted, but have not been executed yet. The transaction may fail in the future, so please check again later",
     "DENIED": "Failed: User denied transaction",
-    "Button": { "FAILURE": "Try Again" }
+    "Button": {
+      "FAILURE": "Try Again"
+    }
   },
-
   "Wallet": {
     "Connect": "Connect",
     "Disconnect": "Disconnect",
     "DownloadExtension": "Download Terra Extension",
-    "ConnectWallet": "Connect Wallet",
+    "ConnectKeplr": "Connect Keplr",
     "CopyAddress": "Copy Address",
     "TerraFinder": "View on Terra Finder"
   },
-
   "MyPage": {
     "Empty": {
       "Invested": "No available asset",

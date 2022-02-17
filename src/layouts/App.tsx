@@ -8,7 +8,8 @@ import usePairs from 'rest/usePairs';
 import routes from 'routes';
 import { ThemeProvider } from 'styled-components';
 import variables from 'styles/_variables.scss';
-import { useContractsAddress } from 'hooks';
+import { Web3ReactProvider } from '@web3-react/core';
+import Web3 from 'web3';
 
 const App = () => {
   const [address] = useLocalStorage<string>('address');
@@ -26,13 +27,16 @@ const App = () => {
 
   const contract = useContractState(address);
 
+  // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider theme={variables}>
-      <Header />
-      <ContractProvider value={contract}>
-        {!isLoading && routes()}
-      </ContractProvider>
-      <Footer />
+      <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
+        <Header />
+        <ContractProvider value={contract}>
+          {!isLoading && routes()}
+        </ContractProvider>
+        <Footer />
+      </Web3ReactProvider>
     </ThemeProvider>
   );
 };

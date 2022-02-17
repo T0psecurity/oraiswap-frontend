@@ -1,6 +1,4 @@
-//@ts-nocheck
-import React, { useEffect, useState } from 'react';
-import { fromPrivateKey } from 'bip32';
+import React, { FC, useEffect, useState } from 'react';
 import CenterEllipsis from './CenterEllipsis';
 import classNames from 'classnames';
 import styles from './LoginWidget.module.scss';
@@ -8,34 +6,10 @@ import Button from 'components/Button';
 import Icon from './Icon';
 import useLocalStorage from 'libs/useLocalStorage';
 import { network } from 'constants/networks';
+import KeplrImage from 'images/keplr.png';
 
-export const LoginWidget = ({ text }) => {
-  // const [childKeyData, setChildKeyData] = useLocalStorage<ChildKeyData>(
-  //   'childkey'
-  // );
-
-  // let childKey;
-  // if (childKeyData) {
-  //   const { privateKey, chainCode, network } = childKeyData;
-  //   childKey = fromPrivateKey(
-  //     Buffer.from(Object.values(privateKey)),
-  //     Buffer.from(Object.values(chainCode)),
-  //     network
-  //   );
-
-  //   window.Wasm.setChildkey(childKey);
-  // } else {
-  //   window.Wasm.removeChildkey();
-  // }
-
-  // const connectWallet = async () => {
-  //   setChildKeyData(await window.Wasm.getChildKeyValue());
-  // };
-  // const disconnectWallet = () => {
-  //   setChildKeyData(undefined);
-  // };
-
-  const [address, setAddress] = useLocalStorage<string>('address');
+export const LoginWidget: FC<{ text: string }> = ({ text }) => {
+  const [address, setAddress] = useLocalStorage<String>('address');
 
   const connectWallet = async () => {
     const keplrAddr = await window.Keplr.getKeplrAddr();
@@ -58,7 +32,7 @@ export const LoginWidget = ({ text }) => {
         >
           <Icon size={16} name="account_balance_wallet" />
           <p className={classNames(styles.address)}>
-            <CenterEllipsis size={6} text={address} />
+            <CenterEllipsis size={6} text={address as string} />
             {' | '}
             {network.id}
           </p>
@@ -66,6 +40,7 @@ export const LoginWidget = ({ text }) => {
         </Button>
       ) : (
         <Button className={classNames(styles.connect)} onClick={connectWallet}>
+          <img height={16} src={KeplrImage} alt="Keplr" />
           {text}
         </Button>
       )}
