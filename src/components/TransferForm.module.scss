@@ -60,6 +60,12 @@
   text-align: left !important;
   border-radius: 7px;
   margin-top: 10px;
+
+  .tokenItem {
+    > span {
+      max-width: 100%;
+    }
+  }
 }
 
 .tokenContainer {
