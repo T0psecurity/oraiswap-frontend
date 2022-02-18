@@ -85,6 +85,7 @@ const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
 const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
+  const [toggle, setToggle] = useState(false);
 
   const onTokenSelect = (item: TokenInfo) => {
     setSelectedToken(item);
@@ -94,17 +95,17 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
     setSelectedNetwork(item);
   };
 
+  const swapNetworks = () => {
+    setToggle(!toggle);
+  };
+
+  const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => {};
+
   return (
     <div className={styles.container}>
-      <div className={styles.networks}>
-        <div
-          className={classNames(
-            styles.gravityBridge,
-            styles['network-container']
-          )}
-        >
+      <div className={toggle ? styles.networksReversed : styles.networks}>
+        <div className={classNames(styles['network-container'])}>
           <div className={styles['network-container-left']}>
-            <p className={styles['network-container-muted']}>From</p>
             <p className={styles['network-container-name']}>Orai Bridge</p>
           </div>
           <div className={styles['network-container-right']}>
@@ -115,13 +116,16 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
             />
           </div>
         </div>
-        <button className={styles['toggle-button']}>
+        <button
+          type="button"
+          className={styles['toggle-button']}
+          onClick={swapNetworks}
+        >
           <img src={SvgArrow} alt="toggle" />
         </button>
-        <div className={classNames(styles.eth, styles['network-container'])}>
+        <div className={classNames(styles['network-container'])}>
           <div className={styles['network-container-left']}>
-            <p className={styles['network-container-muted']}>To</p>
-            <p className={styles['network-container-name']}>
+            <div className={styles['network-container-name']}>
               <ComboBox
                 className={styles.network}
                 headerClass={styles.networkHeader}
@@ -134,7 +138,7 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
                   <TokenItem name={item.name} icon={item.icon} />
                 )}
               />
-            </p>
+            </div>
           </div>
           <div className={styles['network-container-right']}>
             <img
@@ -147,25 +151,55 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
       </div>
 
       <div className={styles.tokenContainer}>
-        <ComboBox
-          label="Select Token:"
-          className={styles.tokens}
-          items={tokens}
-          selected={selectedToken}
-          onSelect={onTokenSelect}
-          getId={(item: TokenInfo) => item.symbol}
-          getValue={(item: TokenInfo) => (
-            <TokenItem name={item.name} icon={item.icon} />
-          )}
+        <input
+          placeholder="0.000000"
+          step="0.000001"
+          type="number"
+          className={styles.textAmount}
+          onChange={onAmountChanged}
         />
-        <input value="0" className={styles.textAmount} />
+        <div>
+          <ComboBox
+            className={styles.tokens}
+            items={tokens}
+            selected={selectedToken}
+            onSelect={onTokenSelect}
+            getId={(item: TokenInfo) => item.symbol}
+            getValue={(item: TokenInfo) => (
+              <TokenItem name={item.name} icon={item.icon} />
+            )}
+          />
+
+          <Button>Transfer</Button>
+        </div>
       </div>
 
       <div>
         <p>Withdraw your Orai Bridge token to Oraichain token.</p>
       </div>
-      <div>
-        <Button>Widthdraw</Button>
+
+      <div className={styles.tokenContainer}>
+        <input
+          placeholder="0.000000"
+          step="0.000001"
+          type="number"
+          className={styles.textAmount}
+          onChange={onAmountChanged}
+        />
+        <div>
+          <ComboBox
+            className={styles.tokens}
+            items={tokens}
+            selected={selectedToken}
+            onSelect={onTokenSelect}
+            getId={(item: TokenInfo) => item.symbol}
+            getValue={(item: TokenInfo) => (
+              <TokenItem name={item.name} icon={item.icon} />
+            )}
+          />
+
+          <Button>Widthdraw</Button>
+        </div>
       </div>
     </div>
   );

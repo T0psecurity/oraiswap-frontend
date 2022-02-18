@@ -13,10 +13,28 @@
   }
 }
 
-.networks {
+.networks,
+.networksReversed {
   width: 100%;
   @include flex(space-between);
   justify-content: flex-start;
+}
+
+.networksReversed {
+  flex-direction: row-reverse;
+  .network-container {
+    &:first-child {
+      .network-container-left::before {
+        content: 'To';
+      }
+    }
+
+    &:last-child {
+      .network-container-left::before {
+        content: 'From';
+      }
+    }
+  }
 }
 
 .network {
@@ -46,12 +64,18 @@
 .tokenContainer {
   @include flex(space-between);
   @include transition(border-color);
+  width: 100%;
   border-radius: 10px;
   border-width: 1px;
   border-style: solid;
   border-color: $bggray;
   padding: 10px;
   position: relative;
+  flex-direction: column;
+  > div {
+    width: 100%;
+    @include flex(space-between);
+  }
 }
 
 .textAmount {
@@ -59,6 +83,13 @@
   font-size: 24px;
   height: 38px;
   line-height: 38px;
+  width: 100%;
+  border-bottom: 1px solid $semiblue;
+  margin-bottom: 10px;
+
+  &::placeholder {
+    color: $gray;
+  }
 }
 
 .tokenItem {
@@ -80,6 +111,18 @@
     max-width: 100%;
     max-height: 100%;
   }
+
+  &:first-child {
+    .network-container-left::before {
+      content: 'From';
+    }
+  }
+
+  &:last-child {
+    .network-container-left::before {
+      content: 'To';
+    }
+  }
 }
 
 .toggle-button {
@@ -94,15 +137,14 @@
 .network-container-left {
   display: flex;
   flex-direction: column;
+  &::before {
+    margin-bottom: 10px;
+    color: $text;
+  }
 }
 
 .network-container-right {
   height: 100%;
-}
-
-.network-container-muted {
-  margin-bottom: 16px;
-  color: $text;
 }
 
 .network-container-name {

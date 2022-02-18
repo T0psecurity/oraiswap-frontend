@@ -100,12 +100,11 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
   const [walletAddress] = useLocalStorage<string>('address');
 
   const settingsModal = useModal();
-  const [slippageSettings, setSlippageSettings] = useLocalStorage<
-    SettingValues
-  >('slippage', {
-    slippage: `${DEFAULT_MAX_SPREAD}`,
-    custom: ''
-  });
+  const [slippageSettings, setSlippageSettings] =
+    useLocalStorage<SettingValues>('slippage', {
+      slippage: `${DEFAULT_MAX_SPREAD}`,
+      custom: ''
+    });
   const slippageTolerance = useMemo(() => {
     // 1% = 0.01
     return `${(
@@ -457,10 +456,8 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
     ) => {
       const msg = Array.isArray(_msg) ? _msg[0] : _msg;
       if (msg?.execute_msg?.send?.msg?.execute_swap_operations) {
-        msg.execute_msg.send.msg.execute_swap_operations.minimum_receive = parseInt(
-          `${minimumReceived}`,
-          10
-        ).toString();
+        msg.execute_msg.send.msg.execute_swap_operations.minimum_receive =
+          parseInt(`${minimumReceived}`, 10).toString();
         if (isNativeToken(symbol || '')) {
           msg.coins = [new Coin()]; //Coins.fromString(toAmount(`${amount}`) + symbol);
         }
@@ -925,26 +922,28 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
       >
         <TabView
           {...tabs}
-          extra={[
-            {
-              iconUrl: iconSettings,
-              onClick: () => {
-                if (settingsModal.isOpen) {
-                  settingsModal.close();
-                  return;
-                }
-                settingsModal.open();
+          extra={
+            type !== Type.TRANSFER && [
+              {
+                iconUrl: iconSettings,
+                onClick: () => {
+                  if (settingsModal.isOpen) {
+                    settingsModal.close();
+                    return;
+                  }
+                  settingsModal.open();
+                },
+                disabled: formState.isSubmitting
               },
-              disabled: formState.isSubmitting
-            },
-            {
-              iconUrl: iconReload,
-              onClick: () => {
-                window.location.reload();
-              },
-              disabled: formState.isSubmitting
-            }
-          ]}
+              {
+                iconUrl: iconReload,
+                onClick: () => {
+                  window.location.reload();
+                },
+                disabled: formState.isSubmitting
+              }
+            ]
+          }
           side={[
             {
               component: (
