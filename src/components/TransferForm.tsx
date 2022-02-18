@@ -174,7 +174,7 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
         </div>
       </div>
 
-      <div>
+      <div style={{ marginBottom: -10 }}>
         <p>Withdraw your Orai Bridge token to Oraichain token.</p>
       </div>
 
