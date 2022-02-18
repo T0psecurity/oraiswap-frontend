@@ -140,13 +140,6 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
               />
             </div>
           </div>
-          <div className={styles['network-container-right']}>
-            <img
-              className={styles['network-container-icon']}
-              src={EthereumImage}
-              alt="to network"
-            />
-          </div>
         </div>
       </div>
 
