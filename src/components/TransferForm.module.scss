@@ -5,7 +5,68 @@
 @import 'src/styles/utils';
 
 .container {
+  width: 100%;
   @include flex(space-between);
+  flex-direction: column;
+  > * + * {
+    margin-top: 20px;
+  }
+}
+
+.networks {
+  width: 100%;
+  @include flex(space-between);
+  justify-content: flex-start;
+}
+
+.network {
+  margin-top: 0 !important;
+  justify-content: unset !important;
+}
+
+.networkHeader {
+  flex-wrap: nowrap !important;
+  font-weight: normal !important;
+  color: inherit !important;
+  padding-left: 0 !important;
+  border-style: none !important;
+  background-color: transparent !important;
+  font-size: inherit !important;
+  > .material-icons {
+    margin-left: 20px;
+  }
+}
+.networkListContainer {
+  width: 180px !important;
+  text-align: left !important;
+  border-radius: 7px;
+  margin-top: 10px;
+}
+
+.tokenContainer {
+  @include flex(space-between);
+  @include transition(border-color);
+  border-radius: 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: $bggray;
+  padding: 10px;
+  position: relative;
+}
+
+.textAmount {
+  text-align: right;
+  font-size: 24px;
+  height: 38px;
+  line-height: 38px;
+}
+
+.tokenItem {
+  @include flex(flex-start);
+  > img {
+    margin-right: 5px;
+    height: 16px;
+  }
 }
 
 .network-container {
@@ -24,6 +85,10 @@
 .toggle-button {
   margin: 10px;
   transform: rotate(-90deg);
+  transition: transform 0.2s ease-in-out;
+  &:hover {
+    transform: rotate(-270deg);
+  }
 }
 
 .network-container-left {

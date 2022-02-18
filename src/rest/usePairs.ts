@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import useAPI from './useAPI';
 import { AIRI, ORAI, UAIRI } from 'constants/constants';
 import { network } from 'constants/networks';
+import { TokenInfo } from 'types/token';
 
 interface Pairs {
   pairs: Pair[];
@@ -13,20 +14,6 @@ export interface Pair {
   pair: TokenInfo[];
   contract: string;
   liquidity_token: string;
-}
-
-interface TokenInfo {
-  symbol: string;
-  name: string;
-  contract_addr: string;
-  decimals: number;
-  icon: string;
-  verified: boolean;
-}
-
-interface PairsResponse {
-  height: string;
-  result: PairsResult;
 }
 
 interface PairsResult {

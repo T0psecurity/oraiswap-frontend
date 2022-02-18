@@ -11,8 +11,10 @@ interface Props {
   label?: string;
   onSelect: (value: any) => void;
   getId?: (value: any) => string;
-  getValue?: (value: any) => string;
+  getValue?: (value: any) => React.ReactChild;
   items: any[];
+  headerClass?: string;
+  listContainerClass?: string;
 }
 
 const ComboBox: FC<Props> = ({
@@ -22,7 +24,9 @@ const ComboBox: FC<Props> = ({
   getValue = (value) => value.name ?? value,
   getId = (value) => value.id ?? value,
   label,
-  items
+  items,
+  headerClass,
+  listContainerClass
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<any>(selected);
@@ -52,7 +56,7 @@ const ComboBox: FC<Props> = ({
       <div className={cx(styles.container)} onClick={toggling}>
         <div
           className={[
-            cx(styles.header),
+            cx(styles.header, headerClass),
             isOpen ? cx(styles['header--open']) : ''
           ].join(' ')}
         >
@@ -60,7 +64,7 @@ const ComboBox: FC<Props> = ({
           <Icon name={isOpen ? 'expand_less' : 'expand_more'} size={24} />
         </div>
         {isOpen && (
-          <div className={cx(styles.listcontainer)}>
+          <div className={cx(styles.listcontainer, listContainerClass)}>
             <ul className={cx(styles.list)}>
               {items
                 .filter((value) => getId(value) !== getId(selectedOption))

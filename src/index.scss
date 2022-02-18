@@ -6,6 +6,9 @@
 
 html {
   background-image: url(images/BackgroundPattern.svg);
+  @include mobile {
+    background-image: url(images/BackgroundPatternMobile.svg);
+  }
 }
 
 #oraiswap {
