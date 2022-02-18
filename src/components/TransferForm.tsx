@@ -75,10 +75,10 @@ const networks: NetworkItem[] = [
 
 const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
   return (
-    <span className={styles.tokenItem}>
+    <div className={styles.tokenItem}>
       <img src={icon} />
-      {name}
-    </span>
+      <span>{name}</span>
+    </div>
   );
 };
 

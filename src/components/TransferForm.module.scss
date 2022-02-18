@@ -40,6 +40,7 @@
 .network {
   margin-top: 0 !important;
   justify-content: unset !important;
+  width: 180px;
 }
 
 .networkHeader {
@@ -51,7 +52,7 @@
   background-color: transparent !important;
   font-size: inherit !important;
   i {
-    margin-left: 20px;
+    margin-left: 0px;
   }
 }
 .networkListContainer {
@@ -97,6 +98,12 @@
   > img {
     margin-right: 5px;
     height: 16px;
+  }
+  > span {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 80px;
   }
 }
 
