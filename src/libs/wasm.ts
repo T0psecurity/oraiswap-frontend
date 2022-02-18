@@ -1,7 +1,6 @@
 import Cosmos from '@oraichain/cosmosjs';
 import { BIP32Interface, fromPrivateKey } from 'bip32';
 import { Buffer } from 'buffer';
-import { sha256 } from 'js-sha256';
 import { getMobileOperatingSystem } from './utils';
 import { network } from 'constants/networks';
 
@@ -227,25 +226,6 @@ class Wasm {
     };
   }
 
-  async getSignedData(data: string): Promise<SignedData | undefined> {
-    const pathOrChildKey = await this.getChildKey();
-    const childKey =
-      typeof pathOrChildKey === 'string'
-        ? await this.getChildKey(pathOrChildKey as string)
-        : pathOrChildKey;
-    if (!childKey) {
-      return;
-    }
-    const hash = Buffer.from(sha256.digest(data));
-    const signature = Buffer.from(
-      this.cosmos.signRaw(hash, childKey.privateKey as Uint8Array)
-    );
-    return {
-      signature: signature.toString('base64'),
-      publicKey: childKey.publicKey.toString('base64')
-    };
-  }
-
   getHandleMessage(
     contract: string,
     msg: Buffer,
@@ -266,9 +246,10 @@ class Wasm {
 
     const msgSendAny = new message.google.protobuf.Any({
       type_url: '/cosmwasm.wasm.v1beta1.MsgExecuteContract',
-      value: message.cosmwasm.wasm.v1beta1.MsgExecuteContract.encode(
-        msgSend
-      ).finish()
+      value:
+        message.cosmwasm.wasm.v1beta1.MsgExecuteContract.encode(
+          msgSend
+        ).finish()
     });
 
     return new message.cosmos.tx.v1beta1.TxBody({
