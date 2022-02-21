@@ -33,7 +33,7 @@
             "symbol": "ORAI",
             "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
             "decimals": 6,
-            "contract_addr": "native",
+            "contract_addr": "",
             "verified": true
         }
     ]
