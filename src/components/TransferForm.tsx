@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { FC, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import Loading from './Loading';
@@ -17,68 +18,13 @@ import {
 import GravityABI from 'constants/abi/gravity.json';
 import Erc20ABI from 'constants/abi/erc20.json';
 import useLocalStorage from 'libs/useLocalStorage';
+import { bridgeNetworks, NetworkItem } from 'constants/networks';
+import bridgeTokens from 'constants/bridge-tokens.json';
 interface Props {
   loading?: boolean;
   size?: number;
   className?: string;
 }
-
-interface NetworkItem {
-  cosmosBased: boolean;
-  name: string;
-  chainId: string;
-  icon: string;
-  rpc: string;
-}
-
-const tokens: TokenInfo[] = [
-  {
-    name: 'aiRight',
-    symbol: 'AIRI',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/11563.png',
-    decimals: 16,
-    contract_addr: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
-    verified: true
-  }
-];
-
-const networks: NetworkItem[] = [
-  {
-    cosmosBased: true,
-    name: 'Atom',
-    chainId: 'Atom',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png'
-  },
-  {
-    cosmosBased: true,
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/14299.png',
-    name: 'Juno',
-    chainId: 'Juno',
-    rpc: ''
-  },
-  {
-    cosmosBased: true,
-    name: 'Osmosis',
-    chainId: 'Osmosis',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/12220.png'
-  },
-  {
-    cosmosBased: false,
-    name: 'Ethereum',
-    chainId: 'ethereum',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
-  },
-  {
-    cosmosBased: false,
-    name: 'Binance Smart Chain',
-    chainId: 'bsc',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png'
-  }
-];
 
 const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
   return (
@@ -91,9 +37,11 @@ const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
 
 const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
   const [metamaskAddress] = useLocalStorage<string>('metamask-address');
+  const [selectedNetwork, setSelectedNetwork] = useState(bridgeNetworks[0]);
+  const tokens = bridgeTokens[selectedNetwork.chainId];
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
-  const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
-  const [toggle, setToggle] = useState(false);
+
+  const [toggle, setToggle] = useState(true);
 
   const oraiContract = new window.web3.eth.Contract(
     Erc20ABI as AbiItem[],
@@ -123,10 +71,11 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
 
   useEffect(() => {
     const getBalances = async () => {
-      const oraiBalance = await oraiContract.methods
+      const result = await oraiContract.methods
         .balanceOf(metamaskAddress)
         .call();
-      console.log(oraiBalance);
+      const balance = window.web3.utils.fromWei(result);
+      console.log(balance);
     };
 
     getBalances();
@@ -161,7 +110,7 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
                 className={styles.network}
                 headerClass={styles.networkHeader}
                 listContainerClass={styles.networkListContainer}
-                items={networks}
+                items={bridgeNetworks}
                 selected={selectedNetwork}
                 onSelect={onNetworkSelect}
                 getId={(item: NetworkItem) => item.chainId}
@@ -195,34 +144,6 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
           />
 
           <Button>Transfer</Button>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: -10 }}>
-        <p>Withdraw your Orai Bridge token to Oraichain token.</p>
-      </div>
-
-      <div className={styles.tokenContainer}>
-        <input
-          placeholder="0.000000"
-          step="0.000001"
-          type="number"
-          className={styles.textAmount}
-          onChange={onAmountChanged}
-        />
-        <div>
-          <ComboBox
-            className={styles.tokens}
-            items={tokens}
-            selected={selectedToken}
-            onSelect={onTokenSelect}
-            getId={(item: TokenInfo) => item.symbol}
-            getValue={(item: TokenInfo) => (
-              <TokenItem name={item.name} icon={item.icon} />
-            )}
-          />
-
-          <Button>Widthdraw</Button>
         </div>
       </div>
     </div>

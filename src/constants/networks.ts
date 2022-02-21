@@ -57,3 +57,55 @@ if (networkKey !== NetworkKey.MAINNET) {
 export const network =
   // sure have value
   networks.get(networkKey)!;
+
+export interface NetworkItem {
+  cosmosBased: boolean;
+  name: string;
+  chainId: string;
+  icon: string;
+  rpc: string;
+}
+export const bridgeNetworks: NetworkItem[] = [
+  {
+    cosmosBased: false,
+    name: 'Ethereum',
+    chainId: 'ethereum',
+    rpc: '',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+  },
+  {
+    cosmosBased: false,
+    name: 'Binance Smart Chain',
+    chainId: 'bsc',
+    rpc: '',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png'
+  },
+  {
+    cosmosBased: true,
+    name: 'Oraichain-testnet',
+    chainId: 'Oraichain-testnet',
+    rpc: 'https://testnet.lcd.orai.io',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
+  },
+  {
+    cosmosBased: true,
+    name: 'Atom',
+    chainId: 'Atom',
+    rpc: '',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png'
+  },
+  {
+    cosmosBased: true,
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/14299.png',
+    name: 'Juno',
+    chainId: 'Juno',
+    rpc: ''
+  },
+  {
+    cosmosBased: true,
+    name: 'Osmosis',
+    chainId: 'Osmosis',
+    rpc: '',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/12220.png'
+  }
+];
