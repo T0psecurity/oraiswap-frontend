@@ -70,11 +70,7 @@ const TransferForm = () => {
 
       setLoading(true);
       const result = await gravityContract.methods
-        .sendToCosmos(
-          tokenContract,
-          window.web3.utils.toHex(keplrAddress),
-          balance
-        )
+        .sendToCosmos(tokenContract, keplrAddress, balance)
         .send({
           from: metamaskAddress
         });
