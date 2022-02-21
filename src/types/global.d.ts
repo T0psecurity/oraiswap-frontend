@@ -4,6 +4,7 @@ import { Buffer } from 'buffer';
 import Keplr from '../libs/kelpr';
 import { Keplr as keplr } from './kelpr/wallet';
 import Wasm from '../libs/wasm';
+import Web3 from 'web3';
 
 declare global {
   type ExecuteOptions = {
@@ -62,6 +63,7 @@ declare global {
     Wallet: Wallet;
     Wasm: Wasm;
     Keplr: Keplr;
+    web3: Web3;
     ethereum: any;
     keplr: keplr;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;

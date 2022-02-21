@@ -1,6 +1,7 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import Loading from './Loading';
+import { AbiItem } from 'web3-utils';
 import styles from './TransferForm.module.scss';
 import GravityBridgeImage from 'images/gravity-bridge.png';
 import EthereumImage from 'images/ethereum.png';
@@ -9,7 +10,13 @@ import ComboBox from './ComboBox';
 import { TokenInfo } from 'types/token';
 import Button from './Button';
 import Icon from './Icon';
-
+import {
+  GRAVITY_CONTRACT_ADDRESS,
+  ORAI_CONTRACT_ADDRESS
+} from 'constants/constants';
+import GravityABI from 'constants/abi/gravity.json';
+import Erc20ABI from 'constants/abi/erc20.json';
+import useLocalStorage from 'libs/useLocalStorage';
 interface Props {
   loading?: boolean;
   size?: number;
@@ -26,7 +33,7 @@ interface NetworkItem {
 
 const tokens: TokenInfo[] = [
   {
-    name: 'aiRight Token',
+    name: 'aiRight',
     symbol: 'AIRI',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/11563.png',
     decimals: 16,
@@ -83,9 +90,22 @@ const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
 };
 
 const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
+  const [metamaskAddress] = useLocalStorage<string>('metamask-address');
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
   const [toggle, setToggle] = useState(false);
+
+  const oraiContract = new window.web3.eth.Contract(
+    Erc20ABI as AbiItem[],
+    ORAI_CONTRACT_ADDRESS
+  );
+
+  const gravityContract = new window.web3.eth.Contract(
+    GravityABI as AbiItem[],
+    GRAVITY_CONTRACT_ADDRESS
+  );
+  // call lastBatchNonce to query nonce from submitter
+  // call sendToCosmos to send token to cosmos, then show the balance
 
   const onTokenSelect = (item: TokenInfo) => {
     setSelectedToken(item);
@@ -100,6 +120,17 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
   };
 
   const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => {};
+
+  useEffect(() => {
+    const getBalances = async () => {
+      const oraiBalance = await oraiContract.methods
+        .balanceOf(metamaskAddress)
+        .call();
+      console.log(oraiBalance);
+    };
+
+    getBalances();
+  }, []);
 
   return (
     <div className={styles.container}>

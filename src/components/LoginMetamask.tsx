@@ -8,6 +8,7 @@ import styles from './LoginWidget.module.scss';
 import Button from 'components/Button';
 import Icon from './Icon';
 import MetamaskImage from 'images/metamask.png';
+import Web3 from 'web3';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 3, 4, 5, 15]
@@ -44,8 +45,12 @@ const LoginMetamask: FC<{ text: string }> = ({ text }) => {
       try {
         if (!active && address && !error) {
           await activate(injected);
+          // reset provider
+          window.web3 = new Web3(await injected.getProvider());
         }
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     };
     connectWalletOnPageLoad();
   }, []);
