@@ -1,30 +1,20 @@
 //@ts-nocheck
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import Loading from './Loading';
 import { AbiItem } from 'web3-utils';
 import styles from './TransferForm.module.scss';
 import GravityBridgeImage from 'images/gravity-bridge.png';
-import EthereumImage from 'images/ethereum.png';
 import SvgArrow from 'images/arrow.svg';
 import ComboBox from './ComboBox';
 import { TokenInfo } from 'types/token';
 import Button from './Button';
-import Icon from './Icon';
-import {
-  GRAVITY_CONTRACT_ADDRESS,
-  ORAI_CONTRACT_ADDRESS
-} from 'constants/constants';
+import { GRAVITY_CONTRACT_ADDRESS } from 'constants/constants';
 import GravityABI from 'constants/abi/gravity.json';
 import Erc20ABI from 'constants/abi/erc20.json';
 import useLocalStorage from 'libs/useLocalStorage';
 import { bridgeNetworks, NetworkItem } from 'constants/networks';
 import bridgeTokens from 'constants/bridge-tokens.json';
-interface Props {
-  loading?: boolean;
-  size?: number;
-  className?: string;
-}
 
 const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
   return (
@@ -35,25 +25,17 @@ const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
   );
 };
 
-const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
+const TransferForm = () => {
   const [metamaskAddress] = useLocalStorage<string>('metamask-address');
+  const [keplrAddress] = useLocalStorage<string>('address');
+  const [loading, setLoading] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(bridgeNetworks[0]);
   const tokens = bridgeTokens[selectedNetwork.chainId];
-  const [selectedToken, setSelectedToken] = useState(tokens[0]);
+  const [selectedToken, setSelectedToken] = useState<TokenInfo>(tokens[0]);
 
   const [toggle, setToggle] = useState(true);
 
-  const oraiContract = new window.web3.eth.Contract(
-    Erc20ABI as AbiItem[],
-    ORAI_CONTRACT_ADDRESS
-  );
-
-  const gravityContract = new window.web3.eth.Contract(
-    GravityABI as AbiItem[],
-    GRAVITY_CONTRACT_ADDRESS
-  );
-  // call lastBatchNonce to query nonce from submitter
-  // call sendToCosmos to send token to cosmos, then show the balance
+  // call sendToCosmos(tokenContract,destination,amount) to send token to cosmos, then show the balance
 
   const onTokenSelect = (item: TokenInfo) => {
     setSelectedToken(item);
@@ -67,18 +49,51 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
     setToggle(!toggle);
   };
 
+  const inputAmountRef = useRef();
   const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
-  useEffect(() => {
-    const getBalances = async () => {
-      const result = await oraiContract.methods
-        .balanceOf(metamaskAddress)
-        .call();
-      const balance = window.web3.utils.fromWei(result);
-      console.log(balance);
-    };
+  const bridgeTransfer = async () => {
+    const amountVal = inputAmountRef.current.value.trim();
+    if (!amountVal) return;
+    if (selectedNetwork.cosmosBased || !toggle) {
+      alert('Currently supporte transfering from Ethereum to cosmos');
+      return;
+    }
 
-    getBalances();
+    try {
+      const balance = window.web3.utils.toWei(amountVal);
+      const tokenContract = selectedToken.contract_addr;
+      const gravityContract = new window.web3.eth.Contract(
+        GravityABI as AbiItem[],
+        GRAVITY_CONTRACT_ADDRESS
+      );
+
+      setLoading(true);
+      const result = await gravityContract.methods
+        .sendToCosmos(
+          tokenContract,
+          window.web3.utils.toHex(keplrAddress),
+          balance
+        )
+        .send({
+          from: metamaskAddress
+        });
+      console.log(result);
+      setLoading(false);
+    } catch (ex) {
+      alert(ex.message);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // const getBalances = async () => {
+    //   const result = await oraiContract.methods
+    //     .balanceOf(metamaskAddress)
+    //     .call();
+    //   const balance = window.web3.utils.fromWei(result);
+    // };
+    // getBalances();
   }, []);
 
   return (
@@ -129,6 +144,7 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
           step="0.000001"
           type="number"
           className={styles.textAmount}
+          ref={inputAmountRef}
           onChange={onAmountChanged}
         />
         <div>
@@ -143,7 +159,13 @@ const TransferForm: FC<Props> = ({ loading, size, className, children }) => {
             )}
           />
 
-          <Button>Transfer</Button>
+          {loading ? (
+            <Loading className={styles.loading} />
+          ) : (
+            <Button type="button" onClick={bridgeTransfer}>
+              Transfer
+            </Button>
+          )}
         </div>
       </div>
     </div>

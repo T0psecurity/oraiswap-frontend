@@ -13,6 +13,18 @@
   }
 }
 
+.loading {
+  zoom: 0.5;
+  &::before {
+    content: 'Loading';
+    font-size: 30px;
+    position: absolute;
+    right: 100px;
+    top: 10px;
+    color: $deepgray;
+  }
+}
+
 .networks,
 .networksReversed {
   width: 100%;
@@ -88,12 +100,13 @@
 .textAmount {
   text-align: right;
   font-size: 24px;
+  font-weight: bold;
   height: 38px;
   line-height: 38px;
   width: 100%;
   border-bottom: 1px solid $semiblue;
   margin-bottom: 10px;
-
+  color: $deepgray;
   &::placeholder {
     color: $gray;
   }

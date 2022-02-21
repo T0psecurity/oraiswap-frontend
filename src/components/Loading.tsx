@@ -5,9 +5,10 @@ import classNames from 'classnames';
 interface Props {
   size?: number;
   className?: string;
+  theme?: 'dark' | 'light';
 }
 
-const Loading = ({ size, className }: Props) => {
+const Loading = ({ size, className, theme = 'light' }: Props) => {
   const style: any = {};
   if (size) {
     style.width = size;
@@ -15,7 +16,12 @@ const Loading = ({ size, className }: Props) => {
   }
   return (
     <div
-      className={classNames(styles.loading, styles['lds-ripple'], className)}
+      className={classNames(
+        styles.loading,
+        styles['lds-ripple'],
+        styles[theme],
+        className
+      )}
       style={style}
     >
       <div></div>
