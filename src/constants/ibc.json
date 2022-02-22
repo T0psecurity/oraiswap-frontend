@@ -1,0 +1,16 @@
+{
+    "gravity-test": {
+        "Oraichain-testnet": {
+            "source": "transfer",
+            "channel": "channel-0",
+            "timeout": 60
+        }
+    },
+    "Oraichain-testnet": {
+        "gravity-test": {
+            "source": "transfer",
+            "channel": "channel-1",
+            "timeout": 60
+        }
+    }
+}

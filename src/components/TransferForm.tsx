@@ -10,15 +10,21 @@ import ComboBox from './ComboBox';
 import { TokenInfo } from 'types/token';
 import Button from './Button';
 import { GRAVITY_CONTRACT_ADDRESS } from 'constants/constants';
+import ibcInfos from 'constants/ibc.json';
 import GravityABI from 'constants/abi/gravity.json';
 import Erc20ABI from 'constants/abi/erc20.json';
 import useLocalStorage from 'libs/useLocalStorage';
+import { SigningStargateClient } from '@cosmjs/stargate';
+import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import {
   bridgeNetworks,
   NetworkItem,
   oraiBridgeNetwork
 } from 'constants/networks';
+import gravityRegistry from 'libs/gravity-registry';
 import bridgeTokens from 'constants/bridge-tokens.json';
+import { coin } from '@cosmjs/proto-signing';
+import { IBCInfo } from 'types/ibc';
 
 const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
   return (
@@ -58,7 +64,43 @@ const TransferForm = () => {
   const inputAmountRef = useRef();
   const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
-  const transferFromGravity = async (amountVal: string) => {};
+  const transferFromGravity = async (amountVal: string) => {
+    await window.keplr.enable(sourceNetwork.chainId);
+    const rawAmount = Math.round(
+      parseFloat(amountVal) * 10 ** selectedToken.decimals
+    ).toString();
+
+    const offlineSigner = window.getOfflineSigner(sourceNetwork.chainId);
+    // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+    const client = await SigningStargateClient.connectWithSigner(
+      sourceNetwork.rpc,
+      offlineSigner,
+      { registry: gravityRegistry }
+    );
+
+    const message = {
+      typeUrl: '/gravity.v1.MsgSendToEth',
+      value: MsgSendToEth.fromPartial({
+        sender: keplrAddress,
+        ethDest: metamaskAddress,
+        amount: {
+          denom: selectedToken.contract_addr,
+          amount: rawAmount
+        },
+        bridgeFee: {
+          denom: selectedToken.contract_addr,
+          // just a number to make sure there is a friction
+          amount: '50000000000'
+        }
+      })
+    };
+    const fee = {
+      amount: [],
+      gas: '200000'
+    };
+    const result = await client.signAndBroadcast(keplrAddress, [message], fee);
+    return result;
+  };
 
   const transferToGravity = async (amountVal: string) => {
     const balance = window.web3.utils.toWei(amountVal);
@@ -75,10 +117,34 @@ const TransferForm = () => {
     return result;
   };
 
-  const transferFromIBC = async (amountVal: string) => {};
-
   // such as Oraichain to Gravity
-  const transferToIBC = async (amountVal: string) => {};
+  const transferIBC = async (amountVal: string) => {
+    await window.keplr.enable(sourceNetwork.chainId);
+    const amount = coin(
+      Math.round(parseFloat(amountVal) * 10 ** selectedToken.decimals),
+      selectedToken.contract_addr
+    );
+    const offlineSigner = window.getOfflineSigner(sourceNetwork.chainId);
+    // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+    const client = await SigningStargateClient.connectWithSigner(
+      sourceNetwork.rpc,
+      offlineSigner
+    );
+    const ibcInfo: IBCInfo =
+      ibcInfos[sourceNetwork.chainId][destNetwork.chainId];
+
+    const result = await client.sendIbcTokens(
+      keplrAddress,
+      keplrAddress,
+      amount,
+      ibcInfo.source,
+      ibcInfo.channel,
+      undefined,
+      (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
+    );
+
+    return result;
+  };
 
   // do bridge transfer based on conditions
   const bridgeTransfer = async () => {
@@ -88,25 +154,24 @@ const TransferForm = () => {
     try {
       let result;
       setLoading(true);
-      if (toggle) {
-        // transfer to
-        if (selectedNetwork.cosmosBased) {
-          // transfer to ibc
-          result = await transferToIBC(amountVal);
-        } else {
-          // transfer to gravity, need convert to Wei
-          result = await transferToGravity(amountVal);
-        }
+
+      // from bridge
+
+      // transfer with IBC
+      if (selectedNetwork.cosmosBased) {
+        // transfer to ibc
+        result = await transferIBC(amountVal);
       } else {
-        // transfer from
-        if (selectedNetwork.cosmosBased) {
-          // transfer from ibc
-          result = await transferFromIBC(amountVal);
+        // transfer gravity from bridge
+        if (toggle) {
+          // transfer to bridge from evm based
+          result = await transferToGravity(amountVal);
         } else {
-          // transfer from gravity
+          // transfer to evm based from bridge
           result = await transferFromGravity(amountVal);
         }
       }
+
       console.log(result);
       setLoading(false);
     } catch (ex) {
