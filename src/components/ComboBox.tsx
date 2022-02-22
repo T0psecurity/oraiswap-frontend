@@ -32,6 +32,11 @@ const ComboBox: FC<Props> = ({
   const [selectedOption, setSelectedOption] = useState<any>(selected);
   const toggling = () => setIsOpen(!isOpen);
 
+  useEffect(() => {
+    // need update selectedOption when selected changed
+    setSelectedOption(selected);
+  }, [selected]);
+
   const onOptionClicked = (value: string) => {
     setSelectedOption(value);
     onSelect(value);

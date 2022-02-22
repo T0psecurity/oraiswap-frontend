@@ -19,7 +19,7 @@
     ],
     "gravity-test": [
         {
-            "name": "Oraichain",
+            "name": "Oraichain Bridge",
             "symbol": "ORAI",
             "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
             "decimals": 6,
@@ -33,7 +33,7 @@
             "symbol": "ORAI",
             "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
             "decimals": 6,
-            "contract_addr": "",
+            "contract_addr": "ibc/28E2AF001B56D4D784D002841A7658C68833F6D52730CB2E0EE0EB43BA8F41DB",
             "verified": true
         }
     ]

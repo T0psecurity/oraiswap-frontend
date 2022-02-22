@@ -13,13 +13,17 @@ import { GRAVITY_CONTRACT_ADDRESS } from 'constants/constants';
 import GravityABI from 'constants/abi/gravity.json';
 import Erc20ABI from 'constants/abi/erc20.json';
 import useLocalStorage from 'libs/useLocalStorage';
-import { bridgeNetworks, NetworkItem } from 'constants/networks';
+import {
+  bridgeNetworks,
+  NetworkItem,
+  oraiBridgeNetwork
+} from 'constants/networks';
 import bridgeTokens from 'constants/bridge-tokens.json';
 
 const TokenItem: FC<{ name: string; icon: string }> = ({ name, icon }) => {
   return (
-    <div className={styles.tokenItem}>
-      <img src={icon} />
+    <div title={name} className={styles.tokenItem}>
+      <img alt={icon} src={icon} />
       <span>{name}</span>
     </div>
   );
@@ -29,13 +33,13 @@ const TransferForm = () => {
   const [metamaskAddress] = useLocalStorage<string>('metamask-address');
   const [keplrAddress] = useLocalStorage<string>('address');
   const [loading, setLoading] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState(bridgeNetworks[0]);
-  const tokens = bridgeTokens[selectedNetwork.chainId];
-  const [selectedToken, setSelectedToken] = useState<TokenInfo>(tokens[0]);
-
   const [toggle, setToggle] = useState(true);
+  const [selectedNetwork, setSelectedNetwork] = useState(bridgeNetworks[0]);
 
-  // call sendToCosmos(tokenContract,destination,amount) to send token to cosmos, then show the balance
+  const tokens =
+    bridgeTokens[toggle ? selectedNetwork.chainId : oraiBridgeNetwork.chainId];
+
+  const [selectedToken, setSelectedToken] = useState<TokenInfo>(tokens[0]);
 
   const onTokenSelect = (item: TokenInfo) => {
     setSelectedToken(item);
@@ -52,28 +56,54 @@ const TransferForm = () => {
   const inputAmountRef = useRef();
   const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
+  const transferFromGravity = async (amountVal: string) => {};
+
+  const transferToGravity = async (amountVal: string) => {
+    const balance = window.web3.utils.toWei(amountVal);
+    const tokenContract = selectedToken.contract_addr;
+    const gravityContract = new window.web3.eth.Contract(
+      GravityABI as AbiItem[],
+      GRAVITY_CONTRACT_ADDRESS
+    );
+    const result = await gravityContract.methods
+      .sendToCosmos(tokenContract, keplrAddress, balance)
+      .send({
+        from: metamaskAddress
+      });
+    return result;
+  };
+
+  const transferFromIBC = async (amountVal: string) => {};
+
+  const transferToIBC = async (amountVal: string) => {};
+
+  // do bridge transfer based on conditions
   const bridgeTransfer = async () => {
     const amountVal = inputAmountRef.current.value.trim();
     if (!amountVal) return;
-    if (selectedNetwork.cosmosBased || !toggle) {
-      alert('Currently supporte transfering from Ethereum to cosmos');
-      return;
-    }
 
     try {
-      const balance = window.web3.utils.toWei(amountVal);
-      const tokenContract = selectedToken.contract_addr;
-      const gravityContract = new window.web3.eth.Contract(
-        GravityABI as AbiItem[],
-        GRAVITY_CONTRACT_ADDRESS
-      );
-
+      let result;
       setLoading(true);
-      const result = await gravityContract.methods
-        .sendToCosmos(tokenContract, keplrAddress, balance)
-        .send({
-          from: metamaskAddress
-        });
+      if (toggle) {
+        // transfer to
+        if (selectedNetwork.cosmosBased) {
+          // transfer to ibc
+          result = await transferToIBC(amountVal);
+        } else {
+          // transfer to gravity, need convert to Wei
+          result = await transferToGravity(amountVal);
+        }
+      } else {
+        // transfer from
+        if (selectedNetwork.cosmosBased) {
+          // transfer from ibc
+          result = await transferFromIBC(amountVal);
+        } else {
+          // transfer from gravity
+          result = await transferFromGravity(amountVal);
+        }
+      }
       console.log(result);
       setLoading(false);
     } catch (ex) {
@@ -90,7 +120,8 @@ const TransferForm = () => {
     //   const balance = window.web3.utils.fromWei(result);
     // };
     // getBalances();
-  }, []);
+    setSelectedToken(tokens[0]);
+  }, [tokens]);
 
   return (
     <div className={styles.container}>

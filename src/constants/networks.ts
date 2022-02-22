@@ -65,6 +65,15 @@ export interface NetworkItem {
   icon: string;
   rpc: string;
 }
+
+export const oraiBridgeNetwork: NetworkItem = {
+  cosmosBased: true,
+  name: 'OraiBridge',
+  chainId: 'gravity-test',
+  rpc: 'http://125.212.192.225:26657',
+  icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
+};
+
 export const bridgeNetworks: NetworkItem[] = [
   {
     cosmosBased: false,
