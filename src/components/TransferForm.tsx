@@ -35,9 +35,11 @@ const TransferForm = () => {
   const [loading, setLoading] = useState(false);
   const [toggle, setToggle] = useState(true);
   const [selectedNetwork, setSelectedNetwork] = useState(bridgeNetworks[0]);
-
-  const tokens =
-    bridgeTokens[toggle ? selectedNetwork.chainId : oraiBridgeNetwork.chainId];
+  let [sourceNetwork, destNetwork] = [selectedNetwork, oraiBridgeNetwork];
+  if (!toggle) {
+    [sourceNetwork, destNetwork] = [destNetwork, sourceNetwork];
+  }
+  const tokens = bridgeTokens[sourceNetwork.chainId][destNetwork.chainId];
 
   const [selectedToken, setSelectedToken] = useState<TokenInfo>(tokens[0]);
 
@@ -75,6 +77,7 @@ const TransferForm = () => {
 
   const transferFromIBC = async (amountVal: string) => {};
 
+  // such as Oraichain to Gravity
   const transferToIBC = async (amountVal: string) => {};
 
   // do bridge transfer based on conditions

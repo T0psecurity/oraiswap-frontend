@@ -3,9 +3,9 @@ import { div, times } from 'libs/math';
 import { toAmount } from 'libs/parse';
 import { Type } from 'pages/Swap';
 import { useEffect, useMemo, useState } from 'react';
-import Cosmos from '@oraichain/cosmosjs';
 import useAPI, { SimulatedData } from './useAPI';
 import { tokenInfos } from './usePairs';
+import { Coin } from '@cosmjs/cosmwasm-stargate/build/codec/cosmos/base/v1beta1/coin';
 
 type Params = {
   from: string;
@@ -98,17 +98,15 @@ const useAutoRouter = (params: Params) => {
       if (type === Type.PROVIDE || type === Type.WITHDRAW) {
         return;
       }
-      const res: Cosmos.message.cosmwasm.wasm.v1beta1.MsgExecuteContract[] = await generateContractMessages(
-        {
-          type: Type.SWAP,
-          amount,
-          from,
-          to,
-          sender: '-',
-          max_spread: 0,
-          belief_price: 0
-        }
-      );
+      const res = await generateContractMessages({
+        type: Type.SWAP,
+        amount,
+        from,
+        to,
+        sender: '-',
+        max_spread: 0,
+        belief_price: 0
+      });
       if (Array.isArray(res) && !isCanceled) {
         setMsgs(res);
       }

@@ -53,7 +53,7 @@ import { useModal } from 'components/Modal';
 import Settings, { SettingValues } from 'components/Settings';
 import useLocalStorage from 'libs/useLocalStorage';
 import useAutoRouter from 'rest/useAutoRouter';
-import Cosmos from '@oraichain/cosmosjs';
+import { Coin } from '@cosmjs/cosmwasm-stargate/build/codec/cosmos/base/v1beta1/coin';
 
 enum Key {
   token1 = 'token1',
@@ -76,7 +76,6 @@ enum Key {
 
 const priceKey = PriceKey.PAIR;
 const infoKey = AssetInfoKey.COMMISSION;
-const { Coin } = Cosmos.message.cosmos.base.v1beta1;
 
 const Wrapper = styled.div`
   width: 100%;
@@ -857,7 +856,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
           gasPrices: `${gasPrice}${getSymbol(feeSymbol)}`
         };
 
-        const signMsg = new Cosmos.message.cosmos.tx.v1beta1.Tx();
+        const signMsg = {}; //new Cosmos.message.cosmos.tx.v1beta1.Tx();
         // const signMsg = await terra.tx.create(
         //   [{ address: walletAddress }],
         //   txOptions

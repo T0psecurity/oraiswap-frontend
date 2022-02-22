@@ -1,4 +1,3 @@
-import { BroadCastMode } from '@oraichain/cosmosjs';
 import { Network } from 'bip32';
 import { Buffer } from 'buffer';
 import Keplr from '../libs/kelpr';
@@ -12,7 +11,6 @@ declare global {
     fees?: number;
     funds?: string;
     memo?: string;
-    mode?: BroadCastMode;
   };
 
   type ExecuteKeplrOptions = {

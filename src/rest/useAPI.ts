@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useCallback } from 'react';
 import oraiswapConfig from 'constants/oraiswap.json';
 import axios from './request';
@@ -8,7 +9,7 @@ import { ORAI, UAIRI } from 'constants/constants';
 import useQuerySmart from 'hooks/useQuerySmart';
 import useLocalStorage from 'libs/useLocalStorage';
 import { useContractsAddress } from 'hooks/useContractsAddress';
-import Cosmos from '@oraichain/cosmosjs';
+import { Coin } from '@cosmjs/cosmwasm-stargate/build/codec/cosmos/base/v1beta1/coin';
 
 interface DenomBalanceResponse {
   balances: DenomInfo[];
@@ -336,12 +337,12 @@ export default () => {
 
       const sent_funds = amount ? [{ denom: ORAI, amount }] : null;
       const msgs = [
-        new Cosmos.message.cosmwasm.wasm.v1beta1.MsgExecuteContract({
-          contract: network.router,
-          msg: Buffer.from(JSON.stringify(input)),
-          sender,
-          sent_funds
-        })
+        // new MsgExecuteContract({
+        //   contract: network.router,
+        //   msg: Buffer.from(JSON.stringify(input)),
+        //   sender,
+        //   sent_funds
+        // })
       ];
 
       return msgs;
