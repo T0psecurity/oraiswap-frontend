@@ -29,6 +29,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "postinstall": "cd node_modules/babel-preset-react-app && yarn",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
@@ -50,7 +51,6 @@
     "react-error-overlay": "6.0.9"
   },
   "devDependencies": {
-    "@cosmjs/launchpad": "^0.27.0",
     "@cosmjs/proto-signing": "^0.27.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

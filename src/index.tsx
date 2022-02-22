@@ -3,7 +3,6 @@ import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import 'hooks/useContractsAddress';
 import './index.scss';
-import './libs/kelpr';
 import ScrollToTop from './layouts/ScrollToTop';
 import Contract from './layouts/Contract';
 import App from './layouts/App';
