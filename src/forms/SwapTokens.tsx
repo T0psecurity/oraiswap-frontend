@@ -164,6 +164,7 @@ const SwapTokens = ({
               if (type === Type.WITHDRAW) {
                 const tokenInfoList = lpTokenInfos.get(item);
                 swapToken = {
+                  ...swapToken,
                   symbol: tokenInfoList
                     ? tokenInfoList[0].symbol + '-' + tokenInfoList[1].symbol
                     : '',
@@ -172,12 +173,13 @@ const SwapTokens = ({
                   icon: tokenInfoList
                     ? [tokenInfoList[0].icon, tokenInfoList[1].icon]
                     : ['', ''],
-                  verified: false
+                  verified: false,
                 };
               } else {
                 const tokenInfo = tokenInfos.get(item);
 
                 swapToken = {
+                  ...swapToken,
                   symbol: tokenInfo?.symbol || '',
                   name: tokenInfo?.name || '',
                   contract_addr: isNativeToken(item) ? '' : item,

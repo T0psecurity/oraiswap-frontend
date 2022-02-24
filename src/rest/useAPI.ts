@@ -284,29 +284,29 @@ export default () => {
     async (
       query:
         | {
-            type: Type.SWAP;
-            from: string;
-            to: string;
-            amount: number | string;
-            max_spread: number | string;
-            belief_price: number | string;
-            sender: string;
-          }
+          type: Type.SWAP;
+          from: string;
+          to: string;
+          amount: number | string;
+          max_spread: number | string;
+          belief_price: number | string;
+          sender: string;
+        }
         | {
-            type: Type.PROVIDE;
-            from: string;
-            to: string;
-            fromAmount: number | string;
-            toAmount: number | string;
-            slippage: number | string;
-            sender: string;
-          }
+          type: Type.PROVIDE;
+          from: string;
+          to: string;
+          fromAmount: number | string;
+          toAmount: number | string;
+          slippage: number | string;
+          sender: string;
+        }
         | {
-            type: Type.WITHDRAW;
-            lpAddr: string;
-            amount: number | string;
-            sender: string;
-          }
+          type: Type.WITHDRAW;
+          lpAddr: string;
+          amount: number | string;
+          sender: string;
+        }
     ) => {
       // @ts-ignore
       const { type, amount, sender, from, to, ...params } = query;
@@ -337,12 +337,12 @@ export default () => {
 
       const sent_funds = amount ? [{ denom: ORAI, amount }] : null;
       const msgs = [
-        // new MsgExecuteContract({
-        //   contract: network.router,
-        //   msg: Buffer.from(JSON.stringify(input)),
-        //   sender,
-        //   sent_funds
-        // })
+        {
+          contract: network.router,
+          msg: Buffer.from(JSON.stringify(input)),
+          sender,
+          sent_funds
+        }
       ];
 
       return msgs;

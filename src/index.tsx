@@ -6,10 +6,12 @@ import './index.scss';
 import ScrollToTop from './layouts/ScrollToTop';
 import Contract from './layouts/Contract';
 import App from './layouts/App';
-import { network } from 'constants/networks';
+// import { network } from 'constants/networks';
+import Keplr from 'libs/keplr';
 
 // enable Keplr
-window.keplr.enable(network.chainId);
+// window.keplr.enable(network.chainId);
+window.Keplr = new Keplr();
 
 render(
   <StrictMode>

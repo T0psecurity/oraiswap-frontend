@@ -13,6 +13,7 @@ import SwapTxInfo from './SwapTxInfo';
 import styles from './Result.module.scss';
 
 import axios from 'rest/request';
+import { network } from 'constants/networks';
 
 export interface ResultProps {
   response?: any;
@@ -30,8 +31,8 @@ enum STATUS {
 }
 
 const Result = ({ response, error, onFailure, parserKey }: ResultProps) => {
-  const txHash = response?.result?.txhash ?? '';
-  const raw_log = response?.result?.raw_log ?? '';
+  const txHash = response?.transactionHash ?? '';
+  const raw_log = JSON.stringify(response?.logs) ?? '';
   /* polling */
   const [txInfo, setTxInfo] = useState<SwapTxInfo>();
 
@@ -47,7 +48,7 @@ const Result = ({ response, error, onFailure, parserKey }: ResultProps) => {
       }
       try {
         const { data: res } = await axios.get(
-          `${process.env.REACT_APP_LCD}/txs/${txHash}`
+          `${network.lcd}/txs/${txHash}`
         );
         if (res?.code) {
           setTxInfo(res);

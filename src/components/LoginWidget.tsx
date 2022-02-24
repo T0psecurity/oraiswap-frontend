@@ -12,14 +12,14 @@ export const LoginWidget: FC<{ text: string }> = ({ text }) => {
   const [address, setAddress] = useLocalStorage<String>('address');
 
   const connectWallet = async () => {
-    if (!window.keplr) {
+    if (!(await window.Keplr.getKeplr())) {
       alert('You must install Keplr to continue');
       return;
     }
-    const offlineSigner = window.keplr.getOfflineSigner(network.chainId);
-    const accounts = await offlineSigner.getAccounts();
+    await window.Keplr.suggestChain(network.chainId);
+    const address = await window.Keplr.getKeplrAddr();
 
-    setAddress(accounts?.[0].address);
+    setAddress(address as string);
   };
   const disconnectWallet = () => {
     setAddress('');

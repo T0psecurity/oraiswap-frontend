@@ -3,10 +3,11 @@ import { truncate } from '../libs/text';
 
 import ExtLink from '../components/ExtLink';
 import styles from './SwapTxHash.module.scss';
+import { network } from 'constants/networks';
 
 const TxHash = ({ children: hash }: { children: string }) => {
   return (
-    <ExtLink href={'finder(hash, "tx")'} className={styles.link}>
+    <ExtLink href={`${network.lcd}/txs/${hash}`} className={styles.link}>
       {truncate(hash, [8, 8])}
     </ExtLink>
   );

@@ -62,10 +62,10 @@ const TransferForm = () => {
   };
 
   const inputAmountRef = useRef();
-  const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => {};
+  const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => { };
 
   const transferFromGravity = async (amountVal: string) => {
-    await window.keplr.enable(sourceNetwork.chainId);
+    await window.Keplr.suggestChain(sourceNetwork.chainId);
     const rawAmount = Math.round(
       parseFloat(amountVal) * 10 ** selectedToken.decimals
     ).toString();
@@ -119,7 +119,7 @@ const TransferForm = () => {
 
   // such as Oraichain to Gravity
   const transferIBC = async (amountVal: string) => {
-    await window.keplr.enable(sourceNetwork.chainId);
+    await window.Keplr.suggestChain(sourceNetwork.chainId);
     const amount = coin(
       Math.round(parseFloat(amountVal) * 10 ** selectedToken.decimals),
       selectedToken.contract_addr

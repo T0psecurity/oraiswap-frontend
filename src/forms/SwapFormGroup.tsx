@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './SwapFormGroup.module.scss';
 import Button from '../components/Button';
-import FeeComboBox from './FeeComboBox';
+import FeeComboBox from './FeeCombobox';
 import Loading from 'components/Loading';
 import NetworkComboBox from './NetworkComboBox';
 
