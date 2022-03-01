@@ -42,7 +42,7 @@ const networks: Map<NetworkKey, NetworkConfig> = new Map<
       fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.050000 ORAI
       factory: 'orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra',
       router: 'orai1g0pwp3rgzqywvt0xdut08gknyj5q37rtn5aecx',
-      oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn'
+      oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn',
     }
   ]
 ]);

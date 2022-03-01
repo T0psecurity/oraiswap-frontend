@@ -6,10 +6,13 @@ import { useEffect, useMemo, useState } from 'react';
 import useAPI, { SimulatedData } from './useAPI';
 import { tokenInfos } from './usePairs';
 import { Coin } from '@cosmjs/cosmwasm-stargate/build/codec/cosmos/base/v1beta1/coin';
+import { TokenInfo } from 'types/token';
 
 type Params = {
   from: string;
   to: string;
+  fromInfo: TokenInfo;
+  toInfo: TokenInfo;
   amount: number | string;
   type?: Type;
 };
@@ -19,7 +22,7 @@ function sleep(t: number) {
 }
 
 const useAutoRouter = (params: Params) => {
-  const { from, to, type, amount } = params;
+  const { from, to, type, amount, fromInfo, toInfo } = params;
   // const amount = 1;
   const { generateContractMessages, querySimulate } = useAPI();
   const [isLoading, setIsLoading] = useState(false);
@@ -103,6 +106,8 @@ const useAutoRouter = (params: Params) => {
         amount,
         from,
         to,
+        fromInfo,
+        toInfo,
         sender: '-',
         max_spread: 0,
         belief_price: 0

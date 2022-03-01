@@ -271,6 +271,8 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
   const { isLoading: isAutoRouterLoading, profitableQuery } = useAutoRouter({
     from: formData[Key.token1],
     to: formData[Key.token2],
+    fromInfo: tokenInfo1,
+    toInfo: tokenInfo2,
     amount: formData[Key.value1],
     type: formState.isSubmitted ? undefined : type
   });
@@ -784,6 +786,10 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
     window.location.reload();
   }, [form]);
 
+  const parseAmount = (value, decimal) => {
+    return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
+  }
+
   const handleSubmit = useCallback(
     async (values) => {
       const { token1, token2, value1, value2, feeSymbol, gasPrice } = values;
@@ -798,9 +804,11 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
           const res = await generateContractMessages({
             type: Type.SWAP,
             sender: `${walletAddr}`,
-            amount: `${(parseFloat(value1) * Math.pow(10, tokenInfo1?.decimals)).toFixed(0)}`,
+            amount: parseAmount(value1, tokenInfo1?.decimals),
             from: `${token1}`,
             to: `${token2}`,
+            fromInfo: tokenInfo1,
+            toInfo: tokenInfo2,
             max_spread: slippageTolerance,
             belief_price: `${decimal(
               times(
@@ -832,17 +840,22 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
               [Type.PROVIDE]: {
                 type: Type.PROVIDE,
                 sender: `${walletAddr}`,
-                fromAmount: `${value1}`,
-                toAmount: `${value2}`,
+                fromAmount: parseAmount(value1, tokenInfo1?.decimals),
+                toAmount: parseAmount(value2, tokenInfo2?.decimals),
                 from: `${token1}`,
                 to: `${token2}`,
-                slippage: slippageTolerance
+                fromInfo: tokenInfo1,
+                toInfo: tokenInfo2,
+                slippage: slippageTolerance,
+                pair,
               },
               [Type.WITHDRAW]: {
                 type: Type.WITHDRAW,
                 sender: `${walletAddr}`,
-                amount: `${value1}`,
-                lpAddr: `${lpContract}`
+                info: tokenInfo1,
+                amount: parseAmount(value1, tokenInfo1?.decimals),
+                lpAddr: `${lpContract}`,
+                pair
               }
             }[type] as any
           );
@@ -852,7 +865,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
         }
 
         const msg = msgs[0];
-        console.log("msg: ", msg)
+        console.log("msgs: ", msgs.map(msg => ({ ...msg, msg: Buffer.from(msg.msg).toString() })));
         const result = await CosmJs.execute({ prefix: ORAI, address: msg.contract, walletAddr, handleMsg: Buffer.from(msg.msg.toString()), gasAmount: { denom: ORAI, amount: "0" }, handleOptions: { funds: msg.sent_funds } });
         console.log("result swap tx hash: ", result);
 
