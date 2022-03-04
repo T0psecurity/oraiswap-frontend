@@ -26,6 +26,7 @@ const LoginMetamask: FC<{ text: string }> = ({ text }) => {
     try {
       await activate(injected);
       setAddress(await injected.getAccount());
+      window.location.reload();
     } catch (ex) {
       console.log(ex);
     }
