@@ -4,6 +4,7 @@ interface ExtNetworkConfig {
   chainId: string;
   rpc: string;
   lcd: string;
+  explorer: string;
 }
 
 interface NetworkConfig extends ExtNetworkConfig {
