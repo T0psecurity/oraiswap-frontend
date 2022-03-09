@@ -3,6 +3,8 @@ import { ReactComponent as Logo } from "assets/icons/logo.svg";
 import { ReactComponent as Swap } from "assets/icons/swap.svg";
 import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
 import { ReactComponent as Pools } from "assets/icons/pool.svg";
+import { ReactComponent as Dark } from "assets/icons/dark.svg";
+import { ReactComponent as Light } from "assets/icons/light.svg";
 import { ThemeContext, Themes } from "context/theme-context";
 import React, {
   memo,
@@ -75,25 +77,25 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <Button
           className={
             styles.menu_theme +
-            (theme == Themes.dark ? ` ${styles.active}` : "")
+            (theme === Themes.dark ? ` ${styles.active}` : "")
           }
           onClick={() => {
             setTheme(Themes.dark);
           }}
         >
-          <Logo style={{ width: 20, height: 20 }} />
+          <Dark style={{ width: 15, height: 15 }} />
           <Text className={styles.menu_theme_text}>Dark</Text>
         </Button>
         <Button
           className={
             styles.menu_theme +
-            (theme == Themes.light ? ` ${styles.active}` : "")
+            (theme === Themes.light ? ` ${styles.active}` : "")
           }
           onClick={() => {
             setTheme(Themes.light);
           }}
         >
-          <Logo style={{ width: 20, height: 20 }} />
+          <Light style={{ width: 15, height: 15 }} />
           <Text className={styles.menu_theme_text}>Light</Text>
         </Button>
       </div>
