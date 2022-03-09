@@ -1,6 +1,7 @@
-import { Typography } from 'antd';
+import { Button, Typography } from 'antd';
 import { ReactComponent as Logo } from 'assets/icons/logo.svg';
-import React, { memo, useEffect, useState } from 'react';
+import { ThemeContext, Themes } from 'context/theme-context';
+import React, { memo, useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
 
@@ -9,6 +10,7 @@ const { Text } = Typography;
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
   const [link, setLink] = useState('/');
+  const { theme, setTheme } = useContext(ThemeContext);
 
   useEffect(() => {
     setLink(location.pathname);
@@ -34,6 +36,19 @@ const Menu: React.FC<{}> = React.memo((props) => {
           {renderLink('/pools', 'Pools', setLink)}
           {renderLink('/balance', 'Balance', setLink)}
       </div>
+
+      <div className={styles.menu_themes}>
+        <Button className={styles.menu_theme + (theme == Themes.dark ? ` ${styles.active}` : "")} onClick={() => {setTheme(Themes.dark)}}>
+          <Logo style={{ width: 20, height: 20 }} />
+          <Text className={styles.menu_theme_text}>Dark</Text>
+        </Button>
+        <Button className={styles.menu_theme + (theme == Themes.light ? ` ${styles.active}` : "")} onClick={() => {setTheme(Themes.light)}}>
+          <Logo style={{ width: 20, height: 20 }} />
+          <Text className={styles.menu_theme_text}>Light</Text>
+        </Button>
+      </div>
+      
+      <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
     </div>
   );
 });

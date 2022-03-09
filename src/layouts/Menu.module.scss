@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
+  height: 100%;
 }
 
 .logo {
@@ -12,14 +13,14 @@
   justify-content: center;
   border-bottom: 1px solid #443E55;
   padding-bottom: 20px;
-}
 
-.logo_text {
-  font-weight: 600;
-  font-size: 24px;
-  line-height: 100%;
-  margin-left: 10px;
-  color: #fff;
+  &_text {
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 100%;
+    margin-left: 10px;
+    color: #fff;
+  }
 }
 
 .menu_items {
@@ -41,12 +42,49 @@
   &.active {
     background: #2D2938;
   }
+
+  &_text {
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 100%;
+    color: #fff;
+    margin-left: 10px;
+  }
 }
 
-.menu_item_text {
-  font-weight: 600;
-  font-size: 18px;
-  line-height: 100%;
-  color: #fff;
-  margin-left: 10px;
+.menu_themes {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 400px;
+}
+
+.menu_theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  width: 138px;
+  padding: 5px 24px 6px;
+
+  &:hover {
+    background: #2D2938;
+    cursor: pointer;
+  }
+
+  &.active {
+    background: #2D2938;
+  }
+
+  &_text {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 100%;
+    margin-left: 10px;
+  }
+}
+
+.menu_footer {
+  text-align: center;
+  margin-top: 100px;
 }
