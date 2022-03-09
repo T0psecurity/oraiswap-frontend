@@ -7,6 +7,9 @@
             "hosting": {
                 "oraiswap": [
                     "oraiswap"
+                ],
+                "oraiswap-staging": [
+                    "oraiswap-staging"
                 ]
             }
         }
