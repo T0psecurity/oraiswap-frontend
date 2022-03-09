@@ -7,7 +7,7 @@ import { network } from 'constants/networks';
 
 const TxHash = ({ children: hash }: { children: string }) => {
   return (
-    <ExtLink href={`${network.lcd}/txs/${hash}`} className={styles.link}>
+    <ExtLink href={`${network.explorer}/txs/${hash}`} className={styles.link}>
       {truncate(hash, [8, 8])}
     </ExtLink>
   );

@@ -23,3 +23,6 @@ yarn-error.log*
 
 .vercel
 .firebase/
+
+# ide
+.idea

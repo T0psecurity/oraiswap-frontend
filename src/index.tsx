@@ -6,21 +6,29 @@ import './index.scss';
 import ScrollToTop from './layouts/ScrollToTop';
 import Contract from './layouts/Contract';
 import App from './layouts/App';
-// import { network } from 'constants/networks';
 import Keplr from 'libs/keplr';
+import { network } from 'constants/networks';
 
 // enable Keplr
-// window.keplr.enable(network.chainId);
 window.Keplr = new Keplr();
 
-render(
-  <StrictMode>
-    <Contract>
-      <Router>
-        <ScrollToTop />
-        <App />
-      </Router>
-    </Contract>
-  </StrictMode>,
-  document.getElementById('oraiswap')
-);
+const checkKeplr = async () => {
+  const keplr = await window.Keplr.getKeplr();
+  if (keplr) {
+    // always trigger suggest chain when users enter the webpage
+    await window.Keplr.suggestChain(network.chainId);
+  }
+  render(
+    <StrictMode>
+      <Contract>
+        <Router>
+          <ScrollToTop />
+          <App />
+        </Router>
+      </Contract>
+    </StrictMode>,
+    document.getElementById('oraiswap')
+  );
+}
+
+checkKeplr();

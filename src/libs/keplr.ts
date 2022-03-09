@@ -20,10 +20,8 @@ export default class Keplr {
     suggestChain = async (chainId: string) => {
         const chainInfo = embedChainInfos.find(chainInfo => chainInfo.chainId === chainId);
         if (!chainInfo) throw "Cannot find chain info given the chain id";
-        console.log("chain info: ", chainInfo)
         await window.keplr.experimentalSuggestChain(chainInfo);
         await window.keplr.enable(chainInfo.chainId);
-        console.log("enabled");
     };
 
     async getKeplr(): Promise<keplrType | undefined> {
@@ -35,7 +33,6 @@ export default class Keplr {
         if (!chainId) return undefined;
         const keplr = await this.getKeplr();
         if (keplr) {
-            console.log("keplr key: ", await keplr.getKey(chainId));
             return keplr.getKey(chainId);
         }
         return undefined;

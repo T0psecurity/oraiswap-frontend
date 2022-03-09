@@ -41,6 +41,7 @@ export let tokenInfos: Map<string, TokenInfo> = new Map<string, TokenInfo>([
   [
     ORAI,
     {
+      denom: ORAI,
       contract_addr: ORAI,
       symbol: ORAI,
       name: ORAI,
@@ -93,7 +94,7 @@ export default () => {
           tokenInfos.set(info.token.contract_addr, tokenInfo);
         }
       } else if (isNativeInfo(info)) {
-        tokenInfo = tokenInfos.get(info.native_token.denom);
+        tokenInfo = { denom: info.native_token.denom, ...tokenInfos.get(info.native_token.denom) };
       }
 
       return tokenInfo;

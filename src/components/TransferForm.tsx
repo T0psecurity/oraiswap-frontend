@@ -103,6 +103,9 @@ const TransferForm = () => {
   };
 
   const transferToGravity = async (amountVal: string) => {
+    if (!window.web3.utils) {
+      throw { message: "You need to connect to Metamask to continue" }
+    }
     const balance = window.web3.utils.toWei(amountVal);
     const tokenContract = selectedToken.contract_addr;
     const gravityContract = new window.web3.eth.Contract(
