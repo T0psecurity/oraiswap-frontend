@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { ContractProvider, useContractState } from 'hooks/useContract';
 import useLocalStorage from 'libs/useLocalStorage';
 
-import Header from './Header';
-import Footer from './Footer';
 import usePairs from 'rest/usePairs';
 import routes from 'routes';
 import { ThemeProvider } from 'styled-components';
@@ -31,11 +29,9 @@ const App = () => {
   return (
     <ThemeProvider theme={variables}>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <Header />
         <ContractProvider value={contract}>
           {!isLoading && routes()}
         </ContractProvider>
-        <Footer />
       </Web3ReactProvider>
     </ThemeProvider>
   );

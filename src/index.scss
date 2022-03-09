@@ -5,10 +5,10 @@
 @import 'src/styles/utils';
 
 html {
-  background-image: url(images/BackgroundPattern.svg);
-  @include mobile {
-    background-image: url(images/BackgroundPatternMobile.svg);
-  }
+  // background-image: url(images/BackgroundPattern.svg);
+  // @include mobile {
+  //   background-image: url(images/BackgroundPatternMobile.svg);
+  // }
 }
 
 #oraiswap {
