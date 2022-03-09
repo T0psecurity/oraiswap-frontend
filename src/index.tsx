@@ -1,13 +1,14 @@
-import React, { StrictMode } from 'react';
-import { render } from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import 'hooks/useContractsAddress';
-import './index.scss';
-import ScrollToTop from './layouts/ScrollToTop';
-import Contract from './layouts/Contract';
-import App from './layouts/App';
-import Keplr from 'libs/keplr';
-import { network } from 'constants/networks';
+import React, { StrictMode } from "react";
+import { render } from "react-dom";
+import { BrowserRouter as Router } from "react-router-dom";
+import "hooks/useContractsAddress";
+import "./index.scss";
+import ScrollToTop from "./layouts/ScrollToTop";
+import Contract from "./layouts/Contract";
+import App from "./layouts/App";
+import Keplr from "libs/keplr";
+import { network } from "constants/networks";
+import AuthProvider from "providers/AuthProvider";
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -22,13 +23,15 @@ const checkKeplr = async () => {
     <StrictMode>
       <Contract>
         <Router>
-          <ScrollToTop />
-          <App />
+          <AuthProvider>
+            <ScrollToTop />
+            <App />
+          </AuthProvider>
         </Router>
       </Contract>
     </StrictMode>,
-    document.getElementById('oraiswap')
+    document.getElementById("oraiswap")
   );
-}
+};
 
 checkKeplr();
