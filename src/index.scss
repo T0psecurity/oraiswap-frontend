@@ -1,8 +1,8 @@
-@import 'src/styles/mixins';
-@import 'src/styles/variables';
-@import 'src/styles/reboot';
-@import 'src/styles/colors';
-@import 'src/styles/utils';
+@import "src/styles/mixins";
+@import "src/styles/variables";
+@import "src/styles/reboot";
+@import "src/styles/colors";
+@import "src/styles/utils";
 
 html {
   // background-image: url(images/BackgroundPattern.svg);
@@ -21,4 +21,43 @@ html {
 
 #basement {
   min-height: 100vh;
+}
+
+@font-face {
+  font-family: "IBMPlexSans";
+  src: url("./assets/fonts/IBMPlexSans-Bold.ttf");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "IBMPlexSans";
+  src: url("./assets/fonts/IBMPlexSans-SemiBold.ttf");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "IBMPlexSans";
+  src: url("./assets/fonts/IBMPlexSans-Medium.ttf");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "IBMPlexSans";
+  src: url("./assets/fonts/IBMPlexSans-Regular.ttf");
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+th,
+td,
+div,
+a {
+  font-family: "IBMPlexSans";
 }
