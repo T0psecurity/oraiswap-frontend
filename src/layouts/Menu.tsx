@@ -16,6 +16,7 @@ import React, {
 import { Link, useLocation } from "react-router-dom";
 import styles from "./Menu.module.scss";
 import RequireAuthButton from "components/connect-wallet/RequireAuthButton";
+import { isLoggedIn } from "providers/AuthProvider";
 
 const { Text } = Typography;
 
@@ -54,7 +55,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
       </Link>
       <div className={styles.menu_items}>
         <RequireAuthButton className={styles.connect_btn}>
-          <Text className={styles.connect}>{"Connect wallet"}</Text>
+          <Text className={styles.connect}>
+            {isLoggedIn() ? "Unnamed connected" : "Connect wallet"}
+          </Text>
         </RequireAuthButton>
         {renderLink(
           "/swap",
