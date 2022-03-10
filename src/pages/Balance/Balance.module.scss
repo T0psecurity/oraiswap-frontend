@@ -19,6 +19,23 @@
   width: 100%;
   display: flex;
   flex-direction: row;
+  .tfBtn {
+    background: #612fca;
+    box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+    border-radius: 8px;
+    padding: 16px;
+    justify-content: center;
+    align-content: center;
+    display: flex;
+    margin-top: 24px;
+    margin-left: 30px;
+    margin-right: 30px;
+    cursor: pointer;
+  }
+  .tfTxt {
+    font-weight: 600;
+    font-size: 16px;
+  }
 }
 .divider {
   width: 100%;
@@ -29,15 +46,114 @@
 }
 .from {
   width: 40%;
-  background-color: red;
+  background: linear-gradient(
+    144.98deg,
+    rgba(51, 51, 51, 0.8) 5.29%,
+    rgba(7, 7, 7, 0.8) 95.51%
+  );
+  box-shadow: -6px 6px 9px -10px rgba(0, 0, 0, 0.12);
+  border-radius: 24px;
 }
 .transferBtn {
   width: 20%;
-  align-self: center;
-  justify-content: center;
   display: flex;
+  flex-direction: column;
 }
 .to {
   width: 40%;
-  background-color: blue;
+  background: linear-gradient(
+    144.98deg,
+    rgba(51, 51, 51, 0.8) 5.29%,
+    rgba(7, 7, 7, 0.8) 95.51%
+  );
+  box-shadow: -6px 6px 9px -10px rgba(0, 0, 0, 0.12);
+  border-radius: 24px;
+}
+.label {
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.balanceDescription {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 150%;
+  text-align: center;
+  color: #777e90;
+  align-self: flex-start;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.tableHeader {
+  display: flex;
+  flex-direction: column;
+  background: #141416;
+  padding: 24px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+}
+.tokenWrapper {
+  padding: 24px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  .tokenBalance {
+    flex-direction: column;
+    display: flex;
+    align-items: flex-end;
+  }
+  .tokenAmount {
+    font-weight: 600;
+    font-size: 22px;
+  }
+  &.active {
+    background: #191b21;
+    border: 1px solid #a871df;
+    box-sizing: border-box;
+    border-radius: 12px;
+  }
+}
+.token {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  .tokenInfo {
+    padding-left: 16px;
+    .tokenName {
+      font-weight: 600;
+      font-size: 22px;
+    }
+    .tokenOrg {
+      background: #612fca;
+      padding-left: 4px;
+      padding-right: 4px;
+      border-radius: 4px;
+    }
+    .tokenOrgTxt {
+      font-weight: 600;
+      font-size: 14px;
+    }
+  }
+}
+.table {
+  .tableDes {
+    padding: 24px;
+    padding-top: 0px;
+    justify-content: space-between;
+    display: flex;
+  }
+}
+.subLabel {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 100%;
+  color: #777e90;
+  &.token {
+    align-self: flex-end;
+  }
 }
