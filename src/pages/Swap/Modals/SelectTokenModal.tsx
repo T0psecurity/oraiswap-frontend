@@ -5,9 +5,7 @@ import cn from "classnames/bind";
 
 const cx = cn.bind(style);
 
-const SelectWalletModal: FC<Modal> = ({ isOpen, close, open }) => {
-    const [slippage, setSlippage] = useState(1);
-    const [chosenOption, setChosenOption] = useState(2);
+const SelectTokenModal: FC<Modal> = ({ isOpen, close, open }) => {
 
     const options = [
         {
@@ -54,4 +52,4 @@ const SelectWalletModal: FC<Modal> = ({ isOpen, close, open }) => {
     );
 };
 
-export default SelectWalletModal;
+export default SelectTokenModal;
