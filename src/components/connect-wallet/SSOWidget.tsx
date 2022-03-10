@@ -39,8 +39,6 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
 
         const receivedData = event.data;
 
-        console.log("receivedData", receivedData);
-
         if (
           !receivedData ||
           typeof receivedData !== "string" ||

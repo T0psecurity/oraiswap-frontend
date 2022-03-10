@@ -1,0 +1,43 @@
+.wrapper {
+  padding: 32px;
+}
+.header {
+  display: flex;
+  flex-direction: column;
+  .totalAssets {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    color: #777e90;
+  }
+  .balance {
+    font-weight: 600;
+    font-size: 40px;
+  }
+}
+.transferTab {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #2d2938;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+.from {
+  width: 40%;
+  background-color: red;
+}
+.transferBtn {
+  width: 20%;
+  align-self: center;
+  justify-content: center;
+  display: flex;
+}
+.to {
+  width: 40%;
+  background-color: blue;
+}
