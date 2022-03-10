@@ -1,6 +1,10 @@
+import LoginMetamask from "components/LoginMetamask";
+import LoginWidget from "components/LoginWidget";
 import Modal from "components/Modal";
 import React from "react";
 import SSOWidget, { SSOWidgetType } from "./SSOWidget";
+import "./SSOWidget.scss";
+import MESSAGE from "lang/MESSAGE.json";
 
 interface ConnectWalletModalProps {
   isOpen: boolean;
@@ -14,7 +18,15 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
   open,
 }) => {
   return (
-    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
+    <Modal
+      isOpen={isOpen}
+      close={close}
+      open={open}
+      className={"popup-connect"}
+      isCloseBtn
+    >
+      <LoginWidget text={MESSAGE.Form.Button.ConnectKeplr} />
+      <LoginMetamask text={MESSAGE.Form.Button.ConnectMetamask} />
       <SSOWidget
         type={SSOWidgetType.inline}
         text="Connect Wallet"

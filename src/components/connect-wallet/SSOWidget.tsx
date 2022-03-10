@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/iframe-has-title */
 import { Skeleton } from "antd";
-// import { AuthContext } from 'providers/AuthProvider';
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "./SSOWidget.scss";
 import LocalStorage, { LocalStorageKey } from "services/LocalStorage";
@@ -19,6 +18,7 @@ type SSOWidgetProps = {
   icon?: string;
 };
 
+const REACT_APP_SSO_SERVER = "https://staging.sso.orai.io";
 const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
   ({
     text = "",
@@ -35,9 +35,11 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
 
     useEffect(() => {
       const handler = async (event: any) => {
-        if (event.origin !== process.env.REACT_APP_SSO_SERVER) return;
+        if (event.origin !== REACT_APP_SSO_SERVER) return;
 
         const receivedData = event.data;
+
+        console.log("receivedData", receivedData);
 
         if (
           !receivedData ||
@@ -48,6 +50,7 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
 
         try {
           const parsedData = JSON.parse(receivedData);
+
           const token = parsedData?.token;
           if (token) {
             LocalStorage.saveItem(LocalStorageKey.token, token, 86400 * 1000);
@@ -78,7 +81,7 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
             }, 1000);
           }}
           ref={iframeRef}
-          src={`${`https://staging.sso.orai.io`}/login/embeded/${type}?serviceURL=${
+          src={`${REACT_APP_SSO_SERVER}/login/embeded/${type}?serviceURL=${
             window.location.href
           }&text=${encodeURIComponent(text)}&style=${encodeURIComponent(
             JSON.stringify(style)
