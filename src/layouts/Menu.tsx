@@ -15,6 +15,7 @@ import React, {
 } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./Menu.module.scss";
+import RequireAuthButton from "components/connect-wallet/RequireAuthButton";
 
 const { Text } = Typography;
 
@@ -40,7 +41,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
         className={styles.menu_item + (link === to ? ` ${styles.active}` : "")}
       >
         {icon}
-        {/* <Logo style={{ width: 30, height: 30 }} /> */}
         <Text className={styles.menu_item_text}>{title}</Text>
       </Link>
     );
@@ -53,6 +53,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <Text className={styles.logo_text}>OraiBridge</Text>
       </Link>
       <div className={styles.menu_items}>
+        <RequireAuthButton className={styles.connect_btn}>
+          <Text className={styles.connect}>{"Connect wallet"}</Text>
+        </RequireAuthButton>
         {renderLink(
           "/swap",
           "Swap",

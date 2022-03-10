@@ -4,6 +4,7 @@ import { Skeleton } from "antd";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "./SSOWidget.scss";
 import LocalStorage, { LocalStorageKey } from "services/LocalStorage";
+import { AuthContext } from "providers/AuthProvider";
 
 export enum SSOWidgetType {
   inline = "inline",
@@ -26,8 +27,8 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
     buttonStyle = {},
     icon = "https://storage.googleapis.com/orailabelstudio/icon/orai-connect.svg",
   }) => {
-    // const authCtx = useContext(AuthContext);
-    // const { dispatch: dispatchAuth } = authCtx;
+    const authCtx = useContext(AuthContext);
+    const { dispatch: dispatchAuth } = authCtx;
 
     const iframeRef = useRef() as any;
     const [iframeLoading, setIframeLoading] = useState(true);
@@ -66,8 +67,7 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
       return () => {
         window.removeEventListener("message", handler);
       };
-    }, []);
-    // }, [dispatchAuth]);
+    }, [dispatchAuth]);
 
     return (
       <div className="sso_widget">
@@ -78,9 +78,7 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
             }, 1000);
           }}
           ref={iframeRef}
-          src={`${
-            process.env.REACT_APP_SSO_SERVER
-          }/login/embeded/${type}?serviceURL=${
+          src={`${`https://staging.sso.orai.io`}/login/embeded/${type}?serviceURL=${
             window.location.href
           }&text=${encodeURIComponent(text)}&style=${encodeURIComponent(
             JSON.stringify(style)

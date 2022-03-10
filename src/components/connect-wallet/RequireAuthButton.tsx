@@ -17,8 +17,12 @@ const RequireAuthButton: React.FC<any> = (props: any) => {
       </Button>
       {openConnectWalletModal && (
         <ConnectWalletModal
-          onClose={() => {
+          isOpen={openConnectWalletModal}
+          close={() => {
             setOpenConnectWalletModal(false);
+          }}
+          open={() => {
+            setOpenConnectWalletModal(true);
           }}
         />
       )}
