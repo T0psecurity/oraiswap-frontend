@@ -124,13 +124,27 @@ const Balance: React.FC<BalanceProps> = () => {
   const [to, setTo] = useState<TokenItemType>({});
   const [fromAmount, setFromAmount] = useState<string>("0");
 
-  const onClickTokenFrom = useCallback((token: TokenItemType) => {
-    setFrom(token);
+  const onClickToken = useCallback((type: string, token: TokenItemType) => {
+    if (type === "to") {
+      setTo(token);
+    } else {
+      setFrom(token);
+    }
   }, []);
 
-  const onClickTokenTo = useCallback((token: TokenItemType) => {
-    setTo(token);
-  }, []);
+  const onClickTokenFrom = useCallback(
+    (token: TokenItemType) => {
+      onClickToken("from", token);
+    },
+    [onClickToken]
+  );
+
+  const onClickTokenTo = useCallback(
+    (token: TokenItemType) => {
+      onClickToken("to", token);
+    },
+    [onClickToken]
+  );
 
   return (
     <Layout>
