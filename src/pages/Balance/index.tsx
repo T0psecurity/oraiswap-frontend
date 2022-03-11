@@ -40,7 +40,7 @@ const tokens = [
       token: 123123.45,
       usd: 100003221,
     },
-    icon: <ATOMCOSMOS style={{ width: 44, height: 44 }} />,
+    icon: <ATOMCOSMOS className={styles.tokenIcon} />,
   },
   {
     name: "ORAI",
@@ -49,7 +49,7 @@ const tokens = [
       token: 123123.45,
       usd: 100003221,
     },
-    icon: <ORAI style={{ width: 44, height: 44 }} />,
+    icon: <ORAI className={styles.tokenIcon} />,
   },
   {
     name: "ETH",
@@ -58,7 +58,7 @@ const tokens = [
       token: 123123.45,
       usd: 100003221,
     },
-    icon: <ETH style={{ width: 44, height: 44 }} />,
+    icon: <ETH className={styles.tokenIcon} />,
   },
   {
     name: "BNB",
@@ -67,7 +67,7 @@ const tokens = [
       token: 123123.45,
       usd: 100003221,
     },
-    icon: <BNB style={{ width: 44, height: 44 }} />,
+    icon: <BNB className={styles.tokenIcon} />,
   },
   {
     name: "OSMO",
@@ -76,7 +76,7 @@ const tokens = [
       token: 123123.45,
       usd: 100003221,
     },
-    icon: <OSMO style={{ width: 44, height: 44 }} />,
+    icon: <OSMO className={styles.tokenIcon} />,
   },
 ];
 
@@ -102,7 +102,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
       }
     >
       <div className={styles.token}>
-        {icon ?? <ATOMCOSMOS style={{ width: 44, height: 44 }} />}
+        {icon ?? <ATOMCOSMOS className={styles.tokenIcon} />}
         <div className={styles.tokenInfo}>
           <div className={styles.tokenName}>{name}</div>
           <div className={styles.tokenOrg}>
