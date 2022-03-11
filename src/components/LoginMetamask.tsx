@@ -9,6 +9,9 @@ import Button from 'components/Button';
 import Icon from './Icon';
 import MetamaskImage from 'images/metamask.png';
 import Web3 from 'web3';
+import cn from "classnames/bind";
+
+const cx = cn.bind(styles);
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 3, 4, 5, 15]
@@ -57,22 +60,33 @@ const LoginMetamask: FC<{ text: string }> = ({ text }) => {
   }, []);
 
   return (
-    <div className={classNames(styles.container)}>
-      {address ? (
-        <Button onClick={disconnect} className={classNames(styles.connected)}>
-          <Icon size={16} name="account_balance_wallet" />
-          <p className={classNames(styles.address)}>
-            <CenterEllipsis size={6} text={address} />
-          </p>
-          <Icon size={20} name="close" />
-        </Button>
-      ) : (
-        <Button className={classNames(styles.connect)} onClick={connect}>
-          <img height={16} src={MetamaskImage} alt="Metamask" />
-          {text}
-        </Button>
-      )}
-    </div>
+    // <div className={classNames(styles.container)}>
+    //   {address ? (
+    //     <Button onClick={disconnect} className={classNames(styles.connected)}>
+    //       <Icon size={16} name="account_balance_wallet" />
+    //       <p className={classNames(styles.address)}>
+    //         <CenterEllipsis size={6} text={address} />
+    //       </p>
+    //       <Icon size={20} name="close" />
+    //     </Button>
+    //   ) : (
+    //     <Button className={classNames(styles.connect)} onClick={connect}>
+    //       <img height={16} src={MetamaskImage} alt="Metamask" />
+    //       {text}
+    //     </Button>
+    //   )}
+    // </div>
+    <div
+      className={cx("item")}
+      onClick={connect}
+    >
+      <img src={require(`assets/icons/metamask.svg`).default} className={cx('logo')} />
+      <div className={cx('grow')}>
+        <div className={cx('network-title')}>Metamask</div>
+        <div className={cx('des')}>Connect using browser wallet</div>
+      </div>
+      <div className={cx('arrow-right')} />
+    </div >
   );
 };
 
