@@ -1,56 +1,78 @@
 {
-    "ethereum": {
-        "gravity-test": [
-            {
-                "name": "Oraichain",
-                "symbol": "ORAI",
-                "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
-                "decimals": 18,
-                "contract_addr": "0x3619DbE27d7c1e7E91aA738697Ae7Bc5FC3eACA5",
-                "verified": true
-            },
-            {
-                "name": "aiRight",
-                "symbol": "AIRI",
-                "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/11563.png",
-                "decimals": 18,
-                "contract_addr": "0x7e2a35c746f2f7c240b664f1da4dd100141ae71f",
-                "verified": true
-            }
-        ]
-    },
-    "gravity-test": {
-        "ethereum": [
-            {
-                "name": "Oraichain Bridge",
-                "symbol": "ORAI",
-                "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
-                "decimals": 18,
-                "contract_addr": "gravity0x3619DbE27d7c1e7E91aA738697Ae7Bc5FC3eACA5",
-                "verified": true
-            }
-        ],
-        "Oraichain-testnet": [
-            {
-                "name": "Oraichain Bridge",
-                "symbol": "ORAI",
-                "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
-                "decimals": 18,
-                "contract_addr": "gravity0x3619DbE27d7c1e7E91aA738697Ae7Bc5FC3eACA5",
-                "verified": true
-            }
-        ]
-    },
-    "Oraichain-testnet": {
-        "gravity-test": [
-            {
-                "name": "Oraichain",
-                "symbol": "ORAI",
-                "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
-                "decimals": 18,
-                "contract_addr": "ibc/28E2AF001B56D4D784D002841A7658C68833F6D52730CB2E0EE0EB43BA8F41DB",
-                "verified": true
-            }
-        ]
-    }
+  "ethereum": {
+    "gravity-test": [
+      {
+        "name": "Oraichain",
+        "symbol": "ORAI",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
+        "decimals": 18,
+        "contract_addr": "0x3619DbE27d7c1e7E91aA738697Ae7Bc5FC3eACA5",
+        "verified": true
+      },
+      {
+        "name": "aiRight",
+        "symbol": "AIRI",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/11563.png",
+        "decimals": 18,
+        "contract_addr": "0x7e2a35c746f2f7c240b664f1da4dd100141ae71f",
+        "verified": true
+      }
+    ]
+  },
+  "bsc": {
+    "gravity-test": [
+      {
+        "name": "Oraichain",
+        "symbol": "ORAI",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
+        "decimals": 18,
+        "contract_addr": "0x9AD563929F05bd294D39F26e07b6cbc807B338C3",
+        "verified": true
+      }
+    ]
+  },
+  "gravity-test": {
+    "ethereum": [
+      {
+        "name": "Oraichain Bridge",
+        "symbol": "ORAI",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
+        "decimals": 18,
+        "contract_addr": "gravity0x3619DbE27d7c1e7E91aA738697Ae7Bc5FC3eACA5",
+        "verified": true
+      }
+    ],
+    "bsc": [
+      {
+        "name": "Oraichain Bridge",
+        "symbol": "ORAI",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
+        "decimals": 18,
+        "contract_addr": "gravity0x9AD563929F05bd294D39F26e07b6cbc807B338C3",
+        "verified": true
+      }
+    ],
+    "Oraichain-testnet": [
+      {
+        "name": "Oraichain Bridge",
+        "symbol": "ORAI",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
+        "decimals": 18,
+        "contract_addr": "gravity0x3619DbE27d7c1e7E91aA738697Ae7Bc5FC3eACA5",
+        "verified": true
+      }
+    ]
+  },
+  "Oraichain-testnet": {
+    "gravity-test": [
+      {
+        "name": "Oraichain",
+        "symbol": "ORAI",
+        "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png",
+        "decimals": 18,
+        "contract_addr": "ibc/28E2AF001B56D4D784D002841A7658C68833F6D52730CB2E0EE0EB43BA8F41DB",
+        "verified": true
+      }
+    ]
+  }
 }
