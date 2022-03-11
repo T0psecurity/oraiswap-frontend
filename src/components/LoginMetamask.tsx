@@ -102,7 +102,7 @@ const LoginMetamask: FC<{ text: string }> = ({ text }) => {
             <Icon size={20} name="close" />
           </div>
         ) : (
-          <div className={cx("arrow-right")} />
+          <></>
         )}
       </div>
     </>

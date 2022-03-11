@@ -56,14 +56,14 @@ export const LoginWidget: FC<{ text: string }> = ({ text }) => {
     >
       <img src={KeplrImage} className={cx("logo")} />
       <div className={cx("grow")}>
-        <div className={cx("network-title")}>Keplr</div>
+        <div className={cx("network-title")}>Keplr Wallet</div>
         <div className={cx("des")}>
           {address ? (
-            <p>
+            <>
               <CenterEllipsis size={6} text={address as string} />
               {" | "}
               {network.id}
-            </p>
+            </>
           ) : (
             "Connect using browser wallet"
           )}
@@ -74,7 +74,7 @@ export const LoginWidget: FC<{ text: string }> = ({ text }) => {
           <Icon size={20} name="close" />
         </div>
       ) : (
-        <div className={cx("arrow-right")} />
+        <></>
       )}
     </div>
   );

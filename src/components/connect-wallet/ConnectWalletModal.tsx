@@ -1,6 +1,5 @@
 import LoginMetamask from "components/LoginMetamask";
 import LoginWidget from "components/LoginWidget";
-import LoginOraiWallet from "components/LoginOraiWallet";
 import Modal from "components/Modal";
 import React from "react";
 import "./SSOWidget.scss";
@@ -30,7 +29,6 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
         <div className={cx("options")}>
           <LoginWidget text={MESSAGE.Form.Button.ConnectKeplr} />
           <LoginMetamask text={MESSAGE.Form.Button.ConnectMetamask} />
-          <LoginOraiWallet />
         </div>
       </div>
     </Modal>
