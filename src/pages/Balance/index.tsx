@@ -1,4 +1,5 @@
 import Layout from "layouts/Layout";
+import { Input } from "antd";
 import React, { ReactElement, useCallback, useState } from "react";
 import styles from "./Balance.module.scss";
 import { ReactComponent as Transfer } from "assets/icons/transfer.svg";
@@ -121,7 +122,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
 const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>({});
   const [to, setTo] = useState<TokenItemType>({});
-  const [fromAmount, setFromAmount] = useState<number>(0);
+  const [fromAmount, setFromAmount] = useState<string>("0");
 
   const onClickTokenFrom = useCallback((token: TokenItemType) => {
     setFrom(token);
@@ -151,7 +152,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   <div
                     className={styles.balanceBtn}
                     onClick={() => {
-                      setFromAmount(from?.amount?.token ?? 0);
+                      setFromAmount(`${from?.amount?.token}` ?? "0");
                     }}
                   >
                     MAX
@@ -160,7 +161,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     className={styles.balanceBtn}
                     onClick={() => {
                       setFromAmount(
-                        (from?.amount && from?.amount?.token / 2) ?? 0
+                        (from?.amount && `${from?.amount?.token / 2}`) ?? "0"
                       );
                     }}
                   >
@@ -180,9 +181,13 @@ const Balance: React.FC<BalanceProps> = () => {
                       </div>
                     </div>
                   </div>
-                  <input
+                  <Input
                     type="number"
+                    defaultValue={fromAmount}
                     value={fromAmount}
+                    onChange={(e) => {
+                      setFromAmount(e.target.value);
+                    }}
                     className={styles.amount}
                   />
                 </div>

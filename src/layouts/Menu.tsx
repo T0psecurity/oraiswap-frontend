@@ -5,7 +5,9 @@ import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
 import { ReactComponent as Pools } from "assets/icons/pool.svg";
 import { ReactComponent as Dark } from "assets/icons/dark.svg";
 import { ReactComponent as Light } from "assets/icons/light.svg";
+import { ReactComponent as Logout } from "assets/icons/logout.svg";
 import { ThemeContext, Themes } from "context/theme-context";
+import LocalStorage, { LocalStorageKey } from "services/LocalStorage";
 import React, {
   memo,
   useContext,
@@ -55,9 +57,22 @@ const Menu: React.FC<{}> = React.memo((props) => {
       </Link>
       <div className={styles.menu_items}>
         <RequireAuthButton className={styles.connect_btn}>
+          <div />
           <Text className={styles.connect}>
             {isLoggedIn() ? "Unnamed connected" : "Connect wallet"}
           </Text>
+          {isLoggedIn() ? (
+            <div
+              onClick={() => {
+                LocalStorage.removeItem(LocalStorageKey.token);
+                window.location.reload();
+              }}
+            >
+              <Logout style={{ width: 30, height: 30 }} />
+            </div>
+          ) : (
+            <div />
+          )}
         </RequireAuthButton>
         {renderLink(
           "/swap",

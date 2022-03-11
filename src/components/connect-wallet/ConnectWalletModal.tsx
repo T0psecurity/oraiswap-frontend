@@ -41,7 +41,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
           color: "#f6f7fb",
           margin: "0 0 0px",
           borderRadius: "4px",
-          background: "linear-gradient(180deg, #DD4AE0 0%, #E14A6E 100%)",
+          background: "linear-gradient(180deg, #612FCA 0%, #612FCA 100%)",
         }}
       />
     </Modal>

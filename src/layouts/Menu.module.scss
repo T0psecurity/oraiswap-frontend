@@ -100,9 +100,10 @@
   padding: 16px;
   margin-top: 32px;
   margin-bottom: 32px;
-  justify-content: center;
+  justify-content: space-around;
   align-content: center;
   display: flex;
+  align-items: center;
 }
 
 .connect {
