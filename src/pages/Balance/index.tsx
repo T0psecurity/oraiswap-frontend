@@ -121,6 +121,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
 const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>({});
   const [to, setTo] = useState<TokenItemType>({});
+  const [fromAmount, setFromAmount] = useState<number>(0);
 
   const onClickTokenFrom = useCallback((token: TokenItemType) => {
     setFrom(token);
@@ -147,8 +148,24 @@ const Balance: React.FC<BalanceProps> = () => {
                   <span className={styles.balanceDescription}>
                     Balance: 11,980.23 ATOM
                   </span>
-                  <div className={styles.balanceBtn}>MAX</div>
-                  <div className={styles.balanceBtn}>HALF</div>
+                  <div
+                    className={styles.balanceBtn}
+                    onClick={() => {
+                      setFromAmount(from?.amount?.token ?? 0);
+                    }}
+                  >
+                    MAX
+                  </div>
+                  <div
+                    className={styles.balanceBtn}
+                    onClick={() => {
+                      setFromAmount(
+                        (from?.amount && from?.amount?.token / 2) ?? 0
+                      );
+                    }}
+                  >
+                    HALF
+                  </div>
                 </div>
                 <span className={styles.balanceDescription}>~$0.00</span>
               </div>
@@ -163,7 +180,11 @@ const Balance: React.FC<BalanceProps> = () => {
                       </div>
                     </div>
                   </div>
-                  <input type="number" className={styles.amount} />
+                  <input
+                    type="number"
+                    value={fromAmount}
+                    className={styles.amount}
+                  />
                 </div>
               ) : null}
             </div>
