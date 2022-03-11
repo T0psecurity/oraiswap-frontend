@@ -96,6 +96,10 @@
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
 }
+.tokenWrapper:hover {
+  background: #191b21;
+  box-sizing: border-box;
+}
 .tokenWrapper {
   padding: 24px;
   display: flex;
@@ -103,6 +107,7 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+
   .tokenBalance {
     flex-direction: column;
     display: flex;

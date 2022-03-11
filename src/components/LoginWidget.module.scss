@@ -1,93 +1,101 @@
 @import "src/styles/variables";
 
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 60px;
-    iframe {
-        border: none;
-        width: 200px;
-        height: 100%;
-    }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  iframe {
+    border: none;
+    width: 200px;
+    height: 100%;
+  }
 }
 
 .address {
-    color: $white;
-    margin: 0 10px 0 8px;
+  color: $white;
+  margin: 0 10px 0 8px;
 }
 
 button.connected {
-    border: 1px solid $white;
-    text-transform: none;
+  border: 1px solid $white;
+  text-transform: none;
 }
 
 button.connect {
-    text-transform: none;
-    img {
-        margin-right: 10px;
-    }
+  text-transform: none;
+  img {
+    margin-right: 10px;
+  }
+}
+
+.item-orai {
+  background: #1e1e21;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .item {
-    background: #1e1e21;
-    border-radius: 8px;
+  background: #1e1e21;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 16px;
+
+  &:hover {
+    cursor: pointer;
+    background: #333642 !important;
+  }
+
+  .logo {
+    width: 54px;
+    height: 54px;
+  }
+
+  .grow {
+    flex-grow: 1;
+
     display: flex;
+    flex-direction: column;
     gap: 10px;
-    align-items: center;
-    padding: 16px;
+    .network-title {
+      font-family: IBM Plex Sans;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 100%;
+      /* identical to box height, or 18px */
 
-    &:hover {
-        cursor: pointer;
-        background: #333642 !important;
+      /* aiRight/White */
+
+      color: #ffffff;
     }
 
-    .logo {
-        width: 54px;
-        height: 54px;
+    .des {
+      font-family: IBM Plex Sans;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 150%;
+      /* identical to box height, or 21px */
+
+      font-feature-settings: "ss03" on;
+
+      /* aiRight/Gray 3 */
+
+      color: #777e90;
     }
+  }
 
-    .grow {
-        flex-grow: 1;
-
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        .network-title {
-            font-family: IBM Plex Sans;
-            font-style: normal;
-            font-weight: 600;
-            font-size: 18px;
-            line-height: 100%;
-            /* identical to box height, or 18px */
-
-            /* aiRight/White */
-
-            color: #ffffff;
-        }
-
-        .des {
-            font-family: IBM Plex Sans;
-            font-style: normal;
-            font-weight: 500;
-            font-size: 14px;
-            line-height: 150%;
-            /* identical to box height, or 21px */
-
-            font-feature-settings: "ss03" on;
-
-            /* aiRight/Gray 3 */
-
-            color: #777e90;
-        }
-    }
-
-    .arrow-right {
-        width: 0;
-        height: 0;
-        border-top: 8px solid transparent;
-        border-bottom: 8px solid transparent;
-
-        border-left: 8px solid #ffffff;
-    }
+  .arrow-right {
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid #ffffff;
+  }
 }
