@@ -3,7 +3,6 @@ import LoginWidget from "components/LoginWidget";
 import LoginOraiWallet from "components/LoginOraiWallet";
 import Modal from "components/Modal";
 import React from "react";
-import SSOWidget, { SSOWidgetType } from "./SSOWidget";
 import "./SSOWidget.scss";
 import MESSAGE from "lang/MESSAGE.json";
 import style from "./ConnectWalletModal.module.scss";
