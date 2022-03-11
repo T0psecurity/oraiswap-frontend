@@ -102,6 +102,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
   .tokenBalance {
     flex-direction: column;
     display: flex;
@@ -156,4 +157,44 @@
   &.token {
     align-self: flex-end;
   }
+}
+.fromBalanceDes {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.balanceFromGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  .balanceBtn {
+    cursor: pointer;
+    background: #191b21;
+    border-radius: 8px;
+    padding: 8px;
+    margin-left: 4px;
+    margin-right: 4px;
+    color: #a871df;
+  }
+}
+input[type="number"] {
+  padding: 12px;
+  box-sizing: border-box;
+  color: #505665;
+  font-weight: 600;
+  font-size: 24px;
+}
+.amount {
+  text-align: right;
+  background: #1e1e21;
+  border-radius: 8px;
+  height: 48px;
+  width: 60%;
+}
+.tokenFromGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
