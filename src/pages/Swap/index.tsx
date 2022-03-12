@@ -43,22 +43,34 @@ interface SwapProps {
 const Swap: React.FC<SwapProps> = () => {
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false)
   const [isOpenSelectTokenModal, setIsOpenSelectTokenModal] = useState(false)
+  const [fromTokenInfo, setFromTokenInfo] = useState({ denom: 'orai', contract_addr: 'orai', decimals: 6 });
+  const [toTokenInfo, setToTokenInfo] = useState({ contract_addr: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2', decimals: 18 });
+  const [swapAmount, setSwapAmount] = useState(1);
 
-  const { data: taxData, error: taxError, isError: isTaxError, isLoading: isTaxLoading } = useQuery(['tax-rate'], () => fetchTaxRate(whitelist.contracts.oracle));
-  const { data: pairInfoData, error: pairError, isError: isPairInfoError, isLoading: isPairLoading } = useQuery(['pair-info'], () => fetchPairInfo(whitelist.contracts.factory, [{ "native_token": { "denom": "orai" } }, { "token": { "contract_addr": "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2" } }]));
 
-  const { data: poolData, error: poolError, isError: isPoolError, isLoading: isPoolLoading } = useQuery(['pool'], () => fetchPool(whitelist.whitelist['orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'].pair));
+  // const { data: taxData, error: taxError, isError: isTaxError, isLoading: isTaxLoading } = useQuery(['tax-rate'], () => fetchTaxRate(whitelist.contracts.oracle));
+  // const { data: pairInfoData, error: pairError, isError: isPairInfoError, isLoading: isPairLoading } = useQuery(['pair-info'], () => fetchPairInfo(whitelist.contracts.factory, [{ "native_token": { "denom": "orai" } }, { "token": { "contract_addr": "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2" } }]));
 
-  const { data: firstTokenInfoData, error: firstTokenInfoError, isError: isFirstTokenInfoError, isLoading: isFirstTokenInfoLoading } = useQuery(['token-info'], () => fetchTokenInfo(whitelist.whitelist['orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'].token));
+  // const { data: poolData, error: poolError, isError: isPoolError, isLoading: isPoolLoading } = useQuery(['pool'], () => fetchPool(whitelist.whitelist['orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'].pair));
 
-  const { data: secTokenInfo, error: secTokenInfoError, isError: isSecTokenInfoError, isLoading: isSecTokenInfoLoading } = useQuery(['token-info'], () => fetchTokenInfo(whitelist.whitelist['orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'].token));
+  // const { data: firstTokenInfoData, error: firstTokenInfoError, isError: isFirstTokenInfoError, isLoading: isFirstTokenInfoLoading } = useQuery(['token-info'], () => fetchTokenInfo(whitelist.whitelist['orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'].token));
 
-  const { data: firstTokenBalance, error: firstTokenBalanceError, isError: isFirstTokenBalanceError, isLoading: isLoadingFirstTokenBalance } = useQuery(['first-token-balance'], () => fetchBalance(whitelist.whitelist['orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'].token, "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573"));
+  // const { data: secTokenInfo, error: secTokenInfoError, isError: isSecTokenInfoError, isLoading: isSecTokenInfoLoading } = useQuery(['token-info'], () => fetchTokenInfo(whitelist.whitelist['orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'].token));
 
-  const { data: secTokenBalance, error: secTokenBalanceError, isError: isSecTokenBalanceError, isLoading: isLoadingSecTokenBalance } = useQuery(['sec-token-balance'], () => fetchBalance('native', "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573"));
+  const { data: firstTokenBalance, error: firstTokenBalanceError, isError: isFirstTokenBalanceError, isLoading: isLoadingFirstTokenBalance } = useQuery(['first-token-balance', fromTokenInfo], () => fetchBalance(fromTokenInfo?.denom ? 'native' : fromTokenInfo.contract_addr, "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573"));
+
+  // const { data: secTokenBalance, error: secTokenBalanceError, isError: isSecTokenBalanceError, isLoading: isLoadingSecTokenBalance } = useQuery(['sec-token-balance'], () => fetchBalance('native', "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573"));
 
   const parseAmount = (value, decimal) => {
     return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
+  }
+
+  useEffect(() => {
+    console.log("first token balance data: ", firstTokenBalance);
+  }, [firstTokenBalance])
+
+  const test = () => {
+    setFromTokenInfo({ contract_addr: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2', decimals: 18 });
   }
 
   // useEffect(() => {
@@ -86,12 +98,12 @@ const Swap: React.FC<SwapProps> = () => {
   // }, [secTokenBalance])
 
   const handleSubmit = async () => {
-    console.log("data tax rate: ", taxData);
-    console.log("data pair info rate: ", pairInfoData);
-    console.log("pool data: ", poolData);
-    console.log("token info: ", firstTokenInfoData);
-    console.log("first balance token: ", firstTokenBalance);
-    console.log("second balance token: ", secTokenBalance);
+    // console.log("data tax rate: ", taxData);
+    // console.log("data pair info rate: ", pairInfoData);
+    // console.log("pool data: ", poolData);
+    // console.log("token info: ", firstTokenInfoData);
+    // console.log("first balance token: ", firstTokenBalance);
+    // console.log("second balance token: ", secTokenBalance);
 
     try {
       let walletAddr;
@@ -101,11 +113,11 @@ const Swap: React.FC<SwapProps> = () => {
       const msgs = await generateContractMessages({
         type: Type.SWAP,
         sender: `${walletAddr}`,
-        amount: parseAmount(1, 0),
-        from: `${'orai'}`,
-        to: `${'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2'}`,
-        fromInfo: { denom: 'orai', contract_addr: 'orai' },
-        toInfo: { contract_addr: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2' },
+        amount: parseAmount(swapAmount, fromTokenInfo.decimals),
+        from: `${fromTokenInfo.contract_addr}`,
+        to: `${toTokenInfo.contract_addr}`,
+        fromInfo: fromTokenInfo,
+        toInfo: toTokenInfo,
       });
 
       const msg = msgs[0];
@@ -177,7 +189,7 @@ const Swap: React.FC<SwapProps> = () => {
             </div>
 
           </div>
-          <button className={cx('swap-btn')} onClick={handleSubmit}>Swap</button>
+          <button className={cx('swap-btn')} onClick={test}>Swap</button>
           {/* <div className={cx('swap-btn')}>Swap</div> */}
           <div className={cx('detail')}>
             <div className={cx('row')}>
