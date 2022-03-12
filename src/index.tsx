@@ -9,9 +9,11 @@ import App from "./layouts/App";
 import Keplr from "libs/keplr";
 import { network } from "constants/networks";
 import AuthProvider from "providers/AuthProvider";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 // enable Keplr
 window.Keplr = new Keplr();
+const queryClient = new QueryClient();
 
 const checkKeplr = async () => {
   const keplr = await window.Keplr.getKeplr();
@@ -24,8 +26,10 @@ const checkKeplr = async () => {
       <Contract>
         <Router>
           <AuthProvider>
-            <ScrollToTop />
-            <App />
+            <QueryClientProvider client={queryClient}>
+              <ScrollToTop />
+              <App />
+            </QueryClientProvider>
           </AuthProvider>
         </Router>
       </Contract>

@@ -86,3 +86,11 @@ export const checkPrefixAndLength = (
     return false;
   }
 };
+
+export const parseAmount = (value: string, decimal: number) => {
+  return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
+}
+
+export const parseDisplayAmount = (value: string, decimal: number) => {
+  return `${(parseFloat(value) / Math.pow(10, decimal)).toFixed(6)}`;
+}
