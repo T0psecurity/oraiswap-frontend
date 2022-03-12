@@ -1,7 +1,7 @@
 import React from 'react';
 
 const CenterEllipsis: React.FC<{
-  text: string;
+  text: string | String;
   size: number;
   className?: string;
 }> = ({ text, size, className }) => {

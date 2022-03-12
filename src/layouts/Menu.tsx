@@ -1,31 +1,51 @@
-import { Button, Typography } from "antd";
-import { ReactComponent as Logo } from "assets/icons/logo.svg";
-import { ReactComponent as Swap } from "assets/icons/swap.svg";
-import { ReactComponent as Wallet } from "assets/icons/wallet.svg";
-import { ReactComponent as Pools } from "assets/icons/pool.svg";
-import { ReactComponent as Dark } from "assets/icons/dark.svg";
-import { ReactComponent as Light } from "assets/icons/light.svg";
-import { ReactComponent as Logout } from "assets/icons/logout.svg";
-import { ThemeContext, Themes } from "context/theme-context";
-import LocalStorage, { LocalStorageKey } from "services/LocalStorage";
+import { Button, Typography } from 'antd';
+import { ReactComponent as Logo } from 'assets/icons/logo.svg';
+import { ReactComponent as Swap } from 'assets/icons/swap.svg';
+import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
+import { ReactComponent as Pools } from 'assets/icons/pool.svg';
+import { ReactComponent as Dark } from 'assets/icons/dark.svg';
+import { ReactComponent as Light } from 'assets/icons/light.svg';
+import { ReactComponent as Logout } from 'assets/icons/logout.svg';
+import { ThemeContext, Themes } from 'context/theme-context';
+import LocalStorage, { LocalStorageKey } from 'services/LocalStorage';
 import React, {
   memo,
   useContext,
   useEffect,
   useState,
-  ReactElement,
-} from "react";
-import { Link, useLocation } from "react-router-dom";
-import styles from "./Menu.module.scss";
-import RequireAuthButton from "components/connect-wallet/RequireAuthButton";
-import { isLoggedIn } from "providers/AuthProvider";
+  ReactElement
+} from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import styles from './Menu.module.scss';
+import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
+// import { isLoggedIn } from 'providers/AuthProvider';
+import { network } from 'constants/networks';
+import useLocalStorage from 'libs/useLocalStorage';
+import CenterEllipsis from 'components/CenterEllipsis';
+import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
+import { useQuery } from 'react-query';
+import TokenBalance from 'components/TokenBalance';
 
 const { Text } = Typography;
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
-  const [link, setLink] = useState("/");
+  const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
+  const [address, setAddress] = useLocalStorage<String>('address');
+
+  const {
+    isLoading,
+    error,
+    data: balanceData
+  } = useQuery(
+    'balance',
+    () =>
+      fetch(`${network.lcd}/cosmos/bank/v1beta1/balances/${address}`).then(
+        (res) => res.json()
+      ),
+    { enabled: address.length > 0 }
+  );
 
   useEffect(() => {
     setLink(location.pathname);
@@ -41,7 +61,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       <Link
         to={to}
         onClick={() => onClick(to)}
-        className={styles.menu_item + (link === to ? ` ${styles.active}` : "")}
+        className={styles.menu_item + (link === to ? ` ${styles.active}` : '')}
       >
         {icon}
         <Text className={styles.menu_item_text}>{title}</Text>
@@ -51,43 +71,61 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   return (
     <div className={styles.menu}>
-      <Link to={"/"} onClick={() => setLink("/")} className={styles.logo}>
+      <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
         {<Logo style={{ width: 40, height: 40 }} />}
-        <Text className={styles.logo_text}>OraiBridge</Text>
+        <Text className={styles.logo_text}>OraiDex</Text>
       </Link>
       <div className={styles.menu_items}>
         <RequireAuthButton className={styles.connect_btn}>
-          <div />
-          <Text className={styles.connect}>
-            {isLoggedIn() ? "Unnamed connected" : "Connect wallet"}
-          </Text>
-          {isLoggedIn() ? (
+          {address ? (
+            <div className={styles.token_info}>
+              <AvatarPlaceholder
+                address={address}
+                className={styles.token_avatar}
+              />
+              <div className={styles.token_info_balance}>
+                <CenterEllipsis
+                  size={6}
+                  text={address}
+                  className={styles.token_address}
+                />
+                {balanceData && (
+                  <TokenBalance
+                    balance={balanceData?.balances[0]}
+                    className={styles.token_balance}
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <Text className={styles.connect}>Connect wallet</Text>
+          )}
+          {address && (
             <Logout
               onClick={(e) => {
-                LocalStorage.removeItem(LocalStorageKey.token);
-                window.location.reload();
+                setAddress('');
+                // LocalStorage.removeItem(LocalStorageKey.token);
+                // window.location.reload();
               }}
               style={{ width: 35, height: 35 }}
             />
-          ) : (
-            <div />
           )}
         </RequireAuthButton>
         {renderLink(
-          "/swap",
-          "Swap",
+          '/swap',
+          'Swap',
           setLink,
           <Swap style={{ width: 30, height: 30 }} />
         )}
         {renderLink(
-          "/pools",
-          "Pools",
+          '/pools',
+          'Pools',
           setLink,
           <Pools style={{ width: 30, height: 30 }} />
         )}
         {renderLink(
-          "/balance",
-          "Balance",
+          '/balance',
+          'Balance',
           setLink,
           <Wallet style={{ width: 30, height: 30 }} />
         )}
@@ -97,7 +135,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <Button
           className={
             styles.menu_theme +
-            (theme === Themes.dark ? ` ${styles.active}` : "")
+            (theme === Themes.dark ? ` ${styles.active}` : '')
           }
           onClick={() => {
             setTheme(Themes.dark);
@@ -109,7 +147,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <Button
           className={
             styles.menu_theme +
-            (theme === Themes.light ? ` ${styles.active}` : "")
+            (theme === Themes.light ? ` ${styles.active}` : '')
           }
           onClick={() => {
             setTheme(Themes.light);
