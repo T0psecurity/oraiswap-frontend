@@ -11,18 +11,28 @@ const cx = cn.bind(style);
 const mockPair = {
     "ORAI-AIRI": {
         contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+        amount1: 100,
+        amount2: 1000,
     },
     "ORAI-TEST1": {
         contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+        amount1: 100,
+        amount2: 1000,
     },
     "ORAI-TEST2": {
         contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+        amount1: 100,
+        amount2: 1000,
     },
     "AIRI-TEST1": {
         contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+        amount1: 100,
+        amount2: 1000,
     },
     "AIRI-TEST2": {
         contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+        amount1: 100,
+        amount2: 1000,
     },
 };
 
@@ -47,12 +57,24 @@ const mockToken = {
 
 const mockBalance = {
     ORAI: 800000,
-    AIRI: 800000,
-    TEST1: 800000,
-    TEST2: 800000,
+    AIRI: 80000.09,
+    TEST1: 8000.122,
+    TEST2: 800.3434,
 };
 
+const mockPrice = {
+    ORAI: 5.01,
+    AIRI: 0.89,
+    TEST1: 1,
+    TEST2: 1,
+};
+
+function numberWithCommas(x: number) {
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
 type TokenName = keyof typeof mockToken;
+type PairName = keyof typeof mockPair;
 
 interface ValidToken {
     title: TokenName;
@@ -64,48 +86,55 @@ interface ValidToken {
 interface SwapProps {}
 
 const Swap: React.FC<SwapProps> = () => {
+    const allToken: ValidToken[] = Object.keys(mockToken).map((name) => {
+        return {
+            ...mockToken[name as TokenName],
+            title: name as TokenName,
+            balance: mockBalance[name as TokenName],
+        };
+    });
     const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
-    const [isSelectFrom, setIsSelectFrom] = useState(true);
+    const [isSelectFrom, setIsSelectFrom] = useState(false);
     const [isSelectTo, setIsSelectTo] = useState(false);
+    const [isSelectFee, setIsSelectFee] = useState(false);
     const [fromToken, setFromToken] = useState<TokenName>("ORAI");
     const [toToken, setToToken] = useState<TokenName>("AIRI");
-    const [listValidFrom, setListValidFrom] = useState<ValidToken[]>(
-        Object.keys(mockToken).map((name) => {
-            return {
-                ...mockToken[name as TokenName],
-                title: name as TokenName,
-                balance: mockBalance[name as TokenName],
-            };
-        })
-    );
+    const [feeToken, setFeeToken] = useState<TokenName>("AIRI");
     const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
+    const [fromAmount, setFromAmount] = useState(0);
+    const [toAmount, setToAmount] = useState(0);
+    const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
+    const [fromToRatio, setFromToRatio] = useState(0);
+    const [slippage, setSlippage] = useState(1);
 
     useEffect(() => {
         let listTo = getListPairedToken(fromToken);
-        const listToken = listTo.map((name) => {
-            return {
-                ...mockToken[name as TokenName],
-                title: name as TokenName,
-                balance: mockBalance[name as TokenName],
-            };
-        });
+        const listToken = allToken.filter((t) => listTo.includes(t.title));
         setListValidTo([...listToken]);
         if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
     }, [fromToken]);
 
-    const getTokenInfo = (contract: string) => {
-        return {
-            price: 1,
-        };
+    useEffect(() => {
+        const pairName = Object.keys(mockPair).find(
+            (p) => p.includes(fromToken) && p.includes(toToken)
+        );
+        setCurrentPair(pairName as PairName);
+
+        const { amount1, amount2 } = mockPair[pairName as PairName];
+        let rate;
+        if (currentPair.indexOf(fromToken) === 0) rate = amount2 / amount1;
+        else rate = amount1 / amount2;
+        setFromToRatio(rate);
+    }, [fromToken, toToken]);
+
+    const onChangeFromAmount = (amount: number) => {
+        setFromAmount(amount);
+        setToAmount(amount * fromToRatio);
     };
 
-    const getPairInfo = (contract: string) => {
-        return {
-            token1: "ORAI",
-            amount1: 10000,
-            token2: "AIRI",
-            amount2: 1000,
-        };
+    const onChangeToAmount = (amount: number) => {
+        setToAmount(amount);
+        setFromAmount(amount / fromToRatio);
     };
 
     const getListPairedToken = (tokenName: TokenName) => {
@@ -146,11 +175,34 @@ const Swap: React.FC<SwapProps> = () => {
                             />
                         </div>
                         <div className={cx("balance")}>
-                            <span>Balance: 8,291.09 ORAI</span>
-                            <div className={cx("btn")}>MAX</div>
-                            <div className={cx("btn")}>HALF</div>
+                            <span>{`Balance: ${numberWithCommas(
+                                +mockBalance[fromToken].toFixed(2)
+                            )} ${fromToken}`}</span>
+                            <div
+                                className={cx("btn")}
+                                onClick={() =>
+                                    onChangeFromAmount(mockBalance[fromToken])
+                                }
+                            >
+                                MAX
+                            </div>
+                            <div
+                                className={cx("btn")}
+                                onClick={() =>
+                                    onChangeFromAmount(
+                                        mockBalance[fromToken] / 2
+                                    )
+                                }
+                            >
+                                HALF
+                            </div>
                             <span style={{ flexGrow: 1, textAlign: "right" }}>
-                                ~$49,780.45
+                                {`~$${numberWithCommas(
+                                    +(
+                                        mockBalance[fromToken] *
+                                        mockPrice[fromToken]
+                                    ).toFixed(2)
+                                )}`}
                             </span>
                         </div>
                         <div className={cx("input")}>
@@ -168,22 +220,30 @@ const Swap: React.FC<SwapProps> = () => {
                                 <span>{fromToken}</span>
                                 <div className={cx("arrow-down")} />
                             </div>
-                            <input className={cx("amount")} />
+                            <input
+                                className={cx("amount")}
+                                value={!!fromAmount ? fromAmount : ""}
+                                placeholder="0"
+                                type="number"
+                                onChange={(e) => {
+                                    onChangeFromAmount(+e.target.value);
+                                }}
+                            />
                         </div>
                         <div className={cx("fee")}>
                             <span>Fee</span>
                             <div
                                 className={cx("token")}
-                                onClick={() => setIsSelectFrom(true)}
+                                onClick={() => setIsSelectFee(true)}
                             >
                                 <img
                                     className={cx("logo")}
                                     src={
-                                        require("assets/icons/oraichain.svg")
+                                        require(`assets/icons/${mockToken[feeToken].logo}`)
                                             .default
                                     }
                                 />
-                                <span>AIRI</span>
+                                <span>{feeToken}</span>
                                 <div className={cx("arrow-down")} />
                             </div>
                         </div>
@@ -192,9 +252,12 @@ const Swap: React.FC<SwapProps> = () => {
                         <img
                             src={require("assets/icons/ant_swap.svg").default}
                             onClick={() => {
-                                const t = fromToken;
+                                const t = fromToken,
+                                    k = fromAmount;
                                 setFromToken(toToken);
                                 setToToken(t);
+                                setFromAmount(toAmount);
+                                setToAmount(fromAmount);
                             }}
                         />
                     </div>
@@ -203,10 +266,14 @@ const Swap: React.FC<SwapProps> = () => {
                             <div className={cx("title")}>TO</div>
                         </div>
                         <div className={cx("balance")}>
-                            <span>Balance: 8,291.09 ORAI</span>
+                            <span>{`Balance: ${numberWithCommas(
+                                +mockBalance[toToken].toFixed(2)
+                            )} ${toToken}`}</span>
 
                             <span style={{ flexGrow: 1, textAlign: "right" }}>
-                                ~$49,780.45
+                                {`1 ${fromToken} ≈ ${numberWithCommas(
+                                    +fromToRatio.toFixed(2)
+                                )} ${toToken}`}
                             </span>
                             <TooltipIcon />
                         </div>
@@ -225,15 +292,18 @@ const Swap: React.FC<SwapProps> = () => {
                                 <span>{toToken}</span>
                                 <div className={cx("arrow-down")} />
                             </div>
-                            <input className={cx("amount")} />
+                            <input
+                                className={cx("amount")}
+                                value={!!toAmount ? toAmount : ""}
+                                placeholder="0"
+                                type="number"
+                                onChange={(e) => {
+                                    onChangeToAmount(+e.target.value);
+                                }}
+                            />
                         </div>
                     </div>
-                    <div
-                        className={cx("swap-btn")}
-                        onClick={() => {
-                            setFromToken("AIRI");
-                        }}
-                    >
+                    <div className={cx("swap-btn")} onClick={() => {}}>
                         Swap
                     </div>
                     <div className={cx("detail")}>
@@ -263,6 +333,8 @@ const Swap: React.FC<SwapProps> = () => {
                         isOpen={isOpenSettingModal}
                         open={() => setIsOpenSettingModal(true)}
                         close={() => setIsOpenSettingModal(false)}
+                        slippage={slippage}
+                        setSlippage={setSlippage}
                     />
 
                     {isSelectFrom ? (
@@ -270,7 +342,7 @@ const Swap: React.FC<SwapProps> = () => {
                             isOpen={isSelectFrom}
                             open={() => setIsSelectFrom(true)}
                             close={() => setIsSelectFrom(false)}
-                            listToken={listValidFrom}
+                            listToken={allToken}
                             setToken={setFromToken}
                         />
                     ) : (
@@ -282,6 +354,13 @@ const Swap: React.FC<SwapProps> = () => {
                             setToken={setToToken}
                         />
                     )}
+                    <SelectTokenModal
+                        isOpen={isSelectFee}
+                        open={() => setIsSelectFee(true)}
+                        close={() => setIsSelectFee(false)}
+                        listToken={allToken}
+                        setToken={setFeeToken}
+                    />
                 </div>
             </div>
         </Layout>
