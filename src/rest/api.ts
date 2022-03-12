@@ -122,51 +122,10 @@ const handleSentFunds = (...funds: any[]) => {
     return sent_funds;
 }
 
-const getMsgs =
-    (
-        _msg: any,
-        {
-            amount,
-            symbol,
-            minimumReceived
-        }: {
-            amount?: string | number;
-            symbol?: string;
-            minimumReceived?: string | number;
-        }
-    ) => {
-        const msg = Array.isArray(_msg) ? _msg[0] : _msg;
-        if (msg?.execute_msg?.send?.msg?.execute_swap_operations) {
-            msg.execute_msg.send.msg.execute_swap_operations.minimum_receive =
-                parseInt(`${minimumReceived}`, 10).toString();
-            if (isNativeToken(symbol || '')) {
-                msg.coins = [new Coin()]; //Coins.fromString(toAmount(`${amount}`) + symbol);
-            }
-
-            msg.execute_msg.send.msg = btoa(
-                JSON.stringify(msg.execute_msg.send.msg)
-            );
-        } else if (msg?.execute_msg?.send?.msg) {
-            msg.execute_msg.send.msg = btoa(
-                JSON.stringify(msg.execute_msg.send.msg)
-            );
-        }
-        if (msg?.execute_msg?.execute_swap_operations) {
-            msg.execute_msg.execute_swap_operations.minimum_receive = parseInt(
-                `${minimumReceived}`,
-                10
-            ).toString();
-            msg.execute_msg.execute_swap_operations.offer_amount = toAmount(
-                `${amount}`,
-                symbol
-            );
-
-            if (isNativeToken(symbol || '')) {
-                msg.coins = [new Coin()]; // Coins.fromString(toAmount(`${amount}`) + symbol);
-            }
-        }
-        return [msg];
-    }
+async function fetchExchangeRate(oracleAddr: string, base_denom: string, quote_denom: string) {
+    const data = await querySmart(oracleAddr, { exchange: { exchange_rate: { base_denom, quote_denom } } });
+    return data;
+}
 
 
 async function generateContractMessages(
@@ -208,6 +167,7 @@ async function generateContractMessages(
     // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
     let contractAddr = network.router;
     let input;
+    console.log("amount to swap: ", amount);
     switch (type) {
         case Type.SWAP:
             const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(fromInfo, from, amount.toString());
@@ -229,7 +189,6 @@ async function generateContractMessages(
             if (fromInfo.denom) {
                 input = inputTemp;
             } else {
-                console.log("input base64: ", btoa(JSON.stringify(inputTemp)));
                 input = {
                     send: {
                         contract: contractAddr,
@@ -272,8 +231,6 @@ async function generateContractMessages(
     }
 
     console.log("input: ", input)
-    console.log("sent funds: ", sent_funds)
-    console.log("contract addr: ", contractAddr)
 
     const msgs = [
         {
@@ -288,4 +245,4 @@ async function generateContractMessages(
 };
 
 
-export { fetchTaxRate, fetchNativeTokenBalance, fetchPairInfo, fetchPool, fetchTokenBalance, fetchBalance, fetchTokenInfo, generateContractMessages }
+export { fetchTaxRate, fetchNativeTokenBalance, fetchPairInfo, fetchPool, fetchTokenBalance, fetchBalance, fetchTokenInfo, generateContractMessages, fetchExchangeRate }

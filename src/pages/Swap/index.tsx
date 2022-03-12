@@ -7,9 +7,8 @@ import { TooltipIcon } from "components/Tooltip";
 import SettingModal from "./Modals/SettingModal";
 import SelectTokenModal from "./Modals/SelectTokenModal";
 import { useQuery } from 'react-query'
-import { fetchBalance, fetchPairInfo, fetchPool, fetchTaxRate, fetchTokenInfo, generateContractMessages } from "rest/api";
+import { fetchBalance, fetchExchangeRate, fetchPairInfo, fetchPool, fetchTaxRate, fetchTokenInfo, generateContractMessages } from "rest/api";
 import { Type } from 'pages/Swap';
-import { decimal } from "libs/parse";
 import CosmJs from "libs/cosmjs";
 import { ORAI } from "constants/constants";
 import { parseAmount, parseDisplayAmount } from "libs/utils";
@@ -19,20 +18,52 @@ const cx = cn.bind(style);
 const mockPair = {
   "ORAI-AIRI": {
     contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+    amount1: 100,
+    amount2: 1000,
   },
   "ORAI-TEST1": {
     contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+    amount1: 100,
+    amount2: 1000,
   },
   "ORAI-TEST2": {
     contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+    amount1: 100,
+    amount2: 1000,
   },
   "AIRI-TEST1": {
     contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+    amount1: 100,
+    amount2: 1000,
   },
   "AIRI-TEST2": {
     contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+    amount1: 100,
+    amount2: 1000,
   },
 };
+
+const whitelist = {
+  "contracts": {
+    "gov": "orai102pll8yzs4knwvz0x20ymwauwvq46zk0adkwd8",
+    "mirrorToken": "orai1dw9sjfvzm9udg3uqtnrr3cph8ce3welc9ljr83",
+    "factory": "orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra",
+    "oracle": "orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn",
+    "mint": "orai1ptrsap5h4n0ee29qxqjpgkmhqjc4pewe8j6lxz",
+    "staking": "orai1wt65k5ugrpujen6r4unh3lddzr0678erny3f4q",
+    "tokenFactory": "orai1n0mdp2fcwuk6mkhuwtwp65upza9z5v0deawvma",
+    "collector": "orai18skkp9lsrv3sq0urf682nfk0cs49xdlfx3a0a8"
+  },
+  "whitelist": {
+    "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2": {
+      "symbol": "uAIRI",
+      "name": "aiRight Token",
+      "token": "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2",
+      "pair": "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
+      "lpToken": "orai12dtk9pwlwyum9em2nkeefphsvg0c4ks88a2aju"
+    }
+  }
+}
 
 const mockToken = {
   ORAI: {
@@ -56,12 +87,24 @@ const mockToken = {
 
 const mockBalance = {
   ORAI: 800000,
-  AIRI: 800000,
-  TEST1: 800000,
-  TEST2: 800000,
+  AIRI: 80000.09,
+  TEST1: 8000.122,
+  TEST2: 800.3434,
 };
 
+const mockPrice = {
+  ORAI: 5.01,
+  AIRI: 0.89,
+  TEST1: 1,
+  TEST2: 1,
+};
+
+function numberWithCommas(x: number) {
+  return x.toFixed(6).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
 type TokenName = keyof typeof mockToken;
+type PairName = keyof typeof mockPair;
 
 interface ValidToken {
   title: TokenName;
@@ -73,22 +116,62 @@ interface ValidToken {
 interface SwapProps { }
 
 const Swap: React.FC<SwapProps> = () => {
+  const allToken: ValidToken[] = Object.keys(mockToken).map((name) => {
+    return {
+      ...mockToken[name as TokenName],
+      title: name as TokenName,
+      balance: mockBalance[name as TokenName],
+    };
+  });
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
-  const [isSelectFrom, setIsSelectFrom] = useState(true);
+  const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
+  const [isSelectFee, setIsSelectFee] = useState(false);
   const [fromToken, setFromToken] = useState<TokenName>("ORAI");
   const [toToken, setToToken] = useState<TokenName>("AIRI");
-  const [listValidFrom, setListValidFrom] = useState<ValidToken[]>(
-    Object.keys(mockToken).map((name) => {
-      return {
-        ...mockToken[name as TokenName],
-        title: name as TokenName,
-        balance: mockBalance[name as TokenName],
-      };
-    })
-  );
+  const [feeToken, setFeeToken] = useState<TokenName>("AIRI");
   const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
-  const [swapAmount, setSwapAmount] = useState(1);
+  const [fromAmount, setFromAmount] = useState(0);
+  const [toAmount, setToAmount] = useState(0);
+  const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
+  const [fromToRatio, setFromToRatio] = useState(0);
+  const [slippage, setSlippage] = useState(1);
+
+  useEffect(() => {
+    let listTo = getListPairedToken(fromToken);
+    const listToken = allToken.filter((t) => listTo.includes(t.title));
+    setListValidTo([...listToken]);
+    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
+  }, [fromToken]);
+
+  useEffect(() => {
+    const pairName = Object.keys(mockPair).find(
+      (p) => p.includes(fromToken) && p.includes(toToken)
+    );
+    setCurrentPair(pairName as PairName);
+
+    // const { amount1, amount2 } = mockPair[pairName as PairName];
+    // let rate;
+    // if (currentPair.indexOf(fromToken) === 0) rate = amount2 / amount1;
+    // else rate = amount1 / amount2;
+    // setFromToRatio(rate);
+  }, [fromToken, toToken]);
+
+  const onChangeFromAmount = (amount: number) => {
+    setFromAmount(amount);
+    setToAmount(amount * fromToRatio);
+  };
+
+  const onMaxFromAmount = (amount: number) => {
+    let finalAmount = parseFloat(parseDisplayAmount(amount, fromTokenInfoData?.decimals));
+    setFromAmount(finalAmount);
+    setToAmount(finalAmount * fromToRatio);
+  };
+
+  const onChangeToAmount = (amount: number) => {
+    setToAmount(amount);
+    setFromAmount(amount / fromToRatio);
+  };
 
   const getTokenDenom = (token) => {
     return mockToken[token].denom ? mockToken[token].denom : undefined
@@ -106,6 +189,13 @@ const Swap: React.FC<SwapProps> = () => {
   const { data: fromTokenBalance, error: fromTokenBalanceError, isError: isFromTokenBalanceError, isLoading: isFromTokenBalanceLoading } = useQuery(['from-token-balance', fromToken], () => fetchBalance(mockToken[fromToken].contractAddress, "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573", getTokenDenom(fromToken)));
 
   const { data: toTokenBalance, error: toTokenBalanceError, isError: isToTokenBalanceError, isLoading: isLoadingToTokenBalance } = useQuery(['to-token-balance', toToken], () => fetchBalance(mockToken[toToken].contractAddress, "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573", getTokenDenom(toToken)));
+
+  const { data: exchangeRate, error: exchangeRateError, isError: isExchangeRateError, isLoading: isExchangeRateLoading } = useQuery(['exchange-rate', fromTokenInfoData, toTokenInfoData], () => fetchExchangeRate(whitelist?.contracts?.oracle, fromTokenInfoData?.symbol.toLocaleLowerCase(), toTokenInfoData?.symbol.toLocaleLowerCase()), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
+
+  useEffect(() => {
+    console.log("exchange rate: ", exchangeRate?.item?.exchange_rate)
+    setFromToRatio(1 / parseFloat(exchangeRate?.item?.exchange_rate));
+  }, [isExchangeRateLoading]);
 
   // useEffect(() => {
   //   console.log("data tax rate: ", taxData);
@@ -127,10 +217,6 @@ const Swap: React.FC<SwapProps> = () => {
   //   console.log("first balance token: ", fromTokenBalance);
   // }, [fromTokenBalance])
 
-  // useEffect(() => {
-  //   console.log("second balance token: ", secTokenBalance);
-  // }, [secTokenBalance])
-
   const handleSubmit = async () => {
     try {
       let walletAddr;
@@ -140,7 +226,7 @@ const Swap: React.FC<SwapProps> = () => {
       const msgs = await generateContractMessages({
         type: Type.SWAP,
         sender: `${walletAddr}`,
-        amount: parseAmount(swapAmount, fromTokenInfoData.decimals),
+        amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
         from: `${fromTokenInfoData.contract_addr}`,
         to: `${toTokenInfoData.contract_addr}`,
         fromInfo: fromTokenInfoData,
@@ -173,21 +259,6 @@ const Swap: React.FC<SwapProps> = () => {
     setListValidTo([...listToken]);
     if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
   }, [fromToken]);
-
-  const getTokenInfo = (contract: string) => {
-    return {
-      price: 1,
-    };
-  };
-
-  const getPairInfo = (contract: string) => {
-    return {
-      token1: "ORAI",
-      amount1: 10000,
-      token2: "AIRI",
-      amount2: 1000,
-    };
-  };
 
   const getListPairedToken = (tokenName: TokenName) => {
     let pairs = Object.keys(mockPair).filter((name) =>
@@ -227,11 +298,30 @@ const Swap: React.FC<SwapProps> = () => {
               />
             </div>
             <div className={cx("balance")}>
-              <span>Balance: {`${parseDisplayAmount(fromTokenBalance, fromTokenInfoData?.decimals)} ${fromTokenInfoData?.symbol.toUpperCase()}`}</span>
-              <div className={cx("btn")}>MAX</div>
-              <div className={cx("btn")}>HALF</div>
+              <span>{`Balance: ${parseDisplayAmount(fromTokenBalance, fromTokenInfoData?.decimals)} ${fromTokenInfoData?.symbol.toUpperCase()}`}</span>
+              <div
+                className={cx("btn")}
+                onClick={() =>
+                  onMaxFromAmount(fromTokenBalance)
+                }
+              >
+                MAX
+              </div>
+              <div
+                className={cx("btn")}
+                onClick={() =>
+                  onMaxFromAmount(fromTokenBalance / 2)
+                }
+              >
+                HALF
+              </div>
               <span style={{ flexGrow: 1, textAlign: "right" }}>
-                ~$49,780.45
+                {`~$${numberWithCommas(
+                  +(
+                    mockBalance[fromToken] *
+                    mockPrice[fromToken]
+                  ).toFixed(2)
+                )}`}
               </span>
             </div>
             <div className={cx("input")}>
@@ -249,22 +339,31 @@ const Swap: React.FC<SwapProps> = () => {
                 <span>{fromToken}</span>
                 <div className={cx("arrow-down")} />
               </div>
-              <input className={cx("amount")} />
+              <input
+                className={cx("amount")}
+                value={fromAmount ? fromAmount : 0}
+                placeholder=""
+                type="number"
+                step={`${parseDisplayAmount(1, fromTokenInfoData?.decimals)}`}
+                onChange={(e) => {
+                  onChangeFromAmount(+e.target.value);
+                }}
+              />
             </div>
             <div className={cx("fee")}>
               <span>Fee</span>
               <div
                 className={cx("token")}
-                onClick={() => setIsSelectFrom(true)}
+                onClick={() => setIsSelectFee(true)}
               >
                 <img
                   className={cx("logo")}
                   src={
-                    require("assets/icons/oraichain.svg")
+                    require(`assets/icons/${mockToken[feeToken].logo}`)
                       .default
                   }
                 />
-                <span>AIRI</span>
+                <span>{feeToken}</span>
                 <div className={cx("arrow-down")} />
               </div>
             </div>
@@ -273,9 +372,12 @@ const Swap: React.FC<SwapProps> = () => {
             <img
               src={require("assets/icons/ant_swap.svg").default}
               onClick={() => {
-                const t = fromToken;
+                const t = fromToken,
+                  k = fromAmount;
                 setFromToken(toToken);
                 setToToken(t);
+                setFromAmount(toAmount);
+                setToAmount(fromAmount);
               }}
             />
           </div>
@@ -284,10 +386,12 @@ const Swap: React.FC<SwapProps> = () => {
               <div className={cx("title")}>TO</div>
             </div>
             <div className={cx("balance")}>
-              <span>Balance: {`${parseDisplayAmount(toTokenBalance, toTokenInfoData?.decimals)} ${toTokenInfoData?.symbol.toUpperCase()}`}</span>
+              <span>{`Balance: ${parseDisplayAmount(toTokenBalance, toTokenInfoData?.decimals)} ${toTokenInfoData?.symbol.toUpperCase()}`}</span>
 
               <span style={{ flexGrow: 1, textAlign: "right" }}>
-                ~$49,780.45
+                {`1 ${fromToken} ≈ ${numberWithCommas(
+                  +fromToRatio
+                )} ${toToken}`}
               </span>
               <TooltipIcon />
             </div>
@@ -306,13 +410,19 @@ const Swap: React.FC<SwapProps> = () => {
                 <span>{toToken}</span>
                 <div className={cx("arrow-down")} />
               </div>
-              <input className={cx("amount")} />
+              <input
+                className={cx("amount")}
+                value={toAmount ? toAmount : 0}
+                placeholder=""
+                type="number"
+                step={`${parseDisplayAmount(1, toTokenInfoData?.decimals)}`}
+                onChange={(e) => {
+                  onChangeToAmount(+e.target.value);
+                }}
+              />
             </div>
           </div>
-          <div
-            className={cx("swap-btn")}
-            onClick={handleSubmit}
-          >
+          <div className={cx("swap-btn")} onClick={handleSubmit}>
             Swap
           </div>
           <div className={cx("detail")}>
@@ -342,6 +452,8 @@ const Swap: React.FC<SwapProps> = () => {
             isOpen={isOpenSettingModal}
             open={() => setIsOpenSettingModal(true)}
             close={() => setIsOpenSettingModal(false)}
+            slippage={slippage}
+            setSlippage={setSlippage}
           />
 
           {isSelectFrom ? (
@@ -349,7 +461,7 @@ const Swap: React.FC<SwapProps> = () => {
               isOpen={isSelectFrom}
               open={() => setIsSelectFrom(true)}
               close={() => setIsSelectFrom(false)}
-              listToken={listValidFrom}
+              listToken={allToken}
               setToken={setFromToken}
             />
           ) : (
@@ -361,6 +473,13 @@ const Swap: React.FC<SwapProps> = () => {
               setToken={setToToken}
             />
           )}
+          <SelectTokenModal
+            isOpen={isSelectFee}
+            open={() => setIsSelectFee(true)}
+            close={() => setIsSelectFee(false)}
+            listToken={allToken}
+            setToken={setFeeToken}
+          />
         </div>
       </div>
     </Layout>
