@@ -1,0 +1,29 @@
+.btn_close {
+  margin-left: 10px;
+  align-self: flex-start;
+}
+.btn_close_img {
+}
+
+.toast_content {
+  display: flex;
+  justify-content: space-between;
+  > img {
+    height: 50px;
+  }
+}
+
+.toast_broadcasting {
+}
+
+.toast_section {
+  p {
+    text-align: left;
+  }
+}
+
+.toast_failed {
+}
+
+.toast_success {
+}

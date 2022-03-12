@@ -1,14 +1,17 @@
-import React, { StrictMode } from "react";
-import { render } from "react-dom";
-import { BrowserRouter as Router } from "react-router-dom";
-import "hooks/useContractsAddress";
-import "./index.scss";
-import ScrollToTop from "./layouts/ScrollToTop";
-import Contract from "./layouts/Contract";
-import App from "./layouts/App";
-import Keplr from "libs/keplr";
-import { network } from "constants/networks";
-import AuthProvider from "providers/AuthProvider";
+import React, { StrictMode } from 'react';
+import { render } from 'react-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
+import 'hooks/useContractsAddress';
+import './index.scss';
+import ScrollToTop from './layouts/ScrollToTop';
+import Contract from './layouts/Contract';
+import App from './layouts/App';
+import Keplr from 'libs/keplr';
+import { network } from 'constants/networks';
+import AuthProvider from 'providers/AuthProvider';
+import { ToastProvider } from 'components/Toasts/context';
+import 'react-toastify/dist/ReactToastify.css';
+import { Bounce, ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from "react-query";
 
 // enable Keplr
@@ -24,17 +27,18 @@ const checkKeplr = async () => {
   render(
     <StrictMode>
       <Contract>
-        <Router>
-          <AuthProvider>
-            <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <Router>
+            <AuthProvider>
               <ScrollToTop />
               <App />
-            </QueryClientProvider>
-          </AuthProvider>
-        </Router>
+            </AuthProvider>
+          </Router>
+          <ToastContainer transition={Bounce} />
+        </ToastProvider>
       </Contract>
     </StrictMode>,
-    document.getElementById("oraiswap")
+    document.getElementById('oraiswap')
   );
 };
 

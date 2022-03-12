@@ -10,8 +10,10 @@ import { useQuery } from 'react-query'
 import { fetchBalance, fetchExchangeRate, fetchPairInfo, fetchPool, fetchTaxRate, fetchTokenInfo, generateContractMessages, simulateSwap } from "rest/api";
 import { Type } from 'pages/Swap';
 import CosmJs from "libs/cosmjs";
-import { ORAI } from "constants/constants";
+import { DECIMAL_FRACTION, ORAI } from "constants/constants";
 import { parseAmount, parseDisplayAmount } from "libs/utils";
+import { displayToast, TToastType } from "components/Toasts/Toast";
+import { network } from "constants/networks";
 
 const cx = cn.bind(style);
 
@@ -42,28 +44,6 @@ const mockPair = {
     amount2: 1000,
   },
 };
-
-const whitelist = {
-  "contracts": {
-    "gov": "orai102pll8yzs4knwvz0x20ymwauwvq46zk0adkwd8",
-    "mirrorToken": "orai1dw9sjfvzm9udg3uqtnrr3cph8ce3welc9ljr83",
-    "factory": "orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra",
-    "oracle": "orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn",
-    "mint": "orai1ptrsap5h4n0ee29qxqjpgkmhqjc4pewe8j6lxz",
-    "staking": "orai1wt65k5ugrpujen6r4unh3lddzr0678erny3f4q",
-    "tokenFactory": "orai1n0mdp2fcwuk6mkhuwtwp65upza9z5v0deawvma",
-    "collector": "orai18skkp9lsrv3sq0urf682nfk0cs49xdlfx3a0a8"
-  },
-  "whitelist": {
-    "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2": {
-      "symbol": "uAIRI",
-      "name": "aiRight Token",
-      "token": "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2",
-      "pair": "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
-      "lpToken": "orai12dtk9pwlwyum9em2nkeefphsvg0c4ks88a2aju"
-    }
-  }
-}
 
 const mockToken = {
   ORAI: {
@@ -177,6 +157,8 @@ const Swap: React.FC<SwapProps> = () => {
     return mockToken[token].denom ? mockToken[token].denom : undefined
   }
 
+  const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(['tax-rate', fromToken], () => fetchTaxRate());
+
   const { data: fromTokenInfoData, error: fromTokenInfoError, isError: isFromTokenInfoError, isLoading: isFromTokenInfoLoading } = useQuery(['from-token-info', fromToken], () => fetchTokenInfo(mockToken[fromToken].contractAddress, getTokenDenom(fromToken)));
 
   const { data: toTokenInfoData, error: toTokenInfoError, isError: isToTokenInfoError, isLoading: isToTokenInfoLoading } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(mockToken[toToken].contractAddress, getTokenDenom(toToken)));
@@ -185,7 +167,7 @@ const Swap: React.FC<SwapProps> = () => {
 
   const { data: toTokenBalance, error: toTokenBalanceError, isError: isToTokenBalanceError, isLoading: isLoadingToTokenBalance } = useQuery(['to-token-balance', toToken], () => fetchBalance(mockToken[toToken].contractAddress, "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573", getTokenDenom(toToken)));
 
-  const { data: exchangeRate, error: exchangeRateError, isError: isExchangeRateError, isLoading: isExchangeRateLoading } = useQuery(['exchange-rate', fromTokenInfoData, toTokenInfoData], () => fetchExchangeRate(whitelist?.contracts?.oracle, fromTokenInfoData?.symbol.toLocaleLowerCase(), toTokenInfoData?.symbol.toLocaleLowerCase()), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
+  const { data: exchangeRate, error: exchangeRateError, isError: isExchangeRateError, isLoading: isExchangeRateLoading } = useQuery(['exchange-rate', fromTokenInfoData, toTokenInfoData], () => fetchExchangeRate(fromTokenInfoData?.symbol.toLocaleLowerCase(), toTokenInfoData?.symbol.toLocaleLowerCase()), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
 
   const { data: simulateData, error: simulateDataError, isError: isSimulateDataError, isLoading: isSimulateDataLoading } = useQuery(['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount], () => simulateSwap({ fromInfo: fromTokenInfoData, toInfo: toTokenInfoData, amount: parseAmount(fromAmount, fromTokenInfoData?.decimals) }), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
 
@@ -219,10 +201,16 @@ const Swap: React.FC<SwapProps> = () => {
 
       if (result) {
         console.log("in correct result");
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
         return;
       }
     } catch (error) {
       console.log("error in swap form: ", error);
+      displayToast(TToastType.TX_FAILED, {
+        message: error
+      });
     }
   }
 
@@ -419,13 +407,13 @@ const Swap: React.FC<SwapProps> = () => {
               </div>
               <span>2,959,898.60 AIRI</span>
             </div> */}
-            {/* <div className={cx("row")}>
+            <div className={cx("row")}>
               <div className={cx("title")}>
-                <span>Spread</span>
+                <span>Tax rate</span>
                 <TooltipIcon />
               </div>
-              <span>2,959,898.60 AIRI</span>
-            </div> */}
+              <span>{taxRate?.rate} %</span>
+            </div>
           </div>
           <SettingModal
             isOpen={isOpenSettingModal}

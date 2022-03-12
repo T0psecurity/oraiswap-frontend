@@ -40,9 +40,9 @@ const querySmart = async (contract: string, msg: string | object) => {
     return res.data;
 };
 
-async function fetchTaxRate(oracleAddr: string) {
+async function fetchTaxRate() {
 
-    const data = await querySmart(oracleAddr, { treasury: { tax_rate: {} } });
+    const data = await querySmart(network.oracle, { treasury: { tax_rate: {} } });
     return data
 }
 
@@ -122,8 +122,8 @@ const handleSentFunds = (...funds: any[]) => {
     return sent_funds;
 }
 
-async function fetchExchangeRate(oracleAddr: string, base_denom: string, quote_denom: string) {
-    const data = await querySmart(oracleAddr, { exchange: { exchange_rate: { base_denom, quote_denom } } });
+async function fetchExchangeRate(base_denom: string, quote_denom: string) {
+    const data = await querySmart(network.oracle, { exchange: { exchange_rate: { base_denom, quote_denom } } });
     return data;
 }
 
