@@ -124,13 +124,27 @@ const Balance: React.FC<BalanceProps> = () => {
   const [to, setTo] = useState<TokenItemType>({});
   const [fromAmount, setFromAmount] = useState<string>("0");
 
-  const onClickTokenFrom = useCallback((token: TokenItemType) => {
-    setFrom(token);
+  const onClickToken = useCallback((type: string, token: TokenItemType) => {
+    if (type === "to") {
+      setTo(token);
+    } else {
+      setFrom(token);
+    }
   }, []);
 
-  const onClickTokenTo = useCallback((token: TokenItemType) => {
-    setTo(token);
-  }, []);
+  const onClickTokenFrom = useCallback(
+    (token: TokenItemType) => {
+      onClickToken("from", token);
+    },
+    [onClickToken]
+  );
+
+  const onClickTokenTo = useCallback(
+    (token: TokenItemType) => {
+      onClickToken("to", token);
+    },
+    [onClickToken]
+  );
 
   return (
     <Layout>
@@ -141,6 +155,7 @@ const Balance: React.FC<BalanceProps> = () => {
         </div>
         <div className={styles.divider} />
         <div className={styles.transferTab}>
+          {/* From Tab */}
           <div className={styles.from}>
             <div className={styles.tableHeader}>
               <span className={styles.label}>From</span>
@@ -211,12 +226,16 @@ const Balance: React.FC<BalanceProps> = () => {
               </div>
             </div>
           </div>
+          {/* End from tab */}
+          {/* Transfer button */}
           <div className={styles.transferBtn}>
             <Transfer style={{ width: 44, height: 44, alignSelf: "center" }} />
             <div className={styles.tfBtn}>
               <span className={styles.tfTxt}>Transfer</span>
             </div>
           </div>
+          {/* End Transfer button */}
+          {/* To Tab */}
           <div className={styles.to}>
             <div className={styles.tableHeader}>
               <span className={styles.label}>To</span>
@@ -253,6 +272,7 @@ const Balance: React.FC<BalanceProps> = () => {
               </div>
             </div>
           </div>
+          {/* End To Tab  */}
         </div>
       </div>
     </Layout>

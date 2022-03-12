@@ -62,14 +62,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {isLoggedIn() ? "Unnamed connected" : "Connect wallet"}
           </Text>
           {isLoggedIn() ? (
-            <div
-              onClick={() => {
+            <Logout
+              onClick={(e) => {
                 LocalStorage.removeItem(LocalStorageKey.token);
                 window.location.reload();
               }}
-            >
-              <Logout style={{ width: 30, height: 30 }} />
-            </div>
+              style={{ width: 35, height: 35 }}
+            />
           ) : (
             <div />
           )}

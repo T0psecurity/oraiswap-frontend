@@ -9,6 +9,17 @@ import { Type } from 'pages/Swap';
 import { TokenInfo as TokenInfoExtend } from 'types/token';
 import { ORAI } from 'constants/constants';
 
+interface TokenInfo {
+    name: string;
+    symbol: string;
+    denom?: string,
+    decimals: number;
+    total_supply: string;
+    contract_addr: string;
+    icon?: string;
+    verified?: boolean;
+}
+
 const toQueryMsg = (msg: string) => {
     try {
         return Buffer.from(JSON.stringify(JSON.parse(msg))).toString('base64');
@@ -35,10 +46,34 @@ async function fetchTaxRate(oracleAddr: string) {
     return data
 }
 
-async function fetchTokenInfo(tokenAddr: string) {
-
-    const data = await querySmart(tokenAddr, { token_info: {} });
-    return data
+async function fetchTokenInfo(tokenAddr: string, denom?: string): TokenInfo {
+    let tokenInfo: TokenInfo = {
+        symbol: '',
+        name: '',
+        contract_addr: tokenAddr,
+        decimals: 6,
+        icon: '',
+        verified: false
+    }
+    if (denom) {
+        tokenInfo.symbol = denom;
+        tokenInfo.name = denom;
+        tokenInfo.denom = denom;
+        tokenInfo.name = denom;
+        tokenInfo.icon = denom;
+        tokenInfo.verified = true;
+    } else {
+        const data = await querySmart(tokenAddr, { token_info: {} });
+        tokenInfo = {
+            symbol: data.symbol,
+            name: data.name,
+            contract_addr: tokenAddr,
+            decimals: data.decimals,
+            icon: data.icon,
+            verified: data.verified
+        };
+    }
+    return tokenInfo
 }
 
 async function fetchPool(pairAddr: string) {
@@ -65,13 +100,16 @@ async function fetchNativeTokenBalance(walletAddr: string) {
     return parseInt(res.balances.find(balance => balance.denom === ORAI).amount);
 }
 
-async function fetchBalance(tokenAddr: string, walletAddr: string) {
-    if (tokenAddr === 'native') return fetchNativeTokenBalance(walletAddr);
+async function fetchBalance(tokenAddr: string, walletAddr: string, denom?: string) {
+    if (denom) return fetchNativeTokenBalance(walletAddr);
     else return fetchTokenBalance(tokenAddr, walletAddr);
 }
 
 const parseTokenInfo = (tokenInfo: TokenInfoExtend, addr: string, amount?: string) => {
-    if (tokenInfo?.denom) return { fund: { denom: addr, amount }, info: { native_token: { denom: addr } } };
+    if (tokenInfo?.denom) {
+        if (amount) return { fund: { denom: addr, amount }, info: { native_token: { denom: addr } } };
+        return { info: { native_token: { denom: addr } } };
+    }
     return { info: { token: { contract_addr: addr } } };
 }
 
@@ -83,6 +121,53 @@ const handleSentFunds = (...funds: any[]) => {
     if (sent_funds.length === 0) return null;
     return sent_funds;
 }
+
+const getMsgs =
+    (
+        _msg: any,
+        {
+            amount,
+            symbol,
+            minimumReceived
+        }: {
+            amount?: string | number;
+            symbol?: string;
+            minimumReceived?: string | number;
+        }
+    ) => {
+        const msg = Array.isArray(_msg) ? _msg[0] : _msg;
+        if (msg?.execute_msg?.send?.msg?.execute_swap_operations) {
+            msg.execute_msg.send.msg.execute_swap_operations.minimum_receive =
+                parseInt(`${minimumReceived}`, 10).toString();
+            if (isNativeToken(symbol || '')) {
+                msg.coins = [new Coin()]; //Coins.fromString(toAmount(`${amount}`) + symbol);
+            }
+
+            msg.execute_msg.send.msg = btoa(
+                JSON.stringify(msg.execute_msg.send.msg)
+            );
+        } else if (msg?.execute_msg?.send?.msg) {
+            msg.execute_msg.send.msg = btoa(
+                JSON.stringify(msg.execute_msg.send.msg)
+            );
+        }
+        if (msg?.execute_msg?.execute_swap_operations) {
+            msg.execute_msg.execute_swap_operations.minimum_receive = parseInt(
+                `${minimumReceived}`,
+                10
+            ).toString();
+            msg.execute_msg.execute_swap_operations.offer_amount = toAmount(
+                `${amount}`,
+                symbol
+            );
+
+            if (isNativeToken(symbol || '')) {
+                msg.coins = [new Coin()]; // Coins.fromString(toAmount(`${amount}`) + symbol);
+            }
+        }
+        return [msg];
+    }
+
 
 async function generateContractMessages(
     query:
@@ -128,7 +213,7 @@ async function generateContractMessages(
             const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(fromInfo, from, amount.toString());
             const { fund: askSentFund, info: askInfo } = parseTokenInfo(toInfo, to, undefined);
             sent_funds = handleSentFunds(offerSentFund, askSentFund);
-            input = {
+            let inputTemp = {
                 execute_swap_operations: {
                     operations: [
                         {
@@ -139,7 +224,21 @@ async function generateContractMessages(
                         }
                     ]
                 }
-            };
+            }
+            // if cw20 => has to send through cw20 contract
+            if (fromInfo.denom) {
+                input = inputTemp;
+            } else {
+                console.log("input base64: ", btoa(JSON.stringify(inputTemp)));
+                input = {
+                    send: {
+                        contract: contractAddr,
+                        amount: amount.toString(),
+                        msg: btoa(JSON.stringify(inputTemp))
+                    }
+                }
+                contractAddr = fromInfo.contract_addr;
+            }
             break;
         // TODO: provide liquidity and withdraw liquidity
         case Type.PROVIDE:

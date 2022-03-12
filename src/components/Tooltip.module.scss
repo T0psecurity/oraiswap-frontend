@@ -1,27 +1,38 @@
-@import 'src/styles/mixins';
-@import 'src/styles/variables';
+@import "src/styles/mixins";
+@import "src/styles/variables";
 
 .tooltip {
-  font-size: 12px;
-  white-space: pre-line;
+    font-family: "IBM Plex Sans";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    /* or 24px */
 
-  article:not(:first-child) {
-    margin-top: 1em;
-  }
+    text-align: center;
+
+    /* aiRight/White */
+
+    color: #ffffff;
+
+    border-radius: 24px;
+    article:not(:first-child) {
+        margin-top: 1em;
+    }
 }
 
 .button {
-  @include flex;
+    @include flex;
 }
 
 /* with tooltip */
 .flex {
-  @include flex(flex-start);
-  display: inline-flex;
+    @include flex(flex-start);
+    display: inline-flex;
 }
 
 .icon {
-  color: fade-out($slate, 0.25);
-  margin-left: 3px;
-  margin-top: -0.04em;
+    color: fade-out($slate, 0.25);
+    margin-left: 3px;
+    margin-top: -0.04em;
 }
