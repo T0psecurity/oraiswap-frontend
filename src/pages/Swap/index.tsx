@@ -23,6 +23,11 @@ const mockPair = {
     amount1: 100,
     amount2: 1000,
   },
+  "AIRI-ATOM": {
+    contractAddress: "orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh",
+    amount1: 100,
+    amount2: 1000,
+  },
   "ORAI-TEST1": {
     contractAddress: "orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v",
     amount1: 100,
@@ -55,8 +60,8 @@ const mockToken = {
     contractAddress: "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2",
     logo: "airi.svg",
   },
-  TEST1: {
-    contractAddress: "orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2",
+  ATOM: {
+    contractAddress: "orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf",
     logo: "atom.svg",
   },
   TEST2: {
@@ -68,6 +73,7 @@ const mockToken = {
 const mockBalance = {
   ORAI: 800000,
   AIRI: 80000.09,
+  ATOM: 50000.09,
   TEST1: 8000.122,
   TEST2: 800.3434,
 };
@@ -120,7 +126,7 @@ const Swap: React.FC<SwapProps> = () => {
   useEffect(() => {
     let listTo = getListPairedToken(fromToken);
     const listToken = allToken.filter((t) => listTo.includes(t.title));
-    setListValidTo([...listToken]);
+    console.log("list token: ", listToken);
     if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
   }, [fromToken]);
 
@@ -173,12 +179,9 @@ const Swap: React.FC<SwapProps> = () => {
 
   useEffect(() => {
     console.log("exchange rate: ", exchangeRate?.item?.exchange_rate)
+    // TODO: need to re-calculate this
     setFromToRatio(1 / parseFloat(exchangeRate?.item?.exchange_rate));
   }, [isExchangeRateLoading]);
-
-  useEffect(() => {
-    console.log("simulate daa: ", simulateData)
-  }, [simulateData]);
 
   const handleSubmit = async () => {
     try {
@@ -282,14 +285,14 @@ const Swap: React.FC<SwapProps> = () => {
               >
                 HALF
               </div>
-              <span style={{ flexGrow: 1, textAlign: "right" }}>
+              {/* <span style={{ flexGrow: 1, textAlign: "right" }}>
                 {`~$${numberWithCommas(
                   +(
                     mockBalance[fromToken] *
                     mockPrice[fromToken]
                   ).toFixed(2)
                 )}`}
-              </span>
+              </span> */}
             </div>
             <div className={cx("input")}>
               <div

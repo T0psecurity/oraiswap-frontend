@@ -4,6 +4,7 @@ export const CHROME = 'https://google.com/chrome';
 export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
 export const AIRI = 'AIRI';
+export const ATOM = 'ATOM';
 export const LP = 'LP';
 
 export const NATIVE_TOKENS = [ORAI];

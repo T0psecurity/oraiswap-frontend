@@ -92,5 +92,6 @@ export const parseAmount = (value: string, decimal: number) => {
 }
 
 export const parseDisplayAmount = (value: string, decimal: number) => {
-  return `${(parseFloat(value) / Math.pow(10, decimal)).toFixed(6)}`;
+  if (value) return `${(parseFloat(value) / Math.pow(10, decimal)).toFixed(6)}`;
+  return 0;
 }
