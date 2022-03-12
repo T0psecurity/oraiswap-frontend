@@ -1,12 +1,14 @@
 import Token from 'images/Token/Token.svg';
 import { tokenInfos } from 'rest/usePairs';
 
-import { ORAI, UAIRI, AIRI } from '../constants/constants';
+import { ORAI, UAIRI, AIRI, ATOM } from '../constants/constants';
 
 export const getSymbol = (key: string) => {
   switch (key) {
     case AIRI:
       return UAIRI;
+    case ATOM:
+      return ATOM;
     case ORAI:
       return ORAI;
     default:
