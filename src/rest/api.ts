@@ -127,13 +127,36 @@ async function fetchExchangeRate(oracleAddr: string, base_denom: string, quote_d
     return data;
 }
 
+async function simulateSwap(query: {
+    fromInfo: TokenInfoExtend;
+    toInfo: TokenInfoExtend;
+    amount: number | string;
+}) {
+    const { amount, fromInfo, toInfo } = query;
+    const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(fromInfo, fromInfo.contract_addr, amount.toString());
+    const { fund: askSentFund, info: askInfo } = parseTokenInfo(toInfo, toInfo.contract_addr, undefined);
+    let msg = {
+        simulate_swap_operations: {
+            operations: [
+                {
+                    orai_swap: {
+                        offer_asset_info: offerInfo,
+                        ask_asset_info: askInfo
+                    }
+                }
+            ],
+            offer_amount: amount.toString(),
+        }
+    }
+    const data = await querySmart(network.router, msg);
+    return data;
+}
+
 
 async function generateContractMessages(
     query:
         | {
             type: Type.SWAP;
-            from: string;
-            to: string;
             fromInfo: TokenInfoExtend;
             toInfo: TokenInfoExtend;
             amount: number | string;
@@ -170,8 +193,8 @@ async function generateContractMessages(
     console.log("amount to swap: ", amount);
     switch (type) {
         case Type.SWAP:
-            const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(fromInfo, from, amount.toString());
-            const { fund: askSentFund, info: askInfo } = parseTokenInfo(toInfo, to, undefined);
+            const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(fromInfo, fromInfo.contract_addr, amount.toString());
+            const { fund: askSentFund, info: askInfo } = parseTokenInfo(toInfo, toInfo.contract_addr, undefined);
             sent_funds = handleSentFunds(offerSentFund, askSentFund);
             let inputTemp = {
                 execute_swap_operations: {
@@ -245,4 +268,4 @@ async function generateContractMessages(
 };
 
 
-export { fetchTaxRate, fetchNativeTokenBalance, fetchPairInfo, fetchPool, fetchTokenBalance, fetchBalance, fetchTokenInfo, generateContractMessages, fetchExchangeRate }
+export { fetchTaxRate, fetchNativeTokenBalance, fetchPairInfo, fetchPool, fetchTokenBalance, fetchBalance, fetchTokenInfo, generateContractMessages, fetchExchangeRate, simulateSwap }
