@@ -187,19 +187,17 @@
     color: #a871df;
   }
 }
-input[type='number'] {
-  padding: 12px;
-  box-sizing: border-box;
-  color: #505665;
-  font-weight: 600;
-  font-size: 24px;
-}
 .amount {
   text-align: right;
   background: #1e1e21;
   border-radius: 8px;
   height: 48px;
   width: 60%;
+  padding: 12px;
+  box-sizing: border-box;
+  color: #505665;
+  font-weight: 600;
+  font-size: 24px;
 }
 .tokenFromGroup {
   display: flex;
