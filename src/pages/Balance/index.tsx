@@ -1,7 +1,7 @@
 import Layout from 'layouts/Layout';
 import { Input } from 'antd';
 import classNames from 'classnames';
-import React, { ReactElement, useCallback, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
@@ -14,6 +14,10 @@ import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import useLocalStorage from 'libs/useLocalStorage';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+import axios from 'axios';
+import { DenomBalanceResponse } from 'rest/useAPI';
+import TokenBalance from 'components/TokenBalance';
 
 interface IBCInfoMap {
   [key: string]: { [key: string]: IBCInfo };
@@ -27,10 +31,22 @@ const ibcInfos: IBCInfoMap = {
       timeout: 60
     }
   },
+  'osmosis-1': {
+    'Oraichain-testnet': {
+      source: 'transfer',
+      channel: 'channel-202',
+      timeout: 60
+    }
+  },
   'Oraichain-testnet': {
     'gravity-test': {
       source: 'transfer',
       channel: 'channel-1',
+      timeout: 60
+    },
+    'osmosis-1': {
+      source: 'transfer',
+      channel: 'channel-3',
       timeout: 60
     }
   }
@@ -41,103 +57,98 @@ interface BalanceProps {}
 type TokenItemType = {
   name?: string;
   org?: string;
+  denom: string;
   icon?: ReactElement;
-  active?: Boolean;
   chainId: string;
   rpc: string;
+  lcd?: string;
   decimals: number;
   contract_addr: string;
-  amount?: {
-    token: number;
-    usd: number;
-  };
+  coingeckoId: 'oraichain-token' | 'osmosis' | 'atom' | 'ethereum' | 'bnb';
+  cosmosBased: Boolean;
+};
+
+type AmountDetail = {
+  amount: number;
+  usd: number;
 };
 interface TokenItemProps {
-  name?: string;
-  org?: string;
-  icon?: ReactElement;
-  active?: Boolean;
+  token: TokenItemType;
+  active: Boolean;
   className?: string;
-  amount?: {
-    token: number;
-    usd: number;
-  };
   onClick?: Function;
+  amountDetail?: AmountDetail;
 }
 
 const tokens: TokenItemType[] = [
   {
     name: 'ATOM',
     org: 'Cosmos Hub',
-    amount: {
-      token: 123123.45,
-      usd: 100003221
-    },
+    coingeckoId: 'atom',
+    denom: 'atom',
     decimals: 6,
     contract_addr: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
-    chainId: 'cosmoshub',
-    rpc: 'http://125.212.192.225:26657',
+    chainId: 'cosmoshub-4',
+    rpc: 'https://rpc-cosmoshub.blockapsis.com',
+    lcd: 'https://lcd-cosmoshub.blockapsis.com',
+    cosmosBased: true,
     icon: <ATOMCOSMOS className={styles.tokenIcon} />
   },
   {
     name: 'ORAI',
     org: 'Oraichain',
-    amount: {
-      token: 123123.45,
-      usd: 100003221
-    },
+    denom: 'orai',
+    coingeckoId: 'oraichain-token',
     contract_addr: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
     decimals: 6,
-    chainId: 'Oraichain',
-    rpc: 'http://125.212.192.225:26657',
+    chainId: 'Oraichain-testnet',
+    rpc: 'https://testnet.rpc.orai.io',
+    lcd: 'https://testnet.lcd.orai.io',
+    cosmosBased: true,
     icon: <ORAI className={styles.tokenIcon} />
   },
   {
     name: 'ETH',
-    org: 'Etherium',
-    amount: {
-      token: 123123.45,
-      usd: 100003221
-    },
+    org: 'Ethereum',
+    coingeckoId: 'ethereum',
+    denom: 'ethereum',
     contract_addr: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
     decimals: 6,
     chainId: 'ethereum',
     rpc: 'http://125.212.192.225:26657',
+    cosmosBased: false,
     icon: <ETH className={styles.tokenIcon} />
   },
   {
     name: 'BNB',
-    org: 'Cosmos Hub',
-    chainId: 'bnb',
-    rpc: 'http://125.212.192.225:26657',
+    org: 'Binance smartchain',
+    chainId: 'bsc',
+    denom: 'bnb',
+    rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
     decimals: 6,
     contract_addr: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
-    amount: {
-      token: 123123.45,
-      usd: 100003221
-    },
+    coingeckoId: 'bnb',
+    cosmosBased: false,
     icon: <BNB className={styles.tokenIcon} />
   },
   {
     name: 'OSMO',
-    org: 'Cosmos Hub',
+    org: 'Osmosis',
+    denom: 'osmosis',
     chainId: 'osmosis-1',
-    rpc: 'http://125.212.192.225:26657',
+    rpc: 'https://rpc-osmosis.blockapsis.com',
+    lcd: 'https://lcd-osmosis.blockapsis.com',
     decimals: 6,
     contract_addr: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
-    amount: {
-      token: 123123.45,
-      usd: 100003221
-    },
+    coingeckoId: 'osmosis',
+    cosmosBased: true,
     icon: <OSMO className={styles.tokenIcon} />
   }
 ];
 
 const TokenItem: React.FC<TokenItemProps> = ({
-  name,
-  org,
-  icon,
-  amount,
+  token,
+  amountDetail,
   active,
   className,
   onClick
@@ -149,38 +160,85 @@ const TokenItem: React.FC<TokenItemProps> = ({
         { [styles.active]: active },
         className
       )}
-      onClick={() =>
-        onClick &&
-        onClick({
-          name,
-          org,
-          icon,
-          amount
-        })
-      }
+      onClick={() => onClick?.(token)}
     >
       <div className={styles.token}>
-        {icon ?? <ATOMCOSMOS className={styles.tokenIcon} />}
+        {token.icon ?? <ATOMCOSMOS className={styles.tokenIcon} />}
         <div className={styles.tokenInfo}>
-          <div className={styles.tokenName}>{name}</div>
+          <div className={styles.tokenName}>{token.name}</div>
           <div className={styles.tokenOrg}>
-            <span className={styles.tokenOrgTxt}>{org}</span>
+            <span className={styles.tokenOrgTxt}>{token.org}</span>
           </div>
         </div>
       </div>
       <div className={styles.tokenBalance}>
-        <div className={styles.tokenAmount}>{amount?.token}</div>
-        <div className={styles.subLabel}>${amount?.usd}</div>
+        <TokenBalance
+          balance={{
+            amount: amountDetail ? amountDetail.amount.toString() : '0',
+            denom: ''
+          }}
+          className={styles.tokenAmount}
+          decimalScale={2}
+        />
+        <TokenBalance
+          balance={amountDetail ? amountDetail.usd : 0}
+          className={styles.subLabel}
+          decimalScale={2}
+        />
       </div>
     </div>
   );
 };
 
+type AmountDetails = { [key: string]: AmountDetail };
+
 const Balance: React.FC<BalanceProps> = () => {
   const [keplrAddress] = useLocalStorage<string>('address');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
-  const [fromAmount, setFromAmount] = useState<string>('0');
+  const [fromAmount, setFromAmount] = useState<number>(0);
+  const [amounts, setAmounts] = useState<AmountDetails>({});
+  const { prices } = useCoinGeckoPrices([
+    'oraichain-token',
+    'osmosis',
+    'atom',
+    'bnb',
+    'ethereum'
+  ]);
+
+  const loadTokenAmounts = async () => {
+    const amountDetails: AmountDetails = {};
+    const filteredTokens = tokens.filter(
+      (token) => token.cosmosBased && token.coingeckoId in prices
+    );
+    for (const token of filteredTokens) {
+      // switch address
+      const address = (await window.keplr.getKey(token.chainId)).bech32Address;
+
+      const url = `${token.lcd}/cosmos/bank/v1beta1/balances/${address}`;
+      const res: DenomBalanceResponse = (await axios.get(url)).data;
+      const amount = parseInt(
+        res.balances.find((balance) => balance.denom === token.denom)?.amount ??
+          '0'
+      );
+
+      const price = prices[token.coingeckoId].price;
+      if (!price) continue;
+      const amountDetail: AmountDetail = {
+        amount,
+        usd: price.multiply(amount).divide(10 ** token.decimals).asNumber
+      };
+      amountDetails[token.coingeckoId] = amountDetail;
+    }
+    setAmounts(amountDetails);
+  };
+
+  useEffect(() => {
+    const amountDetails: AmountDetails = {};
+    loadTokenAmounts();
+  }, [prices]);
+
+  // console.log(prices['oraichain-token'].price);
 
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
     if (type === 'to') {
@@ -211,9 +269,11 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    await window.Keplr.suggestChain(from.chainId);
+    const fromAddress = (await window.keplr.getKey(from.chainId)).bech32Address;
+    const toAddress = (await window.keplr.getKey(to.chainId)).bech32Address;
+    await window.keplr.enable(from.chainId);
     const amount = coin(
-      Math.round(parseFloat(fromAmount) * 10 ** from.decimals),
+      Math.round(fromAmount * 10 ** from.decimals),
       from.contract_addr
     );
     const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
@@ -225,13 +285,13 @@ const Balance: React.FC<BalanceProps> = () => {
     const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
 
     const result = await client.sendIbcTokens(
-      keplrAddress,
-      keplrAddress,
+      fromAddress,
+      toAddress,
       amount,
       ibcInfo.source,
       ibcInfo.channel,
       undefined,
-      Math.floor(Date.now() / 1000) + 60,
+      Math.floor(Date.now() / 1000) + ibcInfo.timeout,
       {
         gas: '200000',
         amount: []
@@ -262,7 +322,9 @@ const Balance: React.FC<BalanceProps> = () => {
                   <div
                     className={styles.balanceBtn}
                     onClick={() => {
-                      setFromAmount(`${from?.amount?.token}` ?? '0');
+                      setFromAmount(
+                        from ? amounts[from.coingeckoId].amount : 0
+                      );
                     }}
                   >
                     MAX
@@ -271,7 +333,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     className={styles.balanceBtn}
                     onClick={() => {
                       setFromAmount(
-                        (from?.amount && `${from?.amount?.token / 2}`) ?? '0'
+                        from ? amounts[from.coingeckoId].amount / 2 : 0
                       );
                     }}
                   >
@@ -296,7 +358,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     defaultValue={fromAmount}
                     value={fromAmount}
                     onChange={(e) => {
-                      setFromAmount(e.target.value);
+                      setFromAmount(parseFloat(e.target.value));
                     }}
                     className={styles.amount}
                   />
@@ -313,9 +375,10 @@ const Balance: React.FC<BalanceProps> = () => {
                   return (
                     <TokenItem
                       key={t.chainId}
+                      amountDetail={amounts[t.coingeckoId]}
                       className={styles.token_from}
                       active={from?.name === t.name}
-                      {...t}
+                      token={t}
                       onClick={onClickTokenFrom}
                     />
                   );
@@ -361,8 +424,9 @@ const Balance: React.FC<BalanceProps> = () => {
                   return (
                     <TokenItem
                       key={t.chainId}
+                      amountDetail={amounts[t.coingeckoId]}
                       active={to?.name === t.name}
-                      {...t}
+                      token={t}
                       onClick={onClickTokenTo}
                     />
                   );
