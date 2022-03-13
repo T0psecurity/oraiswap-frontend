@@ -127,6 +127,7 @@ const Swap: React.FC<SwapProps> = () => {
     let listTo = getListPairedToken(fromToken);
     const listToken = allToken.filter((t) => listTo.includes(t.title));
     console.log("list token: ", listToken);
+    setListValidTo([...listToken]);
     if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
   }, [fromToken]);
 
@@ -217,18 +218,6 @@ const Swap: React.FC<SwapProps> = () => {
     }
   }
 
-  useEffect(() => {
-    let listTo = getListPairedToken(fromToken);
-    const listToken = listTo.map((name) => {
-      return {
-        ...mockToken[name as TokenName],
-        title: name as TokenName,
-        balance: mockBalance[name as TokenName],
-      };
-    });
-    setListValidTo([...listToken]);
-    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
-  }, [fromToken]);
 
   const getListPairedToken = (tokenName: TokenName) => {
     let pairs = Object.keys(mockPair).filter((name) =>
