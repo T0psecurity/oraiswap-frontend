@@ -88,7 +88,9 @@
 .menu_themes {
   display: flex;
   justify-content: space-evenly;
-  margin-top: 400px;
+  position: absolute;
+  bottom: 200px;
+  left: 25px;
 }
 
 .menu_theme {
@@ -119,7 +121,9 @@
 
 .menu_footer {
   text-align: center;
-  margin-top: 100px;
+  position: absolute;
+  bottom: 100px;
+  left: 65px;
 }
 
 .connect_btn {
