@@ -31,7 +31,9 @@ const checkKeplr = async () => {
           <Router>
             <AuthProvider>
               <ScrollToTop />
-              <App />
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
             </AuthProvider>
           </Router>
           <ToastContainer transition={Bounce} />
