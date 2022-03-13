@@ -23,6 +23,7 @@ const checkKeplr = async () => {
   if (keplr) {
     // always trigger suggest chain when users enter the webpage
     await window.Keplr.suggestChain(network.chainId);
+    await window.Keplr.suggestChain("Oraichain");
   }
   render(
     <StrictMode>
