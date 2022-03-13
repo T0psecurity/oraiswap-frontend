@@ -82,6 +82,16 @@ async function fetchPool(pairAddr: string) {
     return data
 }
 
+async function fetchPoolInfoAmount(fromTokenInfo: TokenInfoExtend, toTokenInfo: TokenInfoExtend) {
+    const { info: fromInfo } = parseTokenInfo(fromTokenInfo, fromTokenInfo.contract_addr, undefined);
+    const { info: toInfo } = parseTokenInfo(toTokenInfo, toTokenInfo.contract_addr, undefined);
+    const pairInfo = await querySmart(network.factory, { pair: { asset_infos: [fromInfo, toInfo] } });
+    const poolInfo = await fetchPool(pairInfo.contract_addr);
+    const offerPoolAmount = parseInt(poolInfo.assets.find(asset => JSON.stringify(asset.info) === JSON.stringify(fromInfo)).amount);
+    const askPoolAmount = parseInt(poolInfo.assets.find(asset => JSON.stringify(asset.info) === JSON.stringify(toInfo)).amount);
+    return { offerPoolAmount, askPoolAmount }
+}
+
 async function fetchPairInfo(factoryAddr: string, assetInfos: any[]) {
 
     const data = await querySmart(factoryAddr, { pair: { asset_infos: assetInfos } });
@@ -268,4 +278,4 @@ async function generateContractMessages(
 };
 
 
-export { fetchTaxRate, fetchNativeTokenBalance, fetchPairInfo, fetchPool, fetchTokenBalance, fetchBalance, fetchTokenInfo, generateContractMessages, fetchExchangeRate, simulateSwap }
+export { fetchTaxRate, fetchNativeTokenBalance, fetchPairInfo, fetchPool, fetchTokenBalance, fetchBalance, fetchTokenInfo, generateContractMessages, fetchExchangeRate, simulateSwap, fetchPoolInfoAmount }

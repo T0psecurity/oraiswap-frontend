@@ -7,7 +7,7 @@ import { TooltipIcon } from "components/Tooltip";
 import SettingModal from "./Modals/SettingModal";
 import SelectTokenModal from "./Modals/SelectTokenModal";
 import { useQuery } from 'react-query'
-import { fetchBalance, fetchExchangeRate, fetchPairInfo, fetchPool, fetchTaxRate, fetchTokenInfo, generateContractMessages, simulateSwap } from "rest/api";
+import { fetchBalance, fetchExchangeRate, fetchPairInfo, fetchPool, fetchPoolInfoAmount, fetchTaxRate, fetchTokenInfo, generateContractMessages, simulateSwap } from "rest/api";
 import { Type } from 'pages/Swap';
 import CosmJs from "libs/cosmjs";
 import { DECIMAL_FRACTION, ORAI } from "constants/constants";
@@ -85,9 +85,9 @@ const mockPrice = {
   TEST2: 1,
 };
 
-function numberWithCommas(x: number) {
-  return x.toFixed(6).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-}
+// function numberWithCommas(x: number) {
+//   return x.toFixed(6).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+// }
 
 type TokenName = keyof typeof mockToken;
 type PairName = keyof typeof mockPair;
@@ -119,8 +119,8 @@ const Swap: React.FC<SwapProps> = () => {
   const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
   const [fromAmount, setFromAmount] = useState(0);
   const [toAmount, setToAmount] = useState(0);
-  const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
-  const [fromToRatio, setFromToRatio] = useState(0);
+  // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
+  const [averageRatio, setAverageRatio] = useState(0);
   const [slippage, setSlippage] = useState(1);
 
   useEffect(() => {
@@ -131,34 +131,32 @@ const Swap: React.FC<SwapProps> = () => {
     if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
   }, [fromToken]);
 
-  useEffect(() => {
-    const pairName = Object.keys(mockPair).find(
-      (p) => p.includes(fromToken) && p.includes(toToken)
-    );
-    setCurrentPair(pairName as PairName);
+  // useEffect(() => {
+  //   const pairName = Object.keys(mockPair).find(
+  //     (p) => p.includes(fromToken) && p.includes(toToken)
+  //   );
+  //   // setCurrentPair(pairName as PairName);
 
-    // const { amount1, amount2 } = mockPair[pairName as PairName];
-    // let rate;
-    // if (currentPair.indexOf(fromToken) === 0) rate = amount2 / amount1;
-    // else rate = amount1 / amount2;
-    // setFromToRatio(rate);
-  }, [fromToken, toToken]);
+  //   // const { amount1, amount2 } = mockPair[pairName as PairName];
+  //   // let rate;
+  //   // if (currentPair.indexOf(fromToken) === 0) rate = amount2 / amount1;
+  //   // else rate = amount1 / amount2;
+  //   // setFromToRatio(rate);
+  // }, [fromToken, toToken]);
 
   const onChangeFromAmount = (amount: number) => {
     setFromAmount(amount);
-    setToAmount(amount * fromToRatio);
   };
 
   const onMaxFromAmount = (amount: number) => {
     let finalAmount = parseFloat(parseDisplayAmount(amount, fromTokenInfoData?.decimals));
     setFromAmount(finalAmount);
-    setToAmount(finalAmount * fromToRatio);
   };
 
-  const onChangeToAmount = (amount: number) => {
-    setToAmount(amount);
-    setFromAmount(amount / fromToRatio);
-  };
+  // const onChangeToAmount = (amount: number) => {
+  //   setToAmount(amount);
+  //   setFromAmount(amount / fromToRatio);
+  // };
 
   const getTokenDenom = (token) => {
     return mockToken[token].denom ? mockToken[token].denom : undefined
@@ -174,15 +172,36 @@ const Swap: React.FC<SwapProps> = () => {
 
   const { data: toTokenBalance, error: toTokenBalanceError, isError: isToTokenBalanceError, isLoading: isLoadingToTokenBalance } = useQuery(['to-token-balance', toToken], () => fetchBalance(mockToken[toToken].contractAddress, "orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573", getTokenDenom(toToken)));
 
-  const { data: exchangeRate, error: exchangeRateError, isError: isExchangeRateError, isLoading: isExchangeRateLoading } = useQuery(['exchange-rate', fromTokenInfoData, toTokenInfoData], () => fetchExchangeRate(fromTokenInfoData?.symbol.toLocaleLowerCase(), toTokenInfoData?.symbol.toLocaleLowerCase()), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
+  // const { data: exchangeRate, error: exchangeRateError, isError: isExchangeRateError, isLoading: isExchangeRateLoading } = useQuery(['exchange-rate', fromTokenInfoData, toTokenInfoData], () => fetchExchangeRate(fromTokenInfoData?.symbol.toLocaleLowerCase(), toTokenInfoData?.symbol.toLocaleLowerCase()), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
 
   const { data: simulateData, error: simulateDataError, isError: isSimulateDataError, isLoading: isSimulateDataLoading } = useQuery(['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount], () => simulateSwap({ fromInfo: fromTokenInfoData, toInfo: toTokenInfoData, amount: parseAmount(fromAmount, fromTokenInfoData?.decimals) }), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
 
+  const { data: poolData, isLoading: isPoolDataLoading } = useQuery(['pool-info-amount', fromTokenInfoData, toTokenInfoData], () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
+
+  // useEffect(() => {
+  //   console.log("exchange rate: ", exchangeRate?.item?.exchange_rate)
+  //   // TODO: need to re-calculate this
+  //   setFromToRatio(1 / parseFloat(exchangeRate?.item?.exchange_rate));
+  // }, [isExchangeRateLoading]);
+
+  const calculateToAmount = (poolData, offerAmount) => {
+    const cp = poolData.offerPoolAmount * poolData.askPoolAmount;
+    return poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount);
+  }
+
   useEffect(() => {
-    console.log("exchange rate: ", exchangeRate?.item?.exchange_rate)
-    // TODO: need to re-calculate this
-    setFromToRatio(1 / parseFloat(exchangeRate?.item?.exchange_rate));
-  }, [isExchangeRateLoading]);
+    if (poolData && fromAmount && fromAmount > 0) {
+      const finalToAmount = calculateToAmount(poolData, parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)));
+      setToAmount(parseFloat(parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)).toFixed(6));
+    }
+  }, [poolData, fromAmount]);
+
+  useEffect(() => {
+    if (poolData) {
+      const finalAverageRatio = calculateToAmount(poolData, 1);
+      setAverageRatio(parseFloat(finalAverageRatio));
+    }
+  }, [poolData]);
 
   const handleSubmit = async () => {
     try {
@@ -348,9 +367,7 @@ const Swap: React.FC<SwapProps> = () => {
               <span>{`Balance: ${parseDisplayAmount(toTokenBalance, toTokenInfoData?.decimals)} ${toTokenInfoData?.symbol.toUpperCase()}`}</span>
 
               <span style={{ flexGrow: 1, textAlign: "right" }}>
-                {`1 ${fromToken} ≈ ${numberWithCommas(
-                  +fromToRatio
-                )} ${toToken}`}
+                {`1 ${fromToken} ≈ ${averageRatio.toFixed(6)} ${toToken}`}
               </span>
               <TooltipIcon />
             </div>
@@ -375,9 +392,10 @@ const Swap: React.FC<SwapProps> = () => {
                 placeholder="0"
                 type="number"
                 step={`${parseDisplayAmount(1, toTokenInfoData?.decimals)}`}
-                onChange={(e) => {
-                  onChangeToAmount(e.target.value);
-                }}
+              // onChange={(e) => {
+              //   onChangeToAmount(e.target.value);
+              // }}
+              // disabled={true}
               />
             </div>
           </div>
