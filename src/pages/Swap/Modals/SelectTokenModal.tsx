@@ -40,7 +40,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                         >
                             <img
                                 src={
-                                    require(`assets/icons/${"atom_cosmos.svg"}`)
+                                    require(`assets/icons/${option.logo}`)
                                         .default
                                 }
                                 className={cx("logo")}
