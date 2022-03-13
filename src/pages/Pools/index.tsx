@@ -3,13 +3,15 @@ import React, { memo } from "react";
 import styles from './index.module.scss';
 import { ReactComponent as Logo } from "assets/icons/logo.svg";
 import { Button, Input } from "antd";
+import { useNavigate } from "react-router-dom";
+
 const { Search } = Input;
 
 interface PoolsProps {
-  
+
 }
 
-const Header = memo(({}) => {
+const Header = memo(({ }) => {
   return (
     <div className={styles.header}>
       <div className={styles.header_title}>Pools</div>
@@ -27,9 +29,11 @@ const Header = memo(({}) => {
   )
 });
 
-const PairBox = memo(({}) => {
+const PairBox = memo(({ }) => {
+  const navigate = useNavigate()
+
   return (
-    <div className={styles.pairbox}>
+    <div className={styles.pairbox} onClick={() => navigate('../pool/atom-orai', { replace: true })}>
       <div className={styles.pairbox_header}>
         <div className={styles.pairbox_logo}>
           {<Logo style={{ width: 40, height: 40 }} />}
@@ -41,20 +45,20 @@ const PairBox = memo(({}) => {
         </div>
       </div>
       <div className={styles.pairbox_content}>
-          <div className={styles.pairbox_data}>
-            <span className={styles.pairbox_data_name}>Swap Fee</span>
-            <span className={styles.pairbox_data_value}>0.3%</span>
-          </div>
-          <div className={styles.pairbox_data}>
-            <span className={styles.pairbox_data_name}>Liquidity</span>
-            <span className={styles.pairbox_data_value}>$5,289,043</span>
-          </div>
+        <div className={styles.pairbox_data}>
+          <span className={styles.pairbox_data_name}>Swap Fee</span>
+          <span className={styles.pairbox_data_value}>0.3%</span>
+        </div>
+        <div className={styles.pairbox_data}>
+          <span className={styles.pairbox_data_name}>Liquidity</span>
+          <span className={styles.pairbox_data_value}>$5,289,043</span>
+        </div>
       </div>
     </div>
   )
 });
 
-const WatchList = memo(({}) => {
+const WatchList = memo(({ }) => {
   return (
     <div className={styles.watchlist}>
       <div className={styles.watchlist_title}>Your watchlist</div>
@@ -63,12 +67,12 @@ const WatchList = memo(({}) => {
   )
 });
 
-const ListPools = memo(({}) => {
+const ListPools = memo(({ }) => {
   return (
     <div className={styles.listpools}>
       <div className={styles.listpools_title}>All pools</div>
       <div className={styles.listpools_search}>
-        <Search placeholder="Search by pools or tokens name" onSearch={()=>{}} style={{ width: 420 }} />
+        <Search placeholder="Search by pools or tokens name" onSearch={() => { }} style={{ width: 420 }} />
         <Button className={styles.listpools_create + ` primary-btn`}>Create a pool</Button>
       </div>
       <div className={styles.listpools_list}>
@@ -84,7 +88,7 @@ const ListPools = memo(({}) => {
     </div>
   )
 });
- 
+
 const Pools: React.FC<PoolsProps> = () => {
   return (
     <Layout nonBackground={true}>
@@ -96,5 +100,5 @@ const Pools: React.FC<PoolsProps> = () => {
     </Layout>
   );
 }
- 
+
 export default Pools;
