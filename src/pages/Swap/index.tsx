@@ -162,7 +162,7 @@ const Swap: React.FC<SwapProps> = () => {
     return mockToken[token].denom ? mockToken[token].denom : undefined
   }
 
-  const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(['tax-rate', fromToken], () => fetchTaxRate());
+  const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(['tax-rate'], () => fetchTaxRate());
 
   const { data: fromTokenInfoData, error: fromTokenInfoError, isError: isFromTokenInfoError, isLoading: isFromTokenInfoLoading } = useQuery(['from-token-info', fromToken], () => fetchTokenInfo(mockToken[fromToken].contractAddress, getTokenDenom(fromToken)));
 
@@ -174,9 +174,9 @@ const Swap: React.FC<SwapProps> = () => {
 
   // const { data: exchangeRate, error: exchangeRateError, isError: isExchangeRateError, isLoading: isExchangeRateLoading } = useQuery(['exchange-rate', fromTokenInfoData, toTokenInfoData], () => fetchExchangeRate(fromTokenInfoData?.symbol.toLocaleLowerCase(), toTokenInfoData?.symbol.toLocaleLowerCase()), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
 
-  const { data: simulateData, error: simulateDataError, isError: isSimulateDataError, isLoading: isSimulateDataLoading } = useQuery(['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount], () => simulateSwap({ fromInfo: fromTokenInfoData, toInfo: toTokenInfoData, amount: parseAmount(fromAmount, fromTokenInfoData?.decimals) }), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
+  const { data: simulateData, error: simulateDataError, isError: isSimulateDataError, isLoading: isSimulateDataLoading } = useQuery(['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount], () => simulateSwap({ fromInfo: fromTokenInfoData, toInfo: toTokenInfoData, amount: parseAmount(fromAmount, fromTokenInfoData?.decimals) }), { enabled: !!fromTokenInfoData && !!toTokenInfoData });
 
-  const { data: poolData, isLoading: isPoolDataLoading } = useQuery(['pool-info-amount', fromTokenInfoData, toTokenInfoData], () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
+  const { data: poolData, isLoading: isPoolDataLoading } = useQuery(['pool-info-amount', fromTokenInfoData, toTokenInfoData], () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData), { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate });
 
   // useEffect(() => {
   //   console.log("exchange rate: ", exchangeRate?.item?.exchange_rate)
@@ -184,21 +184,21 @@ const Swap: React.FC<SwapProps> = () => {
   //   setFromToRatio(1 / parseFloat(exchangeRate?.item?.exchange_rate));
   // }, [isExchangeRateLoading]);
 
-  const calculateToAmount = (poolData, offerAmount) => {
+  const calculateToAmount = (poolData, offerAmount, taxRate) => {
     const cp = poolData.offerPoolAmount * poolData.askPoolAmount;
-    return poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount);
+    return (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) * (1 - taxRate);
   }
 
   useEffect(() => {
     if (poolData && fromAmount && fromAmount > 0) {
-      const finalToAmount = calculateToAmount(poolData, parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)));
+      const finalToAmount = calculateToAmount(poolData, parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)), parseFloat(taxRate?.rate));
       setToAmount(parseFloat(parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)).toFixed(6));
     }
   }, [poolData, fromAmount]);
 
   useEffect(() => {
     if (poolData) {
-      const finalAverageRatio = calculateToAmount(poolData, 1);
+      const finalAverageRatio = calculateToAmount(poolData, 1, parseFloat(taxRate?.rate));
       setAverageRatio(parseFloat(finalAverageRatio));
     }
   }, [poolData]);
