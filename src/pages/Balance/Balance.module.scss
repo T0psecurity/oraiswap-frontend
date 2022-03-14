@@ -96,6 +96,11 @@
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
 }
+.tokenWrapper:hover {
+  background: #191b21;
+  box-sizing: border-box;
+}
+
 .tokenWrapper {
   padding: 24px;
   display: flex;
@@ -103,6 +108,7 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+
   .tokenBalance {
     flex-direction: column;
     display: flex;
@@ -117,6 +123,9 @@
     border: 1px solid #a871df;
     box-sizing: border-box;
     border-radius: 12px;
+    &.token_from {
+      border-color: #fff;
+    }
   }
 }
 .token {
@@ -178,7 +187,7 @@
     color: #a871df;
   }
 }
-input[type="number"] {
+input[type='number'] {
   padding: 12px;
   box-sizing: border-box;
   color: #505665;

@@ -25,7 +25,7 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
     type = SSOWidgetType.inline,
     style = {},
     buttonStyle = {},
-    icon = "https://storage.googleapis.com/orailabelstudio/icon/orai-connect.svg",
+    // icon = "https://storage.googleapis.com/orailabelstudio/icon/orai-connect.svg",
   }) => {
     const authCtx = useContext(AuthContext);
     const { dispatch: dispatchAuth } = authCtx;
@@ -85,7 +85,8 @@ const SSOWidget: React.FC<SSOWidgetProps> = React.memo(
             JSON.stringify(style)
           )}&buttonStyle=${encodeURIComponent(
             JSON.stringify(buttonStyle)
-          )}&iconUrl=${icon}`}
+            // )}&iconUrl=${icon}`}
+          )}`}
         />
         {iframeLoading && <Skeleton />}
       </div>

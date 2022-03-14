@@ -7,24 +7,25 @@ import cn from "classnames/bind";
 
 const cx = cn.bind(style);
 
-const SettingModal: FC<Modal> = ({
-    className,
+interface ModalProps {
+    isOpen: boolean;
+    close: () => void;
+    open: () => void;
+    slippage: number;
+    setSlippage: any;
+}
+
+const SettingModal: FC<ModalProps> = ({
     isOpen,
     close,
-    isCloseBtn = false,
     open,
+    slippage,
+    setSlippage,
 }) => {
-    const [slippage, setSlippage] = useState(1);
     const [chosenOption, setChosenOption] = useState(2);
 
     return (
-        <Modal
-            className={className}
-            isOpen={isOpen}
-            close={close}
-            open={open}
-            isCloseBtn={isCloseBtn}
-        >
+        <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false}>
             <div className={cx("setting")}>
                 <div className={cx("title")}>
                     <div>Slippage Tolerance</div>
@@ -59,6 +60,7 @@ const SettingModal: FC<Modal> = ({
                             placeholder="0.00"
                             type={"number"}
                             className={cx("input")}
+                            value={chosenOption === 3 ? slippage : ""}
                             onChange={(event) => {
                                 setSlippage(+event.target.value);
                             }}

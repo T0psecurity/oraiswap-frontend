@@ -17,7 +17,7 @@ export const DefaultTippyProps: TippyProps = {
 const TooltipTippyProps: TippyProps = {
   ...DefaultTippyProps,
   placement: "top",
-  theme: "light-border",
+  theme: "dark-border",
   className: styles.tooltip,
 }
 
@@ -54,7 +54,7 @@ export const TooltipIcon: FC<Props> = ({ children, ...props }) => (
     {children}
     <div className={styles.icon}>
       <Tooltip {...props}>
-        <Icon name="info_outline" size={16} />
+        <Icon name="info" size={16} />
       </Tooltip>
     </div>
   </div>
