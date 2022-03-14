@@ -26,7 +26,7 @@ import TokenBalance from 'components/TokenBalance';
 import { network } from 'constants/networks';
 import Big from 'big.js';
 import NumberFormat from 'react-number-format';
-import { pairsMap as mockPair, swapTokens as mockToken } from 'constants/pools';
+import { pairsMap as mockPair, mockToken } from 'constants/pools';
 import { tokens } from 'constants/bridgeTokens';
 import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
