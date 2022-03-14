@@ -79,6 +79,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         </Link>
         <div className={styles.menu_items}>
           <RequireAuthButton
+            address={address}
             setAddress={setAddress}
             className={styles.connect_btn}
           >
