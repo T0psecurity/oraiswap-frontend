@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Staging
+name: Mainnet
 
 # Controls when the action will run.
 on:
@@ -50,7 +50,7 @@ jobs:
         run: 'echo "$ENV_DEVELOP" > .env'
         shell: bash
         env:
-          ENV_DEVELOP: ${{secrets.ENV_DEVELOP}}
+          ENV_STAGING: ${{secrets.ENV_DEVELOP}}
       - name: Build Production
         run: yarn build
         env:

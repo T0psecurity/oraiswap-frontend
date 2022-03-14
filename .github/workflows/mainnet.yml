@@ -50,7 +50,7 @@ jobs:
         run: 'echo "$ENV_MAINNET" > .env'
         shell: bash
         env:
-          $ENV_MAINNET: ${{secrets.ENV_MAINNET}}
+          ENV_MAINNET: ${{secrets.ENV_MAINNET}}
       - name: Build Production
         run: yarn build
         env:
