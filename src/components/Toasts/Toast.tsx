@@ -11,6 +11,7 @@ import { toast, ToastOptions } from 'react-toastify';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
+import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
 import { ReactComponent as BroadcastingIcon } from 'assets/icons/toast_broadcasting.svg';
 
@@ -23,8 +24,8 @@ const CloseButton = ({ closeToast }: { closeToast: () => void }) => (
 const defaultOptions: ToastOptions = {
   position: 'top-right',
   theme: 'dark',
-  autoClose: 7000,
-  // autoClose: false,
+  // autoClose: 7000,
+  autoClose: false,
   icon: false,
   hideProgressBar: true,
   closeOnClick: false,
@@ -125,7 +126,7 @@ const ToastTxBroadcasting: FunctionComponent = () => (
 
 const ToastInfo: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={classNames(styles.toast_content, styles.toast_info)}>
-    <FailedIcon />
+    <InfoIcon />
     <section className={styles.toast_section}>
       <p>{message}</p>
     </section>

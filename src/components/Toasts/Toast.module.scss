@@ -48,6 +48,8 @@
     font-feature-settings: 'zero' on;
     color: #a871df;
   }
-
-  margin-left: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 15px;
 }
