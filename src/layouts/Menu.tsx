@@ -45,7 +45,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       fetch(`${network.lcd}/cosmos/bank/v1beta1/balances/${address}`).then(
         (res) => res.json()
       ),
-    { enabled: address && address.length > 0 }
+    { enabled: address ? address.length > 0 : false }
   );
 
   useEffect(() => {
@@ -78,7 +78,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <Text className={styles.logo_text}>OraiDex</Text>
         </Link>
         <div className={styles.menu_items}>
-          <RequireAuthButton className={styles.connect_btn}>
+          <RequireAuthButton
+            setAddress={setAddress}
+            className={styles.connect_btn}
+          >
             {address ? (
               <div className={styles.token_info}>
                 <AvatarPlaceholder

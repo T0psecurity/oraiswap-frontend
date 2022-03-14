@@ -12,7 +12,7 @@ import AuthProvider from 'providers/AuthProvider';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 // enable Keplr
 window.Keplr = new Keplr();
