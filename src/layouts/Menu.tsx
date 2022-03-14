@@ -45,7 +45,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       fetch(`${network.lcd}/cosmos/bank/v1beta1/balances/${address}`).then(
         (res) => res.json()
       ),
-    { enabled: address.length > 0 }
+    { enabled: address && address.length > 0 }
   );
 
   useEffect(() => {
