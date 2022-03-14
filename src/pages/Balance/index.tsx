@@ -18,8 +18,9 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
 import { TokenItemType, tokens } from 'constants/bridgeTokens';
+import { network } from 'constants/networks';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -65,7 +66,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             denom: ''
           }}
           className={styles.tokenAmount}
-          decimalScale={2}
+          decimalScale={token.decimals}
         />
         <TokenBalance
           balance={amountDetail ? amountDetail.usd : 0}
@@ -91,7 +92,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const { prices } = useCoinGeckoPrices([
     'oraichain-token',
     'osmosis',
-    'atom',
+    'cosmos',
     'bnb',
     'ethereum'
   ]);
@@ -117,8 +118,9 @@ const Balance: React.FC<BalanceProps> = () => {
       [...fromTokens, ...toTokens].filter(
         (token) => token.cosmosBased && token.coingeckoId in prices
       ),
-      (c) => c.coingeckoId
+      (c) => c.denom
     );
+
 
     for (const token of filteredTokens) {
       // switch address
@@ -126,9 +128,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const url = `${token.lcd}/cosmos/bank/v1beta1/balances/${address}`;
       const res: DenomBalanceResponse = (await axios.get(url)).data;
+      console.log("token denom: ", token.denom);
+      console.log("balances: ", url, res.balances);
       const amount = parseInt(
         res.balances.find((balance) => balance.denom === token.denom)?.amount ??
-          '0'
+        '0'
       );
 
       const amountDetail: AmountDetail = {
@@ -137,6 +141,8 @@ const Balance: React.FC<BalanceProps> = () => {
       };
       amountDetails[token.denom] = amountDetail;
     }
+
+    console.log("filtered tokens: ", amountDetails)
     setAmounts(amountDetails);
   };
 
@@ -215,7 +221,9 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       console.log(result);
-      displayToast(TToastType.TX_SUCCESSFUL);
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `${network.explorer}/txs/${result?.transactionHash}`
+      });
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
@@ -255,7 +263,7 @@ const Balance: React.FC<BalanceProps> = () => {
                       }}
                       className={styles.balanceDescription}
                       prefix="Balance: "
-                      decimalScale={2}
+                      decimalScale={from?.decimals}
                     />
 
                     <button
@@ -264,10 +272,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -280,10 +288,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -295,7 +303,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     balance={fromUsd}
                     className={styles.balanceDescription}
                     prefix="~$"
-                    decimalScale={2}
+                    decimalScale={from?.decimals}
                   />
                 </div>
                 {from?.name ? (
@@ -312,7 +320,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
                     <NumberFormat
                       thousandSeparator
-                      decimalScale={2}
+                      decimalScale={from.decimals}
                       customInput={Input}
                       value={fromAmount}
                       onValueChange={({ floatValue }) => {
@@ -383,7 +391,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   }}
                   className={styles.balanceDescription}
                   prefix="Balance: "
-                  decimalScale={2}
+                  decimalScale={to?.decimals}
                 />
 
                 {to ? (
