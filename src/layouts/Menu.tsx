@@ -139,7 +139,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       </div>
 
       <div>
-        <div className={styles.menu_themes}>
+        {/* <div className={styles.menu_themes}>
           <Button
             className={
               styles.menu_theme +
@@ -166,7 +166,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           </Button>
         </div>
 
-        <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
+        <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div> */}
       </div>
     </div>
   );
