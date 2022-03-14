@@ -8,6 +8,7 @@ import { lpTokenInfos, Pair } from '../rest/usePairs';
 import { tokenInfos } from '../rest/usePairs';
 import Loading from 'components/Loading';
 import useAPI from 'rest/useAPI';
+import { Type } from 'rest/api';
 
 const cx = classNames.bind(styles);
 

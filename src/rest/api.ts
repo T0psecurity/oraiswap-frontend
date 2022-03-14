@@ -19,6 +19,13 @@ interface TokenInfo {
   verified?: boolean;
 }
 
+export enum Type {
+  'TRANSFER' = 'Transfer',
+  'SWAP' = 'Swap',
+  'PROVIDE' = 'Provide',
+  'WITHDRAW' = 'Withdraw'
+}
+
 const toQueryMsg = (msg: string) => {
   try {
     return Buffer.from(JSON.stringify(JSON.parse(msg))).toString('base64');
@@ -54,11 +61,10 @@ async function fetchTokenInfo(tokenAddr: string, denom?: string): TokenInfo {
     verified: false
   };
   if (denom) {
-    tokenInfo.symbol = denom;
-    tokenInfo.name = denom;
+    tokenInfo.symbol = tokenAddr;
+    tokenInfo.name = tokenAddr;
     tokenInfo.denom = denom;
-    tokenInfo.name = denom;
-    tokenInfo.icon = denom;
+    tokenInfo.icon = tokenAddr;
     tokenInfo.verified = true;
   } else {
     const data = await querySmart(tokenAddr, { token_info: {} });
@@ -124,11 +130,11 @@ async function fetchTokenBalance(tokenAddr: string, walletAddr: string) {
   return data.balance;
 }
 
-async function fetchNativeTokenBalance(walletAddr: string) {
+async function fetchNativeTokenBalance(walletAddr: string, denom: string) {
   const url = `${network.lcd}/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   return parseInt(
-    res.balances.find((balance) => balance.denom === ORAI).amount
+    res.balances.find((balance) => balance.denom === denom).amount
   );
 }
 
@@ -137,7 +143,7 @@ async function fetchBalance(
   walletAddr: string,
   denom?: string
 ) {
-  if (denom) return fetchNativeTokenBalance(walletAddr);
+  if (denom) return fetchNativeTokenBalance(walletAddr, denom);
   else return fetchTokenBalance(tokenAddr, walletAddr);
 }
 
@@ -149,10 +155,10 @@ const parseTokenInfo = (
   if (tokenInfo?.denom) {
     if (amount)
       return {
-        fund: { denom: addr, amount },
-        info: { native_token: { denom: addr } }
+        fund: { denom: tokenInfo.denom, amount },
+        info: { native_token: { denom: tokenInfo.denom } }
       };
-    return { info: { native_token: { denom: addr } } };
+    return { info: { native_token: { denom: tokenInfo.denom } } };
   }
   return { info: { token: { contract_addr: addr } } };
 };
@@ -209,33 +215,33 @@ async function simulateSwap(query: {
 async function generateContractMessages(
   query:
     | {
-        type: Type.SWAP;
-        fromInfo: TokenInfoExtend;
-        toInfo: TokenInfoExtend;
-        amount: number | string;
-        max_spread: number | string;
-        belief_price: number | string;
-        sender: string;
-      }
+      type: Type.SWAP;
+      fromInfo: TokenInfoExtend;
+      toInfo: TokenInfoExtend;
+      amount: number | string;
+      max_spread: number | string;
+      belief_price: number | string;
+      sender: string;
+    }
     | {
-        type: Type.PROVIDE;
-        from: string;
-        to: string;
-        fromInfo: TokenInfoExtend;
-        toInfo: TokenInfoExtend;
-        fromAmount: number | string;
-        toAmount: number | string;
-        slippage: number | string;
-        sender: string;
-        pair: string; // oraiswap pair contract addr, handle provide liquidity
-      }
+      type: Type.PROVIDE;
+      from: string;
+      to: string;
+      fromInfo: TokenInfoExtend;
+      toInfo: TokenInfoExtend;
+      fromAmount: number | string;
+      toAmount: number | string;
+      slippage: number | string;
+      sender: string;
+      pair: string; // oraiswap pair contract addr, handle provide liquidity
+    }
     | {
-        type: Type.WITHDRAW;
-        lpAddr: string;
-        amount: number | string;
-        sender: string;
-        pair: string; // oraiswap pair contract addr, handle withdraw liquidity
-      }
+      type: Type.WITHDRAW;
+      lpAddr: string;
+      amount: number | string;
+      sender: string;
+      pair: string; // oraiswap pair contract addr, handle withdraw liquidity
+    }
 ) {
   // @ts-ignore
   const {

@@ -26,99 +26,56 @@ import TokenBalance from 'components/TokenBalance';
 import { network } from 'constants/networks';
 import Big from 'big.js';
 import NumberFormat from 'react-number-format';
+import { pairsMap, mockToken } from 'constants/pools';
+import useLocalStorage from 'libs/useLocalStorage';
+import { Type } from 'rest/api';
 
 const cx = cn.bind(style);
 
 const mockPair = {
   'ORAI-AIRI': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
+    contractAddress: 'orai1wkhkazf88upf2dxqedggy3ldja342rzmfs2mep',
   },
-  'AIRI-ATOM': {
-    contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
-    amount1: 100,
-    amount2: 1000
+  'ORAI-ATOM': {
+    contractAddress: 'orai12j04ae0ql3jmmj20j97ve7q9u6guwxkv4wm8g3',
   },
-  'ORAI-TEST1': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
-  },
-  'ORAI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
-  },
-  'AIRI-TEST1': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
-  },
-  'AIRI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
-  }
 };
 
-const mockToken = {
-  ORAI: {
-    contractAddress: 'orai',
-    denom: 'orai',
-    logo: 'oraichain.svg'
-  },
-  AIRI: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'airi.svg'
-  },
-  ATOM: {
-    contractAddress: 'orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf',
-    logo: 'atom.svg'
-  },
-  TEST2: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'atom.svg'
-  }
-};
-
-const mockBalance = {
-  ORAI: 800000,
-  AIRI: 80000.09,
-  ATOM: 50000.09,
-  TEST1: 8000.122,
-  TEST2: 800.3434
-};
-
-const mockPrice = {
-  ORAI: 5.01,
-  AIRI: 0.89,
-  TEST1: 1,
-  TEST2: 1
-};
+// const mockToken = {
+//   ORAI: {
+//     contractAddress: 'orai',
+//     denom: 'orai',
+//     logo: 'oraichain.svg'
+//   },
+//   AIRI: {
+//     contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
+//     logo: 'airi.svg'
+//   },
+//   ATOM: {
+//     contractAddress: 'orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf',
+//     logo: 'atom_cosmos.svg'
+//   }
+// };
 
 // function numberWithCommas(x: number) {
 //   return x.toFixed(6).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 // }
 
 type TokenName = keyof typeof mockToken;
-type PairName = keyof typeof mockPair;
 
 interface ValidToken {
   title: TokenName;
-  balance: number;
   contractAddress: string;
   logo: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const Swap: React.FC<SwapProps> = () => {
   const allToken: ValidToken[] = Object.keys(mockToken).map((name) => {
     return {
       ...mockToken[name as TokenName],
       title: name as TokenName,
-      balance: mockBalance[name as TokenName]
     };
   });
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
@@ -134,6 +91,7 @@ const Swap: React.FC<SwapProps> = () => {
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState(0);
   const [slippage, setSlippage] = useState(1);
+  const [address, setAddress] = useLocalStorage<String>('address');
 
   useEffect(() => {
     let listTo = getListPairedToken(fromToken);
@@ -210,7 +168,7 @@ const Swap: React.FC<SwapProps> = () => {
   } = useQuery(['from-token-balance', fromToken], () =>
     fetchBalance(
       mockToken[fromToken].contractAddress,
-      'orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573',
+      address,
       getTokenDenom(fromToken)
     )
   );
@@ -223,7 +181,7 @@ const Swap: React.FC<SwapProps> = () => {
   } = useQuery(['to-token-balance', toToken], () =>
     fetchBalance(
       mockToken[toToken].contractAddress,
-      'orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573',
+      address,
       getTokenDenom(toToken)
     )
   );
@@ -381,10 +339,10 @@ const Swap: React.FC<SwapProps> = () => {
               <TokenBalance
                 balance={{
                   amount: fromTokenBalance ? fromTokenBalance : 0,
-                  denom: fromTokenInfoData?.symbol ?? ''
+                  denom: fromTokenInfoData?.name ?? ''
                 }}
                 prefix="Balance: "
-                decimalScale={2}
+                decimalScale={6}
               />
 
               <div
@@ -426,7 +384,7 @@ const Swap: React.FC<SwapProps> = () => {
               <NumberFormat
                 className={cx('amount')}
                 thousandSeparator
-                decimalScale={2}
+                decimalScale={6}
                 type="input"
                 value={fromAmount}
                 onValueChange={({ floatValue }) => {
@@ -480,10 +438,10 @@ const Swap: React.FC<SwapProps> = () => {
               <TokenBalance
                 balance={{
                   amount: toTokenInfoData ? toTokenBalance : 0,
-                  denom: toTokenInfoData?.symbol ?? ''
+                  denom: toTokenInfoData?.name ?? ''
                 }}
                 prefix="Balance: "
-                decimalScale={2}
+                decimalScale={6}
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
@@ -506,12 +464,12 @@ const Swap: React.FC<SwapProps> = () => {
               <NumberFormat
                 className={cx('amount')}
                 thousandSeparator
-                decimalScale={2}
+                decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input
@@ -543,7 +501,7 @@ const Swap: React.FC<SwapProps> = () => {
                   denom: toTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
-                decimalScale={2}
+                decimalScale={6}
               />
 
               {/* <span>{`${parseDisplayAmount(

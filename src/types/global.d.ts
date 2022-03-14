@@ -70,4 +70,4 @@ declare global {
   declare const APP_SETTINGS: Record<string, any>;
 }
 
-export {};
+export { };

@@ -6,13 +6,13 @@ interface ContentProps {
   nonBackground?: boolean;
   children: any;
 }
- 
-const Content: React.FC<ContentProps> = ({children, nonBackground}) => {
+
+const Content: React.FC<ContentProps> = ({ children, nonBackground }) => {
   return (
     <div className={styles.content + (nonBackground ? ` non_background` : "")} >
       {children}
-    </div> 
+    </div>
   );
 }
- 
+
 export default memo(Content);

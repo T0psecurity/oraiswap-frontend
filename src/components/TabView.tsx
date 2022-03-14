@@ -6,6 +6,7 @@ import { TooltipIcon } from './Tooltip';
 import styles from './TabView.module.scss';
 import Modal from './Modal';
 import TransferForm from './TransferForm';
+import { Type } from 'rest/api';
 
 const TabView: FC<TabViewProps> = ({
   tabs,
@@ -77,7 +78,7 @@ const TabView: FC<TabViewProps> = ({
             ...[
               styles.side,
               !side.filter(({ visible }) => visible).length &&
-                styles['side--invisible']
+              styles['side--invisible']
             ]
           )}
         >
