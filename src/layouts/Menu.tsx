@@ -13,7 +13,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement,
+  ReactElement
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
@@ -38,7 +38,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balanceData,
+    data: balanceData
   } = useQuery(
     'balance',
     () =>
@@ -72,97 +72,102 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   return (
     <div className={styles.menu}>
-      <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-        {<Logo style={{ width: 40, height: 40 }} />}
-        <Text className={styles.logo_text}>OraiDex</Text>
-      </Link>
-      <div className={styles.menu_items}>
-        <RequireAuthButton className={styles.connect_btn}>
-          {address ? (
-            <div className={styles.token_info}>
-              <AvatarPlaceholder
-                address={address}
-                className={styles.token_avatar}
-              />
-              <div className={styles.token_info_balance}>
-                <CenterEllipsis
-                  size={6}
-                  text={address}
-                  className={styles.token_address}
+      <div>
+        <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
+          {<Logo style={{ width: 40, height: 40 }} />}
+          <Text className={styles.logo_text}>OraiDex</Text>
+        </Link>
+        <div className={styles.menu_items}>
+          <RequireAuthButton className={styles.connect_btn}>
+            {address ? (
+              <div className={styles.token_info}>
+                <AvatarPlaceholder
+                  address={address}
+                  className={styles.token_avatar}
                 />
-                {balanceData && (
-                  <TokenBalance
-                    balance={balanceData?.balances?.find(
-                      (balance: { denom: string; amount: string }) =>
-                        balance.denom === ORAI
-                    )}
-                    className={styles.token_balance}
+                <div className={styles.token_info_balance}>
+                  <CenterEllipsis
+                    size={6}
+                    text={address}
+                    className={styles.token_address}
                   />
-                )}
+                  {balanceData && (
+                    <TokenBalance
+                      balance={balanceData?.balances?.find(
+                        (balance: { denom: string; amount: string }) =>
+                          balance.denom === ORAI
+                      )}
+                      className={styles.token_balance}
+                      decimalScale={0}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (
-            <Text className={styles.connect}>Connect wallet</Text>
+            ) : (
+              <Text className={styles.connect}>Connect wallet</Text>
+            )}
+            {address && (
+              <Logout
+                onClick={(e) => {
+                  setAddress('');
+                  // LocalStorage.removeItem(LocalStorageKey.token);
+                  // window.location.reload();
+                }}
+                style={{ width: 35, height: 35 }}
+              />
+            )}
+          </RequireAuthButton>
+          {renderLink(
+            '/swap',
+            'Swap',
+            setLink,
+            <Swap style={{ width: 30, height: 30 }} />
           )}
-          {address && (
-            <Logout
-              onClick={(e) => {
-                setAddress('');
-                // LocalStorage.removeItem(LocalStorageKey.token);
-                // window.location.reload();
-              }}
-              style={{ width: 35, height: 35 }}
-            />
+          {renderLink(
+            '/pools',
+            'Pools',
+            setLink,
+            <Pools style={{ width: 30, height: 30 }} />
           )}
-        </RequireAuthButton>
-        {renderLink(
-          '/swap',
-          'Swap',
-          setLink,
-          <Swap style={{ width: 30, height: 30 }} />
-        )}
-        {renderLink(
-          '/pools',
-          'Pools',
-          setLink,
-          <Pools style={{ width: 30, height: 30 }} />
-        )}
-        {renderLink(
-          '/balance',
-          'Balance',
-          setLink,
-          <Wallet style={{ width: 30, height: 30 }} />
-        )}
+          {renderLink(
+            '/balance',
+            'Balance',
+            setLink,
+            <Wallet style={{ width: 30, height: 30 }} />
+          )}
+        </div>
       </div>
 
-      <div className={styles.menu_themes}>
-        <Button
-          className={
-            styles.menu_theme +
-            (theme === Themes.dark ? ` ${styles.active}` : '')
-          }
-          onClick={() => {
-            setTheme(Themes.dark);
-          }}
-        >
-          <Dark style={{ width: 15, height: 15 }} />
-          <Text className={styles.menu_theme_text}>Dark</Text>
-        </Button>
-        <Button
-          className={
-            styles.menu_theme +
-            (theme === Themes.light ? ` ${styles.active}` : '')
-          }
-          onClick={() => {
-            setTheme(Themes.light);
-          }}
-        >
-          <Light style={{ width: 15, height: 15 }} />
-          <Text className={styles.menu_theme_text}>Light</Text>
-        </Button>
-      </div>
+      <div>
+        <div className={styles.menu_themes}>
+          <Button
+            className={
+              styles.menu_theme +
+              (theme === Themes.dark ? ` ${styles.active}` : '')
+            }
+            onClick={() => {
+              setTheme(Themes.dark);
+            }}
+          >
+            <Dark style={{ width: 15, height: 15 }} />
+            <Text className={styles.menu_theme_text}>Dark</Text>
+          </Button>
+          <Button
+            className={
+              styles.menu_theme +
+              (theme === Themes.light ? ` ${styles.active}` : '')
+            }
+            onClick={() => {
+              setTheme(Themes.light);
+            }}
+          >
+            <Light style={{ width: 15, height: 15 }} />
+            <Text className={styles.menu_theme_text}>Light</Text>
+          </Button>
+        </div>
 
-      <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
+        <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
+      </div>
     </div>
   );
 });

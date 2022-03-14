@@ -1,17 +1,24 @@
 import React, { useEffect, useRef } from 'react';
-import NumberFormat from 'react-number-format';
+import NumberFormat, { NumberFormatProps } from 'react-number-format';
 import Big from 'big.js';
 
 type Props = {
-  balance: {
-    amount: string;
-    denom: string;
-  };
-  className?: string;
-};
+  balance:
+    | number
+    | {
+        amount: string | number;
+        decimals?: number;
+        denom: string;
+      };
 
-const TokenBalance: React.FC<Props> = ({ balance, className }) => {
-  const amount = new Big(balance.amount).div(10 ** 6).toString();
+  className?: string;
+} & NumberFormatProps;
+
+const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
+  const amount =
+    typeof balance === 'number'
+      ? balance
+      : new Big(balance.amount).div(10 ** (balance.decimals || 6)).toString();
 
   return (
     <NumberFormat
@@ -19,7 +26,11 @@ const TokenBalance: React.FC<Props> = ({ balance, className }) => {
       value={amount}
       displayType={'text'}
       thousandSeparator={true}
-      suffix={` ${balance.denom.toUpperCase()}`}
+      decimalScale={0}
+      {...(typeof balance === 'number'
+        ? { prefix: '$' }
+        : { suffix: ` ${balance.denom.toUpperCase()}` })}
+      {...props}
     />
   );
 };

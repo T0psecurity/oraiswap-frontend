@@ -8,21 +8,24 @@ import React, {
 import styles from './Toast.module.scss';
 import classNames from 'classnames';
 import { toast, ToastOptions } from 'react-toastify';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
+import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
+import { ReactComponent as BroadcastingIcon } from 'assets/icons/toast_broadcasting.svg';
 
 const CloseButton = ({ closeToast }: { closeToast: () => void }) => (
   <button onClick={closeToast} className={styles.btn_close}>
-    <img
-      alt="x"
-      className={styles.btn_close_img}
-      src="/assets/Icons/ToastClose.png"
-    />
+    <CloseIcon className={styles.btn_close_img} />
   </button>
 );
 
 const defaultOptions: ToastOptions = {
   position: 'top-right',
+  theme: 'dark',
   autoClose: 7000,
   // autoClose: false,
+  icon: false,
   hideProgressBar: true,
   closeOnClick: false,
   pauseOnHover: true,
@@ -37,7 +40,8 @@ const defaultExtraData = { message: '', customLink: '' };
 export enum TToastType {
   TX_BROADCASTING,
   TX_SUCCESSFUL,
-  TX_FAILED
+  TX_FAILED,
+  TX_INFO
 }
 
 interface IToastExtra {
@@ -46,9 +50,14 @@ interface IToastExtra {
 }
 
 export type DisplayToastFn = ((
-  type: TToastType.TX_BROADCASTING,
+  type: TToastType.TX_INFO,
+  extraData?: Partial<Pick<IToastExtra, 'message'>>,
   options?: Partial<ToastOptions>
 ) => void) &
+  ((
+    type: TToastType.TX_BROADCASTING,
+    options?: Partial<ToastOptions>
+  ) => void) &
   ((
     type: TToastType.TX_SUCCESSFUL,
     extraData?: Partial<Pick<IToastExtra, 'customLink'>>,
@@ -80,20 +89,33 @@ export const displayToast: DisplayToastFn = (
     ...defaultOptions,
     ...refinedOptions
   } as ToastOptions;
-  if (type === TToastType.TX_BROADCASTING) {
-    toast(<ToastTxBroadcasting />, inputOptions);
-  } else if (type === TToastType.TX_SUCCESSFUL) {
-    toast(<ToastTxSuccess link={inputExtraData.customLink} />, inputOptions);
-  } else if (type === TToastType.TX_FAILED) {
-    toast(<ToastTxFailed message={inputExtraData.message} />, inputOptions);
-  } else {
-    console.error(`Undefined toast type - ${type}`);
+
+  switch (type) {
+    case TToastType.TX_INFO:
+      return toast(
+        <ToastInfo message={inputExtraData.message} />,
+        inputOptions
+      );
+    case TToastType.TX_BROADCASTING:
+      return toast(<ToastTxBroadcasting />, inputOptions);
+    case TToastType.TX_SUCCESSFUL:
+      return toast(
+        <ToastTxSuccess link={inputExtraData.customLink} />,
+        inputOptions
+      );
+    case TToastType.TX_FAILED:
+      return toast(
+        <ToastTxFailed message={inputExtraData.message} />,
+        inputOptions
+      );
+    default:
+      return console.error(`Undefined toast type - ${type}`);
   }
 };
 
 const ToastTxBroadcasting: FunctionComponent = () => (
   <div className={classNames(styles.toast_content, styles.toast_broadcasting)}>
-    <img alt="ldg" src="/assets/Icons/Loading.png" />
+    <BroadcastingIcon />
     <section className={styles.toast_section}>
       <h6>Transaction Broadcasting</h6>
       <p>Waiting for transaction to be included in the block</p>
@@ -101,9 +123,18 @@ const ToastTxBroadcasting: FunctionComponent = () => (
   </div>
 );
 
+const ToastInfo: FunctionComponent<{ message: string }> = ({ message }) => (
+  <div className={classNames(styles.toast_content, styles.toast_info)}>
+    <FailedIcon />
+    <section className={styles.toast_section}>
+      <p>{message}</p>
+    </section>
+  </div>
+);
+
 const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
-    <img alt="x" src="/assets/Icons/FailedTx.png" />
+    <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Transaction Failed</h6>
       <p>{message}</p>
@@ -113,11 +144,11 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
 
 const ToastTxSuccess: FunctionComponent<{ link: string }> = ({ link }) => (
   <div className={classNames(styles.toast_content, styles.toast_success)}>
-    <img alt="b" src="/assets/Icons/ToastSuccess.png" />
+    <SuccessIcon />
     <section className={styles.toast_section}>
       <h6>Transaction Successful</h6>
       <a target="__blank" href={link}>
-        View explorer <img alt="link" src="/assets/Icons/Link.png" />
+        View on OraiScan <LinkIcon />
       </a>
     </section>
   </div>
