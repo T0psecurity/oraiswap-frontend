@@ -1,0 +1,17 @@
+@import 'src/styles/themes';
+
+.primary-btn {
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 100%;
+}
+
+// Dark Theme
+.dark {
+  .primary-btn {
+    background-color: $dark-bg-primary-btn;
+  }
+}

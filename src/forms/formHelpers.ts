@@ -3,7 +3,6 @@ import { ceil, gt, gte, lte, min, times, minus, plus } from 'libs/math';
 import { checkPrefixAndLength, getLength, omitEmpty } from 'libs/utils';
 import { lookup, format, toAmount, formatAsset, validateDp } from 'libs/parse';
 import { hasTaxToken } from 'helpers/token';
-import { Type } from 'pages/Swap';
 
 /* forms */
 export const step = (decimals = 6) => {

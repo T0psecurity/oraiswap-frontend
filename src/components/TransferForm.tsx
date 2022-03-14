@@ -10,7 +10,7 @@ import ComboBox from './ComboBox';
 import { TokenInfo } from 'types/token';
 import Button from './Button';
 import { GRAVITY_CONTRACT_ADDRESS } from 'constants/constants';
-import ibcInfos from 'constants/ibc.json';
+import { ibcInfos } from 'constants/ibcInfos';
 import GravityABI from 'constants/abi/gravity.json';
 import Erc20ABI from 'constants/abi/erc20.json';
 import useLocalStorage from 'libs/useLocalStorage';
@@ -62,7 +62,7 @@ const TransferForm = () => {
   };
 
   const inputAmountRef = useRef();
-  const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => { };
+  const onAmountChanged = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
   const transferFromGravity = async (amountVal: string) => {
     await window.Keplr.suggestChain(sourceNetwork.chainId);
@@ -104,7 +104,7 @@ const TransferForm = () => {
 
   const transferToGravity = async (amountVal: string) => {
     if (!window.web3.utils) {
-      throw { message: "You need to connect to Metamask to continue" }
+      throw { message: 'You need to connect to Metamask to continue' };
     }
     const balance = window.web3.utils.toWei(amountVal);
     const tokenContract = selectedToken.contract_addr;

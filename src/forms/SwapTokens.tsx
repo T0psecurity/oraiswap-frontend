@@ -5,7 +5,6 @@ import { Config } from './useSelectAsset';
 import SwapToken from './SwapToken';
 import styles from './SwapTokens.module.scss';
 import { lpTokenInfos, Pair } from '../rest/usePairs';
-import { Type } from '../pages/Swap';
 import { tokenInfos } from '../rest/usePairs';
 import Loading from 'components/Loading';
 import useAPI from 'rest/useAPI';
@@ -173,7 +172,7 @@ const SwapTokens = ({
                   icon: tokenInfoList
                     ? [tokenInfoList[0].icon, tokenInfoList[1].icon]
                     : ['', ''],
-                  verified: false,
+                  verified: false
                 };
               } else {
                 const tokenInfo = tokenInfos.get(item);

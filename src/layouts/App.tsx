@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { ContractProvider, useContractState } from 'hooks/useContract';
 import useLocalStorage from 'libs/useLocalStorage';
-
-import Header from './Header';
-import Footer from './Footer';
+import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 import usePairs from 'rest/usePairs';
 import routes from 'routes';
-import { ThemeProvider } from 'styled-components';
 import variables from 'styles/_variables.scss';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
+import { ThemeProvider } from 'context/theme-context';
+import './index.scss';
+
+const queryClient = new QueryClient();
 
 const App = () => {
   const [address] = useLocalStorage<string>('address');
@@ -29,13 +30,13 @@ const App = () => {
 
   // can use ether.js as well, but ether.js is better for nodejs
   return (
-    <ThemeProvider theme={variables}>
+    <ThemeProvider>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <Header />
         <ContractProvider value={contract}>
-          {!isLoading && routes()}
+          <QueryClientProvider client={queryClient}>
+            {!isLoading && routes()}
+          </QueryClientProvider>
         </ContractProvider>
-        <Footer />
       </Web3ReactProvider>
     </ThemeProvider>
   );

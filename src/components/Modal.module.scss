@@ -21,6 +21,7 @@
   bottom: 0;
   background: fade-out(#070a13, 0.2);
   z-index: 3;
+  max-width: 100% !important;
 }
 
 .close {

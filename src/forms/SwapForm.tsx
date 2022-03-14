@@ -36,7 +36,6 @@ import Tooltip from 'lang/Tooltip.json';
 import useGasPrice from 'rest/useGasPrice';
 import { hasTaxToken } from 'helpers/token';
 
-import { Type } from 'pages/Swap';
 import usePool from 'rest/usePool';
 import { insertIf } from 'libs/utils';
 import { percent } from 'libs/num';
@@ -300,22 +299,22 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
     }
     const minimumReceived = profitableQuery
       ? calc.minimumReceived({
-        expectedAmount: `${profitableQuery?.simulatedAmount}`,
-        max_spread: String(slippageTolerance),
-        commission: find(infoKey, formData[Key.symbol2]),
-        decimals: tokenInfo1?.decimals
-      })
+          expectedAmount: `${profitableQuery?.simulatedAmount}`,
+          max_spread: String(slippageTolerance),
+          commission: find(infoKey, formData[Key.symbol2]),
+          decimals: tokenInfo1?.decimals
+        })
       : '0';
 
     const spread =
       tokenInfo2 && poolResult?.estimated
         ? div(
-          minus(
-            poolResult?.estimated,
-            toAmount(formData[Key.value2], formData[Key.token2])
-          ),
-          poolResult?.estimated
-        )
+            minus(
+              poolResult?.estimated,
+              toAmount(formData[Key.value2], formData[Key.token2])
+            ),
+            poolResult?.estimated
+          )
         : '';
 
     const taxs = tax.filter((coin) => !coin.amount.equals(0));
@@ -323,18 +322,21 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
     return [
       ...insertIf(type === Type.SWAP, {
         title: <TooltipIcon content={Tooltip.Swap.Rate}>Rate</TooltipIcon>,
-        content: `${decimal(profitableQuery?.price, tokenInfo1?.decimals)} ${formData[Key.symbol1]
-          } per ${formData[Key.symbol2]}`
+        content: `${decimal(profitableQuery?.price, tokenInfo1?.decimals)} ${
+          formData[Key.symbol1]
+        } per ${formData[Key.symbol2]}`
       }),
       ...insertIf(type !== Type.SWAP, {
         title: `${formData[Key.symbol1]} price`,
-        content: `${poolResult && decimal(poolResult.price1, 6)} ${formData[Key.symbol1]
-          } per LP`
+        content: `${poolResult && decimal(poolResult.price1, 6)} ${
+          formData[Key.symbol1]
+        } per LP`
       }),
       ...insertIf(type !== Type.SWAP, {
         title: `${formData[Key.symbol2]} price`,
-        content: `${poolResult && decimal(poolResult.price2, 6)} ${formData[Key.symbol2]
-          } per LP`
+        content: `${poolResult && decimal(poolResult.price2, 6)} ${
+          formData[Key.symbol2]
+        } per LP`
       }),
       ...insertIf(type === Type.SWAP, {
         title: (
@@ -740,10 +742,10 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
           setValue(
             Key.value2,
             lookup(amounts[0], poolContract1) +
-            poolSymbol1 +
-            ' - ' +
-            lookup(amounts[1], poolContract2) +
-            poolSymbol2
+              poolSymbol1 +
+              ' - ' +
+              lookup(amounts[1], poolContract2) +
+              poolSymbol2
           );
           setTimeout(() => {
             trigger(Key.value1);
@@ -788,7 +790,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
 
   const parseAmount = (value, decimal) => {
     return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
-  }
+  };
 
   const handleSubmit = useCallback(
     async (values) => {
@@ -826,11 +828,11 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
             amount: `${value1}`,
             minimumReceived: profitableQuery
               ? calc.minimumReceived({
-                expectedAmount: `${profitableQuery?.simulatedAmount}`,
-                max_spread: String(slippageTolerance),
-                commission: '0.003', //find(infoKey, formData[Key.symbol2]),
-                decimals: tokenInfo1?.decimals
-              })
+                  expectedAmount: `${profitableQuery?.simulatedAmount}`,
+                  max_spread: String(slippageTolerance),
+                  commission: '0.003', //find(infoKey, formData[Key.symbol2]),
+                  decimals: tokenInfo1?.decimals
+                })
               : '0',
             symbol: token1
           });
@@ -847,7 +849,7 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
                 fromInfo: tokenInfo1,
                 toInfo: tokenInfo2,
                 slippage: slippageTolerance,
-                pair,
+                pair
               },
               [Type.WITHDRAW]: {
                 type: Type.WITHDRAW,
@@ -865,17 +867,27 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
         }
 
         const msg = msgs[0];
-        console.log("msgs: ", msgs.map(msg => ({ ...msg, msg: Buffer.from(msg.msg).toString() })));
-        const result = await CosmJs.execute({ prefix: ORAI, address: msg.contract, walletAddr, handleMsg: Buffer.from(msg.msg.toString()), gasAmount: { denom: ORAI, amount: "0" }, handleOptions: { funds: msg.sent_funds } });
-        console.log("result swap tx hash: ", result);
+        console.log(
+          'msgs: ',
+          msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+        );
+        const result = await CosmJs.execute({
+          prefix: ORAI,
+          address: msg.contract,
+          walletAddr,
+          handleMsg: Buffer.from(msg.msg.toString()),
+          gasAmount: { denom: ORAI, amount: '0' },
+          handleOptions: { funds: msg.sent_funds }
+        });
+        console.log('result swap tx hash: ', result);
 
         if (result) {
-          console.log("in correct result");
+          console.log('in correct result');
           setResult(result);
           return;
         }
       } catch (error) {
-        console.log("error in swap form: ", error);
+        console.log('error in swap form: ', error);
         setResult(error);
       }
     },
@@ -1013,48 +1025,48 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
               max={
                 formData[Key.symbol1]
                   ? async () => {
-                    if (type === Type.WITHDRAW) {
-                      setValue(
-                        Key.value1,
-                        lookup(formData[Key.max1], formData[Key.token1])
-                      );
-                      trigger(Key.value1);
-                      return;
-                    }
-                    let taxVal = '0';
-                    const taxs = await getTax({
-                      token1: formData[Key.token1],
-                      value1: lookup(
-                        formData[Key.max1],
-                        formData[Key.token1]
-                      ),
-                      max1: formData[Key.max1]
-                    });
-
-                    taxs.map((tax) => {
-                      if (tax.denom === formData[Key.token1]) {
-                        taxVal = tax.toData().amount;
-                        return false;
-                      }
-                      return true;
-                    });
-                    let maxBalance = minus(formData[Key.max1], taxVal);
-                    // fee
-                    if (formData[Key.symbol1] === formData[Key.feeSymbol]) {
-                      if (gte(maxBalance, formData[Key.feeValue])) {
-                        maxBalance = minus(
-                          maxBalance,
-                          formData[Key.feeValue]
+                      if (type === Type.WITHDRAW) {
+                        setValue(
+                          Key.value1,
+                          lookup(formData[Key.max1], formData[Key.token1])
                         );
-                      } else {
-                        maxBalance = minus(maxBalance, maxBalance);
+                        trigger(Key.value1);
+                        return;
                       }
-                    }
+                      let taxVal = '0';
+                      const taxs = await getTax({
+                        token1: formData[Key.token1],
+                        value1: lookup(
+                          formData[Key.max1],
+                          formData[Key.token1]
+                        ),
+                        max1: formData[Key.max1]
+                      });
 
-                    maxBalance = lookup(maxBalance, formData[Key.token1]);
-                    setValue(Key.value1, maxBalance);
-                    trigger(Key.value1);
-                  }
+                      taxs.map((tax) => {
+                        if (tax.denom === formData[Key.token1]) {
+                          taxVal = tax.toData().amount;
+                          return false;
+                        }
+                        return true;
+                      });
+                      let maxBalance = minus(formData[Key.max1], taxVal);
+                      // fee
+                      if (formData[Key.symbol1] === formData[Key.feeSymbol]) {
+                        if (gte(maxBalance, formData[Key.feeValue])) {
+                          maxBalance = minus(
+                            maxBalance,
+                            formData[Key.feeValue]
+                          );
+                        } else {
+                          maxBalance = minus(maxBalance, maxBalance);
+                        }
+                      }
+
+                      maxBalance = lookup(maxBalance, formData[Key.token1]);
+                      setValue(Key.value1, maxBalance);
+                      trigger(Key.value1);
+                    }
                   : undefined
               }
             />
@@ -1092,14 +1104,14 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
                 }),
                 ...(type !== Type.WITHDRAW
                   ? {
-                    step: step(tokenInfo2?.decimals),
-                    placeholder: placeholder(tokenInfo2?.decimals),
-                    type: 'number'
-                  }
+                      step: step(tokenInfo2?.decimals),
+                      placeholder: placeholder(tokenInfo2?.decimals),
+                      type: 'number'
+                    }
                   : {
-                    placeholder: '-',
-                    type: 'text'
-                  }),
+                      placeholder: '-',
+                      type: 'text'
+                    }),
                 autoComplete: 'off',
                 readOnly: true,
                 // [Type.PROVIDE, Type.WITHDRAW].includes(type) ||
@@ -1144,7 +1156,8 @@ const SwapForm = ({ type, tabs }: { type: Type; tabs: TabViewProps }) => {
                 }}
               >
                 <p>
-                  The displaying number is the simulated result and can be different from the actual swap rate. Trade at your own risk.
+                  The displaying number is the simulated result and can be
+                  different from the actual swap rate. Trade at your own risk.
                 </p>
               </div>
               <Button

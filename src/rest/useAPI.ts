@@ -2,7 +2,6 @@
 import { useCallback } from 'react';
 import oraiswapConfig from 'constants/oraiswap.json';
 import axios from './request';
-import { Type } from 'pages/Swap';
 import { AxiosError } from 'axios';
 import { network } from 'constants/networks';
 import { ORAI, UAIRI } from 'constants/constants';
@@ -13,7 +12,7 @@ import { Coin } from '@cosmjs/cosmwasm-stargate/build/codec/cosmos/base/v1beta1/
 import { useContractsAddressToken } from 'hooks';
 import { TokenInfo as TokenInfoExtend } from 'types/token';
 
-interface DenomBalanceResponse {
+export interface DenomBalanceResponse {
   balances: DenomInfo[];
 }
 
@@ -281,10 +280,18 @@ export default () => {
     [querySmart]
   );
 
-  const parseTokenInfo = (tokenInfo: TokenInfoExtend, addr: string, amount: string) => {
-    if (tokenInfo?.denom) return { fund: { denom: addr, amount }, info: { native_token: { denom: addr } } };
+  const parseTokenInfo = (
+    tokenInfo: TokenInfoExtend,
+    addr: string,
+    amount: string
+  ) => {
+    if (tokenInfo?.denom)
+      return {
+        fund: { denom: addr, amount },
+        info: { native_token: { denom: addr } }
+      };
     return { info: { token: { contract_addr: addr } } };
-  }
+  };
 
   const handleSentFunds = (...funds) => {
     let sent_funds = [];
@@ -293,52 +300,73 @@ export default () => {
     }
     if (sent_funds.length === 0) return null;
     return sent_funds;
-  }
+  };
 
   const generateContractMessages = useCallback(
     async (
       query:
         | {
-          type: Type.SWAP;
-          from: string;
-          to: string;
-          fromInfo: TokenInfoExtend;
-          toInfo: TokenInfoExtend;
-          amount: number | string;
-          max_spread: number | string;
-          belief_price: number | string;
-          sender: string;
-        }
+            type: Type.SWAP;
+            from: string;
+            to: string;
+            fromInfo: TokenInfoExtend;
+            toInfo: TokenInfoExtend;
+            amount: number | string;
+            max_spread: number | string;
+            belief_price: number | string;
+            sender: string;
+          }
         | {
-          type: Type.PROVIDE;
-          from: string;
-          to: string;
-          fromInfo: TokenInfoExtend;
-          toInfo: TokenInfoExtend;
-          fromAmount: number | string;
-          toAmount: number | string;
-          slippage: number | string;
-          sender: string;
-          pair: string; // oraiswap pair contract addr, handle provide liquidity
-        }
+            type: Type.PROVIDE;
+            from: string;
+            to: string;
+            fromInfo: TokenInfoExtend;
+            toInfo: TokenInfoExtend;
+            fromAmount: number | string;
+            toAmount: number | string;
+            slippage: number | string;
+            sender: string;
+            pair: string; // oraiswap pair contract addr, handle provide liquidity
+          }
         | {
-          type: Type.WITHDRAW;
-          lpAddr: string;
-          amount: number | string;
-          sender: string;
-          pair: string; // oraiswap pair contract addr, handle withdraw liquidity
-        }
+            type: Type.WITHDRAW;
+            lpAddr: string;
+            amount: number | string;
+            sender: string;
+            pair: string; // oraiswap pair contract addr, handle withdraw liquidity
+          }
     ) => {
       // @ts-ignore
-      const { type, amount, sender, from, to, fromAmount, toAmount, lpAddr, fromInfo, toInfo, info, pair, ...params } = query;
+      const {
+        type,
+        amount,
+        sender,
+        from,
+        to,
+        fromAmount,
+        toAmount,
+        lpAddr,
+        fromInfo,
+        toInfo,
+        info,
+        pair,
+        ...params
+      } = query;
       let sent_funds = [];
       // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
       let contractAddr = network.router;
       let input;
       switch (type) {
         case Type.SWAP:
-          const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(fromInfo, from, amount);
-          const { fund: askSentFund, info: askInfo } = parseTokenInfo(toInfo, to);
+          const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(
+            fromInfo,
+            from,
+            amount
+          );
+          const { fund: askSentFund, info: askInfo } = parseTokenInfo(
+            toInfo,
+            to
+          );
           sent_funds = handleSentFunds(offerSentFund, askSentFund);
           input = {
             execute_swap_operations: {
@@ -355,16 +383,26 @@ export default () => {
           break;
         // TODO: provide liquidity and withdraw liquidity
         case Type.PROVIDE:
-          const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(fromInfo, from, fromAmount);
-          const { fund: toSentFund, info: toInfoData } = parseTokenInfo(toInfo, to, toAmount);
+          const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(
+            fromInfo,
+            from,
+            fromAmount
+          );
+          const { fund: toSentFund, info: toInfoData } = parseTokenInfo(
+            toInfo,
+            to,
+            toAmount
+          );
           sent_funds = handleSentFunds(fromSentFund, toSentFund);
           input = {
             provide_liquidity: {
-              assets: [{
-                info: toInfoData,
-                amount: toAmount
-              },
-              { info: fromInfoData, amount: fromAmount }]
+              assets: [
+                {
+                  info: toInfoData,
+                  amount: toAmount
+                },
+                { info: fromInfoData, amount: fromAmount }
+              ]
             }
           };
           contractAddr = pair;
@@ -375,18 +413,18 @@ export default () => {
               owner: sender,
               contract: pair,
               amount,
-              msg: "eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==" // withdraw liquidity msg in base64
+              msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64
             }
-          }
+          };
           contractAddr = lpAddr;
           break;
         default:
           break;
       }
 
-      console.log("input: ", input)
-      console.log("sent funds: ", sent_funds)
-      console.log("contract addr: ", contractAddr)
+      console.log('input: ', input);
+      console.log('sent funds: ', sent_funds);
+      console.log('contract addr: ', contractAddr);
 
       const msgs = [
         {
