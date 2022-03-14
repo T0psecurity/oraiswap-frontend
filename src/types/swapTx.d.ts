@@ -1,52 +1,59 @@
 interface SwapTxInfos {
-  TxInfos: SwapTxInfo[]
+  TxInfos: SwapTxInfo[];
 }
 
 interface SwapTxInfo {
-  txhash: string
+  txhash: string;
 
   tx: {
     value: {
-      fee: { amount: FeeAmount[] }
-      memo: string
-    }
-  }
+      fee: { amount: FeeAmount[] };
+      memo: string;
+    };
+  };
 
-  raw_log?: string
+  raw_log?: string;
 
-  logs: SwapTxLog[]
+  logs: SwapTxLog[];
 }
 
 interface FeeAmount {
-  amount: string
-  denom: string
+  amount: string;
+  denom: string;
 }
 
 interface SwapTxLog {
-  events: SwapTxEvent[]
+  events: SwapTxEvent[];
 }
 
 interface SwapTxEvent {
-  attributes: SwapAttribute[]
-  type: string
+  attributes: SwapAttribute[];
+  type: string;
 }
 
 interface SwapAttribute {
-  key: string
-  value: string
+  key: string;
+  value: string;
 }
 
 /* Tax */
 interface SwapTaxData {
   TreasuryTaxCapDenom: {
-    Result: string
-  }
+    Result: string;
+  };
   TreasuryTaxRate: {
-    Result: string
-  }
+    Result: string;
+  };
 }
 
 interface SwapTax {
-  rate?: string
-  cap?: string
+  rate?: string;
+  cap?: string;
+}
+
+enum Type {
+  'TRANSFER' = 'Transfer',
+  'SWAP' = 'Swap',
+  'PROVIDE' = 'Provide',
+  'WITHDRAW' = 'Withdraw'
 }

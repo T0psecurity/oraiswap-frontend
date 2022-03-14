@@ -6,11 +6,7 @@ import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 import { ReactComponent as ToggleTransfer } from 'assets/icons/toggle_transfer.svg';
-import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
-import { ReactComponent as BNB } from 'assets/icons/bnb.svg';
-import { ReactComponent as ETH } from 'assets/icons/eth.svg';
-import { ReactComponent as ORAI } from 'assets/icons/oraichain.svg';
-import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
+
 import { SigningStargateClient } from '@cosmjs/stargate';
 import useLocalStorage from 'libs/useLocalStorage';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -20,54 +16,10 @@ import axios from 'axios';
 import { DenomBalanceResponse } from 'rest/useAPI';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-
-interface IBCInfoMap {
-  [key: string]: { [key: string]: IBCInfo };
-}
-
-const ibcInfos: IBCInfoMap = {
-  'gravity-test': {
-    'Oraichain-testnet': {
-      source: 'transfer',
-      channel: 'channel-0',
-      timeout: 60
-    }
-  },
-  'osmosis-1': {
-    'Oraichain-testnet': {
-      source: 'transfer',
-      channel: 'channel-202',
-      timeout: 60
-    }
-  },
-  'Oraichain-testnet': {
-    'gravity-test': {
-      source: 'transfer',
-      channel: 'channel-1',
-      timeout: 60
-    },
-    'osmosis-1': {
-      source: 'transfer',
-      channel: 'channel-3',
-      timeout: 60
-    }
-  }
-};
+import { ibcInfos } from 'constants/ibcInfos';
+import { TokenItemType, tokens } from 'constants/bridgeTokens';
 
 interface BalanceProps {}
-
-type TokenItemType = {
-  name?: string;
-  org?: string;
-  denom: string;
-  icon?: ReactElement;
-  chainId: string;
-  rpc: string;
-  lcd?: string;
-  decimals: number;
-  coingeckoId: 'oraichain-token' | 'osmosis' | 'atom' | 'ethereum' | 'bnb';
-  cosmosBased: Boolean;
-};
 
 type AmountDetail = {
   amount: number;
@@ -80,129 +32,6 @@ interface TokenItemProps {
   onClick?: Function;
   amountDetail?: AmountDetail;
 }
-
-const tokens: [TokenItemType[], TokenItemType[]] = [
-  [
-    {
-      name: 'ORAI',
-      org: 'Ethereum',
-      denom: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
-      coingeckoId: 'oraichain-token',
-      decimals: 6,
-      chainId: 'Oraichain-testnet',
-      rpc: 'https://testnet.rpc.orai.io',
-      lcd: 'https://testnet.lcd.orai.io',
-      cosmosBased: false,
-      icon: <ORAI className={styles.tokenIcon} />
-    },
-    {
-      name: 'ATOM',
-      org: 'Cosmos Hub',
-      coingeckoId: 'atom',
-      denom: 'atom',
-      decimals: 6,
-      chainId: 'cosmoshub-4',
-      rpc: 'https://rpc-cosmoshub.blockapsis.com',
-      lcd: 'https://lcd-cosmoshub.blockapsis.com',
-      cosmosBased: true,
-      icon: <ATOMCOSMOS className={styles.tokenIcon} />
-    },
-    {
-      name: 'OSMO',
-      org: 'Osmosis',
-      denom: 'osmosis',
-      chainId: 'osmosis-1',
-      rpc: 'https://rpc-osmosis.blockapsis.com',
-      lcd: 'https://lcd-osmosis.blockapsis.com',
-      decimals: 6,
-      coingeckoId: 'osmosis',
-      cosmosBased: true,
-      icon: <OSMO className={styles.tokenIcon} />
-    },
-    {
-      name: 'ETH',
-      org: 'Ethereum',
-      coingeckoId: 'ethereum',
-      denom: 'ethereum',
-      decimals: 18,
-      chainId: 'ethereum',
-      rpc: 'http://125.212.192.225:26657',
-      cosmosBased: false,
-      icon: <ETH className={styles.tokenIcon} />
-    },
-    {
-      name: 'BNB',
-      org: 'BNB Chain',
-      chainId: 'bsc',
-      denom: 'bnb',
-      rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-      decimals: 18,
-      coingeckoId: 'bnb',
-      cosmosBased: false,
-      icon: <BNB className={styles.tokenIcon} />
-    }
-  ],
-  [
-    {
-      name: 'ORAI',
-      org: 'Oraichain',
-      denom: 'orai',
-      coingeckoId: 'oraichain-token',
-      decimals: 6,
-      chainId: 'Oraichain-testnet',
-      rpc: 'https://testnet.rpc.orai.io',
-      lcd: 'https://testnet.lcd.orai.io',
-      cosmosBased: true,
-      icon: <ORAI className={styles.tokenIcon} />
-    },
-    {
-      name: 'ATOM',
-      org: 'Oraichain',
-      coingeckoId: 'atom',
-      denom: 'ibc/atom',
-      decimals: 6,
-      chainId: 'Oraichain-testnet',
-      rpc: 'https://testnet.rpc.orai.io',
-      lcd: 'https://testnet.lcd.orai.io',
-      cosmosBased: true,
-      icon: <ATOMCOSMOS className={styles.tokenIcon} />
-    },
-    {
-      name: 'OSMO',
-      org: 'Oraichain',
-      denom: 'ibc/osmosis',
-      chainId: 'Oraichain-testnet',
-      rpc: 'https://testnet.rpc.orai.io',
-      lcd: 'https://testnet.lcd.orai.io',
-      decimals: 6,
-      coingeckoId: 'osmosis',
-      cosmosBased: true,
-      icon: <OSMO className={styles.tokenIcon} />
-    },
-    {
-      name: 'ETH',
-      org: 'Oraichain',
-      coingeckoId: 'ethereum',
-      denom: 'ibc/ethereum',
-      decimals: 18,
-      chainId: 'Oraichain-testnet',
-      rpc: 'http://125.212.192.225:26657',
-      cosmosBased: false,
-      icon: <ETH className={styles.tokenIcon} />
-    },
-    {
-      name: 'BNB',
-      org: 'Oraichain',
-      chainId: 'Oraichain-testnet',
-      denom: 'bnb',
-      rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-      decimals: 18,
-      coingeckoId: 'bnb',
-      cosmosBased: false,
-      icon: <BNB className={styles.tokenIcon} />
-    }
-  ]
-];
 
 const TokenItem: React.FC<TokenItemProps> = ({
   token,
@@ -221,7 +50,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
       onClick={() => onClick?.(token)}
     >
       <div className={styles.token}>
-        {token.icon ?? <ATOMCOSMOS className={styles.tokenIcon} />}
+        {token.Icon && <token.Icon className={styles.tokenIcon} />}
         <div className={styles.tokenInfo}>
           <div className={styles.tokenName}>{token.name}</div>
           <div className={styles.tokenOrg}>
@@ -472,7 +301,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 {from?.name ? (
                   <div className={styles.tokenFromGroup}>
                     <div className={styles.token}>
-                      {from.icon}
+                      {from.Icon && <from.Icon />}
                       <div className={styles.tokenInfo}>
                         <div className={styles.tokenName}>{from.name}</div>
                         <div className={styles.tokenOrg}>
@@ -559,7 +388,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
                 {to ? (
                   <div className={styles.token} style={{ marginBottom: 10 }}>
-                    {to.icon}
+                    {to.Icon && <to.Icon />}
                     <div className={styles.tokenInfo}>
                       <div className={styles.tokenName}>{to.name}</div>
                       <div className={styles.tokenOrg}>

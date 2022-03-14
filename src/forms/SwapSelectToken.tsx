@@ -1,18 +1,17 @@
-import React, { FC } from "react"
-import MESSAGE from "../lang/MESSAGE.json"
-import { lookupSymbol } from "../libs/parse"
-import Icon from "../components/Icon"
-import { Config } from "./useSelectAsset"
-import styles from "./SwapSelectToken.module.scss"
-import { GetTokenSvg } from "../helpers/token"
-import { lpTokenInfos, tokenInfos } from "../rest/usePairs"
-import { Type } from "../pages/Swap"
+import React, { FC } from 'react';
+import MESSAGE from '../lang/MESSAGE.json';
+import { lookupSymbol } from '../libs/parse';
+import Icon from '../components/Icon';
+import { Config } from './useSelectAsset';
+import styles from './SwapSelectToken.module.scss';
+import { GetTokenSvg } from '../helpers/token';
+import { lpTokenInfos, tokenInfos } from '../rest/usePairs';
 
 interface Props extends Config {
-  isOpen: boolean
-  asset?: string
-  type: string
-  onClick: () => void
+  isOpen: boolean;
+  asset?: string;
+  type: string;
+  onClick: () => void;
 }
 
 const SwapSelectToken: FC<Props> = ({
@@ -22,20 +21,20 @@ const SwapSelectToken: FC<Props> = ({
   onClick,
   ...props
 }) => {
-  const { formatTokenName } = props
+  const { formatTokenName } = props;
 
-  let symbol = ""
-  let icon = ""
+  let symbol = '';
+  let icon = '';
   if (asset !== undefined) {
     if (type === Type.WITHDRAW) {
-      const tokenInfoList = lpTokenInfos.get(asset)
+      const tokenInfoList = lpTokenInfos.get(asset);
       symbol = tokenInfoList
-        ? tokenInfoList[0].symbol + "-" + tokenInfoList[1].symbol
-        : ""
+        ? tokenInfoList[0].symbol + '-' + tokenInfoList[1].symbol
+        : '';
     } else {
-      const tokenInfo = tokenInfos.get(asset)
-      symbol = tokenInfo ? tokenInfo.symbol : ""
-      icon = tokenInfo ? tokenInfo.icon : ""
+      const tokenInfo = tokenInfos.get(asset);
+      symbol = tokenInfo ? tokenInfo.symbol : '';
+      icon = tokenInfo ? tokenInfo.icon : '';
     }
   }
 
@@ -51,9 +50,9 @@ const SwapSelectToken: FC<Props> = ({
           ? formatTokenName?.(symbol) ?? lookupSymbol(symbol)
           : MESSAGE.Form.Button.SelectToken}
       </div>
-      <Icon name={isOpen ? "expand_less" : "expand_more"} size={24} />
+      <Icon name={isOpen ? 'expand_less' : 'expand_more'} size={24} />
     </button>
-  )
-}
+  );
+};
 
-export default SwapSelectToken
+export default SwapSelectToken;
