@@ -36,7 +36,8 @@ const PairBox = memo(({ }) => {
     <div className={styles.pairbox} onClick={() => navigate('../pool/atom-orai', { replace: true })}>
       <div className={styles.pairbox_header}>
         <div className={styles.pairbox_logo}>
-          {<Logo style={{ width: 40, height: 40 }} />}
+          {<Logo className={styles.pairbox_logo1} style={{ width: 40, height: 40 }} />}
+          {<Logo className={styles.pairbox_logo2} style={{ width: 40, height: 40 }} />}
         </div>
         <div className={styles.pairbox_pair}>
           <div className={styles.pairbox_pair_name}>ATOM/ORAI</div>
