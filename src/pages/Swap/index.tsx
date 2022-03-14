@@ -26,6 +26,7 @@ import TokenBalance from 'components/TokenBalance';
 import { network } from 'constants/networks';
 import Big from 'big.js';
 import NumberFormat from 'react-number-format';
+import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
 
 const cx = cn.bind(style);
 
@@ -134,6 +135,7 @@ const Swap: React.FC<SwapProps> = () => {
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState(0);
   const [slippage, setSlippage] = useState(1);
+  const [swapLoading, setSwapLoading] = useState(false);
 
   useEffect(() => {
     let listTo = getListPairedToken(fromToken);
@@ -302,6 +304,7 @@ const Swap: React.FC<SwapProps> = () => {
   }, [poolData]);
 
   const handleSubmit = async () => {
+    setSwapLoading(true);
     try {
       let walletAddr;
       if (await window.Keplr.getKeplr())
@@ -344,6 +347,7 @@ const Swap: React.FC<SwapProps> = () => {
         message: error
       });
     }
+    setSwapLoading(false);
   };
 
   const getListPairedToken = (tokenName: TokenName) => {
@@ -527,9 +531,14 @@ const Swap: React.FC<SwapProps> = () => {
               /> */}
             </div>
           </div>
-          <div className={cx('swap-btn')} onClick={handleSubmit}>
-            Swap
-          </div>
+          <button
+            className={cx('swap-btn')}
+            onClick={handleSubmit}
+            disabled={swapLoading}
+          >
+            {swapLoading && <LoadingIcon width={40} height={40} />}
+            <span>Swap</span>
+          </button>
           <div className={cx('detail')}>
             <div className={cx('row')}>
               <div className={cx('title')}>
