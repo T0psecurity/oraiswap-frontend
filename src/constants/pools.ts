@@ -1,3 +1,4 @@
+import { tokens } from "./bridgeTokens";
 import { network, NetworkKey } from "./networks";
 
 export type Pair = {
@@ -26,7 +27,7 @@ const pairs: { [networkKey: string]: [{ [key: string]: Pair }] } = {
     }],
 }
 
-
+const tokenSwaps = Object.assign({}, ...(tokens[1].filter(token => token.cosmosBased).map(item => ({ [item.name]: { denom: item.denom, contractAddress: item.contractAddress, logo: item.logo } }))));;
 
 const mockTokens = {
     ORAI: {
@@ -45,5 +46,5 @@ const mockTokens = {
     }
 };
 
-export const pairsMap = pairs[network.id];
-export const mockToken = mockTokens;
+export const pairsMap = pairs[network.id][0];
+export const swapTokens = tokenSwaps;

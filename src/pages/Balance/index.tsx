@@ -17,6 +17,7 @@ import { DenomBalanceResponse } from 'rest/useAPI';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
+import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
 import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
 
@@ -87,6 +88,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
     0, 0
   ]);
+  const [ibcLoading, setIBCLoading] = useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState(tokens);
   const { prices } = useCoinGeckoPrices([
@@ -94,7 +96,8 @@ const Balance: React.FC<BalanceProps> = () => {
     'osmosis',
     'cosmos',
     'bnb',
-    'ethereum'
+    'ethereum',
+    'airight'
   ]);
 
   const getUsd = (amount: number, token: TokenItemType) => {
@@ -189,6 +192,7 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
+    setIBCLoading(true);
     try {
       const fromAddress = (await window.keplr.getKey(from.chainId))
         .bech32Address;
@@ -229,6 +233,7 @@ const Balance: React.FC<BalanceProps> = () => {
         message: ex.message
       });
     }
+    setIBCLoading(false);
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
@@ -370,7 +375,12 @@ const Balance: React.FC<BalanceProps> = () => {
                 }}
               />
             </button>
-            <button className={styles.tfBtn} onClick={transferIBC}>
+            <button
+              className={styles.tfBtn}
+              onClick={transferIBC}
+              disabled={ibcLoading}
+            >
+              {ibcLoading && <LoadingIcon width={40} height={40} />}
               <span className={styles.tfTxt}>Transfer</span>
             </button>
           </div>

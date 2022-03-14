@@ -46,6 +46,11 @@ jobs:
         run: npm install -g yarn
       - name: Install Dependencies
         run: yarn install
+      - name: Copy env
+        run: 'echo "$ENV_DEVELOP" > .env'
+        shell: bash
+        env:
+          ENV_STAGING: ${{secrets.ENV_DEVELOP}}
       - name: Build Production
         run: yarn build
         env:

@@ -26,40 +26,13 @@ import TokenBalance from 'components/TokenBalance';
 import { network } from 'constants/networks';
 import Big from 'big.js';
 import NumberFormat from 'react-number-format';
-import { pairsMap, mockToken } from 'constants/pools';
+import { pairsMap as mockPair, swapTokens as mockToken } from 'constants/pools';
+import { tokens } from 'constants/bridgeTokens';
 import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
+import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
 
 const cx = cn.bind(style);
-
-const mockPair = {
-  'ORAI-AIRI': {
-    contractAddress: 'orai1wkhkazf88upf2dxqedggy3ldja342rzmfs2mep',
-  },
-  'ORAI-ATOM': {
-    contractAddress: 'orai12j04ae0ql3jmmj20j97ve7q9u6guwxkv4wm8g3',
-  },
-};
-
-// const mockToken = {
-//   ORAI: {
-//     contractAddress: 'orai',
-//     denom: 'orai',
-//     logo: 'oraichain.svg'
-//   },
-//   AIRI: {
-//     contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-//     logo: 'airi.svg'
-//   },
-//   ATOM: {
-//     contractAddress: 'orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf',
-//     logo: 'atom_cosmos.svg'
-//   }
-// };
-
-// function numberWithCommas(x: number) {
-//   return x.toFixed(6).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-// }
 
 type TokenName = keyof typeof mockToken;
 
@@ -92,11 +65,11 @@ const Swap: React.FC<SwapProps> = () => {
   const [averageRatio, setAverageRatio] = useState(0);
   const [slippage, setSlippage] = useState(1);
   const [address, setAddress] = useLocalStorage<String>('address');
+  const [swapLoading, setSwapLoading] = useState(false);
 
   useEffect(() => {
     let listTo = getListPairedToken(fromToken);
     const listToken = allToken.filter((t) => listTo.includes(t.title));
-    console.log('list token: ', listToken);
     setListValidTo([...listToken]);
     if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
   }, [fromToken]);
@@ -113,6 +86,10 @@ const Swap: React.FC<SwapProps> = () => {
   //   // else rate = amount1 / amount2;
   //   // setFromToRatio(rate);
   // }, [fromToken, toToken]);
+
+  const parseListTokens = () => {
+
+  }
 
   const onChangeFromAmount = (amount: number) => {
     setFromAmount(amount);
@@ -260,6 +237,7 @@ const Swap: React.FC<SwapProps> = () => {
   }, [poolData]);
 
   const handleSubmit = async () => {
+    setSwapLoading(true);
     try {
       let walletAddr;
       if (await window.Keplr.getKeplr())
@@ -302,6 +280,7 @@ const Swap: React.FC<SwapProps> = () => {
         message: error
       });
     }
+    setSwapLoading(false);
   };
 
   const getListPairedToken = (tokenName: TokenName) => {
@@ -485,9 +464,14 @@ const Swap: React.FC<SwapProps> = () => {
               /> */}
             </div>
           </div>
-          <div className={cx('swap-btn')} onClick={handleSubmit}>
-            Swap
-          </div>
+          <button
+            className={cx('swap-btn')}
+            onClick={handleSubmit}
+            disabled={swapLoading}
+          >
+            {swapLoading && <LoadingIcon width={40} height={40} />}
+            <span>Swap</span>
+          </button>
           <div className={cx('detail')}>
             <div className={cx('row')}>
               <div className={cx('title')}>

@@ -4,10 +4,11 @@ import { ReactComponent as ETH } from 'assets/icons/eth.svg';
 import { ReactComponent as ORAI } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { network, NetworkKey } from './networks';
 
 export type TokenItemType = {
-  name?: string;
+  name: string;
   org?: string;
   denom: string;
   contractAddress?: string;
@@ -16,8 +17,9 @@ export type TokenItemType = {
   rpc: string;
   lcd?: string;
   decimals: number;
-  coingeckoId: 'oraichain-token' | 'osmosis' | 'cosmos' | 'ethereum' | 'bnb';
+  coingeckoId: 'oraichain-token' | 'osmosis' | 'cosmos' | 'ethereum' | 'bnb' | 'airight';
   cosmosBased: Boolean;
+  logo?: string,
 };
 
 const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
@@ -214,14 +216,15 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'ORAI',
         org: 'Oraichain',
         denom: 'orai',
-        contractAddress: 'orai',
+        contractAddress: 'ORAI',
         coingeckoId: 'oraichain-token',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI
+        Icon: ORAI,
+        logo: 'oraichain.svg'
       },
       {
         name: 'ATOM',
@@ -229,13 +232,28 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'cosmos',
         denom:
           'ibc/45C001A5AE212D09879BE4627C45B64D5636086285590D5145A51E18E9D16722',
-        contractAddress: 'ibc/45C001A5AE212D09879BE4627C45B64D5636086285590D5145A51E18E9D16722',
+        contractAddress: 'ATOM',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ATOMCOSMOS
+        Icon: ATOMCOSMOS,
+        logo: 'atom_cosmos.svg'
+      },
+      {
+        name: 'AIRI',
+        org: 'Oraichain',
+        coingeckoId: 'airight',
+        denom: '',
+        contractAddress: 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg',
+        decimals: 6,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: AIRI,
+        logo: 'airi.svg'
       },
       {
         name: 'OSMO',

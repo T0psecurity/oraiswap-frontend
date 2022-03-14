@@ -305,6 +305,9 @@
     /* identical to box height, or 16px */
 
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     /* aiRight/White */
 
@@ -312,6 +315,10 @@
     cursor: pointer;
 
     margin: 20px 0;
+    height: 60px;
+    svg {
+      margin: 0 5px 0 0 !important;
+    }
   }
 
   .detail {
