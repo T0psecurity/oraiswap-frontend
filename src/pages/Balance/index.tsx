@@ -558,7 +558,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 />
 
                 {to ? (
-                  <div className={styles.token}>
+                  <div className={styles.token} style={{ marginBottom: 10 }}>
                     {to.icon}
                     <div className={styles.tokenInfo}>
                       <div className={styles.tokenName}>{to.name}</div>
