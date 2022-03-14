@@ -5,7 +5,6 @@ import Card from './Card';
 import { TooltipIcon } from './Tooltip';
 import styles from './TabView.module.scss';
 import Modal from './Modal';
-import { Type } from 'pages/Swap';
 import TransferForm from './TransferForm';
 
 const TabView: FC<TabViewProps> = ({

@@ -2,7 +2,6 @@
 import { useCallback } from 'react';
 import oraiswapConfig from 'constants/oraiswap.json';
 import axios from './request';
-import { Type } from 'pages/Swap';
 import { AxiosError } from 'axios';
 import { network } from 'constants/networks';
 import { ORAI, UAIRI } from 'constants/constants';

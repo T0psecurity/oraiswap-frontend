@@ -5,7 +5,7 @@ import { NetworkConfig } from 'types/network';
 import styles from './NetworkComboBox.module.scss';
 
 const NetworkComboBox = () => {
-  const items = [...networks.values()];
+  const items = Object.values(networks);
 
   const onNetworkSelect = (item: NetworkConfig) => {
     localStorage.setItem('network', item.id);

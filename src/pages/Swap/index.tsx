@@ -18,7 +18,6 @@ import {
   generateContractMessages,
   simulateSwap
 } from 'rest/api';
-import { Type } from 'pages/Swap';
 import CosmJs from 'libs/cosmjs';
 import { DECIMAL_FRACTION, ORAI } from 'constants/constants';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
