@@ -9,7 +9,16 @@ html {
   // @include mobile {
   //   background-image: url(images/BackgroundPatternMobile.svg);
   // }
-  font-family: IBM Plex Sans;
+  font-family: 'IBM Plex Sans';
+}
+
+button {
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}
+
+button:hover {
+  opacity: 0.8;
 }
 
 .Toastify {

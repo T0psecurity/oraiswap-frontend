@@ -402,109 +402,112 @@ const Balance: React.FC<BalanceProps> = () => {
         <div className={styles.divider} />
         <div className={styles.transferTab}>
           {/* From Tab */}
-          <div className={styles.from}>
-            <div className={styles.tableHeader}>
-              <span className={styles.label}>From</span>
-              <div className={styles.fromBalanceDes}>
-                <div className={styles.balanceFromGroup}>
+          <div className={styles.border_gradient}>
+            <div className={styles.balance_block}>
+              <div className={styles.tableHeader}>
+                <span className={styles.label}>From</span>
+                <div className={styles.fromBalanceDes}>
+                  <div className={styles.balanceFromGroup}>
+                    <TokenBalance
+                      balance={{
+                        amount:
+                          from && amounts[from.denom]
+                            ? amounts[from.denom].amount / 10 ** from.decimals
+                            : 0,
+                        denom: from?.denom ?? ''
+                      }}
+                      className={styles.balanceDescription}
+                      prefix="Balance: "
+                      decimalScale={2}
+                    />
+
+                    <button
+                      className={styles.balanceBtn}
+                      onClick={() => {
+                        setFromAmount(
+                          from
+                            ? [
+                                amounts[from.denom].amount /
+                                  10 ** from.decimals,
+                                amounts[from.denom].usd
+                              ]
+                            : [0, 0]
+                        );
+                      }}
+                    >
+                      MAX
+                    </button>
+                    <button
+                      className={styles.balanceBtn}
+                      onClick={() => {
+                        setFromAmount(
+                          from
+                            ? [
+                                amounts[from.denom].amount /
+                                  (2 * 10 ** from.decimals),
+                                amounts[from.denom].usd / 2
+                              ]
+                            : [0, 0]
+                        );
+                      }}
+                    >
+                      HALF
+                    </button>
+                  </div>
                   <TokenBalance
-                    balance={{
-                      amount:
-                        from && amounts[from.denom]
-                          ? amounts[from.denom].amount / 10 ** from.decimals
-                          : 0,
-                      denom: from?.denom ?? ''
-                    }}
+                    balance={fromUsd}
                     className={styles.balanceDescription}
-                    prefix="Balance: "
+                    prefix="~$"
                     decimalScale={2}
                   />
-
-                  <div
-                    className={styles.balanceBtn}
-                    onClick={() => {
-                      setFromAmount(
-                        from
-                          ? [
-                              amounts[from.denom].amount / 10 ** from.decimals,
-                              amounts[from.denom].usd
-                            ]
-                          : [0, 0]
-                      );
-                    }}
-                  >
-                    MAX
-                  </div>
-                  <div
-                    className={styles.balanceBtn}
-                    onClick={() => {
-                      setFromAmount(
-                        from
-                          ? [
-                              amounts[from.denom].amount /
-                                (2 * 10 ** from.decimals),
-                              amounts[from.denom].usd / 2
-                            ]
-                          : [0, 0]
-                      );
-                    }}
-                  >
-                    HALF
-                  </div>
                 </div>
-                <TokenBalance
-                  balance={fromUsd}
-                  className={styles.balanceDescription}
-                  prefix="~$"
-                  decimalScale={2}
-                />
-              </div>
-              {from?.name ? (
-                <div className={styles.tokenFromGroup}>
-                  <div className={styles.token}>
-                    {from.icon}
-                    <div className={styles.tokenInfo}>
-                      <div className={styles.tokenName}>{from.name}</div>
-                      <div className={styles.tokenOrg}>
-                        <span className={styles.tokenOrgTxt}>{from.org}</span>
+                {from?.name ? (
+                  <div className={styles.tokenFromGroup}>
+                    <div className={styles.token}>
+                      {from.icon}
+                      <div className={styles.tokenInfo}>
+                        <div className={styles.tokenName}>{from.name}</div>
+                        <div className={styles.tokenOrg}>
+                          <span className={styles.tokenOrgTxt}>{from.org}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <NumberFormat
-                    thousandSeparator
-                    decimalScale={2}
-                    customInput={Input}
-                    value={fromAmount}
-                    onValueChange={({ floatValue }) => {
-                      setFromAmount([
-                        floatValue ?? 0,
-                        getUsd((floatValue ?? 0) * 10 ** from.decimals, from)
-                      ]);
-                    }}
-                    className={styles.amount}
-                  />
-                </div>
-              ) : null}
-            </div>
-            <div className={styles.table}>
-              <div className={styles.tableDes}>
-                <span className={styles.subLabel}>Available assets</span>
-                <span className={styles.subLabel}>Balance</span>
-              </div>
-              <div className={styles.tableContent}>
-                {fromTokens.map((t: TokenItemType) => {
-                  return (
-                    <TokenItem
-                      key={t.denom}
-                      amountDetail={amounts[t.denom]}
-                      className={styles.token_from}
-                      active={from?.name === t.name}
-                      token={t}
-                      onClick={onClickTokenFrom}
+                    <NumberFormat
+                      thousandSeparator
+                      decimalScale={2}
+                      customInput={Input}
+                      value={fromAmount}
+                      onValueChange={({ floatValue }) => {
+                        setFromAmount([
+                          floatValue ?? 0,
+                          getUsd((floatValue ?? 0) * 10 ** from.decimals, from)
+                        ]);
+                      }}
+                      className={styles.amount}
                     />
-                  );
-                })}
+                  </div>
+                ) : null}
+              </div>
+              <div className={styles.table}>
+                <div className={styles.tableDes}>
+                  <span className={styles.subLabel}>Available assets</span>
+                  <span className={styles.subLabel}>Balance</span>
+                </div>
+                <div className={styles.tableContent}>
+                  {fromTokens.map((t: TokenItemType) => {
+                    return (
+                      <TokenItem
+                        key={t.denom}
+                        amountDetail={amounts[t.denom]}
+                        className={styles.token_from}
+                        active={from?.name === t.name}
+                        token={t}
+                        onClick={onClickTokenFrom}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -512,67 +515,70 @@ const Balance: React.FC<BalanceProps> = () => {
           {/* Transfer button */}
 
           <div className={styles.transferBtn}>
-            <ToggleTransfer
-              onClick={toggleTransfer}
-              style={{
-                width: 44,
-                height: 44,
-                alignSelf: 'center',
-                cursor: 'pointer'
-              }}
-            />
+            <button onClick={toggleTransfer}>
+              <ToggleTransfer
+                style={{
+                  width: 44,
+                  height: 44,
+                  alignSelf: 'center',
+                  cursor: 'pointer'
+                }}
+              />
+            </button>
             <button className={styles.tfBtn} onClick={transferIBC}>
               <span className={styles.tfTxt}>Transfer</span>
             </button>
           </div>
           {/* End Transfer button */}
           {/* To Tab */}
-          <div className={styles.to}>
-            <div className={styles.tableHeader}>
-              <span className={styles.label}>To</span>
+          <div className={styles.border_gradient}>
+            <div className={styles.balance_block}>
+              <div className={styles.tableHeader}>
+                <span className={styles.label}>To</span>
 
-              <TokenBalance
-                balance={{
-                  amount:
-                    to && amounts[to.denom]
-                      ? amounts[to.denom].amount / 10 ** to.decimals
-                      : 0,
-                  denom: to?.denom ?? ''
-                }}
-                className={styles.balanceDescription}
-                prefix="Balance: "
-                decimalScale={2}
-              />
+                <TokenBalance
+                  balance={{
+                    amount:
+                      to && amounts[to.denom]
+                        ? amounts[to.denom].amount / 10 ** to.decimals
+                        : 0,
+                    denom: to?.denom ?? ''
+                  }}
+                  className={styles.balanceDescription}
+                  prefix="Balance: "
+                  decimalScale={2}
+                />
 
-              {to ? (
-                <div className={styles.token}>
-                  {to.icon}
-                  <div className={styles.tokenInfo}>
-                    <div className={styles.tokenName}>{to.name}</div>
-                    <div className={styles.tokenOrg}>
-                      <span className={styles.tokenOrgTxt}>{to.org}</span>
+                {to ? (
+                  <div className={styles.token}>
+                    {to.icon}
+                    <div className={styles.tokenInfo}>
+                      <div className={styles.tokenName}>{to.name}</div>
+                      <div className={styles.tokenOrg}>
+                        <span className={styles.tokenOrgTxt}>{to.org}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : null}
-            </div>
-            <div className={styles.table}>
-              <div className={styles.tableDes}>
-                <span className={styles.subLabel}>Available assets</span>
-                <span className={styles.subLabel}>Balance</span>
+                ) : null}
               </div>
-              <div className={styles.tableContent}>
-                {toTokens.map((t: TokenItemType) => {
-                  return (
-                    <TokenItem
-                      key={t.denom}
-                      amountDetail={amounts[t.denom]}
-                      active={to?.name === t.name}
-                      token={t}
-                      onClick={onClickTokenTo}
-                    />
-                  );
-                })}
+              <div className={styles.table}>
+                <div className={styles.tableDes}>
+                  <span className={styles.subLabel}>Available assets</span>
+                  <span className={styles.subLabel}>Balance</span>
+                </div>
+                <div className={styles.tableContent}>
+                  {toTokens.map((t: TokenItemType) => {
+                    return (
+                      <TokenItem
+                        key={t.denom}
+                        amountDetail={amounts[t.denom]}
+                        active={to?.name === t.name}
+                        token={t}
+                        onClick={onClickTokenTo}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
