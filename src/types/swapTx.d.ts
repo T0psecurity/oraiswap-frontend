@@ -51,9 +51,9 @@ interface SwapTax {
   cap?: string;
 }
 
-enum Type {
-  'TRANSFER' = 'Transfer',
-  'SWAP' = 'Swap',
-  'PROVIDE' = 'Provide',
-  'WITHDRAW' = 'Withdraw'
-}
+// enum Type {
+//   'TRANSFER' = 'Transfer',
+//   'SWAP' = 'Swap',
+//   'PROVIDE' = 'Provide',
+//   'WITHDRAW' = 'Withdraw'
+// }

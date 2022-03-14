@@ -3,6 +3,7 @@ import { ceil, gt, gte, lte, min, times, minus, plus } from 'libs/math';
 import { checkPrefixAndLength, getLength, omitEmpty } from 'libs/utils';
 import { lookup, format, toAmount, formatAsset, validateDp } from 'libs/parse';
 import { hasTaxToken } from 'helpers/token';
+import { Type } from 'rest/api';
 
 /* forms */
 export const step = (decimals = 6) => {
@@ -20,9 +21,9 @@ export const renderBalance = (
 ) =>
   balance && symbol
     ? {
-        title: [affix, 'Balance'].filter(Boolean).join(' '),
-        content: format(balance, symbol)
-      }
+      title: [affix, 'Balance'].filter(Boolean).join(' '),
+      content: format(balance, symbol)
+    }
     : undefined;
 
 /* validate */
@@ -56,15 +57,15 @@ export const validate = {
     min && getLength(value) < min
       ? `${label} must be longer than ${min} bytes.`
       : max && getLength(value) > max
-      ? `${label} must be shorter than ${max} bytes.`
-      : '',
+        ? `${label} must be shorter than ${max} bytes.`
+        : '',
 
   address: (value: string) =>
     !value
       ? 'Required'
       : !checkPrefixAndLength('orai', value, 44)
-      ? 'Invalid address'
-      : '',
+        ? 'Invalid address'
+        : '',
 
   url: (value: string) => {
     try {
@@ -124,37 +125,37 @@ export const validate = {
     return (optional && !value) || symbol === '' || symbol === undefined
       ? ''
       : !(value || value === '')
-      ? 'Required'
-      : isFrom && !gt(amount, 0)
-      ? `${label} must be greater than 0`
-      : min && !gte(amount, min)
-      ? `${label} must be greater than ${min}`
-      : !validateDp(value, decimals)
-      ? `${label} must be within ${decimals} decimal points`
-      : (type === Type.SWAP &&
-          isFrom === true &&
-          (max === '' || max === '0')) ||
-        ((type === Type.PROVIDE || type === Type.WITHDRAW) &&
-          (max === '' || max === '0'))
-      ? MESSAGE.Form.Validate.InsufficientBalance
-      : isFrom === true &&
-        max &&
-        gt(max, 0) &&
-        !(gt(amount, 0) && lte(amount, max))
-      ? `${label} must be between 0 and ${lookup(max, symbol)}`
-      : isFrom === true &&
-        max &&
-        symbol === feeSymbol &&
-        gt(plus(amount, feeValue), max)
-      ? `Balance is insufficient due to the fee(${lookup(feeValue, feeSymbol)})`
-      : ((type !== Type.PROVIDE && isFrom === true) || type === Type.PROVIDE) &&
-        ((symbol !== feeSymbol && gt(minus(tax, minus(max, amount)), 0)) ||
-          (symbol === feeSymbol &&
-            gt(minus(tax, minus(max, plus(amount, feeValue))), 0)))
-      ? `You must leave at least ${format(tax, symbol)} ${symbol} tax value`
-      : refvalue === '0' && refsymbol !== ''
-      ? 'Not enough pool balance'
-      : '';
+        ? 'Required'
+        : isFrom && !gt(amount, 0)
+          ? `${label} must be greater than 0`
+          : min && !gte(amount, min)
+            ? `${label} must be greater than ${min}`
+            : !validateDp(value, decimals)
+              ? `${label} must be within ${decimals} decimal points`
+              : (type === Type.SWAP &&
+                isFrom === true &&
+                (max === '' || max === '0')) ||
+                ((type === Type.PROVIDE || type === Type.WITHDRAW) &&
+                  (max === '' || max === '0'))
+                ? MESSAGE.Form.Validate.InsufficientBalance
+                : isFrom === true &&
+                  max &&
+                  gt(max, 0) &&
+                  !(gt(amount, 0) && lte(amount, max))
+                  ? `${label} must be between 0 and ${lookup(max, symbol)}`
+                  : isFrom === true &&
+                    max &&
+                    symbol === feeSymbol &&
+                    gt(plus(amount, feeValue), max)
+                    ? `Balance is insufficient due to the fee(${lookup(feeValue, feeSymbol)})`
+                    : ((type !== Type.PROVIDE && isFrom === true) || type === Type.PROVIDE) &&
+                      ((symbol !== feeSymbol && gt(minus(tax, minus(max, amount)), 0)) ||
+                        (symbol === feeSymbol &&
+                          gt(minus(tax, minus(max, plus(amount, feeValue))), 0)))
+                      ? `You must leave at least ${format(tax, symbol)} ${symbol} tax value`
+                      : refvalue === '0' && refsymbol !== ''
+                        ? 'Not enough pool balance'
+                        : '';
   },
 
   symbol: (symbol: string) => {

@@ -96,7 +96,8 @@ const Balance: React.FC<BalanceProps> = () => {
     'osmosis',
     'cosmos',
     'bnb',
-    'ethereum'
+    'ethereum',
+    'airight'
   ]);
 
   const getUsd = (amount: number, token: TokenItemType) => {

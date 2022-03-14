@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { isAssetInfo, tokenInfos } from './usePairs';
 import { div, gt, times, ceil, plus, minus } from '../libs/math';
 import useAPI from './useAPI';
+import { Type } from 'rest/api';
 
 interface PoolResponse {
   height: string;
@@ -123,8 +124,8 @@ export default (
             estimated =
               res && gt(res.total_share, 0) && gt(calculatedAmount, 0)
                 ? ceil(times(times(rate1, LP), rateFromDecimal)) +
-                  '-' +
-                  ceil(times(times(rate2, LP), rateToDecimal))
+                '-' +
+                ceil(times(times(rate2, LP), rateToDecimal))
                 : '0';
             price1 =
               res && gt(res.total_share, 0) && gt(calculatedAmount, 0)

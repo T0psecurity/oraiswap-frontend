@@ -6,6 +6,7 @@ import { Config } from './useSelectAsset';
 import styles from './SwapSelectToken.module.scss';
 import { GetTokenSvg } from '../helpers/token';
 import { lpTokenInfos, tokenInfos } from '../rest/usePairs';
+import { Type } from 'rest/api';
 
 interface Props extends Config {
   isOpen: boolean;

@@ -3,6 +3,7 @@ import SwapPage from '../components/SwapPage';
 import SwapForm from '../forms/SwapForm';
 import Container from '../components/Container';
 import useHash from './useHash';
+import { Type } from 'rest/api';
 
 const Swap = () => {
   const { hash: type } = useHash<Type>(Type.SWAP);
