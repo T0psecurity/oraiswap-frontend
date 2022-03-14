@@ -1,0 +1,89 @@
+.setting {
+    background: #141416;
+    border-radius: 24px;
+    padding: 16px 24px 24px;
+
+    .title {
+        display: flex;
+        align-items: flex-end;
+
+        gap: 5px;
+        margin-bottom: 25px;
+        font-family: IBM Plex Sans;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 18px;
+        line-height: 100%;
+        /* identical to box height, or 18px */
+
+        text-align: center;
+
+        /* aiRight/White */
+
+        color: #ffffff;
+    }
+
+    .options {
+        display: flex;
+        justify-content: space-between;
+
+        .item {
+            display: flex;
+            justify-content: center;
+
+            font-family: IBM Plex Sans;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 100%;
+            /* identical to box height, or 16px */
+
+            text-align: center;
+            font-feature-settings: "zero" on;
+
+            width: 80px;
+            height: 48px;
+            background: #1e1e21;
+            border-radius: 8px;
+            padding: 16px;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        .isChosen {
+            background: #612fca;
+        }
+
+        .input {
+            padding: 0;
+            max-width: 30px;
+        }
+
+        .border {
+            border: 1px solid #3c404d;
+        }
+    }
+
+    .tooltip {
+        font-family: IBM Plex Sans;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 150%;
+        /* or 24px */
+
+        text-align: center;
+
+        /* aiRight/White */
+
+        color: #ffffff;
+        padding: 16px 24px;
+
+        /* aiRight/Dark BG */
+
+        background: #141416;
+        border-radius: 24px;
+    }
+}

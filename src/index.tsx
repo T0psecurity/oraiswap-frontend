@@ -8,9 +8,15 @@ import Contract from './layouts/Contract';
 import App from './layouts/App';
 import Keplr from 'libs/keplr';
 import { network } from 'constants/networks';
+import AuthProvider from 'providers/AuthProvider';
+import { ToastProvider } from 'components/Toasts/context';
+import 'react-toastify/dist/ReactToastify.css';
+import { Bounce, ToastContainer } from 'react-toastify';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 // enable Keplr
 window.Keplr = new Keplr();
+const queryClient = new QueryClient();
 
 const checkKeplr = async () => {
   const keplr = await window.Keplr.getKeplr();
@@ -21,14 +27,19 @@ const checkKeplr = async () => {
   render(
     <StrictMode>
       <Contract>
-        <Router>
-          <ScrollToTop />
-          <App />
-        </Router>
+        <ToastProvider>
+          <Router>
+            <AuthProvider>
+              <ScrollToTop />
+              <App />
+            </AuthProvider>
+          </Router>
+          <ToastContainer transition={Bounce} />
+        </ToastProvider>
       </Contract>
     </StrictMode>,
     document.getElementById('oraiswap')
   );
-}
+};
 
 checkKeplr();

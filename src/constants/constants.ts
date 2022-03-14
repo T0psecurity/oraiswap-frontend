@@ -4,9 +4,11 @@ export const CHROME = 'https://google.com/chrome';
 export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
 export const AIRI = 'AIRI';
+export const ATOM = 'ATOM';
 export const LP = 'LP';
 
 export const NATIVE_TOKENS = [ORAI];
+export const DECIMAL_FRACTION = Math.pow(10, 18);
 
 /* oraiswap:configs */
 export const DEFAULT_MAX_SPREAD = 0.5;

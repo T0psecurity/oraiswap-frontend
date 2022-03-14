@@ -1,0 +1,194 @@
+.pool-detail {
+    padding: 40px;
+    .header {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 40px;
+
+        .logo {
+            position: relative;
+            width: 75px;
+            height: 80px;
+
+            .token1 {
+                width: 48px;
+                height: 48px;
+            }
+
+            .token2 {
+                width: 48px;
+                height: 48px;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                z-index: 1;
+            }
+        }
+        .title {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+
+            .name {
+                font-family: "IBM Plex Sans";
+                font-style: normal;
+                font-weight: 600;
+                font-size: 22px;
+                line-height: 100%;
+                /* identical to box height, or 22px */
+
+                font-feature-settings: "tnum" on, "lnum" on, "zero" on;
+
+                /* aiRight/White */
+
+                color: #ffffff;
+            }
+
+            .value {
+                font-family: "IBM Plex Sans";
+                font-style: normal;
+                font-weight: 600;
+                font-size: 40px;
+                line-height: 100%;
+                /* identical to box height, or 40px */
+
+                font-feature-settings: "tnum" on, "lnum" on, "zero" on;
+
+                color: #ffffff;
+            }
+        }
+        .des {
+            font-family: "IBM Plex Sans";
+            font-style: normal;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 100%;
+            /* identical to box height, or 16px */
+
+            text-align: center;
+            font-feature-settings: "tnum" on, "lnum" on, "zero" on;
+
+            /* aiRight/Gray 3 */
+
+            color: #777e90;
+        }
+        .btn {
+            padding: 16px 24px;
+            text-align: center;
+            border-radius: 8px;
+            font-family: "IBM Plex Sans";
+            font-style: normal;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 100%;
+            /* identical to box height, or 16px */
+
+            text-align: center;
+
+            /* aiRight/White */
+
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .swap {
+            background: #191b21;
+        }
+
+        .liquidity {
+            background: #612fca;
+            /* Inner/Button */
+
+            box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+        }
+    }
+
+    .info {
+        display: flex;
+        justify-content: space-between;
+
+        .container {
+            padding: 16px 24px 32px;
+            background: #17181c;
+            border-radius: 16px;
+
+            width: calc((100% - 32px) / 3);
+
+            font-family: "IBM Plex Sans";
+            font-style: normal;
+            font-weight: 600;
+            font-size: 22px;
+            line-height: 100%;
+            /* identical to box height, or 22px */
+
+            font-feature-settings: "tnum" on, "lnum" on, "zero" on;
+
+            /* aiRight/White */
+
+            color: #ffffff;
+
+            gap: 16px;
+            display: flex;
+            flex-direction: column;
+
+            .title {
+                font-family: "IBM Plex Sans";
+                font-style: normal;
+                font-weight: 500;
+                font-size: 14px;
+                line-height: 150%;
+                /* identical to box height, or 21px */
+
+                font-feature-settings: "ss03" on;
+
+                /* aiRight/Gray 3 */
+
+                color: #777e90;
+            }
+
+            .row {
+                display: flex;
+                gap: 10px;
+
+                .logo {
+                    height: 20px;
+                    width: 20px;
+                }
+
+                .amount {
+                    text-align: right;
+                    flex-grow: 1;
+
+                    .value {
+                        margin-top: 12px;
+                        font-family: "IBM Plex Sans";
+                        font-style: normal;
+                        font-weight: 600;
+                        font-size: 16px;
+                        line-height: 100%;
+                        /* identical to box height, or 16px */
+
+                        font-feature-settings: "tnum" on, "lnum" on, "zero" on;
+
+                        /* aiRight/Gray 3 */
+
+                        color: #777e90;
+                    }
+                }
+            }
+        }
+
+        .ver-containers {
+            width: calc((100% - 20px) / 3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            .small-container {
+                width: 100% !important;
+                height: calc((100% - 16px) / 2);
+            }
+        }
+    }
+}

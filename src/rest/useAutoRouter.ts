@@ -1,7 +1,6 @@
 //@ts-nocheck
 import { div, times } from 'libs/math';
 import { toAmount } from 'libs/parse';
-import { Type } from 'pages/Swap';
 import { useEffect, useMemo, useState } from 'react';
 import useAPI, { SimulatedData } from './useAPI';
 import { tokenInfos } from './usePairs';

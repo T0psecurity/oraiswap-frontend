@@ -4,13 +4,6 @@ import SwapForm from '../forms/SwapForm';
 import Container from '../components/Container';
 import useHash from './useHash';
 
-export enum Type {
-  'TRANSFER' = 'Transfer',
-  'SWAP' = 'Swap',
-  'PROVIDE' = 'Provide',
-  'WITHDRAW' = 'Withdraw'
-}
-
 const Swap = () => {
   const { hash: type } = useHash<Type>(Type.SWAP);
   const tabs = {
