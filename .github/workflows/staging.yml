@@ -50,7 +50,7 @@ jobs:
         run: 'echo "$ENV_DEVELOP" > .env'
         shell: bash
         env:
-          ENV_STAGING: ${{secrets.ENV_DEVELOP}}
+          ENV_DEVELOP: ${{secrets.ENV_DEVELOP}}
       - name: Build Production
         run: yarn build
         env:
