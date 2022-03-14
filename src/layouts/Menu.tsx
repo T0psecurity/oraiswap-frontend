@@ -13,7 +13,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement
+  ReactElement,
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
@@ -38,7 +38,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balanceData
+    data: balanceData,
   } = useQuery(
     'balance',
     () =>
@@ -90,12 +90,15 @@ const Menu: React.FC<{}> = React.memo((props) => {
                   text={address}
                   className={styles.token_address}
                 />
-                {/* {balanceData && (
+                {balanceData && (
                   <TokenBalance
-                    balance={balanceData?.balances?.find((balance: { denom: string, amount: string }) => balance.denom === ORAI)}
+                    balance={balanceData?.balances?.find(
+                      (balance: { denom: string; amount: string }) =>
+                        balance.denom === ORAI
+                    )}
                     className={styles.token_balance}
                   />
-                )} */}
+                )}
               </div>
             </div>
           ) : (
