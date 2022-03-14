@@ -19,7 +19,7 @@ import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
 import { TokenItemType, tokens } from 'constants/bridgeTokens';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -126,9 +126,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const url = `${token.lcd}/cosmos/bank/v1beta1/balances/${address}`;
       const res: DenomBalanceResponse = (await axios.get(url)).data;
+      console.log("token denom: ", token.denom);
+      console.log("balances: ", url, res.balances);
       const amount = parseInt(
         res.balances.find((balance) => balance.denom === token.denom)?.amount ??
-          '0'
+        '0'
       );
 
       const amountDetail: AmountDetail = {
@@ -264,10 +266,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -280,10 +282,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}
