@@ -354,36 +354,44 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    const fromAddress = (await window.keplr.getKey(from.chainId)).bech32Address;
-    const toAddress = (await window.keplr.getKey(to.chainId)).bech32Address;
-    await window.keplr.enable(from.chainId);
-    const amount = coin(
-      Math.round(fromAmount * 10 ** from.decimals),
-      from.denom
-    );
-    const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
-    // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-    const client = await SigningStargateClient.connectWithSigner(
-      from.rpc,
-      offlineSigner
-    );
-    const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
+    try {
+      const fromAddress = (await window.keplr.getKey(from.chainId))
+        .bech32Address;
+      const toAddress = (await window.keplr.getKey(to.chainId)).bech32Address;
+      await window.keplr.enable(from.chainId);
+      const amount = coin(
+        Math.round(fromAmount * 10 ** from.decimals),
+        from.denom
+      );
+      const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        from.rpc,
+        offlineSigner
+      );
+      const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
 
-    const result = await client.sendIbcTokens(
-      fromAddress,
-      toAddress,
-      amount,
-      ibcInfo.source,
-      ibcInfo.channel,
-      undefined,
-      Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-      {
-        gas: '200000',
-        amount: []
-      }
-    );
+      const result = await client.sendIbcTokens(
+        fromAddress,
+        toAddress,
+        amount,
+        ibcInfo.source,
+        ibcInfo.channel,
+        undefined,
+        Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        {
+          gas: '200000',
+          amount: []
+        }
+      );
 
-    return result;
+      console.log(result);
+      displayToast(TToastType.TX_SUCCESSFUL);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message
+      });
+    }
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
