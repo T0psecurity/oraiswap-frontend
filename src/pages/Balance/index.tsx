@@ -254,7 +254,9 @@ const Balance: React.FC<BalanceProps> = () => {
   const [keplrAddress] = useLocalStorage<string>('address');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
-  const [fromAmount, setFromAmount] = useState<number>(0);
+  const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
+    0, 0
+  ]);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState(tokens);
   const { prices } = useCoinGeckoPrices([
@@ -265,8 +267,18 @@ const Balance: React.FC<BalanceProps> = () => {
     'ethereum'
   ]);
 
+  const getUsd = (amount: number, token: TokenItemType) => {
+    if (!amount) return 0;
+    const price = prices[token.coingeckoId].price;
+    if (!price) return 0;
+    return price.multiply(amount).divide(10 ** token.decimals).asNumber;
+  };
+
   const toggleTransfer = () => {
     setTokens([toTokens, fromTokens]);
+    setFrom(to);
+    setTo(from);
+    setFromAmount([0, 0]);
   };
 
   const loadTokenAmounts = async () => {
@@ -290,11 +302,9 @@ const Balance: React.FC<BalanceProps> = () => {
           '0'
       );
 
-      const price = prices[token.coingeckoId].price;
-      if (!price) continue;
       const amountDetail: AmountDetail = {
         amount,
-        usd: price.multiply(amount).divide(10 ** token.decimals).asNumber
+        usd: getUsd(amount, token)
       };
       amountDetails[token.denom] = amountDetail;
     }
@@ -309,6 +319,13 @@ const Balance: React.FC<BalanceProps> = () => {
   // console.log(prices['oraichain-token'].price);
 
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
+    if (!token.cosmosBased) {
+      displayToast(TToastType.TX_INFO, {
+        message: `Token ${token.name} on ${token.org} is currently not supported`
+      });
+      return;
+    }
+
     if (type === 'to') {
       setTo(token);
     } else {
@@ -390,16 +407,29 @@ const Balance: React.FC<BalanceProps> = () => {
               <span className={styles.label}>From</span>
               <div className={styles.fromBalanceDes}>
                 <div className={styles.balanceFromGroup}>
-                  <span className={styles.balanceDescription}>
-                    Balance: 11,980.23 ATOM
-                  </span>
+                  <TokenBalance
+                    balance={{
+                      amount:
+                        from && amounts[from.denom]
+                          ? amounts[from.denom].amount / 10 ** from.decimals
+                          : 0,
+                      denom: from?.denom ?? ''
+                    }}
+                    className={styles.balanceDescription}
+                    prefix="Balance: "
+                    decimalScale={2}
+                  />
+
                   <div
                     className={styles.balanceBtn}
                     onClick={() => {
                       setFromAmount(
                         from
-                          ? amounts[from.denom].amount / 10 ** from.decimals
-                          : 0
+                          ? [
+                              amounts[from.denom].amount / 10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
+                          : [0, 0]
                       );
                     }}
                   >
@@ -410,16 +440,24 @@ const Balance: React.FC<BalanceProps> = () => {
                     onClick={() => {
                       setFromAmount(
                         from
-                          ? amounts[from.denom].amount /
-                              (2 * 10 ** from.decimals)
-                          : 0
+                          ? [
+                              amounts[from.denom].amount /
+                                (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
+                          : [0, 0]
                       );
                     }}
                   >
                     HALF
                   </div>
                 </div>
-                <span className={styles.balanceDescription}>~$0.00</span>
+                <TokenBalance
+                  balance={fromUsd}
+                  className={styles.balanceDescription}
+                  prefix="~$"
+                  decimalScale={2}
+                />
               </div>
               {from?.name ? (
                 <div className={styles.tokenFromGroup}>
@@ -439,7 +477,10 @@ const Balance: React.FC<BalanceProps> = () => {
                     customInput={Input}
                     value={fromAmount}
                     onValueChange={({ floatValue }) => {
-                      setFromAmount(floatValue ?? 0);
+                      setFromAmount([
+                        floatValue ?? 0,
+                        getUsd((floatValue ?? 0) * 10 ** from.decimals, from)
+                      ]);
                     }}
                     className={styles.amount}
                   />
@@ -489,9 +530,20 @@ const Balance: React.FC<BalanceProps> = () => {
           <div className={styles.to}>
             <div className={styles.tableHeader}>
               <span className={styles.label}>To</span>
-              <span className={styles.balanceDescription}>
-                Balance: 11,980.23 ATOM
-              </span>
+
+              <TokenBalance
+                balance={{
+                  amount:
+                    to && amounts[to.denom]
+                      ? amounts[to.denom].amount / 10 ** to.decimals
+                      : 0,
+                  denom: to?.denom ?? ''
+                }}
+                className={styles.balanceDescription}
+                prefix="Balance: "
+                decimalScale={2}
+              />
+
               {to ? (
                 <div className={styles.token}>
                   {to.icon}

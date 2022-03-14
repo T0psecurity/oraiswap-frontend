@@ -6,7 +6,7 @@ type Props = {
   balance:
     | number
     | {
-        amount: string;
+        amount: string | number;
         decimals?: number;
         denom: string;
       };
