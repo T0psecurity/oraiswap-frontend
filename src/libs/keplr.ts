@@ -7,12 +7,12 @@ export default class Keplr {
     constructor() {
         window.onload = async () => {
             if (window.keplr) {
-                window.keplr.defaultOptions = {
-                    sign: {
-                        preferNoSetFee: true,
-                        preferNoSetMemo: true,
-                    },
-                };
+                // window.keplr.defaultOptions = {
+                //     sign: {
+                //         preferNoSetFee: true,
+                //         preferNoSetMemo: true,
+                //     },
+                // };
             }
         }
     }

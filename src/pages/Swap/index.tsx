@@ -572,7 +572,7 @@ const Swap: React.FC<SwapProps> = () => {
                 <span>Tax rate</span>
                 <TooltipIcon />
               </div>
-              <span>{taxRate?.rate} %</span>
+              <span>{parseFloat(taxRate?.rate) * 100} %</span>
             </div>
           </div>
           <SettingModal
