@@ -18,7 +18,9 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
   const amount =
     typeof balance === 'number'
       ? balance
-      : new Big(balance.amount).div(10 ** (balance.decimals || 6)).toString();
+      : new Big(balance.amount ?? 0)
+          .div(10 ** (balance.decimals || 6))
+          .toString();
 
   return (
     <NumberFormat
