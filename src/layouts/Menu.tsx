@@ -95,22 +95,27 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     text={address}
                     className={styles.token_address}
                   />
-                  {balanceData && (
-                    <TokenBalance
-                      balance={balanceData?.balances?.find(
-                        (balance: { denom: string; amount: string }) =>
-                          balance.denom === ORAI
-                      )}
-                      className={styles.token_balance}
-                      decimalScale={0}
-                    />
-                  )}
+                  {(() => {
+                    let balance = balanceData?.balances?.find(
+                      (balance: { denom: string; amount: string }) =>
+                        balance.denom === ORAI
+                    );
+
+                    if (!!balance)
+                      return (
+                        <TokenBalance
+                          balance={balance}
+                          className={styles.token_balance}
+                          decimalScale={0}
+                        />
+                      );
+                  })()}
                 </div>
               </div>
             ) : (
               <Text className={styles.connect}>Connect wallet</Text>
             )}
-            {address && (
+            {!!address && (
               <Logout
                 onClick={(e) => {
                   setAddress('');
