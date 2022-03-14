@@ -251,7 +251,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           from && amounts[from.denom]
                             ? amounts[from.denom].amount / 10 ** from.decimals
                             : 0,
-                        denom: from?.denom ?? ''
+                        denom: from?.name ?? ''
                       }}
                       className={styles.balanceDescription}
                       prefix="Balance: "
@@ -379,7 +379,7 @@ const Balance: React.FC<BalanceProps> = () => {
                       to && amounts[to.denom]
                         ? amounts[to.denom].amount / 10 ** to.decimals
                         : 0,
-                    denom: to?.denom ?? ''
+                    denom: to?.name ?? ''
                   }}
                   className={styles.balanceDescription}
                   prefix="Balance: "
