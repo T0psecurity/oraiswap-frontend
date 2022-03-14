@@ -24,8 +24,8 @@ const CloseButton = ({ closeToast }: { closeToast: () => void }) => (
 const defaultOptions: ToastOptions = {
   position: 'top-right',
   theme: 'dark',
-  // autoClose: 7000,
-  autoClose: false,
+  autoClose: 7000,
+  // autoClose: false,
   icon: false,
   hideProgressBar: true,
   closeOnClick: false,
