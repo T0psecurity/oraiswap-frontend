@@ -26,7 +26,7 @@ const networks: Map<NetworkKey, NetworkConfig> = new Map<
       factory: 'orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra',
       router: 'orai1g0pwp3rgzqywvt0xdut08gknyj5q37rtn5aecx',
       oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn',
-      explorer: 'https://scan.orai.io',
+      explorer: 'https://scan.orai.io'
     }
   ],
   [
@@ -51,7 +51,7 @@ const networks: Map<NetworkKey, NetworkConfig> = new Map<
 
 export default networks;
 
-let networkKey = localStorage.getItem('network') as NetworkKey;
+let networkKey = process.env.REACT_APP_NETWORK as NetworkKey;
 if (networkKey !== NetworkKey.MAINNET) {
   networkKey = NetworkKey.TESTNET;
 }
