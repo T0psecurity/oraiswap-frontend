@@ -9,11 +9,30 @@ html {
   // @include mobile {
   //   background-image: url(images/BackgroundPatternMobile.svg);
   // }
+  font-family: 'IBM Plex Sans';
+}
+
+button {
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}
+
+button:hover {
+  opacity: 0.8;
 }
 
 .Toastify {
+  font-family: IBM Plex Sans;
   position: fixed;
   z-index: 10000000;
+  padding: 16px 8px 16px 16px;
+  .Toastify__toast-theme--dark {
+    background: #2d2938;
+  }
+  .Toastify__toast-container--top-right {
+    top: 35px;
+    right: 35px;
+  }
 }
 
 .Toastify__toast-container {
@@ -31,10 +50,10 @@ html {
 }
 
 .Toastify__toast--default {
-  background: #2d2755 !important;
+  background: #2d2938 !important;
   max-width: 360px !important;
   min-width: 360px !important;
-  border-radius: 16px !important;
+  border-radius: 8px !important;
 
   @media (max-width: 767px) {
     min-width: 280px !important;
@@ -44,7 +63,7 @@ html {
 }
 
 .Toastify__toast {
-  padding: 20px 28px 20px 22px !important;
+  padding: 20px 12px 20px 20px !important;
   overflow: visible !important;
 
   @media (max-width: 767px) {

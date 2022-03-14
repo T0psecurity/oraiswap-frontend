@@ -6,6 +6,7 @@
   );
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   padding: 20px;
 }
 
@@ -13,6 +14,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-right: 10px;
 }
 
 .token_address {
@@ -66,7 +68,7 @@
   align-items: center;
   border-radius: 8px;
   padding: 12px 16px;
-
+  margin-top: 10px;
   &:hover {
     background: #2d2938;
     cursor: pointer;
@@ -87,8 +89,10 @@
 
 .menu_themes {
   display: flex;
-  justify-content: space-evenly;
-  margin-top: 400px;
+  width: 294px;
+  background: rgba(45, 41, 56, 0.15);
+  border-radius: 8px;
+  margin-bottom: 45px;
 }
 
 .menu_theme {
@@ -97,8 +101,9 @@
   justify-content: center;
   border-radius: 4px;
   width: 138px;
+  height: 36px;
   padding: 5px 24px 6px;
-
+  margin: 6px;
   &:hover {
     background: #2d2938;
     cursor: pointer;
@@ -119,14 +124,15 @@
 
 .menu_footer {
   text-align: center;
-  margin-top: 100px;
+  margin-bottom: 60px;
+  color: #777e90;
 }
 
 .connect_btn {
   background: #612fca;
   box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
   border-radius: 8px;
-  padding: 16px 0;
+  padding: 16px;
   margin-top: 32px;
   margin-bottom: 32px;
   justify-content: space-around;
