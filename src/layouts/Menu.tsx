@@ -90,12 +90,12 @@ const Menu: React.FC<{}> = React.memo((props) => {
                   text={address}
                   className={styles.token_address}
                 />
-                {balanceData && (
+                {/* {balanceData && (
                   <TokenBalance
                     balance={balanceData?.balances?.find((balance: { denom: string, amount: string }) => balance.denom === ORAI)}
                     className={styles.token_balance}
                   />
-                )}
+                )} */}
               </div>
             </div>
           ) : (
