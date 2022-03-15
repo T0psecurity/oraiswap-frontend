@@ -21,7 +21,7 @@ import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetail = {
   amount: number;
@@ -106,9 +106,11 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadAmountDetail = async (token: TokenItemType) => {
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) {
-      displayToast(TToastType.TX_FAILED, { message: "You must install Keplr to continue" });
-      return [token.denom, { amount: 0, usd: 0 }]
-    };
+      displayToast(TToastType.TX_FAILED, {
+        message: 'You must install Keplr to continue'
+      });
+      return [token.denom, { amount: 0, usd: 0 }];
+    }
     await window.Keplr.suggestChain(token.chainId);
     const address = await window.Keplr.getKeplrAddr(token.chainId);
 
@@ -219,7 +221,9 @@ const Balance: React.FC<BalanceProps> = () => {
         // set tx hash to trigger refetching amount values
         setTxHash(result?.transactionHash);
       } else {
-        displayToast(TToastType.TX_FAILED, { message: "You must install Keplr to continue" });
+        displayToast(TToastType.TX_FAILED, {
+          message: 'You must install Keplr to continue'
+        });
         return;
       }
     } catch (ex: any) {
@@ -271,10 +275,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                              amounts[from.denom].amount /
-                              10 ** from.decimals,
-                              amounts[from.denom].usd
-                            ]
+                                amounts[from.denom].amount /
+                                  10 ** from.decimals,
+                                amounts[from.denom].usd
+                              ]
                             : [0, 0]
                         );
                       }}
@@ -287,10 +291,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                              amounts[from.denom].amount /
-                              (2 * 10 ** from.decimals),
-                              amounts[from.denom].usd / 2
-                            ]
+                                amounts[from.denom].amount /
+                                  (2 * 10 ** from.decimals),
+                                amounts[from.denom].usd / 2
+                              ]
                             : [0, 0]
                         );
                       }}
@@ -420,17 +424,19 @@ const Balance: React.FC<BalanceProps> = () => {
                   <span className={styles.subLabel}>Balance</span>
                 </div>
                 <div className={styles.tableContent}>
-                  {toTokens.map((t: TokenItemType) => {
-                    return (
-                      <TokenItem
-                        key={t.denom}
-                        amountDetail={amounts[t.denom]}
-                        active={to?.name === t.name}
-                        token={t}
-                        onClick={onClickTokenTo}
-                      />
-                    );
-                  })}
+                  {toTokens
+                    .filter((t) => !from || t.name === from.name)
+                    .map((t: TokenItemType) => {
+                      return (
+                        <TokenItem
+                          key={t.denom}
+                          amountDetail={amounts[t.denom]}
+                          active={to?.name === t.name}
+                          token={t}
+                          onClick={onClickTokenTo}
+                        />
+                      );
+                    })}
                 </div>
               </div>
             </div>
