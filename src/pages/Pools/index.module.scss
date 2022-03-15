@@ -44,7 +44,7 @@
 }
 
 .pairbox {
-  margin-top: 25px;
+  margin-top: 35px;
   background: linear-gradient(
     144.98deg,
     rgba(51, 51, 51, 0.8) 5.29%,
@@ -52,7 +52,7 @@
   );
   border-radius: 24px;
   padding: 24px 24px 35px;
-  width: 30%;
+  width: calc(33% - 20px);
   border: 1px solid;
   border-image-source: linear-gradient(
     99.99deg,
