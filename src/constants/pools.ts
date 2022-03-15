@@ -10,7 +10,7 @@ export enum PairKey {
   ORAI_AIRI = 'ORAI-AIRI',
   ORAI_ATOM = 'ORAI-ATOM',
   ORAI_UST = 'ORAI-UST',
-  AIRI_ATOM = 'AIRI-ATOM'
+  ORAI_LUNA = 'ORAI-LUNA'
 }
 
 export type TokensSwap = { [key: string]: TokenItemType };
@@ -42,6 +42,13 @@ const pairs: { [networkKey: string]: [{ [key: string]: Pair }] } = {
         asset_denoms: [
           'orai',
           'ibc/D9CDEFD93E29F5C2175C7606DFF67490B2123BB93F299B3AFA53E8BB1DDD4FC4'
+        ]
+      },
+      [PairKey.ORAI_LUNA]: {
+        contract_addr: 'orai1ysnprvvmscxj6ukvdm5wtxvu29f9srwtjcrut4',
+        asset_denoms: [
+          'orai',
+          'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C'
         ]
       }
     }

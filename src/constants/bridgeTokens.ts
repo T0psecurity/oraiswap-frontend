@@ -203,8 +203,8 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'uluna',
         decimals: 6,
         chainId: 'columbus-5',
-        rpc: 'http://167.99.119.182:26637',
-        lcd: 'http://167.99.119.182:1337',
+        rpc: 'https://rpc-terra.orai.io',
+        lcd: 'https://lcd-terra.orai.io',
         cosmosBased: true,
         Icon: LUNA
       },
@@ -215,8 +215,8 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'uusd',
         decimals: 6,
         chainId: 'columbus-5',
-        rpc: 'http://167.99.119.182:26637',
-        lcd: 'http://167.99.119.182:1337',
+        rpc: 'https://rpc-terra.orai.io',
+        lcd: 'https://lcd-terra.orai.io',
         cosmosBased: true,
         Icon: UST
       },
