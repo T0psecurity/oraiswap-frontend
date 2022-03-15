@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { is } from 'ramda';
 import bech32 from 'bech32';
 import { Fraction } from '@saberhq/token-utils';
@@ -98,6 +99,8 @@ export const parseDisplayAmount = (value: string, decimal: number) => {
   return 0;
 };
 
+window.Fraction = Fraction;
+
 export const getUsd = (
   amount: number,
   price: Fraction | null,
@@ -105,9 +108,7 @@ export const getUsd = (
 ) => {
   if (!amount) return 0;
   if (!price) return 0;
-  const [numerator, denominator] = amount.toString().split('.'); // denominator default is 1
-  return price
-    .multiply(new Fraction(numerator, denominator))
-    .divide(10 ** decimals).asNumber;
+
+  return price.divide(10 ** decimals / amount).asNumber;
   // return price.multiply(amount).divide(10 ** decimals).asNumber;
 };
