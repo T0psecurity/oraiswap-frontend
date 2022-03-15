@@ -20,7 +20,7 @@ export default class Keplr {
     const chainInfo = embedChainInfos.find(
       (chainInfo) => chainInfo.chainId === chainId
     );
-    if (!chainInfo) throw 'Cannot find chain info given the chain id';
+    if (!chainInfo) return;
     await window.keplr.experimentalSuggestChain(chainInfo);
     await window.keplr.enable(chainInfo.chainId);
   };
@@ -49,8 +49,9 @@ export default class Keplr {
     });
   }
 
-  private async getKeplrKey(): Promise<any | undefined> {
+  private async getKeplrKey(chain_id?: string): Promise<any | undefined> {
     let chainId = network.chainId;
+    if (chain_id) chainId = chain_id;
     if (!chainId) return undefined;
     const keplr = await this.getKeplr();
     if (keplr) {
@@ -59,8 +60,8 @@ export default class Keplr {
     return undefined;
   }
 
-  async getKeplrAddr(): Promise<String | undefined> {
-    const key = await this.getKeplrKey();
+  async getKeplrAddr(chain_id?: string): Promise<String | undefined> {
+    const key = await this.getKeplrKey(chain_id);
     return key.bech32Address;
   }
 

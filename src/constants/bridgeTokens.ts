@@ -21,14 +21,14 @@ export type TokenItemType = {
   lcd?: string;
   decimals: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna';
   cosmosBased: Boolean;
 };
 
@@ -191,8 +191,8 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'uatom',
         decimals: 6,
         chainId: 'cosmoshub-4',
-        rpc: 'https://rpc-cosmoshub.blockapsis.com',
-        lcd: 'https://lcd-cosmoshub.blockapsis.com',
+        rpc: 'https://rpc-cosmos.oraidex.io',
+        lcd: 'https://lcd-cosmos.oraidex.io',
         cosmosBased: true,
         Icon: ATOMCOSMOS
       },
