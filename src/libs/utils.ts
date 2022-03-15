@@ -105,5 +105,9 @@ export const getUsd = (
 ) => {
   if (!amount) return 0;
   if (!price) return 0;
-  return price.multiply(amount).divide(10 ** decimals).asNumber;
+  const [numerator, denominator] = amount.toString().split('.'); // denominator default is 1
+  return price
+    .multiply(new Fraction(numerator, denominator))
+    .divide(10 ** decimals).asNumber;
+  // return price.multiply(amount).divide(10 ** decimals).asNumber;
 };

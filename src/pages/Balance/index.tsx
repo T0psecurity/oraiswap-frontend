@@ -157,6 +157,7 @@ const Balance: React.FC<BalanceProps> = () => {
       setTo(token);
     } else {
       setFrom(token);
+      setFromAmount([0, 0]);
     }
   }, []);
 
