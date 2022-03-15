@@ -1,6 +1,8 @@
 .content {
-  background: url(../assets/images/Background_dark.png) no-repeat;
+  background-image: url(../assets/images/Background_dark.png);
+  background-repeat: no-repeat;
   background-size: cover;
+  background-color: #111111;
   flex: 1;
   min-height: 100vh;
   height: auto;
