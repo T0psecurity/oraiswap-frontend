@@ -63,7 +63,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFee, setIsSelectFee] = useState(false);
   const [fromToken, setFromToken] = useState<TokenName>('ORAI');
   const [toToken, setToToken] = useState<TokenName>('AIRI');
-  const [feeToken, setFeeToken] = useState<TokenName>('AIRI');
+  const [feeToken, setFeeToken] = useState<TokenName>('ORAI');
   const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
   const [fromAmount, setFromAmount] = useState(0);
   const [toAmount, setToAmount] = useState(0);
@@ -289,8 +289,12 @@ const Swap: React.FC<SwapProps> = () => {
       }
     } catch (error) {
       console.log('error in swap form: ', error);
+      let finalError = "";
+      if (typeof error === 'string' || error instanceof String) {
+        finalError = error;
+      } else finalError = JSON.stringify({ message: error });
       displayToast(TToastType.TX_FAILED, {
-        message: error
+        message: finalError
       });
     }
     setSwapLoading(false);
