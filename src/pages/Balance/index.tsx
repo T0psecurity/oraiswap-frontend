@@ -20,7 +20,7 @@ import { network } from 'constants/networks';
 import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -96,7 +96,8 @@ const Balance: React.FC<BalanceProps> = () => {
     'cosmos',
     'bnb',
     'ethereum',
-    'airight'
+    'airight',
+    'terra-luna'
   ]);
 
   const getUsd = (amount: number, token: TokenItemType) => {
@@ -126,31 +127,31 @@ const Balance: React.FC<BalanceProps> = () => {
         ),
         (c) => c.denom
       );
-  
+
       for (const token of filteredTokens) {
         // switch address
-  
+
         const address = (await window.keplr.getKey(token.chainId)).bech32Address;
-  
+
         const amount = await fetchBalance(
           address,
           token.denom,
           token.contractAddress,
           token.lcd
         );
-  
+
         const amountDetail: AmountDetail = {
           amount,
           usd: getUsd(amount, token)
         };
         amountDetails[token.denom] = amountDetail;
       }
-  
+
       setAmounts(amountDetails);
     } catch (ex) {
       console.log(ex);
     }
-    
+
   };
 
   useEffect(() => {
@@ -281,10 +282,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -297,10 +298,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}

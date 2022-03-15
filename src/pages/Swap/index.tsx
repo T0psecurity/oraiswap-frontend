@@ -42,7 +42,7 @@ interface ValidToken {
   logo: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -335,7 +335,7 @@ const Swap: React.FC<SwapProps> = () => {
               <TokenBalance
                 balance={{
                   amount: fromTokenBalance ? fromTokenBalance : 0,
-                  denom: fromTokenInfoData?.name ?? ''
+                  denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -424,14 +424,14 @@ const Swap: React.FC<SwapProps> = () => {
               <TokenBalance
                 balance={{
                   amount: toTokenInfoData ? toTokenBalance : 0,
-                  denom: toTokenInfoData?.name ?? ''
+                  denom: toTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromToken} ≈ ${averageRatio.toFixed(2)} ${toToken}`}
+                {`1 ${fromToken} ≈ ${averageRatio.toFixed(6)} ${toToken}`}
               </span>
               <TooltipIcon />
             </div>
@@ -448,9 +448,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input
@@ -507,7 +507,7 @@ const Swap: React.FC<SwapProps> = () => {
                 <span>Exchange rate</span>
                 <TooltipIcon />
               </div>
-              <span>{parseFloat(exchangeRate) * 100} %</span>
+              <span>{(1 / parseFloat(exchangeRate) * 100).toFixed(2)} %</span>
             </div>
           </div>
           <SettingModal

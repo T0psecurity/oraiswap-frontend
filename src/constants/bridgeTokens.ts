@@ -4,6 +4,7 @@ import { ReactComponent as ETH } from 'assets/icons/eth.svg';
 import { ReactComponent as ORAI } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as LUNA } from 'assets/icons/luna.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { network, NetworkKey } from './networks';
 
@@ -18,14 +19,14 @@ export type TokenItemType = {
   lcd?: string;
   decimals: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terra-luna';
   cosmosBased: Boolean;
-  logo: string;
 };
 
 const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
@@ -43,7 +44,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: false,
         Icon: ORAI,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ATOM',
@@ -56,7 +56,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: false,
         Icon: ATOMCOSMOS,
-        logo: 'oraichain.svg'
       },
       {
         name: 'OSMO',
@@ -69,7 +68,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'osmosis',
         cosmosBased: false,
         Icon: OSMO,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ETH',
@@ -81,7 +79,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
         Icon: ETH,
-        logo: 'oraichain.svg'
       },
       {
         name: 'BNB',
@@ -93,7 +90,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'bnb',
         cosmosBased: false,
         Icon: BNB,
-        logo: 'oraichain.svg'
       }
     ],
     [
@@ -108,7 +104,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: true,
         Icon: ORAI,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ATOM',
@@ -121,7 +116,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: false,
         Icon: ATOMCOSMOS,
-        logo: 'oraichain.svg'
       },
       {
         name: 'OSMO',
@@ -134,7 +128,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'osmosis',
         cosmosBased: false,
         Icon: OSMO,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ETH',
@@ -146,7 +139,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
         Icon: ETH,
-        logo: 'oraichain.svg'
       },
       {
         name: 'BNB',
@@ -158,7 +150,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'bnb',
         cosmosBased: false,
         Icon: BNB,
-        logo: 'oraichain.svg'
       },
       {
         name: 'AIRI',
@@ -172,7 +163,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://testnet-lcd.orai.io',
         cosmosBased: true,
         Icon: AIRI,
-        logo: 'airi.svg'
       }
     ]
   ],
@@ -190,7 +180,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: false,
         Icon: ORAI,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ATOM',
@@ -203,7 +192,18 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: true,
         Icon: ATOMCOSMOS,
-        logo: 'oraichain.svg'
+      },
+      {
+        name: 'LUNA',
+        org: 'Terra',
+        coingeckoId: 'terra-luna',
+        denom: 'uluna',
+        decimals: 6,
+        chainId: 'columbus-5',
+        rpc: 'http://public-node.terra.dev:26657',
+        lcd: 'http://167.99.119.182:1337',
+        cosmosBased: true,
+        Icon: LUNA,
       },
       {
         name: 'OSMO',
@@ -216,7 +216,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'osmosis',
         cosmosBased: false,
         Icon: OSMO,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ETH',
@@ -229,7 +228,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
         Icon: ETH,
-        logo: 'oraichain.svg'
       },
       {
         name: 'BNB',
@@ -242,7 +240,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'bnb',
         cosmosBased: false,
         Icon: BNB,
-        logo: 'oraichain.svg'
       }
     ],
     [
@@ -257,7 +254,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
         Icon: ORAI,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ATOM',
@@ -271,7 +267,19 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
         Icon: ATOMCOSMOS,
-        logo: 'atom_cosmos.svg'
+      },
+      {
+        name: 'LUNA',
+        org: 'Oraichain',
+        coingeckoId: 'terra-luna',
+        denom:
+          'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C',
+        decimals: 6,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: LUNA,
       },
       {
         name: 'AIRI',
@@ -285,7 +293,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
         Icon: AIRI,
-        logo: 'airi.svg'
       },
       {
         name: 'OSMO',
@@ -298,7 +305,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'osmosis',
         cosmosBased: false,
         Icon: OSMO,
-        logo: 'oraichain.svg'
       },
       {
         name: 'ETH',
@@ -310,7 +316,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
         Icon: ETH,
-        logo: 'oraichain.svg'
       },
       {
         name: 'BNB',
@@ -322,7 +327,6 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'bnb',
         cosmosBased: false,
         Icon: BNB,
-        logo: 'oraichain.svg'
       }
     ]
   ]
