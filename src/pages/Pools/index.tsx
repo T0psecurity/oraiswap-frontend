@@ -1,9 +1,9 @@
-import Layout from "layouts/Layout";
 import React, { memo } from "react";
 import styles from './index.module.scss';
 import { ReactComponent as Logo } from "assets/icons/logo.svg";
 import { Button, Input } from "antd";
 import { useNavigate } from "react-router-dom";
+import Content from "layouts/Content";
 
 const { Search } = Input;
 
@@ -91,13 +91,13 @@ const ListPools = memo(({ }) => {
 });
 const Pools: React.FC<PoolsProps> = () => {
   return (
-    <Layout nonBackground={true}>
+    <Content nonBackground={true}>
       <div className={styles.pools}>
         <Header />
         <WatchList />
         <ListPools />
       </div>
-    </Layout>
+    </Content>
   );
 }
 

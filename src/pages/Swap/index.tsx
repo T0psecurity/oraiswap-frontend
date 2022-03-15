@@ -1,5 +1,4 @@
 //@ts-nocheck
-import Layout from "layouts/Layout";
 import React, { useEffect, useState } from "react";
 import style from "./index.module.scss";
 import cn from "classnames/bind";
@@ -14,6 +13,7 @@ import { DECIMAL_FRACTION, ORAI } from "constants/constants";
 import { parseAmount, parseDisplayAmount } from "libs/utils";
 import { displayToast, TToastType } from "components/Toasts/Toast";
 import { network } from "constants/networks";
+import Content from "layouts/Content";
 
 const cx = cn.bind(style);
 
@@ -248,7 +248,7 @@ const Swap: React.FC<SwapProps> = () => {
   };
 
   return (
-    <Layout>
+    <Content>
       <div
         style={{
           height: "100%",
@@ -459,7 +459,7 @@ const Swap: React.FC<SwapProps> = () => {
           />
         </div>
       </div>
-    </Layout>
+    </Content>
   );
 };
 

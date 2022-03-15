@@ -9,6 +9,7 @@ import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
 import { ThemeProvider } from 'context/theme-context';
 import './index.scss';
+import Menu from './Menu';
 
 const queryClient = new QueryClient();
 
@@ -34,7 +35,10 @@ const App = () => {
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
         <ContractProvider value={contract}>
           <QueryClientProvider client={queryClient}>
-            {!isLoading && routes()}
+            <div className="app">
+              <Menu />
+              {!isLoading && routes()}
+            </div>
           </QueryClientProvider>
         </ContractProvider>
       </Web3ReactProvider>
