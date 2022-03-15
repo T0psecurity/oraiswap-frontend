@@ -14,48 +14,48 @@ const mockPair = {
   'ORAI-AIRI': {
     contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
     amount1: 100,
-    amount2: 1000,
+    amount2: 1000
   },
   'AIRI-ATOM': {
     contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
     amount1: 100,
-    amount2: 1000,
+    amount2: 1000
   },
   'ORAI-TEST2': {
     contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
     amount1: 100,
-    amount2: 1000,
+    amount2: 1000
   },
   'AIRI-TEST2': {
     contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
     amount1: 100,
-    amount2: 1000,
+    amount2: 1000
   },
   'ATOM-ORAI': {
     contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
     amount1: 100,
-    amount2: 1000,
-  },
+    amount2: 1000
+  }
 };
 
 const mockToken = {
   ORAI: {
     contractAddress: 'orai',
     denom: 'orai',
-    logo: 'oraichain.svg',
+    logo: 'oraichain.svg'
   },
   AIRI: {
     contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'airi.svg',
+    logo: 'airi.svg'
   },
   ATOM: {
     contractAddress: 'orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf',
-    logo: 'atom.svg',
+    logo: 'atom.svg'
   },
   TEST2: {
     contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'atom.svg',
-  },
+    logo: 'atom.svg'
+  }
 };
 
 const mockBalance = {
@@ -63,14 +63,14 @@ const mockBalance = {
   AIRI: 80000.09,
   ATOM: 50000.09,
   TEST1: 8000.122,
-  TEST2: 800.3434,
+  TEST2: 800.3434
 };
 
 const mockPrice = {
   ORAI: 5.01,
   AIRI: 0.89,
   TEST1: 1,
-  TEST2: 1,
+  TEST2: 1
 };
 
 type TokenName = keyof typeof mockToken;
@@ -97,7 +97,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
 
   return (
-    <Content nonBackground={true}>
+    <Content nonBackground>
       {!!namePool && namePool! in mockPair ? (
         <>
           <div className={cx('pool-detail')}>

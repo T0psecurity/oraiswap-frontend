@@ -163,7 +163,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
 
   return (
-    <Content nonBackground={true}>
+    <Content nonBackground>
       <div className={styles.pools}>
         <Header
           amount={totalAmount}
