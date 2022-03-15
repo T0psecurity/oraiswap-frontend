@@ -5,6 +5,7 @@ import { ReactComponent as ORAI } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as LUNA } from 'assets/icons/luna.svg';
+import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { network, NetworkKey } from './networks';
 
@@ -194,18 +195,18 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         cosmosBased: true,
         Icon: ATOMCOSMOS,
       },
-      // {
-      //   name: 'LUNA',
-      //   org: 'Terra',
-      //   coingeckoId: 'terra-luna',
-      //   denom: 'uluna',
-      //   decimals: 6,
-      //   chainId: 'columbus-5',
-      //   rpc: 'http://167.99.119.182:26637',
-      //   lcd: 'http://167.99.119.182:1337',
-      //   cosmosBased: true,
-      //   Icon: LUNA,
-      // },
+      {
+        name: 'LUNA',
+        org: 'Terra',
+        coingeckoId: 'terra-luna',
+        denom: 'uluna',
+        decimals: 6,
+        chainId: 'columbus-5',
+        rpc: 'http://167.99.119.182:26637',
+        lcd: 'http://167.99.119.182:1337',
+        cosmosBased: true,
+        Icon: LUNA,
+      },
       {
         name: 'UST',
         org: 'Terra',
@@ -216,7 +217,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'http://167.99.119.182:26637',
         lcd: 'http://167.99.119.182:1337',
         cosmosBased: true,
-        Icon: LUNA,
+        Icon: UST,
       },
       {
         name: 'OSMO',
@@ -281,19 +282,19 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         cosmosBased: true,
         Icon: ATOMCOSMOS,
       },
-      // {
-      //   name: 'LUNA',
-      //   org: 'Oraichain',
-      //   coingeckoId: 'terra-luna',
-      //   denom:
-      //     'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C',
-      //   decimals: 6,
-      //   chainId: 'Oraichain',
-      //   rpc: 'https://rpc.orai.io',
-      //   lcd: 'https://lcd.orai.io',
-      //   cosmosBased: true,
-      //   Icon: LUNA,
-      // },
+      {
+        name: 'LUNA',
+        org: 'Oraichain',
+        coingeckoId: 'terra-luna',
+        denom:
+          'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C',
+        decimals: 6,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: LUNA,
+      },
       {
         name: 'UST',
         org: 'Oraichain',
@@ -305,7 +306,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: LUNA,
+        Icon: UST,
       },
       {
         name: 'AIRI',
