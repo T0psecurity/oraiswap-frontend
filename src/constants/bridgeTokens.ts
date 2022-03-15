@@ -17,9 +17,15 @@ export type TokenItemType = {
   rpc: string;
   lcd?: string;
   decimals: number;
-  coingeckoId: 'oraichain-token' | 'osmosis' | 'cosmos' | 'ethereum' | 'bnb' | 'airight';
+  coingeckoId:
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight';
   cosmosBased: Boolean;
-  logo: string,
+  logo: string;
 };
 
 const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
@@ -29,7 +35,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'ORAI',
         org: 'Ethereum',
         denom: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
-        contractAddress: "ORAI",
+        contractAddress: 'ORAI',
         coingeckoId: 'oraichain-token',
         decimals: 6,
         chainId: 'Oraichain-testnet',
@@ -95,7 +101,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'ORAI',
         org: 'Oraichain',
         denom: 'orai',
-        contractAddress: "ORAI",
+        contractAddress: 'ORAI',
         coingeckoId: 'oraichain-token',
         decimals: 6,
         chainId: 'Oraichain-testnet',
@@ -103,7 +109,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: true,
         Icon: ORAI,
-        logo: "oraichain.svg"
+        logo: 'oraichain.svg'
       },
       {
         name: 'ATOM',
@@ -162,13 +168,13 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: '',
         contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
         decimals: 6,
-        chainId: 'Oraichain',
+        chainId: 'Oraichain-testnet',
         rpc: 'https://testnet-rpc.orai.io',
         lcd: 'https://testnet-lcd.orai.io',
         cosmosBased: true,
         Icon: AIRI,
         logo: 'airi.svg'
-      },
+      }
     ]
   ],
   [NetworkKey.MAINNET]: [
