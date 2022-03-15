@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Staging
+name: Testnet
 
 # Controls when the action will run.
 on:
@@ -50,7 +50,7 @@ jobs:
         run: 'echo "$ENV_VAR" > .env'
         shell: bash
         env:
-          ENV_VAR: ${{secrets.ENV_MAINNET}}
+          ENV_VAR: ${{secrets.ENV_DEVELOP}}
       - name: Build Production
         run: yarn build
         env:
@@ -59,8 +59,8 @@ jobs:
       - name: Set firebase project alias
         run: |
           yarn firebase use default --token ${{ secrets.FIREBASE_TOKEN }}
-          yarn firebase target:apply hosting oraiswap-staging oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }}
-          yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"
+          yarn firebase target:apply hosting oraiswap-testnet oraiswap-testnet --token ${{ secrets.FIREBASE_TOKEN }}
+          yarn firebase deploy --only hosting:oraiswap-testnet --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"
 #      - name: Send discord message
 #        uses: appleboy/discord-action@master
 #        with:

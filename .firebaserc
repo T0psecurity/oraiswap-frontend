@@ -10,6 +10,9 @@
                 ],
                 "oraiswap-staging": [
                     "oraiswap-staging"
+                ],
+                "oraiswap-testnet": [
+                    "oraiswap-testnet"
                 ]
             }
         }

@@ -11,6 +11,7 @@ import { toast, ToastOptions } from 'react-toastify';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
+import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
 import { ReactComponent as BroadcastingIcon } from 'assets/icons/toast_broadcasting.svg';
 
@@ -41,7 +42,8 @@ export enum TToastType {
   TX_BROADCASTING,
   TX_SUCCESSFUL,
   TX_FAILED,
-  TX_INFO
+  TX_INFO,
+  KEPLR_FAILED,
 }
 
 interface IToastExtra {
@@ -125,7 +127,7 @@ const ToastTxBroadcasting: FunctionComponent = () => (
 
 const ToastInfo: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={classNames(styles.toast_content, styles.toast_info)}>
-    <FailedIcon />
+    <InfoIcon />
     <section className={styles.toast_section}>
       <p>{message}</p>
     </section>

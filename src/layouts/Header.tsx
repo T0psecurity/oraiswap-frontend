@@ -5,8 +5,13 @@ import styles from './Header.module.scss';
 import LoginWidget from 'components/LoginWidget';
 import MESSAGE from 'lang/MESSAGE.json';
 import LoginMetamask from 'components/LoginMetamask';
+import useLocalStorage from 'libs/useLocalStorage';
 
 const Header = () => {
+  const [address, setAddress] = useLocalStorage<String>('address');
+  const onAddress = (address: string) => {
+    setAddress(address);
+  };
   return (
     <header className={styles.header}>
       <Container className={styles.container}>
@@ -19,7 +24,10 @@ const Header = () => {
 
         <section className={styles.support}>
           <div className={styles.connect}>
-            <LoginWidget text={MESSAGE.Form.Button.ConnectKeplr} />
+            <LoginWidget
+              onAddress={onAddress}
+              text={MESSAGE.Form.Button.ConnectKeplr}
+            />
             <LoginMetamask text={MESSAGE.Form.Button.ConnectMetamask} />
           </div>
         </section>

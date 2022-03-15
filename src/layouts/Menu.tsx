@@ -45,7 +45,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       fetch(`${network.lcd}/cosmos/bank/v1beta1/balances/${address}`).then(
         (res) => res.json()
       ),
-    { enabled: address && address.length > 0 }
+    { enabled: address ? address.length > 0 : false }
   );
 
   useEffect(() => {
@@ -78,7 +78,11 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <Text className={styles.logo_text}>OraiDex</Text>
         </Link>
         <div className={styles.menu_items}>
-          <RequireAuthButton className={styles.connect_btn}>
+          <RequireAuthButton
+            address={address}
+            setAddress={setAddress}
+            className={styles.connect_btn}
+          >
             {address ? (
               <div className={styles.token_info}>
                 <AvatarPlaceholder
@@ -91,22 +95,27 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     text={address}
                     className={styles.token_address}
                   />
-                  {balanceData && (
-                    <TokenBalance
-                      balance={balanceData?.balances?.find(
-                        (balance: { denom: string; amount: string }) =>
-                          balance.denom === ORAI
-                      )}
-                      className={styles.token_balance}
-                      decimalScale={0}
-                    />
-                  )}
+                  {(() => {
+                    let balance = balanceData?.balances?.find(
+                      (balance: { denom: string; amount: string }) =>
+                        balance.denom === ORAI
+                    );
+
+                    if (!!balance)
+                      return (
+                        <TokenBalance
+                          balance={balance}
+                          className={styles.token_balance}
+                          decimalScale={0}
+                        />
+                      );
+                  })()}
                 </div>
               </div>
             ) : (
               <Text className={styles.connect}>Connect wallet</Text>
             )}
-            {address && (
+            {!!address && (
               <Logout
                 onClick={(e) => {
                   setAddress('');
@@ -139,7 +148,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       </div>
 
       <div>
-        {/* <div className={styles.menu_themes}>
+        <div className={styles.menu_themes}>
           <Button
             className={
               styles.menu_theme +
@@ -166,7 +175,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           </Button>
         </div>
 
-        <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div> */}
+        <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
       </div>
     </div>
   );

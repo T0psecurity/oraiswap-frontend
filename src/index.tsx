@@ -12,14 +12,15 @@ import AuthProvider from 'providers/AuthProvider';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 // enable Keplr
 window.Keplr = new Keplr();
 const queryClient = new QueryClient();
 
-const checkKeplr = async () => {
+const startApp = async () => {
   const keplr = await window.Keplr.getKeplr();
+  // suggest our chain
   if (keplr) {
     // always trigger suggest chain when users enter the webpage
     await window.Keplr.suggestChain(network.chainId);
@@ -31,7 +32,9 @@ const checkKeplr = async () => {
           <Router>
             <AuthProvider>
               <ScrollToTop />
-              <App />
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
             </AuthProvider>
           </Router>
           <ToastContainer transition={Bounce} />
@@ -42,4 +45,4 @@ const checkKeplr = async () => {
   );
 };
 
-checkKeplr();
+startApp();

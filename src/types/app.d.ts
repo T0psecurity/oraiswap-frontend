@@ -1,14 +1,14 @@
 interface Result {
-  loading: boolean
-  error?: Error
-  data?: any
+  loading: boolean;
+  error?: Error;
+  data?: any;
 }
 
 interface Content {
-  title?: ReactNode
-  content?: ReactNode
+  title?: ReactNode;
+  content?: ReactNode;
 }
 
 interface Dict<T = string> {
-  [token: string]: T
+  [token: string]: T;
 }

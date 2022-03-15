@@ -1,5 +1,3 @@
-import { TokenInfoResponse } from './ow20/token_info_response';
-
 interface ExtNetworkConfig {
   chainId: string;
   rpc: string;
@@ -7,7 +5,7 @@ interface ExtNetworkConfig {
   explorer: string;
 }
 
-interface NetworkConfig extends ExtNetworkConfig {
+export interface NetworkConfig extends ExtNetworkConfig {
   /** Chain ID */
   id: string;
   /** Contract Addresses JSON URL */
@@ -22,10 +20,9 @@ interface NetworkConfig extends ExtNetworkConfig {
   factory: string;
   oracle: string;
   router: string;
-  tokens: TokenInfoResponse[];
 }
 
-interface Network extends NetworkConfig {
+export interface Network extends NetworkConfig {
   /** Get finder link */
   finder: (address: string, path?: string) => string;
 
