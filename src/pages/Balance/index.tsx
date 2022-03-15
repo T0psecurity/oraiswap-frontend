@@ -100,6 +100,7 @@ const Balance: React.FC<BalanceProps> = () => {
     'terra-luna',
     'terrausd',
   ]);
+  const [txHash, setTxHash] = useState("");
 
   const getUsd = (amount: number, token: TokenItemType) => {
     if (!amount) return 0;
@@ -158,7 +159,7 @@ const Balance: React.FC<BalanceProps> = () => {
   useEffect(() => {
     const amountDetails: AmountDetails = {};
     loadTokenAmounts();
-  }, [prices]);
+  }, [prices, txHash]);
 
   // console.log(prices['oraichain-token'].price);
 
@@ -234,6 +235,8 @@ const Balance: React.FC<BalanceProps> = () => {
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
       });
+      // set tx hash to trigger refetching amount values
+      setTxHash(result?.transactionHash);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
