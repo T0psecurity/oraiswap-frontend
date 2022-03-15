@@ -1,5 +1,6 @@
 import { is } from 'ramda';
 import bech32 from 'bech32';
+import { Fraction } from '@saberhq/token-utils';
 
 /* object */
 export const record = <T, V>(
@@ -90,9 +91,19 @@ export const checkPrefixAndLength = (
 export const parseAmount = (value: string, decimal: number) => {
   if (!value) return '0';
   return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
-}
+};
 
 export const parseDisplayAmount = (value: string, decimal: number) => {
   if (value) return `${(parseFloat(value) / Math.pow(10, decimal)).toFixed(6)}`;
   return 0;
-}
+};
+
+export const getUsd = (
+  amount: number,
+  price: Fraction | null,
+  decimals: number
+) => {
+  if (!amount) return 0;
+  if (!price) return 0;
+  return price.multiply(amount).divide(10 ** decimals).asNumber;
+};

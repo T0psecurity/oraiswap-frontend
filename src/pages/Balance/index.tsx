@@ -15,12 +15,13 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
 import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
-import { TokenItemType, tokens } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
 import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
+import { getUsd } from 'libs/utils';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetail = {
   amount: number;
@@ -90,23 +91,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const [ibcLoading, setIBCLoading] = useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState(tokens);
-  const { prices } = useCoinGeckoPrices([
-    'oraichain-token',
-    'osmosis',
-    'cosmos',
-    'bnb',
-    'ethereum',
-    'airight',
-    'terra-luna',
-    'terrausd',
-  ]);
 
-  const getUsd = (amount: number, token: TokenItemType) => {
-    if (!amount) return 0;
-    const price = prices[token.coingeckoId].price;
-    if (!price) return 0;
-    return price.multiply(amount).divide(10 ** token.decimals).asNumber;
-  };
+  const { prices } = useCoinGeckoPrices(
+    filteredTokens.map((t) => t.coingeckoId)
+  );
 
   const toggleTransfer = () => {
     setTokens([toTokens, fromTokens]);
@@ -119,20 +107,11 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       const amountDetails: AmountDetails = {};
 
-      const filteredTokens = _.uniqBy(
-        _.flatten(tokens).filter(
-          // TODO: contractAddress for ethereum use different method
-          (token) =>
-            // !token.contractAddress &&
-            token.denom && token.cosmosBased && token.coingeckoId in prices
-        ),
-        (c) => c.denom
-      );
-
       for (const token of filteredTokens) {
         // switch address
 
-        const address = (await window.keplr.getKey(token.chainId)).bech32Address;
+        const address = (await window.keplr.getKey(token.chainId))
+          .bech32Address;
 
         const amount = await fetchBalance(
           address,
@@ -143,7 +122,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
         const amountDetail: AmountDetail = {
           amount,
-          usd: getUsd(amount, token)
+          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
         };
         amountDetails[token.denom] = amountDetail;
       }
@@ -152,7 +131,6 @@ const Balance: React.FC<BalanceProps> = () => {
     } catch (ex) {
       console.log(ex);
     }
-
   };
 
   useEffect(() => {
@@ -283,10 +261,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                              amounts[from.denom].amount /
-                              10 ** from.decimals,
-                              amounts[from.denom].usd
-                            ]
+                                amounts[from.denom].amount /
+                                  10 ** from.decimals,
+                                amounts[from.denom].usd
+                              ]
                             : [0, 0]
                         );
                       }}
@@ -299,10 +277,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                              amounts[from.denom].amount /
-                              (2 * 10 ** from.decimals),
-                              amounts[from.denom].usd / 2
-                            ]
+                                amounts[from.denom].amount /
+                                  (2 * 10 ** from.decimals),
+                                amounts[from.denom].usd / 2
+                              ]
                             : [0, 0]
                         );
                       }}
@@ -337,7 +315,11 @@ const Balance: React.FC<BalanceProps> = () => {
                       onValueChange={({ floatValue }) => {
                         setFromAmount([
                           floatValue ?? 0,
-                          getUsd((floatValue ?? 0) * 10 ** from.decimals, from)
+                          getUsd(
+                            (floatValue ?? 0) * 10 ** from.decimals,
+                            prices[from.coingeckoId].price,
+                            from.decimals
+                          )
                         ]);
                       }}
                       className={styles.amount}

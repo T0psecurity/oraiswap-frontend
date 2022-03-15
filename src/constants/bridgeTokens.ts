@@ -8,26 +8,27 @@ import { ReactComponent as LUNA } from 'assets/icons/luna.svg';
 import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { network, NetworkKey } from './networks';
+import _ from 'lodash';
 
 export type TokenItemType = {
   name: string;
   org?: string;
   denom: string;
   contractAddress?: string;
-  Icon?: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
+  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   chainId: string;
   rpc: string;
   lcd?: string;
   decimals: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna';
   cosmosBased: Boolean;
 };
 
@@ -45,7 +46,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://testnet.rpc.orai.io',
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: false,
-        Icon: ORAI,
+        Icon: ORAI
       },
       {
         name: 'ATOM',
@@ -57,7 +58,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc-cosmoshub.blockapsis.com',
         lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: false,
-        Icon: ATOMCOSMOS,
+        Icon: ATOMCOSMOS
       },
       {
         name: 'OSMO',
@@ -69,7 +70,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 6,
         coingeckoId: 'osmosis',
         cosmosBased: false,
-        Icon: OSMO,
+        Icon: OSMO
       },
       {
         name: 'ETH',
@@ -80,7 +81,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         chainId: 'ethereum',
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
-        Icon: ETH,
+        Icon: ETH
       },
       {
         name: 'BNB',
@@ -91,7 +92,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 18,
         coingeckoId: 'bnb',
         cosmosBased: false,
-        Icon: BNB,
+        Icon: BNB
       }
     ],
     [
@@ -105,7 +106,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://testnet.rpc.orai.io',
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI,
+        Icon: ORAI
       },
       {
         name: 'ATOM',
@@ -117,7 +118,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://testnet.rpc.orai.io',
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: false,
-        Icon: ATOMCOSMOS,
+        Icon: ATOMCOSMOS
       },
       {
         name: 'OSMO',
@@ -129,7 +130,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 6,
         coingeckoId: 'osmosis',
         cosmosBased: false,
-        Icon: OSMO,
+        Icon: OSMO
       },
       {
         name: 'ETH',
@@ -140,7 +141,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         chainId: 'Oraichain-testnet',
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
-        Icon: ETH,
+        Icon: ETH
       },
       {
         name: 'BNB',
@@ -151,7 +152,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 18,
         coingeckoId: 'bnb',
         cosmosBased: false,
-        Icon: BNB,
+        Icon: BNB
       },
       {
         name: 'AIRI',
@@ -164,7 +165,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://testnet-rpc.orai.io',
         lcd: 'https://testnet-lcd.orai.io',
         cosmosBased: true,
-        Icon: AIRI,
+        Icon: AIRI
       }
     ]
   ],
@@ -181,7 +182,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://testnet.rpc.orai.io',
         lcd: 'https://testnet.lcd.orai.io',
         cosmosBased: false,
-        Icon: ORAI,
+        Icon: ORAI
       },
       {
         name: 'ATOM',
@@ -193,7 +194,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc-cosmoshub.blockapsis.com',
         lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: true,
-        Icon: ATOMCOSMOS,
+        Icon: ATOMCOSMOS
       },
       {
         name: 'LUNA',
@@ -205,7 +206,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'http://167.99.119.182:26637',
         lcd: 'http://167.99.119.182:1337',
         cosmosBased: true,
-        Icon: LUNA,
+        Icon: LUNA
       },
       {
         name: 'UST',
@@ -217,7 +218,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'http://167.99.119.182:26637',
         lcd: 'http://167.99.119.182:1337',
         cosmosBased: true,
-        Icon: UST,
+        Icon: UST
       },
       {
         name: 'OSMO',
@@ -229,7 +230,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 6,
         coingeckoId: 'osmosis',
         cosmosBased: false,
-        Icon: OSMO,
+        Icon: OSMO
       },
       {
         name: 'ETH',
@@ -241,7 +242,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         chainId: 'ethereum',
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
-        Icon: ETH,
+        Icon: ETH
       },
       {
         name: 'BNB',
@@ -253,7 +254,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 18,
         coingeckoId: 'bnb',
         cosmosBased: false,
-        Icon: BNB,
+        Icon: BNB
       }
     ],
     [
@@ -267,7 +268,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI,
+        Icon: ORAI
       },
       {
         name: 'ATOM',
@@ -280,7 +281,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ATOMCOSMOS,
+        Icon: ATOMCOSMOS
       },
       {
         name: 'LUNA',
@@ -293,7 +294,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: LUNA,
+        Icon: LUNA
       },
       {
         name: 'UST',
@@ -306,7 +307,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: UST,
+        Icon: UST
       },
       {
         name: 'AIRI',
@@ -319,7 +320,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: AIRI,
+        Icon: AIRI
       },
       {
         name: 'OSMO',
@@ -331,7 +332,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 6,
         coingeckoId: 'osmosis',
         cosmosBased: false,
-        Icon: OSMO,
+        Icon: OSMO
       },
       {
         name: 'ETH',
@@ -342,7 +343,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         chainId: 'Oraichain-testnet',
         rpc: 'http://125.212.192.225:26657',
         cosmosBased: false,
-        Icon: ETH,
+        Icon: ETH
       },
       {
         name: 'BNB',
@@ -353,10 +354,20 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         decimals: 18,
         coingeckoId: 'bnb',
         cosmosBased: false,
-        Icon: BNB,
+        Icon: BNB
       }
     ]
   ]
 };
 
 export const tokens = tokensMap[network.id];
+
+export const filteredTokens = _.uniqBy(
+  _.flatten(tokens).filter(
+    // TODO: contractAddress for ethereum use different method
+    (token) =>
+      // !token.contractAddress &&
+      token.denom && token.cosmosBased && token.coingeckoId
+  ),
+  (c) => c.denom
+);
