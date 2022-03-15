@@ -12,8 +12,6 @@ import useLocalStorage from 'libs/useLocalStorage';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import axios from 'axios';
-import { DenomBalanceResponse } from 'rest/useAPI';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
