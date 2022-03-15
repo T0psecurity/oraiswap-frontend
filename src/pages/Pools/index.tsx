@@ -1,17 +1,16 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useState } from 'react';
 import styles from './index.module.scss';
-import { ReactComponent as Logo } from "assets/icons/logo.svg";
-import { Button, Input } from "antd";
-import { useNavigate } from "react-router-dom";
-import Content from "layouts/Content";
+import { ReactComponent as Logo } from 'assets/icons/logo.svg';
+import { Button, Input } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import Content from 'layouts/Content';
+import { fetchPairs } from 'rest/api';
 
 const { Search } = Input;
 
-interface PoolsProps {
+interface PoolsProps {}
 
-}
-
-const Header = memo(({ }) => {
+const Header = memo(({}) => {
   return (
     <div className={styles.header}>
       <div className={styles.header_title}>Pools</div>
@@ -26,18 +25,31 @@ const Header = memo(({ }) => {
         </div>
       </div>
     </div>
-  )
+  );
 });
 
-const PairBox = memo(({ }) => {
-  const navigate = useNavigate()
+const PairBox = memo(({}) => {
+  const navigate = useNavigate();
 
   return (
-    <div className={styles.pairbox} onClick={() => navigate('../pool/atom-orai', { replace: true })}>
+    <div
+      className={styles.pairbox}
+      onClick={() => navigate('../pool/atom-orai', { replace: true })}
+    >
       <div className={styles.pairbox_header}>
         <div className={styles.pairbox_logo}>
-          {<Logo className={styles.pairbox_logo1} style={{ width: 40, height: 40 }} />}
-          {<Logo className={styles.pairbox_logo2} style={{ width: 40, height: 40 }} />}
+          {
+            <Logo
+              className={styles.pairbox_logo1}
+              style={{ width: 40, height: 40 }}
+            />
+          }
+          {
+            <Logo
+              className={styles.pairbox_logo2}
+              style={{ width: 40, height: 40 }}
+            />
+          }
         </div>
         <div className={styles.pairbox_pair}>
           <div className={styles.pairbox_pair_name}>ATOM/ORAI</div>
@@ -56,25 +68,39 @@ const PairBox = memo(({ }) => {
         </div>
       </div>
     </div>
-  )
+  );
 });
 
-const WatchList = memo(({ }) => {
+const WatchList = memo(({}) => {
   return (
     <div className={styles.watchlist}>
       <div className={styles.watchlist_title}>Your watchlist</div>
       <PairBox />
     </div>
-  )
+  );
 });
 
-const ListPools = memo(({ }) => {
+const ListPools = memo(({}) => {
+  const [pairs, setPairs] = useState([]);
+
+  useEffect(() => {
+    fetchPairs().then((data) => {
+      console.log(data);
+    });
+  });
+
   return (
     <div className={styles.listpools}>
       <div className={styles.listpools_title}>All pools</div>
       <div className={styles.listpools_search}>
-        <Search placeholder="Search by pools or tokens name" onSearch={() => { }} style={{ width: 420 }} />
-        <Button className={styles.listpools_create + ` primary-btn`}>Create a pool</Button>
+        <Search
+          placeholder="Search by pools or tokens name"
+          onSearch={() => {}}
+          style={{ width: 420 }}
+        />
+        <Button className={styles.listpools_create + ` primary-btn`}>
+          Create a pool
+        </Button>
       </div>
       <div className={styles.listpools_list}>
         <PairBox />
@@ -87,7 +113,7 @@ const ListPools = memo(({ }) => {
         <PairBox />
       </div>
     </div>
-  )
+  );
 });
 const Pools: React.FC<PoolsProps> = () => {
   return (
@@ -99,6 +125,6 @@ const Pools: React.FC<PoolsProps> = () => {
       </div>
     </Content>
   );
-}
+};
 
 export default Pools;
