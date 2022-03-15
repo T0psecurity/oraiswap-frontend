@@ -237,7 +237,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   return (
-    <Content>
+    <Content nonBackground>
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>

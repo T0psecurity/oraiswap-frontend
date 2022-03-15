@@ -1,6 +1,6 @@
-import React, { memo } from "react";
+import React, { memo } from 'react';
 import styles from './Content.module.scss';
-import Menu from "./Menu";
+import classNames from 'classnames';
 
 interface ContentProps {
   nonBackground?: boolean;
@@ -9,10 +9,12 @@ interface ContentProps {
 
 const Content: React.FC<ContentProps> = ({ children, nonBackground }) => {
   return (
-    <div className={styles.content + (nonBackground ? ` non_background` : "")} >
+    <div
+      className={classNames(styles.content, { non_background: nonBackground })}
+    >
       {children}
     </div>
   );
-}
+};
 
 export default memo(Content);
