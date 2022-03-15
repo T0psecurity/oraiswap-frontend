@@ -21,7 +21,7 @@ import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -104,10 +104,16 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadAmountDetail = async (token: TokenItemType) => {
-    const address = (await window.keplr.getKey(token.chainId)).bech32Address;
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) {
+      displayToast(TToastType.TX_FAILED, { message: "You must install Keplr to continue" });
+      return [token.denom, { amount: 0, usd: 0 }]
+    };
+    await window.Keplr.suggestChain(token.chainId);
+    const address = await window.Keplr.getKeplrAddr(token.chainId);
 
     const amount = await fetchBalance(
-      address,
+      address as string,
       token.denom,
       token.contractAddress,
       token.lcd
@@ -175,42 +181,47 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     setIBCLoading(true);
     try {
-      const fromAddress = (await window.keplr.getKey(from.chainId))
-        .bech32Address;
-      const toAddress = (await window.keplr.getKey(to.chainId)).bech32Address;
-      await window.keplr.enable(from.chainId);
-      const amount = coin(
-        Math.round(fromAmount * 10 ** from.decimals),
-        from.denom
-      );
-      const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-      const client = await SigningStargateClient.connectWithSigner(
-        from.rpc,
-        offlineSigner
-      );
-      const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
+      const keplr = await window.Keplr.getKeplr();
+      if (keplr) {
+        await window.Keplr.suggestChain(from.chainId);
+        const fromAddress = await window.Keplr.getKeplrAddr(from.chainId);
+        const toAddress = await window.Keplr.getKeplrAddr(to.chainId);
+        const amount = coin(
+          Math.round(fromAmount * 10 ** from.decimals),
+          from.denom
+        );
+        const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
+        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+        const client = await SigningStargateClient.connectWithSigner(
+          from.rpc,
+          offlineSigner
+        );
+        const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
 
-      const result = await client.sendIbcTokens(
-        fromAddress,
-        toAddress,
-        amount,
-        ibcInfo.source,
-        ibcInfo.channel,
-        undefined,
-        Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-        {
-          gas: '200000',
-          amount: []
-        }
-      );
+        const result = await client.sendIbcTokens(
+          fromAddress as string,
+          toAddress as string,
+          amount,
+          ibcInfo.source,
+          ibcInfo.channel,
+          undefined,
+          Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+          {
+            gas: '200000',
+            amount: []
+          }
+        );
 
-      console.log(result);
-      displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
-      });
-      // set tx hash to trigger refetching amount values
-      setTxHash(result?.transactionHash);
+        console.log(result);
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
+        });
+        // set tx hash to trigger refetching amount values
+        setTxHash(result?.transactionHash);
+      } else {
+        displayToast(TToastType.TX_FAILED, { message: "You must install Keplr to continue" });
+        return;
+      }
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
@@ -260,10 +271,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -276,10 +287,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}

@@ -95,4 +95,54 @@ export const embedChainInfos: ChainInfo[] = [
         },
         features: ['stargate', 'ibc-transfer', 'cosmwasm'],
     },
+    {
+        rpc: 'https://rpc-terra.orai.io',
+        rest: 'https://lcd-terra.orai.io',
+        chainId: 'columbus-5',
+        chainName: 'Terra',
+        stakeCurrency: {
+            coinDenom: 'LUNA',
+            coinMinimalDenom: 'uluna',
+            coinDecimals: 6,
+            coinGeckoId: 'terra-luna',
+            coinImageUrl: window.location.origin + '/public/assets/tokens/terra.png',
+        },
+        bip44: {
+            coinType: 118,
+        },
+        bech32Config: Bech32Address.defaultBech32Config('terra'),
+        currencies: [
+            {
+                coinDenom: 'LUMA',
+                coinMinimalDenom: 'uluna',
+                coinDecimals: 6,
+                coinGeckoId: 'terra-luna',
+                coinImageUrl: window.location.origin + '/public/assets/tokens/terra.png',
+            },
+            {
+                coinDenom: 'UST',
+                coinMinimalDenom: 'uusd',
+                coinDecimals: 6,
+                coinGeckoId: 'terrausd',
+                coinImageUrl: window.location.origin + '/public/assets/tokens/terra.png',
+            },
+        ],
+        feeCurrencies: [
+            {
+                coinDenom: 'LUNA',
+                coinMinimalDenom: 'uluna',
+                coinDecimals: 6,
+                coinGeckoId: 'terra-luna',
+                coinImageUrl: window.location.origin + '/public/assets/tokens/terra.png',
+            },
+            {
+                coinDenom: 'UST',
+                coinMinimalDenom: 'uusd',
+                coinDecimals: 6,
+                coinGeckoId: 'terrausd',
+                coinImageUrl: window.location.origin + '/public/assets/tokens/terra.png',
+            },
+        ],
+        features: ['stargate', 'ibc-transfer', 'cosmwasm'],
+    },
 ];
