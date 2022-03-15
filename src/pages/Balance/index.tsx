@@ -97,7 +97,8 @@ const Balance: React.FC<BalanceProps> = () => {
     'bnb',
     'ethereum',
     'airight',
-    'terra-luna'
+    'terra-luna',
+    'terrausd',
   ]);
 
   const getUsd = (amount: number, token: TokenItemType) => {
@@ -231,7 +232,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       console.log(result);
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${network.explorer}/txs/${result?.transactionHash}`
+        customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
       });
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {

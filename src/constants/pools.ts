@@ -8,6 +8,7 @@ export type Pair = {
 export enum PairKey {
     ORAI_AIRI = 'ORAI-AIRI',
     ORAI_ATOM = 'ORAI-ATOM',
+    ORAI_UST = 'ORAI-UST',
     AIRI_ATOM = 'AIRI-ATOM'
 }
 
@@ -28,6 +29,9 @@ const pairs: { [networkKey: string]: [{ [key: string]: Pair }] } = {
             },
             [PairKey.ORAI_ATOM]: {
                 contract_addr: 'orai12j04ae0ql3jmmj20j97ve7q9u6guwxkv4wm8g3'
+            },
+            [PairKey.ORAI_UST]: {
+                contract_addr: 'orai13us9ewmhyxa3ntl7vyg0gewvwddudlnkuzd8pk',
             }
         }
     ]

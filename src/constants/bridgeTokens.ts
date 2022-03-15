@@ -25,6 +25,7 @@ export type TokenItemType = {
   | 'ethereum'
   | 'bnb'
   | 'airight'
+  | 'terrausd'
   | 'terra-luna';
   cosmosBased: Boolean;
 };
@@ -193,14 +194,26 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         cosmosBased: true,
         Icon: ATOMCOSMOS,
       },
+      // {
+      //   name: 'LUNA',
+      //   org: 'Terra',
+      //   coingeckoId: 'terra-luna',
+      //   denom: 'uluna',
+      //   decimals: 6,
+      //   chainId: 'columbus-5',
+      //   rpc: 'http://167.99.119.182:26637',
+      //   lcd: 'http://167.99.119.182:1337',
+      //   cosmosBased: true,
+      //   Icon: LUNA,
+      // },
       {
-        name: 'LUNA',
+        name: 'UST',
         org: 'Terra',
-        coingeckoId: 'terra-luna',
-        denom: 'uluna',
+        coingeckoId: 'terrausd',
+        denom: 'uusd',
         decimals: 6,
         chainId: 'columbus-5',
-        rpc: 'http://public-node.terra.dev:26657',
+        rpc: 'http://167.99.119.182:26637',
         lcd: 'http://167.99.119.182:1337',
         cosmosBased: true,
         Icon: LUNA,
@@ -268,12 +281,25 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         cosmosBased: true,
         Icon: ATOMCOSMOS,
       },
+      // {
+      //   name: 'LUNA',
+      //   org: 'Oraichain',
+      //   coingeckoId: 'terra-luna',
+      //   denom:
+      //     'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C',
+      //   decimals: 6,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   cosmosBased: true,
+      //   Icon: LUNA,
+      // },
       {
-        name: 'LUNA',
+        name: 'UST',
         org: 'Oraichain',
-        coingeckoId: 'terra-luna',
+        coingeckoId: 'terrausd',
         denom:
-          'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C',
+          'ibc/D9CDEFD93E29F5C2175C7606DFF67490B2123BB93F299B3AFA53E8BB1DDD4FC4',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',

@@ -486,7 +486,6 @@ const Swap: React.FC<SwapProps> = () => {
                   amount: simulateData ? simulateData?.amount : 0,
                   denom: toTokenInfoData?.symbol ?? ''
                 }}
-                prefix="Balance: "
                 decimalScale={6}
               />
 
