@@ -292,7 +292,7 @@ const Swap: React.FC<SwapProps> = () => {
       let finalError = "";
       if (typeof error === 'string' || error instanceof String) {
         finalError = error;
-      } else finalError = JSON.stringify({ message: error });
+      } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
@@ -398,14 +398,14 @@ const Swap: React.FC<SwapProps> = () => {
                 }}
               /> */}
             </div>
-            <div className={cx('fee')}>
+            {/* <div className={cx('fee')}>
               <span>Fee</span>
               <div className={cx('token')} onClick={() => setIsSelectFee(true)}>
                 <FeeIcon className={cx('logo')} />
                 <span>{feeToken}</span>
                 <div className={cx('arrow-down')} />
               </div>
-            </div>
+            </div> */}
           </div>
           <div className={cx('swap-icon')}>
             <img
@@ -538,13 +538,13 @@ const Swap: React.FC<SwapProps> = () => {
               setToken={setToToken}
             />
           )}
-          <SelectTokenModal
+          {/* <SelectTokenModal
             isOpen={isSelectFee}
             open={() => setIsSelectFee(true)}
             close={() => setIsSelectFee(false)}
             listToken={allToken}
             setToken={setFeeToken}
-          />
+          /> */}
         </div>
       </div>
     </Content>

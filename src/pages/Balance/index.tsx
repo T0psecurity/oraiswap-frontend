@@ -91,7 +91,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [ibcLoading, setIBCLoading] = useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState(tokens);
-
+  const [txHash, setTxHash] = useState('');
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
@@ -136,7 +136,7 @@ const Balance: React.FC<BalanceProps> = () => {
   useEffect(() => {
     const amountDetails: AmountDetails = {};
     loadTokenAmounts();
-  }, [prices]);
+  }, [prices, txHash]);
 
   // console.log(prices['oraichain-token'].price);
 
@@ -212,6 +212,8 @@ const Balance: React.FC<BalanceProps> = () => {
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
       });
+      // set tx hash to trigger refetching amount values
+      setTxHash(result?.transactionHash);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
