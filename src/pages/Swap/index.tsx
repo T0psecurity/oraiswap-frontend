@@ -38,11 +38,11 @@ type TokenName = keyof typeof mockToken;
 
 interface ValidToken {
   title: TokenName;
-  contractAddress: string;
+  contract_addr: string;
   logo: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const Swap: React.FC<SwapProps> = () => {
   const allToken: ValidToken[] = Object.keys(mockToken).map((name) => {
@@ -66,13 +66,6 @@ const Swap: React.FC<SwapProps> = () => {
   const [slippage, setSlippage] = useState(1);
   const [address, setAddress] = useLocalStorage<String>('address');
   const [swapLoading, setSwapLoading] = useState(false);
-
-  useEffect(() => {
-    let listTo = getListPairedToken(fromToken);
-    const listToken = allToken.filter((t) => listTo.includes(t.title));
-    setListValidTo([...listToken]);
-    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
-  }, [fromToken]);
 
   const onChangeFromAmount = (amount: number) => {
     setFromAmount(amount);
@@ -122,8 +115,9 @@ const Swap: React.FC<SwapProps> = () => {
     fetchBalance(
       address,
       mockToken[fromToken].denom,
-      mockToken[fromToken].contractAddress
-    )
+      mockToken[fromToken].contract_addr,
+      mockToken[fromToken].lcd
+    ), { enabled: !!address }
   );
 
   const {
@@ -135,8 +129,9 @@ const Swap: React.FC<SwapProps> = () => {
     fetchBalance(
       address,
       mockToken[toToken].denom,
-      mockToken[toToken].contractAddress
-    )
+      mockToken[toToken].contract_addr,
+      mockToken[fromToken].lcd
+    ), { enabled: !!address }
   );
 
   const {
@@ -149,10 +144,6 @@ const Swap: React.FC<SwapProps> = () => {
     () => fetchExchangeRate(fromTokenInfoData?.denom, toTokenInfoData?.denom),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
-
-  useEffect(() => {
-    console.log('exchange rate: ', exchangeRate);
-  }, [exchangeRate]);
 
   const {
     data: simulateData,
@@ -176,28 +167,22 @@ const Swap: React.FC<SwapProps> = () => {
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate }
   );
 
+  // const { data: pairInfo, isLoading: isPairInfoLoading } = useQuery(
+  //   ['pair-info', fromTokenInfoData, toTokenInfoData],
+  //   () => fetchPairInfo(mockToken),
+  //   { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+  // );
+
   // useEffect(() => {
-  //   console.log("exchange rate: ", exchangeRate?.item?.exchange_rate)
-  //   // TODO: need to re-calculate this
-  //   setFromToRatio(1 / parseFloat(exchangeRate?.item?.exchange_rate));
-  // }, [isExchangeRateLoading]);
+  //   console.log("pair info: ", pairInfo)
+  // }, [pairInfo]);
 
-  const calculateToAmount = (poolData, offerAmount, taxRate) => {
-    const offer = new Big(poolData.offerPoolAmount);
-    const ask = new Big(poolData.askPoolAmount);
-
-    return ask
-      .minus(
-        offer
-          .mul(poolData.askPoolAmount)
-          .div(poolData.offerPoolAmount + offerAmount)
-      )
-      .mul(1 - taxRate)
-      .toNumber();
-
-    // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
-    // (1 - taxRate)
-  };
+  useEffect(() => {
+    let listTo = getListPairedToken(fromToken);
+    const listToken = allToken.filter((t) => listTo.includes(t.title));
+    setListValidTo([...listToken]);
+    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
+  }, [fromToken]);
 
   useEffect(() => {
     if (poolData && fromAmount && fromAmount > 0) {
@@ -224,6 +209,27 @@ const Swap: React.FC<SwapProps> = () => {
       setAverageRatio(parseFloat(finalAverageRatio));
     }
   }, [poolData]);
+
+  useEffect(() => {
+
+  })
+
+  const calculateToAmount = (poolData, offerAmount, taxRate) => {
+    const offer = new Big(poolData.offerPoolAmount);
+    const ask = new Big(poolData.askPoolAmount);
+
+    return ask
+      .minus(
+        offer
+          .mul(poolData.askPoolAmount)
+          .div(poolData.offerPoolAmount + offerAmount)
+      )
+      .mul(1 - taxRate)
+      .toNumber();
+
+    // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
+    // (1 - taxRate)
+  };
 
   const handleSubmit = async () => {
     setSwapLoading(true);
@@ -425,9 +431,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input

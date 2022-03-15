@@ -6,7 +6,7 @@ import axios from 'axios';
 import useQuerySmart from 'hooks/useQuerySmart';
 import { network } from 'constants/networks';
 import { ORAI } from 'constants/constants';
-import { TokenSwap } from 'constants/pools';
+import { TokensSwap, TokenSwap } from 'constants/pools';
 
 interface TokenInfo {
   name: string;
@@ -43,9 +43,8 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${
-    lcd ?? network.lcd
-  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${lcd ?? network.lcd
+    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -61,25 +60,25 @@ async function fetchTokenInfo(tokenSwap: TokenSwap): TokenInfo {
   let tokenInfo: TokenInfo = {
     symbol: '',
     name: tokenSwap.name,
-    contract_addr: tokenSwap.contractAddress,
+    contract_addr: tokenSwap.contract_addr,
     decimals: 6,
     denom: tokenSwap.denom,
     icon: '',
     verified: false
   };
-  if (!tokenSwap.contractAddress) {
+  if (!tokenSwap.contract_addr) {
     tokenInfo.symbol = tokenSwap.name;
     tokenInfo.icon = tokenSwap.name;
     tokenInfo.verified = true;
   } else {
-    const data = await querySmart(tokenSwap.contractAddress, {
+    const data = await querySmart(tokenSwap.contract_addr, {
       token_info: {}
     });
     tokenInfo = {
       ...tokenInfo,
       symbol: data.symbol,
       name: data.name,
-      contract_addr: tokenSwap.contractAddress,
+      contract_addr: tokenSwap.contract_addr,
       decimals: data.decimals,
       icon: data.icon,
       verified: data.verified
@@ -116,9 +115,11 @@ async function fetchPoolInfoAmount(
   return { offerPoolAmount, askPoolAmount };
 }
 
-async function fetchPairInfo(factoryAddr: string, assetInfos: any[]) {
-  const data = await querySmart(factoryAddr, {
-    pair: { asset_infos: assetInfos }
+async function fetchPairInfo(assetInfos: TokenInfo[2]) {
+  let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
+  let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+  const data = await querySmart(network.factory, {
+    pair: { asset_infos: [firstAsset, secondAsset] }
   });
   return data;
 }
@@ -143,9 +144,8 @@ async function fetchNativeTokenBalance(
   denom: string,
   lcd?: string
 ) {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   return parseInt(
     res.balances.find((balance) => balance.denom === denom).amount
@@ -224,33 +224,33 @@ async function simulateSwap(query: {
 async function generateContractMessages(
   query:
     | {
-        type: Type.SWAP;
-        fromInfo: TokenInfo;
-        toInfo: TokenInfo;
-        amount: number | string;
-        max_spread: number | string;
-        belief_price: number | string;
-        sender: string;
-      }
+      type: Type.SWAP;
+      fromInfo: TokenInfo;
+      toInfo: TokenInfo;
+      amount: number | string;
+      max_spread: number | string;
+      belief_price: number | string;
+      sender: string;
+    }
     | {
-        type: Type.PROVIDE;
-        from: string;
-        to: string;
-        fromInfo: TokenInfo;
-        toInfo: TokenInfo;
-        fromAmount: number | string;
-        toAmount: number | string;
-        slippage: number | string;
-        sender: string;
-        pair: string; // oraiswap pair contract addr, handle provide liquidity
-      }
+      type: Type.PROVIDE;
+      from: string;
+      to: string;
+      fromInfo: TokenInfo;
+      toInfo: TokenInfo;
+      fromAmount: number | string;
+      toAmount: number | string;
+      slippage: number | string;
+      sender: string;
+      pair: string; // oraiswap pair contract addr, handle provide liquidity
+    }
     | {
-        type: Type.WITHDRAW;
-        lpAddr: string;
-        amount: number | string;
-        sender: string;
-        pair: string; // oraiswap pair contract addr, handle withdraw liquidity
-      }
+      type: Type.WITHDRAW;
+      lpAddr: string;
+      amount: number | string;
+      sender: string;
+      pair: string; // oraiswap pair contract addr, handle withdraw liquidity
+    }
 ) {
   // @ts-ignore
   const {
