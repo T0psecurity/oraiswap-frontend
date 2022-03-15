@@ -52,6 +52,11 @@ const querySmart = async (
   return res.data;
 };
 
+async function fetchPairs() {
+  const data = await querySmart(network.factory, { pairs: {} });
+  return data;
+}
+
 async function fetchTaxRate() {
   const data = await querySmart(network.oracle, { treasury: { tax_rate: {} } });
   return data;
@@ -366,12 +371,14 @@ async function generateContractMessages(
 }
 
 export {
+  querySmart,
   fetchTaxRate,
   fetchNativeTokenBalance,
   fetchPairInfo,
   fetchPool,
   fetchTokenBalance,
   fetchBalance,
+  fetchPairs,
   fetchTokenInfo,
   generateContractMessages,
   fetchExchangeRate,
