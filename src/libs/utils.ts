@@ -99,7 +99,19 @@ export const parseDisplayAmount = (value: string, decimal: number) => {
   return 0;
 };
 
-window.Fraction = Fraction;
+const gcd = (a, b) => {
+  return b ? gcd(b, a % b) : a;
+};
+
+export const numberToFraction = function (_decimal) {
+  var top = _decimal.toString().replace(/\d+[.]/, '');
+  var bottom = Math.pow(10, top.length);
+  if (_decimal > 1) {
+    top = +top + Math.floor(_decimal) * bottom;
+  }
+  var x = gcd(top, bottom);
+  return new Fraction(top / x, bottom / x);
+};
 
 export const getUsd = (
   amount: number,
@@ -109,6 +121,6 @@ export const getUsd = (
   if (!amount) return 0;
   if (!price) return 0;
 
-  return price.divide(10 ** decimals / amount).asNumber;
-  // return price.multiply(amount).divide(10 ** decimals).asNumber;
+  return price.multiply(numberToFraction(amount)).divide(10 ** decimals)
+    .asNumber;
 };
