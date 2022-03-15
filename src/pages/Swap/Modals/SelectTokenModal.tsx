@@ -22,6 +22,9 @@ const SelectTokenModal: FC<ModalProps> = ({
     listToken,
     setToken,
 }) => {
+
+
+
     return (
         <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
             <div className={cx("select")}>
@@ -29,28 +32,25 @@ const SelectTokenModal: FC<ModalProps> = ({
                     <div>Select a token</div>
                 </div>
                 <div className={cx("options")}>
-                    {listToken.map((option: any, idx) => (
-                        <div
-                            className={cx("item")}
-                            key={idx}
-                            onClick={() => {
-                                setToken(option.title);
-                                close();
-                            }}
-                        >
-                            <img
-                                src={
-                                    require(`assets/icons/${option.logo}`)
-                                        .default
-                                }
-                                className={cx("logo")}
-                            />
-                            <div className={cx("grow")}>
-                                <div>{option.title}</div>
+                    {listToken.map((option: any, idx) => {
+
+                        return (
+                            <div
+                                className={cx("item")}
+                                key={idx}
+                                onClick={() => {
+                                    setToken(option.title);
+                                    close();
+                                }}
+                            >
+                                <option.Icon className={cx("logo")} />
+                                <div className={cx("grow")}>
+                                    <div>{option.title}</div>
+                                </div>
+                                <div>{option.balance}</div>
                             </div>
-                            <div>{option.balance}</div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             </div>
         </Modal>
