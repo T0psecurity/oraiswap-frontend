@@ -27,7 +27,7 @@ import { network } from 'constants/networks';
 import Big from 'big.js';
 import NumberFormat from 'react-number-format';
 import { pairsMap as mockPair, mockToken } from 'constants/pools';
-import { tokens } from 'constants/bridgeTokens';
+import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
 import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
@@ -38,11 +38,17 @@ type TokenName = keyof typeof mockToken;
 
 interface ValidToken {
   title: TokenName;
-  contract_addr: string;
+  contractAddress: string;
   logo: string;
 }
 
-interface SwapProps { }
+interface SwapProps {}
+
+const suggestToken = async (token: TokenItemType) => {
+  if (token.contractAddress) {
+    await window.keplr.suggestToken(token.chainId, token.contractAddress);
+  }
+};
 
 const Swap: React.FC<SwapProps> = () => {
   const allToken: ValidToken[] = Object.keys(mockToken).map((name) => {
@@ -106,18 +112,30 @@ const Swap: React.FC<SwapProps> = () => {
     fetchTokenInfo(mockToken[toToken])
   );
 
+  const mockFromToken = mockToken[fromToken];
+  const mockToToken = mockToken[toToken];
+
+  // suggest tokens
+  useEffect(() => {
+    suggestToken(mockFromToken);
+    suggestToken(mockToToken);
+  }, [mockFromToken, mockToToken]);
+
   const {
     data: fromTokenBalance,
     error: fromTokenBalanceError,
     isError: isFromTokenBalanceError,
     isLoading: isFromTokenBalanceLoading
-  } = useQuery(['from-token-balance', fromToken], () =>
-    fetchBalance(
-      address,
-      mockToken[fromToken].denom,
-      mockToken[fromToken].contract_addr,
-      mockToken[fromToken].lcd
-    ), { enabled: !!address }
+  } = useQuery(
+    ['from-token-balance', fromToken],
+    () =>
+      fetchBalance(
+        address,
+        mockFromToken.denom,
+        mockFromToken.contractAddress,
+        mockFromToken.lcd
+      ),
+    { enabled: !!address }
   );
 
   const {
@@ -125,13 +143,16 @@ const Swap: React.FC<SwapProps> = () => {
     error: toTokenBalanceError,
     isError: isToTokenBalanceError,
     isLoading: isLoadingToTokenBalance
-  } = useQuery(['to-token-balance', toToken], () =>
-    fetchBalance(
-      address,
-      mockToken[toToken].denom,
-      mockToken[toToken].contract_addr,
-      mockToken[fromToken].lcd
-    ), { enabled: !!address }
+  } = useQuery(
+    ['to-token-balance', toToken],
+    () =>
+      fetchBalance(
+        address,
+        mockToToken.denom,
+        mockToToken.contractAddress,
+        mockToToken.lcd
+      ),
+    { enabled: !!address }
   );
 
   const {
@@ -209,10 +230,6 @@ const Swap: React.FC<SwapProps> = () => {
       setAverageRatio(parseFloat(finalAverageRatio));
     }
   }, [poolData]);
-
-  useEffect(() => {
-
-  })
 
   const calculateToAmount = (poolData, offerAmount, taxRate) => {
     const offer = new Big(poolData.offerPoolAmount);
@@ -431,9 +448,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input

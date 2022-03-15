@@ -1,12 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
-import CenterEllipsis from './CenterEllipsis';
-import classNames from 'classnames';
 import styles from './LoginWidget.module.scss';
-import Button from 'components/Button';
-import Icon from './Icon';
-import useLocalStorage from 'libs/useLocalStorage';
 import { network } from 'constants/networks';
-import KeplrImage from 'images/keplr.png';
+import KeplrImage from 'assets/images/keplr.png';
 import cn from 'classnames/bind';
 
 const cx = cn.bind(styles);
