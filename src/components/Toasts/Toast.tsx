@@ -110,6 +110,11 @@ export const displayToast: DisplayToastFn = (
         <ToastTxFailed message={inputExtraData.message} />,
         inputOptions
       );
+    case TToastType.KEPLR_FAILED:
+      return toast(
+        <ToastKeplrFailed message={inputExtraData.message} />,
+        inputOptions
+      );
     default:
       return console.error(`Undefined toast type - ${type}`);
   }
@@ -139,6 +144,16 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Transaction Failed</h6>
+      <p>{message}</p>
+    </section>
+  </div>
+);
+
+const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) => (
+  <div className={classNames(styles.toast_content, styles.toast_failed)}>
+    <FailedIcon />
+    <section className={styles.toast_section}>
+      <h6>Keplr failed</h6>
       <p>{message}</p>
     </section>
   </div>

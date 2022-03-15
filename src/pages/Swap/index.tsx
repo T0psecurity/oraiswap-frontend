@@ -34,36 +34,41 @@ import Content from 'layouts/Content';
 
 const cx = cn.bind(style);
 
-type TokenName = keyof typeof mockToken;
+type TokenDenom = keyof typeof mockToken;
 
 interface ValidToken {
-  title: TokenName;
+  title: TokenDenom;
   contractAddress: string;
-  logo: string;
+  Icon: string;
+  denom: string,
 }
 
 interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
-    await window.keplr.suggestToken(token.chainId, token.contractAddress);
+    const keplr = await window.Keplr.getKeplr();
+    if (keplr) await keplr.suggestToken(token.chainId, token.contractAddress);
+    else displayToast(TToastType.KEPLR_FAILED, { message: "You need to install Keplr to continue" });
   }
 };
 
 const Swap: React.FC<SwapProps> = () => {
-  const allToken: ValidToken[] = Object.keys(mockToken).map((name) => {
+  const allToken: ValidToken[] = Object.values(mockToken).map((token) => {
     return {
-      ...mockToken[name as TokenName],
-      title: name as TokenName
+      contractAddress: token.contractAddress,
+      Icon: token.Icon,
+      title: token.name,
+      denom: token.denom
     };
   });
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [isSelectFee, setIsSelectFee] = useState(false);
-  const [fromToken, setFromToken] = useState<TokenName>('ORAI');
-  const [toToken, setToToken] = useState<TokenName>('AIRI');
-  const [feeToken, setFeeToken] = useState<TokenName>('ORAI');
+  const [fromToken, setFromToken] = useState<TokenDenom>('orai');
+  const [toToken, setToToken] = useState<TokenDenom>('airi');
+  const [feeToken, setFeeToken] = useState<TokenDenom>('airi');
   const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
   const [fromAmount, setFromAmount] = useState(0);
   const [toAmount, setToAmount] = useState(0);
@@ -117,8 +122,10 @@ const Swap: React.FC<SwapProps> = () => {
 
   // suggest tokens
   useEffect(() => {
-    suggestToken(mockFromToken);
-    suggestToken(mockToToken);
+    if (mockFromToken && mockToToken) {
+      suggestToken(mockFromToken);
+      suggestToken(mockToToken);
+    }
   }, [mockFromToken, mockToToken]);
 
   const {
@@ -200,9 +207,9 @@ const Swap: React.FC<SwapProps> = () => {
 
   useEffect(() => {
     let listTo = getListPairedToken(fromToken);
-    const listToken = allToken.filter((t) => listTo.includes(t.title));
+    const listToken = allToken.filter((t) => listTo.includes(t.denom));
     setListValidTo([...listToken]);
-    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
+    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenDenom);
   }, [fromToken]);
 
   useEffect(() => {
@@ -292,7 +299,7 @@ const Swap: React.FC<SwapProps> = () => {
       let finalError = "";
       if (typeof error === 'string' || error instanceof String) {
         finalError = error;
-      } else finalError = JSON.stringify({ message: error });
+      } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
@@ -300,16 +307,16 @@ const Swap: React.FC<SwapProps> = () => {
     setSwapLoading(false);
   };
 
-  const getListPairedToken = (tokenName: TokenName) => {
-    let pairs = Object.keys(mockPair).filter((name) =>
-      name.includes(tokenName)
+  const getListPairedToken = (tokenDenom: TokenDenom) => {
+    let pairs = Object.keys(mockPair).filter((denom) =>
+      denom.includes(tokenDenom)
     );
-    return pairs!.map((name) => name.replace(tokenName, '').replace('-', ''));
+    return pairs!.map((denom) => denom.replace(tokenDenom, '').replace('-', ''));
   };
 
-  const FromIcon = mockToken[fromToken].Icon;
-  const ToIcon = mockToken[toToken].Icon;
-  const FeeIcon = mockToken[feeToken].Icon;
+  const FromIcon = mockToken[fromToken]?.Icon;
+  const ToIcon = mockToken[toToken]?.Icon;
+  // const FeeIcon = mockToken[feeToken].Icon;
 
   return (
     <Content>
@@ -371,8 +378,8 @@ const Swap: React.FC<SwapProps> = () => {
                 className={cx('token')}
                 onClick={() => setIsSelectFrom(true)}
               >
-                <FromIcon className={cx('logo')} />
-                <span>{fromToken}</span>
+                {FromIcon && <FromIcon className={cx('logo')} />}
+                <span>{fromTokenInfoData?.symbol}</span>
                 <div className={cx('arrow-down')} />
               </div>
 
@@ -398,14 +405,14 @@ const Swap: React.FC<SwapProps> = () => {
                 }}
               /> */}
             </div>
-            <div className={cx('fee')}>
+            {/* <div className={cx('fee')}>
               <span>Fee</span>
               <div className={cx('token')} onClick={() => setIsSelectFee(true)}>
                 <FeeIcon className={cx('logo')} />
                 <span>{feeToken}</span>
                 <div className={cx('arrow-down')} />
               </div>
-            </div>
+            </div> */}
           </div>
           <div className={cx('swap-icon')}>
             <img
@@ -427,7 +434,7 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('balance')}>
               <TokenBalance
                 balance={{
-                  amount: toTokenInfoData ? toTokenBalance : 0,
+                  amount: toTokenBalance ? toTokenBalance : 0,
                   denom: toTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
@@ -435,14 +442,14 @@ const Swap: React.FC<SwapProps> = () => {
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromToken} ≈ ${averageRatio.toFixed(6)} ${toToken}`}
+                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${toTokenInfoData?.symbol}`}
               </span>
               <TooltipIcon />
             </div>
             <div className={cx('input')}>
               <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
-                <ToIcon className={cx('logo')} />
-                <span>{toToken}</span>
+                {ToIcon && <ToIcon className={cx('logo')} />}
+                <span>{toTokenInfoData?.symbol}</span>
                 <div className={cx('arrow-down')} />
               </div>
 
@@ -538,13 +545,13 @@ const Swap: React.FC<SwapProps> = () => {
               setToken={setToToken}
             />
           )}
-          <SelectTokenModal
+          {/* <SelectTokenModal
             isOpen={isSelectFee}
             open={() => setIsSelectFee(true)}
             close={() => setIsSelectFee(false)}
             listToken={allToken}
             setToken={setFeeToken}
-          />
+          /> */}
         </div>
       </div>
     </Content>
