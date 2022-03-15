@@ -11,6 +11,13 @@ export enum PairKey {
     AIRI_ATOM = 'AIRI-ATOM',
 }
 
+export type TokenSwap = {
+    name: string,
+    denom: string,
+    contractAddress?: string,
+    Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>,
+}
+
 const pairs: { [networkKey: string]: [{ [key: string]: Pair }] } = {
     [NetworkKey.TESTNET]: [{
         [PairKey.ORAI_AIRI]: {
@@ -27,24 +34,7 @@ const pairs: { [networkKey: string]: [{ [key: string]: Pair }] } = {
     }],
 }
 
-const tokenSwaps = Object.assign({}, ...(tokens[1].filter(token => token.cosmosBased).map(item => ({ [item.name]: { denom: item.denom, contractAddress: item.contractAddress, logo: item.logo } }))));;
-
-const mockTokens = {
-    ORAI: {
-        contractAddress: 'ORAI',
-        denom: 'orai',
-        logo: 'oraichain.svg'
-    },
-    AIRI: {
-        contractAddress: 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg',
-        logo: 'airi.svg'
-    },
-    ATOM: {
-        contractAddress: 'ATOM',
-        denom: 'ibc/45C001A5AE212D09879BE4627C45B64D5636086285590D5145A51E18E9D16722',
-        logo: 'atom_cosmos.svg'
-    }
-};
+const tokenSwaps = Object.assign({}, ...(tokens[1].filter(token => token.cosmosBased).map(item => ({ [item.name]: { name: item.name, denom: item.denom, contractAddress: item.contractAddress, Icon: item.Icon } }))));;
 
 export const pairsMap = pairs[network.id][0];
 export const mockToken = tokenSwaps;

@@ -20,6 +20,7 @@ import { ibcInfos } from 'constants/ibcInfos';
 import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
 import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
+import { fetchBalance } from 'rest/api';
 
 interface BalanceProps {}
 
@@ -121,6 +122,7 @@ const Balance: React.FC<BalanceProps> = () => {
       _.flatten(tokens).filter(
         // TODO: contractAddress for ethereum use different method
         (token) =>
+          // !token.contractAddress &&
           token.denom && token.cosmosBased && token.coingeckoId in prices
       ),
       (c) => c.denom
@@ -131,13 +133,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const address = (await window.keplr.getKey(token.chainId)).bech32Address;
 
-      const url = `${token.lcd}/cosmos/bank/v1beta1/balances/${address}`;
-      const res: DenomBalanceResponse = (await axios.get(url)).data;
-      console.log('token denom: ', token.denom);
-      console.log('balances: ', url, res.balances);
-      const amount = parseInt(
-        res.balances.find((balance) => balance.denom === token.denom)?.amount ??
-          '0'
+      const amount = await fetchBalance(
+        address,
+        token.denom,
+        token.contractAddress,
+        token.lcd
       );
 
       const amountDetail: AmountDetail = {
