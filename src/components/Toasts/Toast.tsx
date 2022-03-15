@@ -42,7 +42,8 @@ export enum TToastType {
   TX_BROADCASTING,
   TX_SUCCESSFUL,
   TX_FAILED,
-  TX_INFO
+  TX_INFO,
+  KEPLR_FAILED,
 }
 
 interface IToastExtra {

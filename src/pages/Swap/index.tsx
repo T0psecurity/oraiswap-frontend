@@ -1,5 +1,4 @@
 //@ts-nocheck
-import Layout from 'layouts/Layout';
 import React, { useEffect, useState } from 'react';
 import style from './index.module.scss';
 import cn from 'classnames/bind';
@@ -26,11 +25,12 @@ import TokenBalance from 'components/TokenBalance';
 import { network } from 'constants/networks';
 import Big from 'big.js';
 import NumberFormat from 'react-number-format';
-import { pairsMap as mockPair, swapTokens as mockToken } from 'constants/pools';
-import { tokens } from 'constants/bridgeTokens';
+import { pairsMap as mockPair, mockToken } from 'constants/pools';
+import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
 import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
+import Content from 'layouts/Content';
 
 const cx = cn.bind(style);
 
@@ -44,11 +44,17 @@ interface ValidToken {
 
 interface SwapProps { }
 
+const suggestToken = async (token: TokenItemType) => {
+  if (token.contractAddress) {
+    await window.keplr.suggestToken(token.chainId, token.contractAddress);
+  }
+};
+
 const Swap: React.FC<SwapProps> = () => {
   const allToken: ValidToken[] = Object.keys(mockToken).map((name) => {
     return {
       ...mockToken[name as TokenName],
-      title: name as TokenName,
+      title: name as TokenName
     };
   });
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
@@ -57,7 +63,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFee, setIsSelectFee] = useState(false);
   const [fromToken, setFromToken] = useState<TokenName>('ORAI');
   const [toToken, setToToken] = useState<TokenName>('AIRI');
-  const [feeToken, setFeeToken] = useState<TokenName>('AIRI');
+  const [feeToken, setFeeToken] = useState<TokenName>('ORAI');
   const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
   const [fromAmount, setFromAmount] = useState(0);
   const [toAmount, setToAmount] = useState(0);
@@ -66,30 +72,6 @@ const Swap: React.FC<SwapProps> = () => {
   const [slippage, setSlippage] = useState(1);
   const [address, setAddress] = useLocalStorage<String>('address');
   const [swapLoading, setSwapLoading] = useState(false);
-
-  useEffect(() => {
-    let listTo = getListPairedToken(fromToken);
-    const listToken = allToken.filter((t) => listTo.includes(t.title));
-    setListValidTo([...listToken]);
-    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
-  }, [fromToken]);
-
-  // useEffect(() => {
-  //   const pairName = Object.keys(mockPair).find(
-  //     (p) => p.includes(fromToken) && p.includes(toToken)
-  //   );
-  //   // setCurrentPair(pairName as PairName);
-
-  //   // const { amount1, amount2 } = mockPair[pairName as PairName];
-  //   // let rate;
-  //   // if (currentPair.indexOf(fromToken) === 0) rate = amount2 / amount1;
-  //   // else rate = amount1 / amount2;
-  //   // setFromToRatio(rate);
-  // }, [fromToken, toToken]);
-
-  const parseListTokens = () => {
-
-  }
 
   const onChangeFromAmount = (amount: number) => {
     setFromAmount(amount);
@@ -107,10 +89,6 @@ const Swap: React.FC<SwapProps> = () => {
   //   setFromAmount(amount / fromToRatio);
   // };
 
-  const getTokenDenom = (token) => {
-    return mockToken[token].denom ? mockToken[token].denom : undefined;
-  };
-
   const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(
     ['tax-rate'],
     () => fetchTaxRate()
@@ -122,10 +100,7 @@ const Swap: React.FC<SwapProps> = () => {
     isError: isFromTokenInfoError,
     isLoading: isFromTokenInfoLoading
   } = useQuery(['from-token-info', fromToken], () =>
-    fetchTokenInfo(
-      mockToken[fromToken].contractAddress,
-      getTokenDenom(fromToken)
-    )
+    fetchTokenInfo(mockToken[fromToken])
   );
 
   const {
@@ -134,20 +109,33 @@ const Swap: React.FC<SwapProps> = () => {
     isError: isToTokenInfoError,
     isLoading: isToTokenInfoLoading
   } = useQuery(['to-token-info', toToken], () =>
-    fetchTokenInfo(mockToken[toToken].contractAddress, getTokenDenom(toToken))
+    fetchTokenInfo(mockToken[toToken])
   );
+
+  const mockFromToken = mockToken[fromToken];
+  const mockToToken = mockToken[toToken];
+
+  // suggest tokens
+  useEffect(() => {
+    suggestToken(mockFromToken);
+    suggestToken(mockToToken);
+  }, [mockFromToken, mockToToken]);
 
   const {
     data: fromTokenBalance,
     error: fromTokenBalanceError,
     isError: isFromTokenBalanceError,
     isLoading: isFromTokenBalanceLoading
-  } = useQuery(['from-token-balance', fromToken], () =>
-    fetchBalance(
-      mockToken[fromToken].contractAddress,
-      address,
-      getTokenDenom(fromToken)
-    )
+  } = useQuery(
+    ['from-token-balance', fromToken],
+    () =>
+      fetchBalance(
+        address,
+        mockFromToken.denom,
+        mockFromToken.contractAddress,
+        mockFromToken.lcd
+      ),
+    { enabled: !!address }
   );
 
   const {
@@ -155,15 +143,28 @@ const Swap: React.FC<SwapProps> = () => {
     error: toTokenBalanceError,
     isError: isToTokenBalanceError,
     isLoading: isLoadingToTokenBalance
-  } = useQuery(['to-token-balance', toToken], () =>
-    fetchBalance(
-      mockToken[toToken].contractAddress,
-      address,
-      getTokenDenom(toToken)
-    )
+  } = useQuery(
+    ['to-token-balance', toToken],
+    () =>
+      fetchBalance(
+        address,
+        mockToToken.denom,
+        mockToToken.contractAddress,
+        mockToToken.lcd
+      ),
+    { enabled: !!address }
   );
 
-  // const { data: exchangeRate, error: exchangeRateError, isError: isExchangeRateError, isLoading: isExchangeRateLoading } = useQuery(['exchange-rate', fromTokenInfoData, toTokenInfoData], () => fetchExchangeRate(fromTokenInfoData?.symbol.toLocaleLowerCase(), toTokenInfoData?.symbol.toLocaleLowerCase()), { enabled: fromTokenInfoData !== undefined && toTokenInfoData !== undefined });
+  const {
+    data: exchangeRate,
+    error: exchangeRateError,
+    isError: isExchangeRateError,
+    isLoading: isExchangeRateLoading
+  } = useQuery(
+    ['exchange-rate', fromTokenInfoData, toTokenInfoData],
+    () => fetchExchangeRate(fromTokenInfoData?.denom, toTokenInfoData?.denom),
+    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+  );
 
   const {
     data: simulateData,
@@ -178,7 +179,7 @@ const Swap: React.FC<SwapProps> = () => {
         toInfo: toTokenInfoData,
         amount: parseAmount(fromAmount, fromTokenInfoData?.decimals)
       }),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+    { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
 
   const { data: poolData, isLoading: isPoolDataLoading } = useQuery(
@@ -187,11 +188,48 @@ const Swap: React.FC<SwapProps> = () => {
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate }
   );
 
+  // const { data: pairInfo, isLoading: isPairInfoLoading } = useQuery(
+  //   ['pair-info', fromTokenInfoData, toTokenInfoData],
+  //   () => fetchPairInfo(mockToken),
+  //   { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+  // );
+
   // useEffect(() => {
-  //   console.log("exchange rate: ", exchangeRate?.item?.exchange_rate)
-  //   // TODO: need to re-calculate this
-  //   setFromToRatio(1 / parseFloat(exchangeRate?.item?.exchange_rate));
-  // }, [isExchangeRateLoading]);
+  //   console.log("pair info: ", pairInfo)
+  // }, [pairInfo]);
+
+  useEffect(() => {
+    let listTo = getListPairedToken(fromToken);
+    const listToken = allToken.filter((t) => listTo.includes(t.title));
+    setListValidTo([...listToken]);
+    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenName);
+  }, [fromToken]);
+
+  useEffect(() => {
+    if (poolData && fromAmount && fromAmount > 0) {
+      const finalToAmount =
+        calculateToAmount(
+          poolData,
+          parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)),
+          parseFloat(taxRate?.rate)
+        ) ?? 0;
+      const newToAmount = parseFloat(
+        parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)
+      ).toFixed(6);
+      setToAmount(newToAmount);
+    } else if (fromAmount === 0) setToAmount(0);
+  }, [poolData, fromAmount]);
+
+  useEffect(() => {
+    if (poolData) {
+      const finalAverageRatio = calculateToAmount(
+        poolData,
+        1,
+        parseFloat(taxRate?.rate)
+      );
+      setAverageRatio(parseFloat(finalAverageRatio));
+    }
+  }, [poolData]);
 
   const calculateToAmount = (poolData, offerAmount, taxRate) => {
     const offer = new Big(poolData.offerPoolAmount);
@@ -209,32 +247,6 @@ const Swap: React.FC<SwapProps> = () => {
     // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
     // (1 - taxRate)
   };
-
-  useEffect(() => {
-    if (poolData && fromAmount && fromAmount > 0) {
-      const finalToAmount =
-        calculateToAmount(
-          poolData,
-          parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)),
-          parseFloat(taxRate?.rate)
-        ) ?? 0;
-      const newToAmount = parseFloat(
-        parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)
-      ).toFixed(6);
-      setToAmount(newToAmount);
-    }
-  }, [poolData, fromAmount]);
-
-  useEffect(() => {
-    if (poolData) {
-      const finalAverageRatio = calculateToAmount(
-        poolData,
-        1,
-        parseFloat(taxRate?.rate)
-      );
-      setAverageRatio(parseFloat(finalAverageRatio));
-    }
-  }, [poolData]);
 
   const handleSubmit = async () => {
     setSwapLoading(true);
@@ -272,12 +284,17 @@ const Swap: React.FC<SwapProps> = () => {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        setSwapLoading(false);
         return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
+      let finalError = "";
+      if (typeof error === 'string' || error instanceof String) {
+        finalError = error;
+      } else finalError = JSON.stringify({ message: error });
       displayToast(TToastType.TX_FAILED, {
-        message: error
+        message: finalError
       });
     }
     setSwapLoading(false);
@@ -290,8 +307,12 @@ const Swap: React.FC<SwapProps> = () => {
     return pairs!.map((name) => name.replace(tokenName, '').replace('-', ''));
   };
 
+  const FromIcon = mockToken[fromToken].Icon;
+  const ToIcon = mockToken[toToken].Icon;
+  const FeeIcon = mockToken[feeToken].Icon;
+
   return (
-    <Layout>
+    <Content>
       <div
         style={{
           height: '100%',
@@ -318,7 +339,7 @@ const Swap: React.FC<SwapProps> = () => {
               <TokenBalance
                 balance={{
                   amount: fromTokenBalance ? fromTokenBalance : 0,
-                  denom: fromTokenInfoData?.name ?? ''
+                  denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -350,12 +371,7 @@ const Swap: React.FC<SwapProps> = () => {
                 className={cx('token')}
                 onClick={() => setIsSelectFrom(true)}
               >
-                <img
-                  className={cx('logo')}
-                  src={
-                    require(`assets/icons/${mockToken[fromToken].logo}`).default
-                  }
-                />
+                <FromIcon className={cx('logo')} />
                 <span>{fromToken}</span>
                 <div className={cx('arrow-down')} />
               </div>
@@ -385,12 +401,7 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('fee')}>
               <span>Fee</span>
               <div className={cx('token')} onClick={() => setIsSelectFee(true)}>
-                <img
-                  className={cx('logo')}
-                  src={
-                    require(`assets/icons/${mockToken[feeToken].logo}`).default
-                  }
-                />
+                <FeeIcon className={cx('logo')} />
                 <span>{feeToken}</span>
                 <div className={cx('arrow-down')} />
               </div>
@@ -417,25 +428,20 @@ const Swap: React.FC<SwapProps> = () => {
               <TokenBalance
                 balance={{
                   amount: toTokenInfoData ? toTokenBalance : 0,
-                  denom: toTokenInfoData?.name ?? ''
+                  denom: toTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromToken} ≈ ${averageRatio.toFixed(2)} ${toToken}`}
+                {`1 ${fromToken} ≈ ${averageRatio.toFixed(6)} ${toToken}`}
               </span>
               <TooltipIcon />
             </div>
             <div className={cx('input')}>
               <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
-                <img
-                  className={cx('logo')}
-                  src={
-                    require(`assets/icons/${mockToken[toToken].logo}`).default
-                  }
-                />
+                <ToIcon className={cx('logo')} />
                 <span>{toToken}</span>
                 <div className={cx('arrow-down')} />
               </div>
@@ -484,7 +490,6 @@ const Swap: React.FC<SwapProps> = () => {
                   amount: simulateData ? simulateData?.amount : 0,
                   denom: toTokenInfoData?.symbol ?? ''
                 }}
-                prefix="Balance: "
                 decimalScale={6}
               />
 
@@ -493,19 +498,19 @@ const Swap: React.FC<SwapProps> = () => {
                   toTokenInfoData?.decimals
                 )} ${toTokenInfoData?.symbol.toUpperCase()}`}</span> */}
             </div>
-            {/* <div className={cx("row")}>
-              <div className={cx("title")}>
-                <span>Tx Fee</span>
-                <TooltipIcon />
-              </div>
-              <span>2,959,898.60 AIRI</span>
-            </div> */}
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Tax rate</span>
                 <TooltipIcon />
               </div>
               <span>{parseFloat(taxRate?.rate) * 100} %</span>
+            </div>
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span>Exchange rate</span>
+                <TooltipIcon />
+              </div>
+              <span>{(1 / parseFloat(exchangeRate) * 100).toFixed(2)} %</span>
             </div>
           </div>
           <SettingModal
@@ -542,7 +547,7 @@ const Swap: React.FC<SwapProps> = () => {
           />
         </div>
       </div>
-    </Layout>
+    </Content>
   );
 };
 

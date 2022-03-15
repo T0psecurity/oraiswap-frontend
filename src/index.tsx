@@ -18,8 +18,9 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 window.Keplr = new Keplr();
 const queryClient = new QueryClient();
 
-const checkKeplr = async () => {
+const startApp = async () => {
   const keplr = await window.Keplr.getKeplr();
+  // suggest our chain
   if (keplr) {
     // always trigger suggest chain when users enter the webpage
     await window.Keplr.suggestChain(network.chainId);
@@ -44,4 +45,4 @@ const checkKeplr = async () => {
   );
 };
 
-checkKeplr();
+startApp();

@@ -1,4 +1,3 @@
-import Layout from 'layouts/Layout';
 import { Input } from 'antd';
 import classNames from 'classnames';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
@@ -12,14 +11,14 @@ import useLocalStorage from 'libs/useLocalStorage';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import axios from 'axios';
-import { DenomBalanceResponse } from 'rest/useAPI';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
 import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
 import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
+import { fetchBalance } from 'rest/api';
+import Content from 'layouts/Content';
 
 interface BalanceProps { }
 
@@ -97,7 +96,9 @@ const Balance: React.FC<BalanceProps> = () => {
     'cosmos',
     'bnb',
     'ethereum',
-    'airight'
+    'airight',
+    'terra-luna',
+    'terrausd',
   ]);
 
   const getUsd = (amount: number, token: TokenItemType) => {
@@ -115,38 +116,43 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadTokenAmounts = async () => {
-    const amountDetails: AmountDetails = {};
+    try {
+      const amountDetails: AmountDetails = {};
 
-    const filteredTokens = _.uniqBy(
-      [...fromTokens, ...toTokens].filter(
-        (token) => token.cosmosBased && token.coingeckoId in prices
-      ),
-      (c) => c.denom
-    );
-
-
-    for (const token of filteredTokens) {
-      // switch address
-      const address = (await window.keplr.getKey(token.chainId)).bech32Address;
-
-      const url = `${token.lcd}/cosmos/bank/v1beta1/balances/${address}`;
-      const res: DenomBalanceResponse = (await axios.get(url)).data;
-      console.log("token denom: ", token.denom);
-      console.log("balances: ", url, res.balances);
-      const amount = parseInt(
-        res.balances.find((balance) => balance.denom === token.denom)?.amount ??
-        '0'
+      const filteredTokens = _.uniqBy(
+        _.flatten(tokens).filter(
+          // TODO: contractAddress for ethereum use different method
+          (token) =>
+            // !token.contractAddress &&
+            token.denom && token.cosmosBased && token.coingeckoId in prices
+        ),
+        (c) => c.denom
       );
 
-      const amountDetail: AmountDetail = {
-        amount,
-        usd: getUsd(amount, token)
-      };
-      amountDetails[token.denom] = amountDetail;
+      for (const token of filteredTokens) {
+        // switch address
+
+        const address = (await window.keplr.getKey(token.chainId)).bech32Address;
+
+        const amount = await fetchBalance(
+          address,
+          token.denom,
+          token.contractAddress,
+          token.lcd
+        );
+
+        const amountDetail: AmountDetail = {
+          amount,
+          usd: getUsd(amount, token)
+        };
+        amountDetails[token.denom] = amountDetail;
+      }
+
+      setAmounts(amountDetails);
+    } catch (ex) {
+      console.log(ex);
     }
 
-    console.log("filtered tokens: ", amountDetails)
-    setAmounts(amountDetails);
   };
 
   useEffect(() => {
@@ -226,7 +232,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       console.log(result);
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${network.explorer}/txs/${result?.transactionHash}`
+        customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
       });
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -239,7 +245,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   return (
-    <Layout>
+    <Content>
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
@@ -440,7 +446,7 @@ const Balance: React.FC<BalanceProps> = () => {
           {/* End To Tab  */}
         </div>
       </div>
-    </Layout>
+    </Content>
   );
 };
 

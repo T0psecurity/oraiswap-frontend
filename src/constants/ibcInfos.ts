@@ -47,8 +47,20 @@ const ibcInfosMap: { [key: string]: IBCInfoMap } = {
         source: 'transfer',
         channel: 'channel-9',
         timeout: 60
+      },
+      'columbus-5': {
+        source: 'transfer',
+        channel: 'channel-11',
+        timeout: 60
+      },
+    },
+    'columbus-5': {
+      Oraichain: {
+        source: 'transfer',
+        channel: 'channel-40',
+        timeout: 480
       }
-    }
+    },
   }
 };
 
