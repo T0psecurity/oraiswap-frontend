@@ -48,7 +48,7 @@ const PairBox = memo<{ pair: Pair; amount: number }>(({ pair, amount }) => {
   return (
     <div
       className={styles.pairbox}
-      onClick={() => navigate('../pool/atom-orai', { replace: true })}
+      // onClick={() => navigate('../pool/atom-orai', { replace: true })}
     >
       <div className={styles.pairbox_header}>
         <div className={styles.pairbox_logos}>

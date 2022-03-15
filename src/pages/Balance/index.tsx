@@ -103,30 +103,28 @@ const Balance: React.FC<BalanceProps> = () => {
     setFromAmount([0, 0]);
   };
 
+  const loadAmountDetail = async (token: TokenItemType) => {
+    const address = (await window.keplr.getKey(token.chainId)).bech32Address;
+
+    const amount = await fetchBalance(
+      address,
+      token.denom,
+      token.contractAddress,
+      token.lcd
+    );
+
+    const amountDetail: AmountDetail = {
+      amount,
+      usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+    };
+    return [token.denom, amountDetail];
+  };
+
   const loadTokenAmounts = async () => {
     try {
-      const amountDetails: AmountDetails = {};
-
-      for (const token of filteredTokens) {
-        // switch address
-
-        const address = (await window.keplr.getKey(token.chainId))
-          .bech32Address;
-
-        const amount = await fetchBalance(
-          address,
-          token.denom,
-          token.contractAddress,
-          token.lcd
-        );
-
-        const amountDetail: AmountDetail = {
-          amount,
-          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
-        };
-        amountDetails[token.denom] = amountDetail;
-      }
-
+      const amountDetails = Object.fromEntries(
+        await Promise.all(filteredTokens.map(loadAmountDetail))
+      );
       setAmounts(amountDetails);
     } catch (ex) {
       console.log(ex);
@@ -134,7 +132,6 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   useEffect(() => {
-    const amountDetails: AmountDetails = {};
     loadTokenAmounts();
   }, [prices, txHash]);
 
