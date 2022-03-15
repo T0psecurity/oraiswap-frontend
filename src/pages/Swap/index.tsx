@@ -1,5 +1,4 @@
 //@ts-nocheck
-import Layout from 'layouts/Layout';
 import React, { useEffect, useState } from 'react';
 import style from './index.module.scss';
 import cn from 'classnames/bind';
@@ -31,6 +30,7 @@ import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
 import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
+import Content from 'layouts/Content';
 
 const cx = cn.bind(style);
 
@@ -308,7 +308,7 @@ const Swap: React.FC<SwapProps> = () => {
   const FeeIcon = mockToken[feeToken].Icon;
 
   return (
-    <Layout>
+    <Content>
       <div
         style={{
           height: '100%',
@@ -544,7 +544,7 @@ const Swap: React.FC<SwapProps> = () => {
           />
         </div>
       </div>
-    </Layout>
+    </Content>
   );
 };
 

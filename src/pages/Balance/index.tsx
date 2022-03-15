@@ -1,4 +1,3 @@
-import Layout from 'layouts/Layout';
 import { Input } from 'antd';
 import classNames from 'classnames';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
@@ -19,6 +18,7 @@ import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
 import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
 import { fetchBalance } from 'rest/api';
+import Content from 'layouts/Content';
 
 interface BalanceProps {}
 
@@ -114,38 +114,43 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadTokenAmounts = async () => {
-    const amountDetails: AmountDetails = {};
+    try {
+      const amountDetails: AmountDetails = {};
 
-    const filteredTokens = _.uniqBy(
-      _.flatten(tokens).filter(
-        // TODO: contractAddress for ethereum use different method
-        (token) =>
-          // !token.contractAddress &&
-          token.denom && token.cosmosBased && token.coingeckoId in prices
-      ),
-      (c) => c.denom
-    );
-
-    for (const token of filteredTokens) {
-      // switch address
-
-      const address = (await window.keplr.getKey(token.chainId)).bech32Address;
-
-      const amount = await fetchBalance(
-        address,
-        token.denom,
-        token.contractAddress,
-        token.lcd
+      const filteredTokens = _.uniqBy(
+        _.flatten(tokens).filter(
+          // TODO: contractAddress for ethereum use different method
+          (token) =>
+            // !token.contractAddress &&
+            token.denom && token.cosmosBased && token.coingeckoId in prices
+        ),
+        (c) => c.denom
       );
-
-      const amountDetail: AmountDetail = {
-        amount,
-        usd: getUsd(amount, token)
-      };
-      amountDetails[token.denom] = amountDetail;
+  
+      for (const token of filteredTokens) {
+        // switch address
+  
+        const address = (await window.keplr.getKey(token.chainId)).bech32Address;
+  
+        const amount = await fetchBalance(
+          address,
+          token.denom,
+          token.contractAddress,
+          token.lcd
+        );
+  
+        const amountDetail: AmountDetail = {
+          amount,
+          usd: getUsd(amount, token)
+        };
+        amountDetails[token.denom] = amountDetail;
+      }
+  
+      setAmounts(amountDetails);
+    } catch (ex) {
+      console.log(ex);
     }
-
-    setAmounts(amountDetails);
+    
   };
 
   useEffect(() => {
@@ -238,7 +243,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   return (
-    <Layout>
+    <Content>
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
@@ -439,7 +444,7 @@ const Balance: React.FC<BalanceProps> = () => {
           {/* End To Tab  */}
         </div>
       </div>
-    </Layout>
+    </Content>
   );
 };
 

@@ -1,4 +1,3 @@
-import Layout from 'layouts/Layout';
 import React, { memo, useState } from 'react';
 import styles from './index.module.scss';
 import { ReactComponent as Logo } from 'assets/icons/logo.svg';
@@ -7,6 +6,7 @@ import style from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
 import { useParams } from 'react-router-dom';
 import LiquidityModal from './LiquidityModal/LiquidityModal';
+import Content from 'layouts/Content';
 
 const cx = cn.bind(style);
 
@@ -97,7 +97,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
 
   return (
-    <Layout nonBackground={true}>
+    <Content nonBackground={true}>
       {!!namePool && namePool! in mockPair ? (
         <>
           <div className={cx('pool-detail')}>
@@ -211,7 +211,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       ) : (
         <>No Pool found</>
       )}
-    </Layout>
+    </Content>
   );
 };
 
