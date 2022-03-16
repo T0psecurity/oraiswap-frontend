@@ -1,5 +1,5 @@
 import { Button, Typography } from 'antd';
-import { ReactComponent as Logo } from 'assets/icons/logo.svg';
+import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
@@ -7,7 +7,7 @@ import { ReactComponent as Dark } from 'assets/icons/dark.svg';
 import { ReactComponent as Light } from 'assets/icons/light.svg';
 import { ReactComponent as Logout } from 'assets/icons/logout.svg';
 import { ThemeContext, Themes } from 'context/theme-context';
-import LocalStorage, { LocalStorageKey } from 'services/LocalStorage';
+
 import React, {
   memo,
   useContext,
@@ -75,8 +75,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     <div className={styles.menu}>
       <div>
         <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-          {<Logo style={{ width: 40, height: 40 }} />}
-          <Text className={styles.logo_text}>OraiDex</Text>
+          <LogoFull />
         </Link>
         <div className={styles.menu_items}>
           <RequireAuthButton
