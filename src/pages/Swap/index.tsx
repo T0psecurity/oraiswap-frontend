@@ -43,7 +43,7 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -259,6 +259,11 @@ const Swap: React.FC<SwapProps> = () => {
   };
 
   const handleSubmit = async () => {
+    if (fromAmount <= 0)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'From amount should be higher than 0!'
+      })
+
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
@@ -448,9 +453,8 @@ const Swap: React.FC<SwapProps> = () => {
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${
-                  toTokenInfoData?.symbol
-                }`}
+                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${toTokenInfoData?.symbol
+                  }`}
               </span>
               <TooltipIcon />
             </div>
@@ -467,9 +471,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input
