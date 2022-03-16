@@ -23,6 +23,7 @@ const startApp = async () => {
     // always trigger suggest chain when users enter the webpage
     await window.Keplr.suggestChain(network.chainId);
   }
+
   render(
     <StrictMode>
       <ToastProvider>

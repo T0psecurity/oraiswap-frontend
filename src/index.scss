@@ -4,12 +4,15 @@
 @import 'src/styles/colors';
 @import 'src/styles/utils';
 
-html {
+html,
+body {
   // background-image: url(images/BackgroundPattern.svg);
   // @include mobile {
   //   background-image: url(images/BackgroundPatternMobile.svg);
   // }
   font-family: 'IBM Plex Sans';
+  height: 100%;
+  overflow: hidden;
 }
 
 button {
@@ -77,10 +80,15 @@ button:hover {
 
 #oraiswap {
   font-size: $font-size;
-  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
 }
 
 #basement {

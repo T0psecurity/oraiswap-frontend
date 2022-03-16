@@ -9,12 +9,14 @@ import { ThemeProvider } from 'context/theme-context';
 import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import useWindowSize from 'hooks/useWindowSize';
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [address, setAddress] = useLocalStorage<string>('address');
-
+  const { windowSize } = useWindowSize();
+  console.log(windowSize);
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     window.addEventListener('keplr_keystorechange', keplrHandler);
@@ -44,7 +46,10 @@ const App = () => {
     <ThemeProvider>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
         <QueryClientProvider client={queryClient}>
-          <div className="app">
+          <div
+            className="app"
+            style={{ zoom: windowSize.width > 1300 ? 1 : 0.9 }}
+          >
             <Menu />
             {routes()}
           </div>
