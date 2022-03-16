@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { ContractProvider, useContractState } from 'hooks/useContract';
 import useLocalStorage from 'libs/useLocalStorage';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 
@@ -40,20 +39,16 @@ const App = () => {
     }
   };
 
-  const contract = useContractState(address);
-
   // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <ContractProvider value={contract}>
-          <QueryClientProvider client={queryClient}>
-            <div className="app">
-              <Menu />
-              {routes()}
-            </div>
-          </QueryClientProvider>
-        </ContractProvider>
+        <QueryClientProvider client={queryClient}>
+          <div className="app">
+            <Menu />
+            {routes()}
+          </div>
+        </QueryClientProvider>
       </Web3ReactProvider>
     </ThemeProvider>
   );

@@ -1,10 +1,8 @@
 import React, { StrictMode } from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
-import 'hooks/useContractsAddress';
 import './index.scss';
 import ScrollToTop from './layouts/ScrollToTop';
-import Contract from './layouts/Contract';
 import App from './layouts/App';
 import Keplr from 'libs/keplr';
 import { network } from 'constants/networks';
@@ -27,19 +25,17 @@ const startApp = async () => {
   }
   render(
     <StrictMode>
-      <Contract>
-        <ToastProvider>
-          <Router>
-            <AuthProvider>
-              <ScrollToTop />
-              <QueryClientProvider client={queryClient}>
-                <App />
-              </QueryClientProvider>
-            </AuthProvider>
-          </Router>
-          <ToastContainer transition={Bounce} />
-        </ToastProvider>
-      </Contract>
+      <ToastProvider>
+        <Router>
+          <AuthProvider>
+            <ScrollToTop />
+            <QueryClientProvider client={queryClient}>
+              <App />
+            </QueryClientProvider>
+          </AuthProvider>
+        </Router>
+        <ToastContainer transition={Bounce} />
+      </ToastProvider>
     </StrictMode>,
     document.getElementById('oraiswap')
   );
