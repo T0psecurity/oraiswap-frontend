@@ -26,6 +26,7 @@ import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
 import { ORAI } from 'constants/constants';
+import Loader from 'components/Loader';
 
 const { Text } = Typography;
 

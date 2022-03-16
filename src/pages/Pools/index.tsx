@@ -101,9 +101,6 @@ const ListPools = memo<{ pairInfos: PairInfoData[] }>(({ pairInfos }) => {
           onSearch={() => {}}
           style={{ width: 420 }}
         />
-        {/* <Button className={styles.listpools_create + ` primary-btn`}>
-          Create a pool
-        </Button> */}
       </div>
       <div className={styles.listpools_list}>
         {pairInfos.map(({ amount, pair }) => (

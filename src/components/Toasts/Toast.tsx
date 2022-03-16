@@ -43,7 +43,7 @@ export enum TToastType {
   TX_SUCCESSFUL,
   TX_FAILED,
   TX_INFO,
-  KEPLR_FAILED,
+  KEPLR_FAILED
 }
 
 interface IToastExtra {
@@ -149,7 +149,9 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   </div>
 );
 
-const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) => (
+const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({
+  message
+}) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
     <FailedIcon />
     <section className={styles.toast_section}>

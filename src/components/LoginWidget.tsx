@@ -22,32 +22,8 @@ export const LoginWidget: FC<{
 
     onAddress(address as string);
   };
-  // const disconnectWallet = () => {
-  //   onAddress('');
-  // };
 
   return (
-    // <div className={classNames(styles.container)}>
-    //   {address ? (
-    //     <Button
-    //       onClick={disconnectWallet}
-    //       className={classNames(styles.connected)}
-    //     >
-    //       <Icon size={16} name="account_balance_wallet" />
-    //       <p className={classNames(styles.address)}>
-    //         <CenterEllipsis size={6} text={address as string} />
-    //         {' | '}
-    //         {network.id}
-    //       </p>
-    //       <Icon size={20} name="close" />
-    //     </Button>
-    //   ) : (
-    //     <Button className={classNames(styles.connect)} onClick={connectWallet}>
-    //       <img height={16} src={KeplrImage} alt="Keplr" />
-    //       {text}
-    //     </Button>
-    //   )}
-    // </div>
     <div
       className={cx('item')}
       // onClick={address ? disconnectWallet : connectWallet}
@@ -56,26 +32,8 @@ export const LoginWidget: FC<{
       <img src={KeplrImage} className={cx('logo')} />
       <div className={cx('grow')}>
         <div className={cx('network-title')}>{text}</div>
-        <div className={cx('des')}>
-          {/* {address ? (
-            <>
-              <CenterEllipsis size={6} text={address as string} />
-              {" | "}
-              {network.id}
-            </>
-          ) : (
-            "Connect using browser wallet"
-          )} */}
-          Connect using browser wallet
-        </div>
+        <div className={cx('des')}>Connect using browser wallet</div>
       </div>
-      {/* {address ? (
-        <div>
-          <Icon size={20} name="close" />
-        </div>
-      ) : (
-        <></>
-      )} */}
     </div>
   );
 };

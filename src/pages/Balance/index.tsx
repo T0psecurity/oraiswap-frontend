@@ -14,12 +14,12 @@ import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
-import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
 import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
 import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
+import Loader from 'components/Loader';
 
 interface BalanceProps {}
 
@@ -383,7 +383,7 @@ const Balance: React.FC<BalanceProps> = () => {
               onClick={transferIBC}
               disabled={ibcLoading}
             >
-              {ibcLoading && <LoadingIcon width={40} height={40} />}
+              {ibcLoading && <Loader width={40} height={40} />}
               <span className={styles.tfTxt}>Transfer</span>
             </button>
           </div>
