@@ -17,6 +17,11 @@ const App = () => {
   const [address, setAddress] = useLocalStorage<string>('address');
   const { windowSize } = useWindowSize();
 
+  // update windowSize
+  document
+    .getElementById('oraiswap')
+    ?.style.setProperty('zoom', windowSize.width > 1480 ? '1' : '0.9');
+
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     window.addEventListener('keplr_keystorechange', keplrHandler);
@@ -46,13 +51,8 @@ const App = () => {
     <ThemeProvider>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
         <QueryClientProvider client={queryClient}>
-          <div
-            className="app"
-            style={{ zoom: windowSize.width > 1480 ? 1 : 0.9 }}
-          >
-            <Menu />
-            {routes()}
-          </div>
+          <Menu />
+          {routes()}
         </QueryClientProvider>
       </Web3ReactProvider>
     </ThemeProvider>
