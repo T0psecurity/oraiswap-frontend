@@ -1,5 +1,4 @@
 import React from 'react';
-import Container from '../components/Container';
 import styles from './Footer.module.scss';
 import { ReactComponent as Logo } from '../images/DelightLogo.svg';
 import { network } from 'constants/networks';
@@ -7,7 +6,7 @@ import { network } from 'constants/networks';
 const Footer = () => {
   return (
     <footer className={styles.footer}>
-      <Container className={styles.container}>
+      <div className={styles.container}>
         <section className={styles.network}>{network.chainId}</section>
 
         <section className={styles.community}>
@@ -16,7 +15,7 @@ const Footer = () => {
             <Logo height={24} />
           </a>
         </section>
-      </Container>
+      </div>
     </footer>
   );
 };

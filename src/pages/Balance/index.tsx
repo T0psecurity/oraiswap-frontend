@@ -81,6 +81,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
 
 type AmountDetails = { [key: string]: AmountDetail };
 
+displayToast(TToastType.TX_BROADCASTING);
+
 const Balance: React.FC<BalanceProps> = () => {
   const [keplrAddress] = useLocalStorage<string>('address');
   const [from, setFrom] = useState<TokenItemType>();

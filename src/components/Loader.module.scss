@@ -1,17 +1,17 @@
-.loader,
-.loader:after {
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-}
+// .loader,
+// .loader:after {
+//   border-radius: 50%;
+//   width: 44px;
+//   height: 44px;
+// }
 .loader {
-  font-size: 10px;
+  //   font-size: 10px;
   position: relative;
-  text-indent: -9999em;
-  border-top: 5px solid #f3eeff;
-  border-right: 5px solid #f3eeff;
-  border-bottom: 5px solid #f3eeff;
-  border-left: 5px solid #c4a8ff;
+  //   text-indent: -9999em;
+  //   border-top: 5px solid #f3eeff;
+  //   border-right: 5px solid #f3eeff;
+  //   border-bottom: 5px solid #f3eeff;
+  //   border-left: 5px solid #c4a8ff;
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);

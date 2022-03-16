@@ -13,7 +13,7 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
-import { ReactComponent as BroadcastingIcon } from 'assets/icons/toast_broadcasting.svg';
+import Loader from 'components/Loader';
 
 const CloseButton = ({ closeToast }: { closeToast: () => void }) => (
   <button onClick={closeToast} className={styles.btn_close}>
@@ -24,8 +24,8 @@ const CloseButton = ({ closeToast }: { closeToast: () => void }) => (
 const defaultOptions: ToastOptions = {
   position: 'top-right',
   theme: 'dark',
-  autoClose: 7000,
-  // autoClose: false,
+  // autoClose: 7000,
+  autoClose: false,
   icon: false,
   hideProgressBar: true,
   closeOnClick: false,
@@ -122,7 +122,7 @@ export const displayToast: DisplayToastFn = (
 
 const ToastTxBroadcasting: FunctionComponent = () => (
   <div className={classNames(styles.toast_content, styles.toast_broadcasting)}>
-    <BroadcastingIcon />
+    <Loader />
     <section className={styles.toast_section}>
       <h6>Transaction Broadcasting</h6>
       <p>Waiting for transaction to be included in the block</p>
