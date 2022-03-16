@@ -48,7 +48,7 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <div
             className="app"
-            style={{ zoom: windowSize.width > 1300 ? 1 : 0.9 }}
+            style={{ zoom: windowSize.width > 1480 ? 1 : 0.9 }}
           >
             <Menu />
             {routes()}
