@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { ContractProvider, useContractState } from 'hooks/useContract';
 import useLocalStorage from 'libs/useLocalStorage';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 
@@ -10,12 +9,14 @@ import { ThemeProvider } from 'context/theme-context';
 import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import useWindowSize from 'hooks/useWindowSize';
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [address, setAddress] = useLocalStorage<string>('address');
-
+  const { windowSize } = useWindowSize();
+  console.log(windowSize);
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     window.addEventListener('keplr_keystorechange', keplrHandler);
@@ -40,20 +41,19 @@ const App = () => {
     }
   };
 
-  const contract = useContractState(address);
-
   // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <ContractProvider value={contract}>
-          <QueryClientProvider client={queryClient}>
-            <div className="app">
-              <Menu />
-              {routes()}
-            </div>
-          </QueryClientProvider>
-        </ContractProvider>
+        <QueryClientProvider client={queryClient}>
+          <div
+            className="app"
+            style={{ zoom: windowSize.width > 1300 ? 1 : 0.9 }}
+          >
+            <Menu />
+            {routes()}
+          </div>
+        </QueryClientProvider>
       </Web3ReactProvider>
     </ThemeProvider>
   );

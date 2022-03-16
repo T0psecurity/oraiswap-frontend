@@ -8,12 +8,6 @@ interface ExtNetworkConfig {
 export interface NetworkConfig extends ExtNetworkConfig {
   /** Chain ID */
   id: string;
-  /** Contract Addresses JSON URL */
-  contract: string;
-  /** Swap Contract Addresses JSON URL */
-  swap: string;
-  /** Wallet URL */
-  walletUrl: string;
 
   /** Fixed fee */
   fee: { gasPrice: string; amount: string; gas: string };
