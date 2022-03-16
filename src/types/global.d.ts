@@ -6,10 +6,17 @@ import Wasm from '../libs/wasm';
 import Web3 from 'web3';
 
 declare global {
+  type Fund = {
+    denom: string;
+    amount: string;
+  };
+
+  type Funds = Fund[];
+
   type ExecuteOptions = {
     gas?: number;
     fees?: number;
-    funds?: string;
+    funds?: Funds;
     memo?: string;
   };
 
@@ -70,4 +77,4 @@ declare global {
   declare const APP_SETTINGS: Record<string, any>;
 }
 
-export { };
+export {};

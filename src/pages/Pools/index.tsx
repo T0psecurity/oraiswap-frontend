@@ -5,7 +5,7 @@ import { Button, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { mockToken, Pair, pairsMap } from 'constants/pools';
-import { fetchPoolInfoAmount, fetchTokenInfo } from 'rest/api';
+import { fetchPairInfo, fetchPoolInfoAmount, fetchTokenInfo } from 'rest/api';
 import { useQuery } from 'react-query';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens } from 'constants/bridgeTokens';
@@ -41,7 +41,7 @@ const Header = memo<{ amount: number; oraiPrice: number }>(
   }
 );
 
-const PairBox = memo<{ pair: Pair; amount: number }>(({ pair, amount }) => {
+const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) => mockToken[denom]);
 
@@ -68,7 +68,9 @@ const PairBox = memo<{ pair: Pair; amount: number }>(({ pair, amount }) => {
       <div className={styles.pairbox_content}>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>
-          <span className={styles.pairbox_data_value}>0.3%</span>
+          <span className={styles.pairbox_data_value}>
+            {100 * parseFloat(commissionRate)}%
+          </span>
         </div>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Liquidity</span>
@@ -103,8 +105,8 @@ const ListPools = memo<{ pairInfos: PairInfoData[] }>(({ pairInfos }) => {
         />
       </div>
       <div className={styles.listpools_list}>
-        {pairInfos.map(({ amount, pair }) => (
-          <PairBox amount={amount} pair={pair} key={pair.contract_addr} />
+        {pairInfos.map((info) => (
+          <PairBox {...info} key={info.pair.contract_addr} />
         ))}
       </div>
     </div>
@@ -114,6 +116,7 @@ const ListPools = memo<{ pairInfos: PairInfoData[] }>(({ pairInfos }) => {
 type PairInfoData = {
   pair: Pair;
   amount: number;
+  commissionRate: string;
 };
 
 const Pools: React.FC<PoolsProps> = () => {
@@ -122,7 +125,7 @@ const Pools: React.FC<PoolsProps> = () => {
   );
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
 
-  const fetchPairInfo = async (pair: Pair): Promise<PairInfoData> => {
+  const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map(
       (denom) => mockToken[denom]
     );
@@ -130,10 +133,10 @@ const Pools: React.FC<PoolsProps> = () => {
       fetchTokenInfo(fromToken),
       fetchTokenInfo(toToken)
     ]);
-    const poolData = await fetchPoolInfoAmount(
-      fromTokenInfoData,
-      toTokenInfoData
-    );
+    const [poolData, infoData] = await Promise.all([
+      fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
+      fetchPairInfo([fromTokenInfoData, toTokenInfoData])
+    ]);
     const fromAmount = getUsd(
       poolData.offerPoolAmount,
       prices[fromToken.coingeckoId].price,
@@ -144,17 +147,22 @@ const Pools: React.FC<PoolsProps> = () => {
       prices[toToken.coingeckoId].price,
       toToken.decimals
     );
-    return { pair, amount: fromAmount + toAmount };
+
+    return {
+      pair,
+      amount: fromAmount + toAmount,
+      commissionRate: infoData.commission_rate
+    };
   };
 
-  const fetchPairInfos = async () => {
+  const fetchPairInfoDataList = async () => {
     const poolList = await Promise.all(
-      Object.values(pairsMap).map(fetchPairInfo)
+      Object.values(pairsMap).map(fetchPairInfoData)
     );
     setPairInfos(poolList);
   };
   useEffect(() => {
-    fetchPairInfos();
+    fetchPairInfoDataList();
   }, [prices]);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
