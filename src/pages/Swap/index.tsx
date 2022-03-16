@@ -29,7 +29,7 @@ import { pairsMap as mockPair, mockToken } from 'constants/pools';
 import { TokenItemType, tokens } from 'constants/bridgeTokens';
 import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
-import { ReactComponent as LoadingIcon } from 'assets/icons/loading-spin.svg';
+import Loader from 'components/Loader';
 import Content from 'layouts/Content';
 
 const cx = cn.bind(style);
@@ -40,16 +40,19 @@ interface ValidToken {
   title: TokenDenom;
   contractAddress: string;
   Icon: string;
-  denom: string,
+  denom: string;
 }
 
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
     const keplr = await window.Keplr.getKeplr();
     if (keplr) await keplr.suggestToken(token.chainId, token.contractAddress);
-    else displayToast(TToastType.KEPLR_FAILED, { message: "You need to install Keplr to continue" });
+    else
+      displayToast(TToastType.KEPLR_FAILED, {
+        message: 'You need to install Keplr to continue'
+      });
   }
 };
 
@@ -257,6 +260,7 @@ const Swap: React.FC<SwapProps> = () => {
 
   const handleSubmit = async () => {
     setSwapLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
     try {
       let walletAddr;
       if (await window.Keplr.getKeplr())
@@ -296,7 +300,7 @@ const Swap: React.FC<SwapProps> = () => {
       }
     } catch (error) {
       console.log('error in swap form: ', error);
-      let finalError = "";
+      let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
         finalError = error;
       } else finalError = String(error);
@@ -311,7 +315,9 @@ const Swap: React.FC<SwapProps> = () => {
     let pairs = Object.keys(mockPair).filter((denom) =>
       denom.includes(tokenDenom)
     );
-    return pairs!.map((denom) => denom.replace(tokenDenom, '').replace('-', ''));
+    return pairs!.map((denom) =>
+      denom.replace(tokenDenom, '').replace('-', '')
+    );
   };
 
   const FromIcon = mockToken[fromToken]?.Icon;
@@ -442,7 +448,9 @@ const Swap: React.FC<SwapProps> = () => {
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${toTokenInfoData?.symbol}`}
+                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${
+                  toTokenInfoData?.symbol
+                }`}
               </span>
               <TooltipIcon />
             </div>
@@ -459,9 +467,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
@@ -482,7 +490,7 @@ const Swap: React.FC<SwapProps> = () => {
             onClick={handleSubmit}
             disabled={swapLoading}
           >
-            {swapLoading && <LoadingIcon width={40} height={40} />}
+            {swapLoading && <Loader width={40} height={40} />}
             <span>Swap</span>
           </button>
           <div className={cx('detail')}>
@@ -517,7 +525,7 @@ const Swap: React.FC<SwapProps> = () => {
                 <span>Exchange rate</span>
                 <TooltipIcon />
               </div>
-              <span>{(1 / parseFloat(exchangeRate) * 100).toFixed(2)} %</span>
+              <span>{((1 / parseFloat(exchangeRate)) * 100).toFixed(2)} %</span>
             </div>
           </div>
           <SettingModal

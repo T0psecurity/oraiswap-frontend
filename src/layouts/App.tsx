@@ -16,7 +16,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [address, setAddress] = useLocalStorage<string>('address');
   const { windowSize } = useWindowSize();
-  console.log(windowSize);
+
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     window.addEventListener('keplr_keystorechange', keplrHandler);

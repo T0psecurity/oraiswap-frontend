@@ -1,6 +1,5 @@
 import React from 'react';
 import logo from '../images/logo.png';
-import Container from '../components/Container';
 import styles from './Header.module.scss';
 import LoginWidget from 'components/LoginWidget';
 import MESSAGE from 'lang/MESSAGE.json';
@@ -14,7 +13,7 @@ const Header = () => {
   };
   return (
     <header className={styles.header}>
-      <Container className={styles.container}>
+      <div className={styles.container}>
         <section className={styles.wrapper}>
           <a className={styles.logo} href="https://swap.orai.io">
             <img src={logo} />
@@ -31,7 +30,7 @@ const Header = () => {
             <LoginMetamask text={MESSAGE.Form.Button.ConnectMetamask} />
           </div>
         </section>
-      </Container>
+      </div>
     </header>
   );
 };

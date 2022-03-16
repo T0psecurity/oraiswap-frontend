@@ -13,7 +13,7 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
-import { ReactComponent as BroadcastingIcon } from 'assets/icons/toast_broadcasting.svg';
+import Loader from 'components/Loader';
 
 const CloseButton = ({ closeToast }: { closeToast: () => void }) => (
   <button onClick={closeToast} className={styles.btn_close}>
@@ -43,7 +43,7 @@ export enum TToastType {
   TX_SUCCESSFUL,
   TX_FAILED,
   TX_INFO,
-  KEPLR_FAILED,
+  KEPLR_FAILED
 }
 
 interface IToastExtra {
@@ -122,7 +122,7 @@ export const displayToast: DisplayToastFn = (
 
 const ToastTxBroadcasting: FunctionComponent = () => (
   <div className={classNames(styles.toast_content, styles.toast_broadcasting)}>
-    <BroadcastingIcon />
+    <Loader />
     <section className={styles.toast_section}>
       <h6>Transaction Broadcasting</h6>
       <p>Waiting for transaction to be included in the block</p>
@@ -149,7 +149,9 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   </div>
 );
 
-const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) => (
+const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({
+  message
+}) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
     <FailedIcon />
     <section className={styles.toast_section}>
