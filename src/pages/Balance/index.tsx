@@ -81,8 +81,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
 
 type AmountDetails = { [key: string]: AmountDetail };
 
-displayToast(TToastType.TX_BROADCASTING);
-
 const Balance: React.FC<BalanceProps> = () => {
   const [keplrAddress] = useLocalStorage<string>('address');
   const [from, setFrom] = useState<TokenItemType>();
@@ -185,6 +183,7 @@ const Balance: React.FC<BalanceProps> = () => {
       return;
     }
     setIBCLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
     try {
       const keplr = await window.Keplr.getKeplr();
       if (keplr) {

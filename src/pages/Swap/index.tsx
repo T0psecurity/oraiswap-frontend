@@ -260,6 +260,7 @@ const Swap: React.FC<SwapProps> = () => {
 
   const handleSubmit = async () => {
     setSwapLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
     try {
       let walletAddr;
       if (await window.Keplr.getKeplr())
