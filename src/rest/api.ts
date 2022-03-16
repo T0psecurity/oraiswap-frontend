@@ -1,12 +1,9 @@
-//@ts-nocheck
-
-import React from 'react';
-import { useQuery } from 'react-query';
 import axios from 'axios';
-import useQuerySmart from 'hooks/useQuerySmart';
 import { network } from 'constants/networks';
-import { ORAI } from 'constants/constants';
 import { TokenItemType } from 'constants/bridgeTokens';
+import { PairInfo } from 'types/oraiswap_pair/pair_info';
+import { PoolResponse } from 'types/oraiswap_pair/pool_response';
+import _ from 'lodash';
 
 interface TokenInfo {
   name: string;
@@ -62,7 +59,7 @@ async function fetchTaxRate() {
   return data;
 }
 
-async function fetchTokenInfo(tokenSwap: TokenItemType): TokenInfo {
+async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   let tokenInfo: TokenInfo = {
     symbol: '',
     name: tokenSwap.name,
@@ -70,7 +67,8 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): TokenInfo {
     decimals: 6,
     denom: tokenSwap.denom,
     icon: '',
-    verified: false
+    verified: false,
+    total_supply: ''
   };
   if (!tokenSwap.contractAddress) {
     tokenInfo.symbol = tokenSwap.name;
@@ -93,7 +91,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): TokenInfo {
   return tokenInfo;
 }
 
-async function fetchPool(pairAddr: string) {
+async function fetchPool(pairAddr: string): Promise<PoolResponse> {
   const data = await querySmart(pairAddr, { pool: {} });
   return data;
 }
@@ -109,19 +107,19 @@ async function fetchPoolInfoAmount(
   });
   const poolInfo = await fetchPool(pairInfo.contract_addr);
   const offerPoolAmount = parseInt(
-    poolInfo.assets.find(
-      (asset) => JSON.stringify(asset.info) === JSON.stringify(fromInfo)
-    ).amount
+    poolInfo.assets.find((asset) => _.isEqual(asset.info, fromInfo))?.amount ??
+      '0'
   );
   const askPoolAmount = parseInt(
-    poolInfo.assets.find(
-      (asset) => JSON.stringify(asset.info) === JSON.stringify(toInfo)
-    ).amount
+    poolInfo.assets.find((asset) => _.isEqual(asset.info, toInfo))?.amount ??
+      '0'
   );
   return { offerPoolAmount, askPoolAmount };
 }
 
-async function fetchPairInfo(assetInfos: TokenInfo[2]) {
+async function fetchPairInfo(
+  assetInfos: [TokenInfo, TokenInfo]
+): Promise<PairInfo> {
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
   const data = await querySmart(network.factory, {
@@ -155,7 +153,8 @@ async function fetchNativeTokenBalance(
   }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
-    res.balances.find((balance) => balance.denom === denom)?.amount ?? 0;
+    res.balances.find((balance: { denom: string }) => balance.denom === denom)
+      ?.amount ?? 0;
   return parseInt(amount);
 }
 
@@ -169,7 +168,7 @@ async function fetchBalance(
   else return fetchTokenBalance(tokenAddr, walletAddr, lcd);
 }
 
-const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string) => {
+const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string | number) => {
   if (!tokenInfo?.contract_addr) {
     if (amount)
       return {
@@ -181,7 +180,7 @@ const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string) => {
   return { info: { token: { contract_addr: tokenInfo?.contract_addr } } };
 };
 
-const handleSentFunds = (...funds: any[]) => {
+const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
   let sent_funds = [];
   for (let fund of funds) {
     if (fund) sent_funds.push(fund);
@@ -228,69 +227,58 @@ async function simulateSwap(query: {
   return data;
 }
 
+export type SwapQuery = {
+  type: Type.SWAP;
+  fromInfo: TokenInfo;
+  toInfo: TokenInfo;
+  amount: number | string;
+  max_spread: number | string;
+  belief_price: number | string;
+  sender: string;
+};
+
+export type ProvideQuery = {
+  type: Type.PROVIDE;
+  from: string;
+  to: string;
+  fromInfo: TokenInfo;
+  toInfo: TokenInfo;
+  fromAmount: number | string;
+  toAmount: number | string;
+  slippage: number | string;
+  sender: string;
+  pair: string; // oraiswap pair contract addr, handle provide liquidity
+};
+
+export type WithdrawQuery = {
+  type: Type.WITHDRAW;
+  lpAddr: string;
+  amount: number | string;
+  sender: string;
+  pair: string; // oraiswap pair contract addr, handle withdraw liquidity
+};
+
 async function generateContractMessages(
-  query:
-    | {
-        type: Type.SWAP;
-        fromInfo: TokenInfo;
-        toInfo: TokenInfo;
-        amount: number | string;
-        max_spread: number | string;
-        belief_price: number | string;
-        sender: string;
-      }
-    | {
-        type: Type.PROVIDE;
-        from: string;
-        to: string;
-        fromInfo: TokenInfo;
-        toInfo: TokenInfo;
-        fromAmount: number | string;
-        toAmount: number | string;
-        slippage: number | string;
-        sender: string;
-        pair: string; // oraiswap pair contract addr, handle provide liquidity
-      }
-    | {
-        type: Type.WITHDRAW;
-        lpAddr: string;
-        amount: number | string;
-        sender: string;
-        pair: string; // oraiswap pair contract addr, handle withdraw liquidity
-      }
+  query: SwapQuery | ProvideQuery | WithdrawQuery
 ) {
   // @ts-ignore
-  const {
-    type,
-    amount,
-    sender,
-    from,
-    to,
-    fromAmount,
-    toAmount,
-    lpAddr,
-    fromInfo,
-    toInfo,
-    info,
-    pair,
-    ...params
-  } = query;
-  let sent_funds = [];
+  const { type, sender, ...params } = query;
+  let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.router;
   let input;
-  console.log('amount to swap: ', amount);
   switch (type) {
     case Type.SWAP:
+      const swapQuery = params as SwapQuery;
       const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(
-        fromInfo,
-        amount.toString()
+        swapQuery.fromInfo,
+        swapQuery.amount.toString()
       );
       const { fund: askSentFund, info: askInfo } = parseTokenInfo(
-        toInfo,
+        swapQuery.toInfo,
         undefined
       );
-      sent_funds = handleSentFunds(offerSentFund, askSentFund);
+      sent_funds = handleSentFunds(offerSentFund as Fund, askSentFund as Fund);
       let inputTemp = {
         execute_swap_operations: {
           operations: [
@@ -304,53 +292,56 @@ async function generateContractMessages(
         }
       };
       // if cw20 => has to send through cw20 contract
-      if (!fromInfo.contract_addr) {
+      if (!swapQuery.fromInfo.contract_addr) {
         input = inputTemp;
       } else {
         input = {
           send: {
             contract: contractAddr,
-            amount: amount.toString(),
+            amount: swapQuery.amount.toString(),
             msg: btoa(JSON.stringify(inputTemp))
           }
         };
-        contractAddr = fromInfo.contract_addr;
+        contractAddr = swapQuery.fromInfo.contract_addr;
       }
       break;
     // TODO: provide liquidity and withdraw liquidity
     case Type.PROVIDE:
+      const provideQuery = params as ProvideQuery;
       const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(
-        fromInfo,
-        fromAmount
+        provideQuery.fromInfo,
+        provideQuery.fromAmount
       );
       const { fund: toSentFund, info: toInfoData } = parseTokenInfo(
-        toInfo,
-        toAmount
+        provideQuery.toInfo,
+        provideQuery.toAmount
       );
-      sent_funds = handleSentFunds(fromSentFund, toSentFund);
+      sent_funds = handleSentFunds(fromSentFund as Fund, toSentFund as Fund);
       input = {
         provide_liquidity: {
           assets: [
             {
               info: toInfoData,
-              amount: toAmount
+              amount: provideQuery.toAmount
             },
-            { info: fromInfoData, amount: fromAmount }
+            { info: fromInfoData, amount: provideQuery.fromAmount }
           ]
         }
       };
-      contractAddr = pair;
+      contractAddr = provideQuery.pair;
       break;
     case Type.WITHDRAW:
+      const withdrawQuery = params as WithdrawQuery;
+
       input = {
         send: {
           owner: sender,
-          contract: pair,
-          amount,
-          msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64
+          contract: withdrawQuery.pair,
+          amount: withdrawQuery.amount,
+          msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
         }
       };
-      contractAddr = lpAddr;
+      contractAddr = withdrawQuery.lpAddr;
       break;
     default:
       break;
