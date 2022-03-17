@@ -172,7 +172,7 @@ const Swap: React.FC<SwapProps> = () => {
     isLoading: isExchangeRateLoading
   } = useQuery(
     ['exchange-rate', fromTokenInfoData, toTokenInfoData],
-    () => fetchExchangeRate(fromTokenInfoData?.denom, toTokenInfoData?.denom),
+    () => fetchExchangeRate(toTokenInfoData?.denom, fromTokenInfoData?.denom),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
 
@@ -529,7 +529,7 @@ const Swap: React.FC<SwapProps> = () => {
                 <span>Exchange rate</span>
                 <TooltipIcon />
               </div>
-              <span>{((1 / parseFloat(exchangeRate)) * 100).toFixed(2)} %</span>
+              <span>{(parseFloat(exchangeRate)).toFixed(6)}</span>
             </div>
           </div>
           <SettingModal
