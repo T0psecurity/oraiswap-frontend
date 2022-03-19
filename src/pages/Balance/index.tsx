@@ -111,21 +111,26 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return [token.denom, { amount: 0, usd: 0 }];
     }
-    await window.Keplr.suggestChain(token.chainId);
-    const address = await window.Keplr.getKeplrAddr(token.chainId);
+    try {
+      await window.Keplr.suggestChain(token.chainId);
+      const address = await window.Keplr.getKeplrAddr(token.chainId);
 
-    const amount = await fetchBalance(
-      address as string,
-      token.denom,
-      token.contractAddress,
-      token.lcd
-    );
+      const amount = await fetchBalance(
+        address as string,
+        token.denom,
+        token.contractAddress,
+        token.lcd
+      );
 
-    const amountDetail: AmountDetail = {
-      amount,
-      usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
-    };
-    return [token.denom, amountDetail];
+      const amountDetail: AmountDetail = {
+        amount,
+        usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+      };
+      return [token.denom, amountDetail];
+    } catch (ex) {
+      console.log(ex);
+      return [token.denom, { amount: 0, usd: 0 }];
+    }
   };
 
   const loadTokenAmounts = async () => {
