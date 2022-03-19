@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosClass from 'axios';
 import { network } from 'constants/networks';
 import { TokenItemType } from 'constants/bridgeTokens';
 import { PairInfo } from 'types/oraiswap_pair/pair_info';
@@ -23,6 +23,11 @@ export enum Type {
   'WITHDRAW' = 'Withdraw'
 }
 
+// override with timeout
+const axios = axiosClass.create({
+  timeout: 10000
+});
+
 const toQueryMsg = (msg: string) => {
   try {
     return Buffer.from(JSON.stringify(JSON.parse(msg))).toString('base64');
@@ -40,8 +45,9 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -107,11 +113,11 @@ async function fetchPoolInfoAmount(
   const poolInfo = await fetchPool(pairInfo.contract_addr);
   const offerPoolAmount = parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, fromInfo))?.amount ??
-    '0'
+      '0'
   );
   const askPoolAmount = parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, toInfo))?.amount ??
-    '0'
+      '0'
   );
   return { offerPoolAmount, askPoolAmount };
 }
@@ -147,8 +153,9 @@ async function fetchNativeTokenBalance(
   denom: string,
   lcd?: string
 ) {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
