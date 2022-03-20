@@ -155,7 +155,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
       if (pendingList.length > 0) {
-        setPendingTokens(pendingList);
+        setTimeout(() => setPendingTokens(pendingList), 3000);
       }
     } catch (ex) {
       console.log(ex);
