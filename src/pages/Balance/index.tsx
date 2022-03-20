@@ -95,6 +95,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
+  // this help to retry loading and show something in processing
+  const [pendingTokens, setPendingTokens] = useState(filteredTokens);
 
   const toggleTransfer = () => {
     setTokens([toTokens, fromTokens]);
@@ -103,7 +105,10 @@ const Balance: React.FC<BalanceProps> = () => {
     setFromAmount([0, 0]);
   };
 
-  const loadAmountDetail = async (token: TokenItemType) => {
+  const loadAmountDetail = async (
+    token: TokenItemType,
+    pendingList: TokenItemType[]
+  ) => {
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) {
       displayToast(TToastType.TX_FAILED, {
@@ -126,19 +131,32 @@ const Balance: React.FC<BalanceProps> = () => {
         amount,
         usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
       };
+
       return [token.denom, amountDetail];
     } catch (ex) {
       console.log(ex);
+      pendingList.push(token);
       return [token.denom, { amount: 0, usd: 0 }];
     }
   };
 
   const loadTokenAmounts = async () => {
+    if (pendingTokens.length == 0) return;
     try {
+      const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
-        await Promise.all(filteredTokens.map(loadAmountDetail))
+        await Promise.all(
+          pendingTokens.map((token) => loadAmountDetail(token, pendingList))
+        )
       );
-      setAmounts(amountDetails);
+
+      // update amounts
+      setAmounts((old) => ({ ...old, ...amountDetails }));
+
+      // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
+      if (pendingList.length > 0) {
+        setPendingTokens(pendingList);
+      }
     } catch (ex) {
       console.log(ex);
     }
@@ -146,7 +164,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useEffect(() => {
     loadTokenAmounts();
-  }, [prices, txHash]);
+  }, [prices, txHash, pendingTokens]);
 
   // console.log(prices['oraichain-token'].price);
 
