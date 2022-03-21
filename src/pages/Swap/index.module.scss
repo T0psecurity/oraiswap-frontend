@@ -1,9 +1,11 @@
+@import 'src/styles/mixins';
+
 .container {
   margin: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px 16px 32px;
+  padding: 16px 16px 32px 16px;
 
   width: 520px;
   height: 633px;
@@ -31,10 +33,15 @@
 
   border-radius: 24px;
 
-  .to {
-    input.amount {
-      color: #505665;
-    }
+  @include mobile {
+    position: static;
+    padding: 16px;
+    width: 100%;
+    min-width: 100vw;
+    margin: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .from,
@@ -64,6 +71,15 @@
         rgba(232, 241, 255, 0) 98.89%
       )
       1;
+
+    @include mobile {
+      padding-left: 0;
+      padding-right: 0;
+      border: none;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+    }
 
     /* Inside auto layout */
 
@@ -216,6 +232,9 @@
       .amount {
         flex-grow: 1;
         text-align: right;
+        @include mobile {
+          width: 100%;
+        }
       }
     }
 
@@ -274,6 +293,21 @@
           border-top: 6px solid #ffffff;
         }
       }
+    }
+  }
+
+  .from {
+    @include mobile {
+      border-bottom: 1px solid;
+    }
+  }
+
+  .to {
+    input.amount {
+      color: #505665;
+    }
+    @include mobile {
+      border-top: 1px solid;
     }
   }
 
