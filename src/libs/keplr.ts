@@ -1,9 +1,61 @@
 import { ChainInfo } from '@keplr-wallet/types';
-import { isMobile } from '@walletconnect/browser-utils';
+import { isAndroid, isMobile } from '@walletconnect/browser-utils';
 import { network } from 'constants/networks';
 import { embedChainInfos } from 'networks';
+import WalletConnect from '@walletconnect/client';
+import { KeplrWalletConnectV1 } from '@keplr-wallet/wc-client';
+import { IJsonRpcRequest, IRequestOptions } from '@walletconnect/types';
+import { BroadcastMode, StdTx } from '@cosmjs/launchpad';
+import Axios from 'axios';
+import WalletConnectQRCodeModal from '@walletconnect/qrcode-modal';
 
+const sendTx = async (
+  chainId: string,
+  tx: StdTx | Uint8Array,
+  mode: BroadcastMode
+): Promise<Uint8Array> => {
+  const restInstance = Axios.create({
+    baseURL: network.lcd
+  });
+
+  const isProtoTx = Buffer.isBuffer(tx) || tx instanceof Uint8Array;
+
+  const params = isProtoTx
+    ? {
+        tx_bytes: Buffer.from(tx as any).toString('base64'),
+        mode: (() => {
+          switch (mode) {
+            case 'async':
+              return 'BROADCAST_MODE_ASYNC';
+            case 'block':
+              return 'BROADCAST_MODE_BLOCK';
+            case 'sync':
+              return 'BROADCAST_MODE_SYNC';
+            default:
+              return 'BROADCAST_MODE_UNSPECIFIED';
+          }
+        })()
+      }
+    : {
+        tx,
+        mode: mode
+      };
+
+  const result = await restInstance.post(
+    isProtoTx ? '/cosmos/tx/v1beta1/txs' : '/txs',
+    params
+  );
+
+  const txResponse = isProtoTx ? result.data['tx_response'] : result.data;
+
+  if (txResponse.code != null && txResponse.code !== 0) {
+    throw new Error(txResponse['raw_log']);
+  }
+
+  return Buffer.from(txResponse.txhash, 'hex');
+};
 export default class Keplr {
+  private walletConnector: WalletConnect | undefined;
   constructor() {
     window.onload = async () => {
       if (window.keplr) {
@@ -26,78 +78,105 @@ export default class Keplr {
     await window.keplr.enable(chainInfo.chainId);
   };
 
-  // private getKeplrMobile: Promise<Keplr | undefined> {
+  onWalletConnectDisconnected = (error: Error | null) => {
+    if (error) {
+      console.log(error);
+    } else {
+      this.disconnect();
+    }
+  };
 
-  //     if (!this.walletConnector) {
-  //       this.walletConnector = new WalletConnect({
-  //         bridge: 'https://bridge.walletconnect.org',
-  //         signingMethods: [],
-  //         qrcodeModal: new WalletConnectQRCodeModalV1Renderer()
-  //       });
-  //       // XXX: I don't know why they designed that the client meta options in the constructor should be always ingored...
-  //       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //       // @ts-ignore
-  //       this.walletConnector._clientMeta = {
-  //         name: 'Osmosis',
-  //         description: 'Osmosis is the first IBC-native Cosmos interchain AMM',
-  //         url: 'https://app.osmosis.zone',
-  //         icons: [
-  //           window.location.origin + '/public/assets/osmosis-wallet-connect.png'
-  //         ]
-  //       };
+  /**
+   * Disconnect the wallet regardless of wallet type (extension, wallet connect)
+   */
+  disconnect() {
+    if (this.walletConnector) {
+      if (this.walletConnector.connected) {
+        this.walletConnector.killSession();
+      }
+      this.walletConnector = undefined;
+    }
+  }
 
-  //       this.walletConnector!.on(
-  //         'disconnect',
-  //         this.onWalletConnectDisconnected
-  //       );
-  //     }
+  async getMobileKeplr(): Promise<keplrType | undefined> {
+    if (!this.walletConnector) {
+      this.walletConnector = new WalletConnect({
+        bridge: 'https://bridge.walletconnect.org',
+        signingMethods: [],
+        qrcodeModal: WalletConnectQRCodeModal
+      });
+      // XXX: I don't know why they designed that the client meta options in the constructor should be always ingored...
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.walletConnector._clientMeta = {
+        name: 'Osmosis',
+        description: 'Osmosis is the first IBC-native Cosmos interchain AMM',
+        url: 'https://oraidex.io',
+        icons: [
+          window.location.origin + '/public/assets/osmosis-wallet-connect.png'
+        ]
+      };
 
-  //     if (!this.walletConnector.connected) {
-  //       return new Promise<Keplr | undefined>((resolve, reject) => {
-  //         this.walletConnector!.connect()
-  //           .then(() => {
-  //             localStorage?.removeItem(KeyConnectingWalletType);
-  //             localStorage?.setItem(
-  //               KeyAutoConnectingWalletType,
-  //               'wallet-connect'
-  //             );
-  //             this.autoConnectingWalletType = 'wallet-connect';
+      this.walletConnector!.on('disconnect', this.onWalletConnectDisconnected);
+    }
 
-  //             resolve(
-  //               new KeplrWalletConnectV1(this.walletConnector!, {
-  //                 sendTx,
-  //                 onBeforeSendRequest: this.onBeforeSendRequest
-  //               })
-  //             );
-  //           })
-  //           .catch((e) => {
-  //             console.log(e);
-  //             // XXX: Due to the limitation of cureent account store implementation.
-  //             //      We shouldn't throw an error (reject) on the `getKeplr()` method.
-  //             //      So return the `undefined` temporarily.
-  //             //      In this case, the wallet will be considered as `NotExist`
-  //             resolve(undefined);
-  //           });
-  //       });
-  //     } else {
-  //       localStorage?.removeItem(KeyConnectingWalletType);
-  //       localStorage?.setItem(KeyAutoConnectingWalletType, 'wallet-connect');
-  //       this.autoConnectingWalletType = 'wallet-connect';
+    if (!this.walletConnector.connected) {
+      try {
+        await this.walletConnector!.connect();
+      } catch (e) {
+        console.log(e);
+        // XXX: Due to the limitation of cureent account store implementation.
+        //      We shouldn't throw an error (reject) on the `getKeplr()` method.
+        //      So return the `undefined` temporarily.
+        //      In this case, the wallet will be considered as `NotExist`
+        return undefined;
+      }
+    }
 
-  //       return Promise.resolve(
-  //         new KeplrWalletConnectV1(this.walletConnector, {
-  //           sendTx,
-  //           onBeforeSendRequest: this.onBeforeSendRequest
-  //         })
-  //       );
-  //     }
+    return;
+    new KeplrWalletConnectV1(this.walletConnector!, {
+      sendTx,
+      onBeforeSendRequest: this.onBeforeSendRequest
+    });
+  }
 
-  // }
+  protected onBeforeSendRequest = (request: Partial<IJsonRpcRequest>): void => {
+    if (!isMobile()) {
+      return;
+    }
+
+    const deepLink = isAndroid()
+      ? 'intent://wcV1#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;'
+      : 'keplrwallet://wcV1';
+
+    switch (request.method) {
+      case 'keplr_enable_wallet_connect_v1':
+        // Keplr mobile requests another per-chain permission for each wallet connect session.
+        // By the current logic, `enable()` is requested immediately after wallet connect is connected.
+        // However, in this case, two requests are made consecutively.
+        // So in ios, the deep link modal pops up twice and confuses the user.
+        // To solve this problem, enable on the osmosis chain does not open deep links.
+        if (
+          request.params &&
+          request.params.length === 1 &&
+          request.params[0] === network.chainId
+        ) {
+          break;
+        }
+        window.location.href = deepLink;
+        break;
+      case 'keplr_sign_amino_wallet_connect_v1':
+        window.location.href = deepLink;
+        break;
+    }
+
+    return;
+  };
 
   async getKeplr(): Promise<keplrType | undefined> {
     if (isMobile()) {
       console.log('isMobile');
-      return;
+      return this.getMobileKeplr();
     }
 
     if (window.keplr) {

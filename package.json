@@ -17,6 +17,8 @@
     "@sunnyag/react-coingecko": "^2.1.0",
     "@tippyjs/react": "^4.2.0",
     "@walletconnect/browser-utils": "^1.7.5",
+    "@walletconnect/client": "^1.7.5",
+    "@walletconnect/qrcode-modal": "^1.7.5",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
     "antd": "^4.19.1",

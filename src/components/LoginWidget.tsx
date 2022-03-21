@@ -3,11 +3,6 @@ import styles from './LoginWidget.module.scss';
 import { network } from 'constants/networks';
 import KeplrImage from 'assets/images/keplr.png';
 import cn from 'classnames/bind';
-import {
-  isAndroid as checkIsAndroid,
-  isMobile as checkIsMobile,
-  saveMobileLinkInfo
-} from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 
@@ -16,7 +11,6 @@ export const LoginWidget: FC<{
   onAddress: (address: string) => void;
 }> = ({ text, onAddress }) => {
   // const [address, setAddress] = useLocalStorage<String>("address");
-  const [isMobile] = useState(() => checkIsMobile());
 
   const connectWallet = async () => {
     if (!(await window.Keplr.getKeplr())) {
