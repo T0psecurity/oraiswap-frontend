@@ -1,11 +1,11 @@
 import React, { memo, useState } from 'react';
 import styles from './index.module.scss';
-import { ReactComponent as Logo } from 'assets/icons/logo.svg';
-import { Button, Input } from 'antd';
+import { Button, Divider, Input } from 'antd';
 import style from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
 import { useParams } from 'react-router-dom';
 import LiquidityModal from './LiquidityModal/LiquidityModal';
+import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
 
 const cx = cn.bind(style);
@@ -83,7 +83,7 @@ interface ValidToken {
   logo: string;
 }
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { namePool } = useParams();
@@ -95,6 +95,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     token2 = _token2 as TokenName;
   }
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
+  const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
 
   return (
     <Content nonBackground>
@@ -122,88 +123,146 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               </div>
               <div className={cx('des')}>1 ATOM ≈ 4.85 ORAI</div>
               <div className={cx('btn', 'swap')}>Quick Swap</div>
-              <div
-                className={cx('btn', 'liquidity')}
-                onClick={() => setIsOpenLiquidityModal(true)}
-              >
-                Add/Remove Liquidity
-              </div>
             </div>
             <div className={cx('info')}>
-              <div className={cx('container')}>
-                <div className={cx('title')}>Total Amount</div>
-                <div className={cx('row')}>
-                  <img
-                    className={cx('logo')}
-                    src={
-                      require(`assets/icons/${mockToken[token1].logo}`).default
-                    }
-                  />
-                  <div>{token1}</div>
-                  <div className={cx('amount')}>
-                    <div>103,980.23</div>
-                    <div className={cx('value')}>$2,644,521</div>
+              <div className={cx('row')}>
+                <div className={cx('container', 'tokens')}>
+                  <div className={cx('available-tokens')}>
+                    <div className={cx('label')}>
+                      Available LP tokens
+                    </div>
+                  </div>
+                  <div className={cx('liquidity')}>
+                    <div className={cx('label')}>
+                      My liquidity
+                    </div>
+                    <div className={cx('liquidity_token')}>
+                      <div className={cx('liquidity_token_name')}>
+                        <span className={cx('mark')}></span>
+                        <span className={cx('icon')}></span>
+                        <span className={cx('token-name')}>ATOM</span>
+                      </div>
+                      <div className={cx('liquidity_token_value')}>
+                        <span className={cx('amount')}>1,980.23</span>
+                        <span className={cx('amount-usd')}>$26,445</span>
+                      </div>
+                    </div>
+                    <div className={cx('liquidity_token')}>
+                      <div className={cx('liquidity_token_name')}>
+                        <span className={cx('mark')}></span>
+                        <span className={cx('icon')}></span>
+                        <span className={cx('token-name')}>ORAI</span>
+                      </div>
+                      <div className={cx('liquidity_token_value')}>
+                        <span className={cx('amount')}>1,980.23</span>
+                        <span className={cx('amount-usd')}>$26,445</span>
+                      </div>
+                    </div>
+                    <Button className={cx('btn')} onClick={() => setIsOpenLiquidityModal(true)}>Add/Remove Liquidity</Button>
                   </div>
                 </div>
-                <div className={cx('row')}>
-                  <img
-                    className={cx('logo')}
-                    src={
-                      require(`assets/icons/${mockToken[token2].logo}`).default
-                    }
-                  />
-                  <div>{token2}</div>
-                  <div className={cx('amount')}>
-                    <div>103,980.23</div>
-                    <div className={cx('value')}>$2,644,521</div>
+
+                <div className={cx('container', 'pool-catalyst')}>
+                  <div className={cx('label')}>
+                    Pool Catalyst
+                  </div>
+                  <div className={cx('content')}>
+                    <div className={cx('pool-catalyst_token')}>
+                      <div className={cx('pool-catalyst_token_name')}>
+                        <span className={cx('icon')}></span>
+                        <span className={cx('token-name')}>ORAI</span>
+                      </div>
+                      <div className={cx('pool-catalyst_token_value')}>
+                        <span className={cx('amount')}>1,980.23</span>
+                        <span className={cx('amount-usd')}>$26,445</span>
+                      </div>
+                    </div>
+                    <div className={cx('pool-catalyst_token')}>
+                      <div className={cx('pool-catalyst_token_name')}>
+                        <span className={cx('icon')}></span>
+                        <span className={cx('token-name')}>ORAI</span>
+                      </div>
+                      <div className={cx('pool-catalyst_token_value')}>
+                        <span className={cx('amount')}>1,980.23</span>
+                        <span className={cx('amount-usd')}>$26,445</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className={cx('container')}>
-                <div className={cx('title')}>Total Amount</div>
-                <div className={cx('row')}>
-                  <img
-                    className={cx('logo')}
-                    src={
-                      require(`assets/icons/${mockToken[token1].logo}`).default
-                    }
-                  />
-                  <div>{token1}</div>
-                  <div className={cx('amount')}>
-                    <div>103,980.23</div>
-                    <div className={cx('value')}>$2,644,521</div>
+
+              <div className={cx('row')}>
+                <div className={cx('mining')}>
+                  <div className={cx('label--bold')}>
+                    Liquidity Mining
+                  </div>
+                  <div className={cx('label--sub')}>
+                    Bond liquidity to earn ORAI liquidity reward and swap fees
+                  </div>
+                  <div className={cx('container', 'container_mining')}>
+                    <div className={cx('icon')}>
+
+                    </div>
+                    <div className={cx('bonded')}>
+                      <div className={cx('label')}>
+                        Bonded
+                      </div>
+                      <div className={cx('amount')}>
+                        2.35 GAMM-1
+                      </div>
+                      <div className={cx('amount-usd')}>
+                        $1,948.80
+                      </div>
+                      <Divider dashed style={{ background: "#2D2938", width: "100%", height: "1px", margin: "16px 0" }} />
+                      <div className={cx('bonded-apr')}>
+                        <div className={cx('bonded-name')}>
+                          Current APR
+                        </div>
+                        <div className={cx('bonded-value')}>
+                          63.08%
+                        </div>
+                      </div>
+                      <div className={cx('bonded-unbouding')}>
+                        <div className={cx('bonded-name')}>
+                          Unbonding Duration
+                        </div>
+                        <div className={cx('bonded-value')}>
+                          7 days
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className={cx('row')}>
-                  <img
-                    className={cx('logo')}
-                    src={
-                      require(`assets/icons/${mockToken[token2].logo}`).default
-                    }
-                  />
-                  <div>{token2}</div>
-                  <div className={cx('amount')}>
-                    <div>103,980.23</div>
-                    <div className={cx('value')}>$2,644,521</div>
+                <div className={cx('earning')}>
+                  <Button className={cx('btn')}>Start Earning</Button>
+                  <div className={cx('container', 'container_earning')}>
+                    <div className={cx('label')}>
+                      Earnings
+                    </div>
+                    <div className={cx('amount')}>
+                      0 ORAI
+                    </div>
+                    <div className={cx('amount-usd')}>
+                      $0
+                    </div>
+                    <Button className={cx('btn', 'btn--dark')} onClick={() => setIsOpenBondingModal(true)}>Unbond All</Button>
                   </div>
                 </div>
               </div>
-              <div className={cx('ver-containers')}>
-                <div className={cx('container', 'small-container')}>
-                  <div className={cx('title')}>My Liquidity</div>
-                  <div>$12,948.80</div>
-                </div>
-                <div className={cx('container', 'small-container')}>
-                  <div className={cx('title')}>Bonded</div>
-                  <div>$12,948.80</div>
-                </div>
-              </div>
+
             </div>
           </div>
           <LiquidityModal
             isOpen={isOpenLiquidityModal}
             open={() => setIsOpenLiquidityModal(true)}
             close={() => setIsOpenLiquidityModal(false)}
+            token1={token1}
+            token2={token2}
+          />
+          <BondingModal
+            isOpen={isOpenBondingModal}
+            open={() => setIsOpenBondingModal(true)}
+            close={() => setIsOpenBondingModal(false)}
             token1={token1}
             token2={token2}
           />

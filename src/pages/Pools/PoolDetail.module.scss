@@ -1,5 +1,6 @@
 .pool-detail {
     padding: 40px;
+
     .header {
         display: flex;
         gap: 20px;
@@ -105,16 +106,41 @@
         }
     }
 
-    .info {
-        display: flex;
-        justify-content: space-between;
+    .info {        
+        .row {
+          display: flex;
+          justify-content: space-between;
+          gap: 30px;
+        }
+
+        .label {
+          font-family: 'IBM Plex Sans';
+          font-style: normal;
+          font-weight: 500;
+          font-size: 14px;
+          line-height: 150%;
+          color: #777E90;
+
+          &--bold {
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 100%;
+            color: #FFF;
+          }
+
+          &--sub {
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 150%;
+            color: #777E90;
+            margin-top: 10px;
+          }
+        }
 
         .container {
-            padding: 16px 24px 32px;
+            padding: 25px;
             background: #17181c;
             border-radius: 16px;
-
-            width: calc((100% - 32px) / 3);
 
             font-family: "IBM Plex Sans";
             font-style: normal;
@@ -128,67 +154,225 @@
             /* aiRight/White */
 
             color: #ffffff;
-
-            gap: 16px;
             display: flex;
             flex-direction: column;
+            margin-top: 25px;
 
-            .title {
-                font-family: "IBM Plex Sans";
-                font-style: normal;
-                font-weight: 500;
-                font-size: 14px;
-                line-height: 150%;
-                /* identical to box height, or 21px */
+            &.tokens {
+              width: 70%;
+              display: flex;
+              flex-direction: row;
+              gap: 30px;
 
-                font-feature-settings: "ss03" on;
+              .available-tokens {
+                width: 30%;
+                text-align: center;
+              }
 
-                /* aiRight/Gray 3 */
+              .liquidity {
+                width: 70%;
 
-                color: #777e90;
-            }
+                .liquidity_token {
+                  display: flex;
+                  margin-top: 30px;
 
-            .row {
-                display: flex;
-                gap: 10px;
+                  .liquidity_token_name {
+                    display: flex;
+                    gap: 5px;
+                    flex-grow: 2;
 
-                .logo {
-                    height: 20px;
-                    width: 20px;
-                }
-
-                .amount {
-                    text-align: right;
-                    flex-grow: 1;
-
-                    .value {
-                        margin-top: 12px;
-                        font-family: "IBM Plex Sans";
-                        font-style: normal;
-                        font-weight: 600;
-                        font-size: 16px;
-                        line-height: 100%;
-                        /* identical to box height, or 16px */
-
-                        font-feature-settings: "tnum" on, "lnum" on, "zero" on;
-
-                        /* aiRight/Gray 3 */
-
-                        color: #777e90;
+                    .mark {
+                      width: 16px;
+                      height: 16px;
+                      background: #FFD5AE;
+                      border-radius: 4px;
                     }
+
+                    .token-name {
+                      font-weight: 600;
+                      font-size: 18px;
+                      line-height: 100%;
+                    }
+                  }
+
+                  .liquidity_token_value {
+                    flex-grow: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    gap: 10px;
+
+                    .amount {
+                      font-weight: 600;
+                      font-size: 18px;
+                      line-height: 100%;
+                    }
+
+                    .amount-usd {
+                      font-weight: 600;
+                      font-size: 14px;
+                      line-height: 100%;
+                      color: #777E90;
+                    }
+                  }
                 }
+                
+              }
             }
+
+            &.pool-catalyst {
+              width: 27%;
+
+              .pool-catalyst_token {
+                display: flex;
+                margin-top: 30px;
+
+                .pool-catalyst_token_name {
+                  display: flex;
+                  gap: 5px;
+                  flex-grow: 2;
+
+                  .token-name {
+                    font-weight: 600;
+                    font-size: 18px;
+                    line-height: 100%;
+                  }
+                }
+
+                .pool-catalyst_token_value {
+                  flex-grow: 1;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: flex-end;
+                  gap: 10px;
+
+                  .amount {
+                    font-weight: 600;
+                    font-size: 18px;
+                    line-height: 100%;
+                  }
+
+                  .amount-usd {
+                    font-weight: 600;
+                    font-size: 14px;
+                    line-height: 100%;
+                    color: #777E90;
+                  }
+                }
+              }
+            }
+
         }
 
-        .ver-containers {
-            width: calc((100% - 20px) / 3);
+        .btn {
+          background: #612fca;
+          box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+          padding: 16px 108px;
+          text-align: center;
+          border-radius: 8px;
+          font-family: "IBM Plex Sans";
+          font-style: normal;
+          font-weight: 600;
+          font-size: 16px;
+          line-height: 100%;
+          text-align: center;
+          color: #ffffff;
+          cursor: pointer;
+          display: flex;
+          margin: 10px auto;
+
+          &--dark {
+            padding: 16px 92px;
+            background: #2D2938;
+            border: none;
+            box-shadow: none;
+          }
+        }
+
+        .mining {
+          margin-top: 50px;
+          width: 70%;
+
+          .container_mining {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+
+            .icon {
+              width: 30%;
+            }
+
+            .bonded {
+              width: 70%;
+              &-apr, &-unbouding {
+                display: flex;
+                margin-top: 20px;
+                justify-content: space-between;
+              }
+
+              &-apr {
+                .bonded-value {
+                  background: #612FCA;
+                  border-radius: 8px;
+                  padding: 5px;
+                }
+              }
+  
+              &-name {
+                font-weight: 500;
+                font-size: 16px;
+                line-height: 100%;
+                color: #777E90;
+              }
+
+              &-value {
+                font-weight: 500;
+                font-size: 16px;
+                line-height: 100%;
+              }
+            }
+
+            .amount {
+              font-weight: 600;
+              font-size: 18px;
+              line-height: 100%;
+              margin-top: 20px;
+            }
+
+            .amount-usd {
+              font-weight: 600;
+              font-size: 14px;
+              line-height: 100%;
+              color: #777E90;
+              margin-top: 10px;
+            }
+          }
+        }
+
+        .earning {
+          margin-top: 50px;
+          width: 27%;
+
+          .container_earning {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            .small-container {
-                width: 100% !important;
-                height: calc((100% - 16px) / 2);
+            gap: 14px;
+            margin-top: 15px;
+            
+            .amount {
+              font-weight: 600;
+              font-size: 18px;
+              line-height: 100%;
+              margin-top: 20px;
             }
+
+            .amount-usd {
+              font-weight: 600;
+              font-size: 14px;
+              line-height: 100%;
+              color: #777E90;
+            }
+          }
         }
     }
 }

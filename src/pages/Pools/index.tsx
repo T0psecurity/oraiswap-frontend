@@ -44,11 +44,11 @@ const Header = memo<{ amount: number; oraiPrice: number }>(
 const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) => mockToken[denom]);
-
+  console.log(pair, amount)
   return (
     <div
       className={styles.pairbox}
-      // onClick={() => navigate('../pool/atom-orai', { replace: true })}
+      onClick={() => navigate('../pool/atom-orai', { replace: true })}
     >
       <div className={styles.pairbox_header}>
         <div className={styles.pairbox_logos}>
@@ -137,6 +137,7 @@ const Pools: React.FC<PoolsProps> = () => {
       fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
       fetchPairInfo([fromTokenInfoData, toTokenInfoData])
     ]);
+    
     const fromAmount = getUsd(
       poolData.offerPoolAmount,
       prices[fromToken.coingeckoId].price,
@@ -147,7 +148,6 @@ const Pools: React.FC<PoolsProps> = () => {
       prices[toToken.coingeckoId].price,
       toToken.decimals
     );
-
     return {
       pair,
       amount: fromAmount + toAmount,
