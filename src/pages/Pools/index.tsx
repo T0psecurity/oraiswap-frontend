@@ -12,10 +12,11 @@ import { filteredTokens } from 'constants/bridgeTokens';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
+import NewPoolModal from './NewPoolModal/NewPoolModal'
 
 const { Search } = Input;
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 const Header = memo<{ amount: number; oraiPrice: number }>(
   ({ amount, oraiPrice }) => {
@@ -44,6 +45,7 @@ const Header = memo<{ amount: number; oraiPrice: number }>(
 const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) => mockToken[denom]);
+
   console.log(pair, amount)
   return (
     <div
@@ -100,9 +102,10 @@ const ListPools = memo<{ pairInfos: PairInfoData[] }>(({ pairInfos }) => {
       <div className={styles.listpools_search}>
         <Search
           placeholder="Search by pools or tokens name"
-          onSearch={() => {}}
-          style={{ width: 420 }}
+          onSearch={() => { }}
+          style={{ width: 420, background: "#1E1E21", borderRadius: '8px', padding: '10px' }}
         />
+        <div className={styles.listpools_btn}>Create new pool</div>
       </div>
       <div className={styles.listpools_list}>
         {pairInfos.map((info) => (
@@ -124,6 +127,7 @@ const Pools: React.FC<PoolsProps> = () => {
     filteredTokens.map((t) => t.coingeckoId)
   );
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
+  const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(true)
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map(
@@ -137,7 +141,7 @@ const Pools: React.FC<PoolsProps> = () => {
       fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
       fetchPairInfo([fromTokenInfoData, toTokenInfoData])
     ]);
-    
+
     const fromAmount = getUsd(
       poolData.offerPoolAmount,
       prices[fromToken.coingeckoId].price,
@@ -176,6 +180,12 @@ const Pools: React.FC<PoolsProps> = () => {
         />
         <WatchList />
         <ListPools pairInfos={pairInfos} />
+        <NewPoolModal
+          isOpen={isOpenNewPoolModal}
+          open={() => setIsOpenNewPoolModal(true)}
+          close={() => setIsOpenNewPoolModal(false)}
+
+        />
       </div>
     </Content>
   );
