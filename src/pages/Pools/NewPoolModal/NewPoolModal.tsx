@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './NewPoolModal.module.scss';
@@ -56,9 +56,6 @@ interface ModalProps {
   isCloseBtn?: boolean;
 }
 
-
-
-
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
@@ -76,14 +73,14 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   >(null);
   const [token1, setToken1] = useState<TokenDenom | null>(null);
   const [token2, setToken2] = useState<TokenDenom | null>(null);
-  const [listToken1Option, setListToken1Option] = useState<ValidToken[]>(allToken)
-  const [listToken2Option, setListToken2Option] = useState<ValidToken[]>(allToken)
-  const [supplyToken1, setSupplyToken1] = useState(0)
-  const [supplyToken2, setSupplyToken2] = useState(0)
-  const [amountToken1, setAmountToken1] = useState(0)
-  const [amountToken2, setAmountToken2] = useState(0)
-
-
+  const [listToken1Option, setListToken1Option] =
+    useState<ValidToken[]>(allToken);
+  const [listToken2Option, setListToken2Option] =
+    useState<ValidToken[]>(allToken);
+  const [supplyToken1, setSupplyToken1] = useState(0);
+  const [supplyToken2, setSupplyToken2] = useState(0);
+  const [amountToken1, setAmountToken1] = useState(0);
+  const [amountToken2, setAmountToken2] = useState(0);
 
   const {
     data: token1InfoData,
@@ -144,7 +141,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <input
               // className={cx('amount')}
               // value={fromAmount ? fromAmount : ""}
-              value={supplyToken1 ? supplyToken1 : ""}
+              value={supplyToken1 ? supplyToken1 : ''}
               placeholder="0"
               type="number"
               onChange={(e) => {
@@ -189,7 +186,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <div className={cx('amount')}>
             <input
-              value={supplyToken2 ? supplyToken2 : ""}
+              value={supplyToken2 ? supplyToken2 : ''}
               placeholder="0"
               type="number"
               onChange={(e) => {
@@ -200,7 +197,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
         </div>
       </div>
-      <div className={cx('swap-btn')} onClick={() => setStep(2)}>Next</div>
+      <div className={cx('swap-btn')} onClick={() => setStep(2)}>
+        Next
+      </div>
     </>
   );
 
@@ -229,11 +228,11 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <input
             className={cx('amount')}
-            value={!!amountToken1 ? amountToken1 : ""}
+            value={!!amountToken1 ? amountToken1 : ''}
             placeholder="0"
             type="number"
             onChange={(e) => {
-              setAmountToken1(+e.target.value)
+              setAmountToken1(+e.target.value);
             }}
           />
         </div>
@@ -262,39 +261,109 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <input
             className={cx('amount')}
-            value={!!amountToken2 ? amountToken2 : ""}
+            value={!!amountToken2 ? amountToken2 : ''}
             placeholder="0"
             type="number"
             onChange={(e) => {
-              setAmountToken2(+e.target.value)
+              setAmountToken2(+e.target.value);
             }}
           />
-
         </div>
       </div>
-      <div style={{ display: "flex", gap: "10px" }}>
-        <div className={cx('back-btn')} onClick={() => setStep(1)}>Back</div>
-        <div className={cx('swap-btn')} onClick={() => setStep(3)}>Next</div>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <div className={cx('back-btn')} onClick={() => setStep(1)}>
+          Back
+        </div>
+        <div className={cx('swap-btn')} onClick={() => setStep(3)}>
+          Next
+        </div>
       </div>
-
     </>
   );
 
   const step3Component = (
     <>
-      {DemoPie(
-        [
+      <div className={cx('stat')}>
+        {DemoPie([
           {
             type: token1InfoData?.symbol!,
-            value: amountToken1
+            value: amountToken1,
           },
           {
             type: token2InfoData?.symbol!,
-            value: amountToken2
-          }
+            value: amountToken2,
+          },
         ])}
+        <div className={cx('stats_info')}>
+          <div className={cx('stats_info_row')}>
+            <div
+              className={cx('stats_info_cl')}
+              style={{ background: '#612FCA' }}
+            />
+            <Token1Icon className={cx('stats_info_lg')} />
+            <div className={cx('stats_info_name')}>
+              {token1InfoData?.symbol}
+            </div>
+            <div className={cx('stats_info_percent')}>{supplyToken1}%</div>
+            <div className={cx('stats_info_value_amount')}>{amountToken1}</div>
+          </div>
+          <div className={cx('stats_info_row')}>
+            <div className={cx('stats_info_value_usd')}>$182.38</div>
+          </div>
+          <div className={cx('stats_info_row')}>
+            <div
+              className={cx('stats_info_cl')}
+              style={{ background: '#FFD5AE' }}
+            />
+            <Token2Icon className={cx('stats_info_lg')} />
+            <div className={cx('stats_info_name')}>
+              {token2InfoData?.symbol}
+            </div>
+            <div className={cx('stats_info_percent')}>{supplyToken2}%</div>
+            <div className={cx('stats_info_value_amount')}>{amountToken2}</div>
+          </div>
+          <div className={cx('stats_info_row')}>
+            <div className={cx('stats_info_value_usd')}>$182.38</div>
+          </div>
+        </div>
+      </div>
+      <div className={cx('supply')}>
+        <div className={cx('input')}>
+          <div className={cx('token')}>
+            <span className={cx('title')}>Swap Fee</span>
+          </div>
+          <div className={cx('amount')}>
+            <input
+              // className={cx('amount')}
+              // value={fromAmount ? fromAmount : ""}
+
+              placeholder="0"
+              type="number"
+              onChange={(e) => { }}
+            />
+            <span>%</span>
+          </div>
+        </div>
+      </div>
+      <div className={cx('detail')}>
+        <div className={cx('row')}>
+          <div className={cx('row-title')}>
+            <span>Pool Creation Fee</span>
+            <TooltipIcon />
+          </div>
+          <span>50 ORAI</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <div className={cx('back-btn')} onClick={() => setStep(2)}>
+          Back
+        </div>
+        <div className={cx('swap-btn')} onClick={() => { }}>
+          Create
+        </div>
+      </div>
     </>
-  )
+  );
 
   return (
     <Modal
@@ -348,9 +417,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
         </div>
         {(() => {
-          if (step === 1) return step1Component
-          if (step === 2) return step2Component
-          if (step === 3) return step3Component
+          if (step === 1) return step1Component;
+          if (step === 2) return step2Component;
+          if (step === 3) return step3Component;
         })()}
       </div>
       <SelectTokenModal
@@ -358,9 +427,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         open={() => setIsSelectingToken('token1')}
         close={() => setIsSelectingToken(null)}
         setToken={(token1: TokenDenom) => {
-          setToken1(token1)
+          setToken1(token1);
 
-          setListToken2Option(allToken.filter(t => t.denom !== token1))
+          setListToken2Option(allToken.filter((t) => t.denom !== token1));
         }}
         listToken={listToken1Option}
       />
@@ -369,9 +438,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         open={() => setIsSelectingToken('token2')}
         close={() => setIsSelectingToken(null)}
         setToken={(token2: TokenDenom) => {
-          setToken2(token2)
-          setListToken1Option(allToken.filter(t => t.denom !== token2))
-
+          setToken2(token2);
+          setListToken1Option(allToken.filter((t) => t.denom !== token2));
         }}
         listToken={listToken2Option}
       />
@@ -379,30 +447,29 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   );
 };
 
-
-
-const DemoPie = (data: {
-  type: string,
-  value: number
-}[]) => {
+const DemoPie = (
+  data: {
+    type: string;
+    value: number;
+  }[]
+) => {
   const config = {
-    legend: undefined,
+    legend: false,
     autoFit: false,
     appendPadding: 10,
     data,
-    height: 300,
-    width: 300,
+    height: 150,
+    width: 150,
     angleField: 'value',
     colorField: 'type',
     radius: 1,
-    innerRadius: 0.8,
+    innerRadius: 0.85,
     label: {
       type: 'inner',
       offset: '-50%',
-      content: '{value}',
+      content: undefined,
       style: {
-        textAlign: 'center',
-        fontSize: 14,
+        fontSize: 0,
       },
     },
     interactions: [
@@ -422,8 +489,7 @@ const DemoPie = (data: {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           color: '#ffffff',
-          fontSize: '14px'
-
+          fontSize: '14px',
         },
         content: `${data[0].type}/${data[1].type}`,
       },

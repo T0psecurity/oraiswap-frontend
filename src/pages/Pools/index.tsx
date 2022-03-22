@@ -95,7 +95,7 @@ const WatchList = memo(() => {
   );
 });
 
-const ListPools = memo<{ pairInfos: PairInfoData[] }>(({ pairInfos }) => {
+const ListPools = memo<{ pairInfos: PairInfoData[], setIsOpenNewPoolModal: any }>(({ pairInfos, setIsOpenNewPoolModal }) => {
   return (
     <div className={styles.listpools}>
       <div className={styles.listpools_title}>All pools</div>
@@ -105,7 +105,7 @@ const ListPools = memo<{ pairInfos: PairInfoData[] }>(({ pairInfos }) => {
           onSearch={() => { }}
           style={{ width: 420, background: "#1E1E21", borderRadius: '8px', padding: '10px' }}
         />
-        <div className={styles.listpools_btn}>Create new pool</div>
+        <div className={styles.listpools_btn} onClick={() => setIsOpenNewPoolModal(true)}>Create new pool</div>
       </div>
       <div className={styles.listpools_list}>
         {pairInfos.map((info) => (
@@ -127,7 +127,7 @@ const Pools: React.FC<PoolsProps> = () => {
     filteredTokens.map((t) => t.coingeckoId)
   );
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
-  const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(true)
+  const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false)
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map(
@@ -179,7 +179,7 @@ const Pools: React.FC<PoolsProps> = () => {
           oraiPrice={prices['oraichain-token'].price?.asNumber ?? 0}
         />
         <WatchList />
-        <ListPools pairInfos={pairInfos} />
+        <ListPools pairInfos={pairInfos} setIsOpenNewPoolModal={setIsOpenNewPoolModal} />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}

@@ -765,5 +765,98 @@
         border: 1px solid #3c404d;
       }
     }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+
+      .stats_info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        .stats_info_row {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        .stats_info_cl {
+          width: 16px;
+          height: 16px;
+        }
+        .stats_info_lg {
+          width: 20px;
+          height: 20px;
+        }
+        .stats_info_name {
+          font-family: 'IBM Plex Sans';
+          font-style: normal;
+          font-weight: 600;
+          font-size: 18px;
+          line-height: 100%;
+          /* identical to box height, or 18px */
+
+          text-align: center;
+          font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+
+          /* aiRight/White */
+
+          color: #ffffff;
+          text-transform: uppercase;
+        }
+        .stats_info_percent {
+          font-family: 'IBM Plex Sans';
+          font-style: normal;
+          font-weight: 500;
+          font-size: 14px;
+          line-height: 100%;
+          /* identical to box height, or 14px */
+
+          font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+
+          /* aiRight/Gray 3 */
+
+          color: #777e90;
+        }
+
+        .stats_info_value_amount {
+          flex-grow: 1;
+          text-align: right;
+          min-width: 130px;
+          font-family: 'IBM Plex Sans';
+          font-style: normal;
+          font-weight: 600;
+          font-size: 18px;
+          line-height: 100%;
+          /* identical to box height, or 18px */
+
+          font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+
+          /* aiRight/White */
+
+          color: #ffffff;
+        }
+
+        .stats_info_value_usd {
+          margin: 5px 0 20px 0;
+          min-width: 130px;
+          text-align: right;
+          flex-grow: 1;
+          font-family: 'IBM Plex Sans';
+          font-style: normal;
+          font-weight: 600;
+          font-size: 14px;
+          line-height: 100%;
+          /* identical to box height, or 14px */
+
+          font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+
+          /* aiRight/Gray 3 */
+
+          color: #777e90;
+        }
+      }
+    }
   }
 }
