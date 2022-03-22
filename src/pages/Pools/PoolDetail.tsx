@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { memo, useState } from 'react';
 import styles from './index.module.scss';
 import { Button, Divider, Input } from 'antd';
@@ -7,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
+import { Pie } from '@ant-design/plots';
 
 const cx = cn.bind(style);
 
@@ -131,6 +133,16 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     <div className={cx('label')}>
                       Available LP tokens
                     </div>
+                    {DemoPie([
+                      {
+                        type: "ATOM",
+                        value: 10,
+                      },
+                      {
+                        type: "ORAI",
+                        value: 20,
+                      },
+                    ], '102.57 GAMM-1', '$52,749')}
                   </div>
                   <div className={cx('liquidity')}>
                     <div className={cx('label')}>
@@ -138,7 +150,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     </div>
                     <div className={cx('liquidity_token')}>
                       <div className={cx('liquidity_token_name')}>
-                        <span className={cx('mark')}></span>
+                        <span className={cx('mark')} style={{background: '#FFD5AE'}}></span>
                         <span className={cx('icon')}></span>
                         <span className={cx('token-name')}>ATOM</span>
                       </div>
@@ -149,7 +161,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     </div>
                     <div className={cx('liquidity_token')}>
                       <div className={cx('liquidity_token_name')}>
-                        <span className={cx('mark')}></span>
+                        <span className={cx('mark')} style={{background: '#612FCA'}}></span>
                         <span className={cx('icon')}></span>
                         <span className={cx('token-name')}>ORAI</span>
                       </div>
@@ -200,9 +212,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     Bond liquidity to earn ORAI liquidity reward and swap fees
                   </div>
                   <div className={cx('container', 'container_mining')}>
-                    <div className={cx('icon')}>
-
-                    </div>
+                    <img className={cx('icon')} src={require('assets/images/Liquidity_mining_illus.png').default} />
                     <div className={cx('bonded')}>
                       <div className={cx('label')}>
                         Bonded
@@ -272,6 +282,67 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       )}
     </Content>
   );
+};
+
+const DemoPie = (
+  data: {
+    type: string;
+    value: number;
+  }[], 
+  title: string,
+  value: string
+) => {
+  const config = {
+    legend: false,
+    appendPadding: 10,
+    data,
+    angleField: 'value',
+    colorField: 'type',
+    radius: 1,
+    innerRadius: 0.9,
+    label: {
+      type: 'inner',
+      offset: '-50%',
+      content: undefined,
+      style: {
+        fontSize: 0,
+      },
+    },
+    interactions: [
+      {
+        type: 'element-selected',
+      },
+      {
+        type: 'element-active',
+      },
+    ],
+    color: ['#612FCA', '#FFD5AE'],
+    statistic: {
+      title: {
+        style: {
+          whiteSpace: 'pre-wrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          color: '#ffffff',
+          fontSize: '18px',
+          fontWeight: 600
+        },
+        content: title,
+      },
+      content: {
+        style: {
+          marginTop: '5px',
+          whiteSpace: 'pre-wrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          color: '#777E90',
+          fontSize: '14px',
+        },
+        content: value,
+      },
+    },
+  };
+  return <Pie style={{ height: "189px", width: "189px" }} {...config} />;
 };
 
 export default PoolDetail;

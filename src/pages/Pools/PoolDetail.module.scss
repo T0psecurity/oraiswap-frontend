@@ -167,6 +167,9 @@
               .available-tokens {
                 width: 30%;
                 text-align: center;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
               }
 
               .liquidity {
@@ -183,8 +186,7 @@
 
                     .mark {
                       width: 16px;
-                      height: 16px;
-                      background: #FFD5AE;
+                      height: 16px;                      
                       border-radius: 4px;
                     }
 
