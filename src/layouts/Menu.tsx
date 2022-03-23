@@ -163,7 +163,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               <Pools style={{ width: 30, height: 30 }} />
             )}
             {renderLink(
-              '/balance',
+              '/bridge',
               'Bridge',
               setLink,
               <Wallet style={{ width: 30, height: 30 }} />
