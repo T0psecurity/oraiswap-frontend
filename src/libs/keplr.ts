@@ -1,13 +1,21 @@
 import { ChainInfo } from '@keplr-wallet/types';
 import { isAndroid, isMobile } from '@walletconnect/browser-utils';
-import { network } from 'constants/networks';
+import { blacklistNetworks, network } from 'constants/networks';
 import { embedChainInfos } from 'networks';
 import WalletConnect from '@walletconnect/client';
 import { KeplrWalletConnectV1 } from '@keplr-wallet/wc-client';
 import { IJsonRpcRequest, IRequestOptions } from '@walletconnect/types';
 import { BroadcastMode, StdTx } from '@cosmjs/launchpad';
 import Axios from 'axios';
-import WalletConnectQRCodeModal from '@walletconnect/qrcode-modal';
+import { KeplrQRCodeModalV1 } from '@keplr-wallet/wc-qrcode-modal';
+import { filteredTokens } from 'constants/bridgeTokens';
+import createHash from 'create-hash';
+import { Bech32Address } from '@keplr-wallet/cosmos';
+
+const hash160 = (buffer: Uint8Array) => {
+  var t = createHash('sha256').update(buffer).digest();
+  return createHash('rmd160').update(t).digest();
+};
 
 const sendTx = async (
   chainId: string,
@@ -15,7 +23,7 @@ const sendTx = async (
   mode: BroadcastMode
 ): Promise<Uint8Array> => {
   const restInstance = Axios.create({
-    baseURL: network.lcd
+    baseURL: filteredTokens.find((token) => token.chainId === chainId)!.lcd
   });
 
   const isProtoTx = Buffer.isBuffer(tx) || tx instanceof Uint8Array;
@@ -73,9 +81,13 @@ export default class Keplr {
     const chainInfo = embedChainInfos.find(
       (chainInfo) => chainInfo.chainId === chainId
     );
-    if (!chainInfo) return;
-    await window.keplr.experimentalSuggestChain(chainInfo);
-    await window.keplr.enable(chainInfo.chainId);
+    if (!chainInfo || !window.keplr) return;
+    if (!isMobile()) {
+      await window.keplr.experimentalSuggestChain(chainInfo);
+      await window.keplr.enable(chainInfo.chainId);
+    } else if (!blacklistNetworks.includes(chainInfo.chainId)) {
+      await window.keplr.enable(chainInfo.chainId);
+    }
   };
 
   onWalletConnectDisconnected = (error: Error | null) => {
@@ -103,14 +115,14 @@ export default class Keplr {
       this.walletConnector = new WalletConnect({
         bridge: 'https://bridge.walletconnect.org',
         signingMethods: [],
-        qrcodeModal: WalletConnectQRCodeModal
+        qrcodeModal: new KeplrQRCodeModalV1()
       });
       // XXX: I don't know why they designed that the client meta options in the constructor should be always ingored...
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       this.walletConnector._clientMeta = {
-        name: 'Osmosis',
-        description: 'Osmosis is the first IBC-native Cosmos interchain AMM',
+        name: 'Oraichain',
+        description: 'Oraichain is the first IBC-native Cosmos interchain AMM',
         url: 'https://oraidex.io',
         icons: [
           window.location.origin + '/public/assets/osmosis-wallet-connect.png'
@@ -133,8 +145,7 @@ export default class Keplr {
       }
     }
 
-    return;
-    new KeplrWalletConnectV1(this.walletConnector!, {
+    return new KeplrWalletConnectV1(this.walletConnector!, {
       sendTx,
       onBeforeSendRequest: this.onBeforeSendRequest
     });
@@ -175,11 +186,10 @@ export default class Keplr {
 
   async getKeplr(): Promise<keplrType | undefined> {
     if (isMobile()) {
-      console.log('isMobile');
-      return this.getMobileKeplr();
-    }
-
-    if (window.keplr) {
+      if (!window.keplr) {
+        const keplr = await this.getMobileKeplr();
+        if (keplr) window.keplr = keplr;
+      }
       return window.keplr;
     }
 
@@ -214,12 +224,22 @@ export default class Keplr {
   }
 
   async getKeplrAddr(chain_id?: string): Promise<String | undefined> {
+    // not support network.chainId (Oraichain)
+    if (isMobile() && blacklistNetworks.includes(chain_id ?? network.chainId)) {
+      const pubkey = await this.getKeplrPubKey('osmosis-1');
+      return this.getAddressFromPubKey(pubkey!);
+    }
     const key = await this.getKeplrKey(chain_id);
     return key.bech32Address;
   }
 
-  async getKeplrPubKey(): Promise<Uint8Array | undefined> {
-    const key = await this.getKeplrKey();
+  async getKeplrPubKey(chain_id?: string): Promise<Uint8Array | undefined> {
+    const key = await this.getKeplrKey(chain_id);
     return key.pubKey;
+  }
+
+  getAddressFromPubKey(pubkey: Uint8Array, denom?: string) {
+    const address = hash160(pubkey);
+    return new Bech32Address(address).toBech32(denom ?? network.denom);
   }
 }

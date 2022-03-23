@@ -166,8 +166,6 @@ const Balance: React.FC<BalanceProps> = () => {
     loadTokenAmounts();
   }, [prices, txHash, pendingTokens]);
 
-  // console.log(prices['oraichain-token'].price);
-
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
     if (!token.cosmosBased) {
       displayToast(TToastType.TX_INFO, {
