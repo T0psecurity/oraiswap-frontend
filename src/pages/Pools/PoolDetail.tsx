@@ -85,7 +85,7 @@ interface ValidToken {
   logo: string;
 }
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { namePool } = useParams();
@@ -130,27 +130,30 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               <div className={cx('row')}>
                 <div className={cx('container', 'tokens')}>
                   <div className={cx('available-tokens')}>
-                    <div className={cx('label')}>
-                      Available LP tokens
-                    </div>
-                    {DemoPie([
-                      {
-                        type: "ATOM",
-                        value: 10,
-                      },
-                      {
-                        type: "ORAI",
-                        value: 20,
-                      },
-                    ], '102.57 GAMM-1', '$52,749')}
+                    <div className={cx('label')}>Available LP tokens</div>
+                    {DemoPie(
+                      [
+                        {
+                          type: 'ATOM',
+                          value: 10
+                        },
+                        {
+                          type: 'ORAI',
+                          value: 20
+                        }
+                      ],
+                      '102.57 GAMM-1',
+                      '$52,749'
+                    )}
                   </div>
                   <div className={cx('liquidity')}>
-                    <div className={cx('label')}>
-                      My liquidity
-                    </div>
+                    <div className={cx('label')}>My liquidity</div>
                     <div className={cx('liquidity_token')}>
                       <div className={cx('liquidity_token_name')}>
-                        <span className={cx('mark')} style={{background: '#FFD5AE'}}></span>
+                        <span
+                          className={cx('mark')}
+                          style={{ background: '#FFD5AE' }}
+                        ></span>
                         <span className={cx('icon')}></span>
                         <span className={cx('token-name')}>ATOM</span>
                       </div>
@@ -161,7 +164,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     </div>
                     <div className={cx('liquidity_token')}>
                       <div className={cx('liquidity_token_name')}>
-                        <span className={cx('mark')} style={{background: '#612FCA'}}></span>
+                        <span
+                          className={cx('mark')}
+                          style={{ background: '#612FCA' }}
+                        ></span>
                         <span className={cx('icon')}></span>
                         <span className={cx('token-name')}>ORAI</span>
                       </div>
@@ -170,14 +176,17 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <span className={cx('amount-usd')}>$26,445</span>
                       </div>
                     </div>
-                    <Button className={cx('btn')} onClick={() => setIsOpenLiquidityModal(true)}>Add/Remove Liquidity</Button>
+                    <Button
+                      className={cx('btn')}
+                      onClick={() => setIsOpenLiquidityModal(true)}
+                    >
+                      Add/Remove Liquidity
+                    </Button>
                   </div>
                 </div>
 
                 <div className={cx('container', 'pool-catalyst')}>
-                  <div className={cx('label')}>
-                    Pool Catalyst
-                  </div>
+                  <div className={cx('label')}>Pool Catalyst</div>
                   <div className={cx('content')}>
                     <div className={cx('pool-catalyst_token')}>
                       <div className={cx('pool-catalyst_token_name')}>
@@ -205,40 +214,40 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
               <div className={cx('row')}>
                 <div className={cx('mining')}>
-                  <div className={cx('label--bold')}>
-                    Liquidity Mining
-                  </div>
+                  <div className={cx('label--bold')}>Liquidity Mining</div>
                   <div className={cx('label--sub')}>
                     Bond liquidity to earn ORAI liquidity reward and swap fees
                   </div>
                   <div className={cx('container', 'container_mining')}>
-                    <img className={cx('icon')} src={require('assets/images/Liquidity_mining_illus.png').default} />
+                    <img
+                      className={cx('icon')}
+                      src={
+                        require('assets/images/Liquidity_mining_illus.png')
+                          .default
+                      }
+                    />
                     <div className={cx('bonded')}>
-                      <div className={cx('label')}>
-                        Bonded
-                      </div>
-                      <div className={cx('amount')}>
-                        2.35 GAMM-1
-                      </div>
-                      <div className={cx('amount-usd')}>
-                        $1,948.80
-                      </div>
-                      <Divider dashed style={{ background: "#2D2938", width: "100%", height: "1px", margin: "16px 0" }} />
+                      <div className={cx('label')}>Bonded</div>
+                      <div className={cx('amount')}>2.35 GAMM-1</div>
+                      <div className={cx('amount-usd')}>$1,948.80</div>
+                      <Divider
+                        dashed
+                        style={{
+                          background: '#2D2938',
+                          width: '100%',
+                          height: '1px',
+                          margin: '16px 0'
+                        }}
+                      />
                       <div className={cx('bonded-apr')}>
-                        <div className={cx('bonded-name')}>
-                          Current APR
-                        </div>
-                        <div className={cx('bonded-value')}>
-                          63.08%
-                        </div>
+                        <div className={cx('bonded-name')}>Current APR</div>
+                        <div className={cx('bonded-value')}>63.08%</div>
                       </div>
                       <div className={cx('bonded-unbouding')}>
                         <div className={cx('bonded-name')}>
                           Unbonding Duration
                         </div>
-                        <div className={cx('bonded-value')}>
-                          7 days
-                        </div>
+                        <div className={cx('bonded-value')}>7 days</div>
                       </div>
                     </div>
                   </div>
@@ -246,20 +255,18 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 <div className={cx('earning')}>
                   <Button className={cx('btn')}>Start Earning</Button>
                   <div className={cx('container', 'container_earning')}>
-                    <div className={cx('label')}>
-                      Earnings
-                    </div>
-                    <div className={cx('amount')}>
-                      0 ORAI
-                    </div>
-                    <div className={cx('amount-usd')}>
-                      $0
-                    </div>
-                    <Button className={cx('btn', 'btn--dark')} onClick={() => setIsOpenBondingModal(true)}>Unbond All</Button>
+                    <div className={cx('label')}>Earnings</div>
+                    <div className={cx('amount')}>0 ORAI</div>
+                    <div className={cx('amount-usd')}>$0</div>
+                    <Button
+                      className={cx('btn', 'btn--dark')}
+                      onClick={() => setIsOpenBondingModal(true)}
+                    >
+                      Unbond All
+                    </Button>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
           <LiquidityModal
@@ -288,7 +295,7 @@ const DemoPie = (
   data: {
     type: string;
     value: number;
-  }[], 
+  }[],
   title: string,
   value: string
 ) => {
@@ -305,16 +312,16 @@ const DemoPie = (
       offset: '-50%',
       content: undefined,
       style: {
-        fontSize: 0,
-      },
+        fontSize: 0
+      }
     },
     interactions: [
       {
-        type: 'element-selected',
+        type: 'element-selected'
       },
       {
-        type: 'element-active',
-      },
+        type: 'element-active'
+      }
     ],
     color: ['#612FCA', '#FFD5AE'],
     statistic: {
@@ -327,7 +334,7 @@ const DemoPie = (
           fontSize: '18px',
           fontWeight: 600
         },
-        content: title,
+        content: title
       },
       content: {
         style: {
@@ -336,13 +343,13 @@ const DemoPie = (
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           color: '#777E90',
-          fontSize: '14px',
+          fontSize: '14px'
         },
-        content: value,
-      },
-    },
+        content: value
+      }
+    }
   };
-  return <Pie style={{ height: "189px", width: "189px" }} {...config} />;
+  return <Pie style={{ height: '189px', width: '189px' }} {...config} />;
 };
 
 export default PoolDetail;

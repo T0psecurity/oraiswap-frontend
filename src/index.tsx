@@ -17,13 +17,6 @@ window.Keplr = new Keplr();
 const queryClient = new QueryClient();
 
 const startApp = async () => {
-  const keplr = await window.Keplr.getKeplr();
-  // suggest our chain
-  if (keplr) {
-    // always trigger suggest chain when users enter the webpage
-    await window.Keplr.suggestChain(network.chainId);
-  }
-
   render(
     <StrictMode>
       <ToastProvider>
@@ -40,6 +33,13 @@ const startApp = async () => {
     </StrictMode>,
     document.getElementById('oraiswap')
   );
+
+  const keplr = await window.Keplr.getKeplr();
+  // suggest our chain
+  if (keplr) {
+    // always trigger suggest chain when users enter the webpage
+    await window.Keplr.suggestChain(network.chainId);
+  }
 };
 
 startApp();
