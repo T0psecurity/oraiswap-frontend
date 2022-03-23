@@ -1,7 +1,7 @@
 // @ts-nocheck
 import styles from './Pie.module.scss';
 import cn from 'classnames/bind';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 const cx = cn.bind(styles);
 

@@ -1,3 +1,9 @@
+@property --p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
 .pie {
   --p: 20;
   --b: 22px;
