@@ -10,6 +10,7 @@ import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useWindowSize from 'hooks/useWindowSize';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const queryClient = new QueryClient();
 
@@ -22,8 +23,20 @@ const App = () => {
     .getElementById('oraiswap')
     ?.style.setProperty('zoom', windowSize.width > 1480 ? '1' : '0.9');
 
+  const updateAddress = async () => {
+    // automatically update. If user is also using Oraichain wallet => dont update
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) throw 'You must install Keplr to continue';
+    const newAddress = await window.Keplr.getKeplrAddr();
+    if (newAddress) setAddress(newAddress as string);
+  };
+
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
+    // try to set it again
+    if (!address) {
+      updateAddress();
+    }
     window.addEventListener('keplr_keystorechange', keplrHandler);
   }, []);
 
@@ -32,11 +45,7 @@ const App = () => {
       console.log(
         'Key store in Keplr is changed. You may need to refetch the account info.'
       );
-      // automatically update. If user is also using Oraichain wallet => dont update
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) throw 'You must install Keplr to continue';
-      const newAddress = await window.Keplr.getKeplrAddr();
-      if (newAddress) setAddress(newAddress as string);
+      updateAddress();
       window.location.reload();
     } catch (error) {
       console.log('Error: ', error);
