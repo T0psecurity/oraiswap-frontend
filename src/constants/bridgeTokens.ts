@@ -225,11 +225,11 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Osmosis',
         denom: 'uosmo',
         chainId: 'osmosis-1',
-        rpc: 'https://rpc-osmosis.blockapsis.com',
-        lcd: 'https://lcd-osmosis.blockapsis.com',
+        rpc: 'http://167.99.119.182:26657',
+        lcd: 'http://167.99.119.182:1317',
         decimals: 6,
         coingeckoId: 'osmosis',
-        cosmosBased: false,
+        cosmosBased: true,
         Icon: OSMO
       },
       {
@@ -325,13 +325,13 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'OSMO',
         org: 'Oraichain',
-        denom: 'ibc/osmosis',
+        denom: 'ibc/6AE2756AA7EAA8FA06E11472EA05CA681BD8D3FBC1AAA9F06C79D1EC1C90DC9B',
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         decimals: 6,
         coingeckoId: 'osmosis',
-        cosmosBased: false,
+        cosmosBased: true,
         Icon: OSMO
       },
       {
