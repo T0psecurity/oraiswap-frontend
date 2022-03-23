@@ -18,7 +18,7 @@ import {
   generateContractMessages,
   simulateSwap
 } from 'rest/api';
-import { Pie } from '@ant-design/plots';
+import Pie from 'components/Pie';
 
 const cx = cn.bind(style);
 
@@ -280,16 +280,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const step3Component = (
     <>
       <div className={cx('stat')}>
-        {DemoPie([
-          {
-            type: token1InfoData?.symbol!,
-            value: amountToken1
-          },
-          {
-            type: token2InfoData?.symbol!,
-            value: amountToken2
-          }
-        ])}
+        <Pie percent={50}>
+          {token1InfoData?.symbol}/${token2InfoData?.symbol}
+        </Pie>
         <div className={cx('stats_info')}>
           <div className={cx('stats_info_row')}>
             <div

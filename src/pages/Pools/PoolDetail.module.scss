@@ -111,6 +111,10 @@
       display: flex;
       justify-content: space-between;
       gap: 30px;
+      &:first-child {
+        padding-bottom: 40px;
+        border-bottom: 1px solid #2d2938;
+      }
     }
 
     .label {

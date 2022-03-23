@@ -1,16 +1,15 @@
 // @ts-nocheck
 import React, { memo, useState } from 'react';
-import styles from './index.module.scss';
 import { Button, Divider, Input } from 'antd';
-import style from './PoolDetail.module.scss';
+import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
 import { useParams } from 'react-router-dom';
 import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
-import { Pie } from '@ant-design/plots';
+import Pie from 'components/Pie';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 const mockPair = {
   'ORAI-AIRI': {
@@ -131,20 +130,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 <div className={cx('container', 'tokens')}>
                   <div className={cx('available-tokens')}>
                     <div className={cx('label')}>Available LP tokens</div>
-                    {DemoPie(
-                      [
-                        {
-                          type: 'ATOM',
-                          value: 10
-                        },
-                        {
-                          type: 'ORAI',
-                          value: 20
-                        }
-                      ],
-                      '102.57 GAMM-1',
-                      '$52,749'
-                    )}
+                    <Pie percent={50}>102.57 GAMM-1 $52,749</Pie>
                   </div>
                   <div className={cx('liquidity')}>
                     <div className={cx('label')}>My liquidity</div>
@@ -178,6 +164,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     </div>
                     <Button
                       className={cx('btn')}
+                      style={{ marginTop: 30 }}
                       onClick={() => setIsOpenLiquidityModal(true)}
                     >
                       Add/Remove Liquidity
@@ -289,67 +276,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       )}
     </Content>
   );
-};
-
-const DemoPie = (
-  data: {
-    type: string;
-    value: number;
-  }[],
-  title: string,
-  value: string
-) => {
-  const config = {
-    legend: false,
-    appendPadding: 10,
-    data,
-    angleField: 'value',
-    colorField: 'type',
-    radius: 1,
-    innerRadius: 0.9,
-    label: {
-      type: 'inner',
-      offset: '-50%',
-      content: undefined,
-      style: {
-        fontSize: 0
-      }
-    },
-    interactions: [
-      {
-        type: 'element-selected'
-      },
-      {
-        type: 'element-active'
-      }
-    ],
-    color: ['#612FCA', '#FFD5AE'],
-    statistic: {
-      title: {
-        style: {
-          whiteSpace: 'pre-wrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          color: '#ffffff',
-          fontSize: '18px',
-          fontWeight: 600
-        },
-        content: title
-      },
-      content: {
-        style: {
-          marginTop: '5px',
-          whiteSpace: 'pre-wrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          color: '#777E90',
-          fontSize: '14px'
-        },
-        content: value
-      }
-    }
-  };
-  return <Pie style={{ height: '189px', width: '189px' }} {...config} />;
 };
 
 export default PoolDetail;
