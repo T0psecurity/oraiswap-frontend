@@ -16,31 +16,21 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
-  simulateSwap
+  simulateSwap,
 } from 'rest/api';
+import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+import { filteredTokens } from 'constants/bridgeTokens';
+import { getUsd } from 'libs/utils';
+import TokenBalance from 'components/TokenBalance';
+import useLocalStorage from 'libs/useLocalStorage';
+import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import Pie from 'components/Pie';
+
 
 const cx = cn.bind(style);
 
-const mockBalance = {
-  ORAI: 800000,
-  AIRI: 80000.09,
-  ATOM: 50000.09,
-  TEST1: 8000.122,
-  TEST2: 800.3434
-};
-
-const mockPrice = {
-  ORAI: 5.01,
-  AIRI: 0.89,
-  TEST1: 1,
-  TEST2: 1
-};
-
 type TokenDenom = keyof typeof mockToken;
 
-type TokenName = keyof typeof mockToken;
-type PairName = keyof typeof mockPair;
 interface ValidToken {
   title: TokenDenom;
   contractAddress: string | undefined;
@@ -56,6 +46,13 @@ interface ModalProps {
   isCloseBtn?: boolean;
 }
 
+const mapTokenToIdPrice = {
+  ORAI: 'oraichain-token',
+  LUNA: 'terra-luna',
+  AIRI: 'airight',
+  ATOM: 'cosmos',
+  UST: 'terrausd',
+};
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
@@ -64,9 +61,12 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       contractAddress: token.contractAddress,
       Icon: token.Icon,
       title: token.name,
-      denom: token.denom
+      denom: token.denom,
     };
   });
+  const { prices } = useCoinGeckoPrices(
+    filteredTokens.map((t) => t.coingeckoId)
+  );
   const [step, setStep] = useState(1);
   const [isSelectingToken, setIsSelectingToken] = useState<
     'token1' | 'token2' | null
@@ -81,12 +81,13 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState(0);
   const [amountToken2, setAmountToken2] = useState(0);
+  const [address] = useLocalStorage<String>('address');
 
   const {
     data: token1InfoData,
     error: token1InfoError,
     isError: isToken1InfoError,
-    isLoading: isToken1InfoLoading
+    isLoading: isToken1InfoLoading,
   } = useQuery(['token-info', token1], () => {
     if (!!token1) return fetchTokenInfo(mockToken[token1!]);
   });
@@ -95,13 +96,54 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token2InfoData,
     error: token2InfoError,
     isError: isToken2InfoError,
-    isLoading: isToken2InfoLoading
+    isLoading: isToken2InfoLoading,
   } = useQuery(['token-info', token2], () => {
     if (!!token2) return fetchTokenInfo(mockToken[token2!]);
   });
 
+  const {
+    data: token1Balance,
+    error: token1BalanceError,
+    isError: isToken1BalanceError,
+    isLoading: isToken1BalanceLoading,
+  } = useQuery(
+    ['token-balance', token1],
+    () =>
+      fetchBalance(
+        address,
+        mockToken[token1!].denom,
+        mockToken[token1!].contractAddress,
+        mockToken[token1!].lcd
+      ),
+    { enabled: !!address }
+  );
+
+  const {
+    data: token2Balance,
+    error: token2BalanceError,
+    isError: isToken2BalanceError,
+    isLoading: isLoadingToken2Balance,
+  } = useQuery(
+    ['token-balance', token2],
+    () =>
+      fetchBalance(
+        address,
+        mockToken[token2!].denom,
+        mockToken[token2!].contractAddress,
+        mockToken[token2!].lcd
+      ),
+    { enabled: !!address }
+  );
+
   const Token1Icon = mockToken[token1!]?.Icon;
   const Token2Icon = mockToken[token2!]?.Icon;
+
+  const getBalanceValue = (tokenSymbol: string, amount: number) => {
+    const pricePer =
+      prices[mapTokenToIdPrice[tokenSymbol]]?.price?.asNumber ?? 0;
+
+    return pricePer * amount;
+  };
 
   const step1Component = (
     <>
@@ -207,12 +249,42 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <div className={cx('percent')}>{supplyToken1}%</div>
         </div>
         <div className={cx('balance')}>
-          <span>Balance: 338.45 {token1InfoData?.symbol}</span>
-          <div className={cx('btn')}>MAX</div>
-          <div className={cx('btn')} onClick={() => {}}>
+          <TokenBalance
+            balance={{
+              amount: token1Balance ? token1Balance : 0,
+              denom: token1InfoData?.symbol ?? '',
+            }}
+            prefix="Balance: "
+            decimalScale={6}
+          />
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              setAmountToken1(
+                parseDisplayAmount(token1Balance, token1InfoData?.decimals)
+              )
+            }
+          >
+            MAX
+          </div>
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              setAmountToken1(
+                parseDisplayAmount(token1Balance / 2, token1InfoData?.decimals)
+              )
+            }
+          >
             HALF
           </div>
-          <span style={{ flexGrow: 1, textAlign: 'right' }}>$604.12</span>
+          <TokenBalance
+            balance={getBalanceValue(
+              token1InfoData?.symbol,
+              parseDisplayAmount(token1Balance, token1InfoData?.decimals)
+            )}
+            style={{ flexGrow: 1, textAlign: 'right' }}
+            decimalScale={2}
+          />
         </div>
         <div className={cx('input')}>
           <div className={cx('token')}>
@@ -240,12 +312,42 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <div className={cx('percent')}>{supplyToken2}%</div>
         </div>
         <div className={cx('balance')}>
-          <span>Balance: 338.45 {token2InfoData?.symbol}</span>
-          <div className={cx('btn')}>MAX</div>
-          <div className={cx('btn')} onClick={() => {}}>
+          <TokenBalance
+            balance={{
+              amount: token2Balance ? token2Balance : 0,
+              denom: token2InfoData?.symbol ?? '',
+            }}
+            prefix="Balance: "
+            decimalScale={6}
+          />
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              setAmountToken2(
+                parseDisplayAmount(token2Balance, token2InfoData?.decimals)
+              )
+            }
+          >
+            MAX
+          </div>
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              setAmountToken2(
+                parseDisplayAmount(token2Balance / 2, token2InfoData?.decimals)
+              )
+            }
+          >
             HALF
           </div>
-          <span style={{ flexGrow: 1, textAlign: 'right' }}>$604.12</span>
+          <TokenBalance
+            balance={getBalanceValue(
+              token2InfoData?.symbol,
+              parseDisplayAmount(token2Balance, token2InfoData?.decimals)
+            )}
+            style={{ flexGrow: 1, textAlign: 'right' }}
+            decimalScale={2}
+          />
         </div>
         <div className={cx('input')}>
           <div className={cx('token')}>
@@ -270,7 +372,12 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(1)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => setStep(3)}>
+        <div
+          className={cx('swap-btn')}
+          onClick={() => {
+            setStep(3);
+          }}
+        >
           Next
         </div>
       </div>
@@ -280,7 +387,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const step3Component = (
     <>
       <div className={cx('stat')}>
-        <Pie percent={50}>
+      <Pie percent={50}>
           {token1InfoData?.symbol}/${token2InfoData?.symbol}
         </Pie>
         <div className={cx('stats_info')}>
@@ -297,7 +404,11 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('stats_info_value_amount')}>{amountToken1}</div>
           </div>
           <div className={cx('stats_info_row')}>
-            <div className={cx('stats_info_value_usd')}>$182.38</div>
+            <TokenBalance
+              balance={getBalanceValue(token1InfoData?.symbol, +amountToken2)}
+              className={cx('stats_info_value_usd')}
+              decimalScale={2}
+            />
           </div>
           <div className={cx('stats_info_row')}>
             <div
@@ -312,7 +423,11 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('stats_info_value_amount')}>{amountToken2}</div>
           </div>
           <div className={cx('stats_info_row')}>
-            <div className={cx('stats_info_value_usd')}>$182.38</div>
+            <TokenBalance
+              balance={getBalanceValue(token2InfoData?.symbol, +amountToken2)}
+              className={cx('stats_info_value_usd')}
+              decimalScale={2}
+            />
           </div>
         </div>
       </div>
@@ -458,16 +573,16 @@ const DemoPie = (
       offset: '-50%',
       content: undefined,
       style: {
-        fontSize: 0
-      }
+        fontSize: 0,
+      },
     },
     interactions: [
       {
-        type: 'element-selected'
+        type: 'element-selected',
       },
       {
-        type: 'element-active'
-      }
+        type: 'element-active',
+      },
     ],
     color: ['#612FCA', '#FFD5AE'],
     statistic: {
@@ -478,11 +593,11 @@ const DemoPie = (
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           color: '#ffffff',
-          fontSize: '14px'
+          fontSize: '14px',
         },
-        content: `${data[0].type}/${data[1].type}`
-      }
-    }
+        content: `${data[0].type}/${data[1].type}`,
+      },
+    },
   };
   return <Pie {...config} />;
 };
