@@ -12,11 +12,11 @@ import { filteredTokens } from 'constants/bridgeTokens';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
-import NewPoolModal from './NewPoolModal/NewPoolModal'
+import NewPoolModal from './NewPoolModal/NewPoolModal';
 
 const { Search } = Input;
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 const Header = memo<{ amount: number; oraiPrice: number }>(
   ({ amount, oraiPrice }) => {
@@ -46,7 +46,7 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) => mockToken[denom]);
 
-  console.log(pair, amount)
+  console.log(pair, amount);
   return (
     <div
       className={styles.pairbox}
@@ -95,20 +95,55 @@ const WatchList = memo(() => {
   );
 });
 
-const ListPools = memo<{ pairInfos: PairInfoData[], setIsOpenNewPoolModal: any }>(({ pairInfos, setIsOpenNewPoolModal }) => {
+const ListPools = memo<{
+  pairInfos: PairInfoData[];
+  setIsOpenNewPoolModal: any;
+}>(({ pairInfos, setIsOpenNewPoolModal }) => {
+  const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
+    []
+  );
+
+  useEffect(() => {
+    setFilteredPairInfos(pairInfos);
+  }, [pairInfos]);
+
+  const filterPairs = (text: string) => {
+    if (!text) {
+      return setFilteredPairInfos(pairInfos);
+    }
+    const searchReg = new RegExp(text, 'i');
+    const ret = pairInfos.filter((pairInfo) =>
+      pairInfo.pair.asset_denoms.some(
+        (denom) => mockToken[denom].name.search(searchReg) !== -1
+      )
+    );
+
+    setFilteredPairInfos(ret);
+  };
+
   return (
     <div className={styles.listpools}>
       <div className={styles.listpools_title}>All pools</div>
       <div className={styles.listpools_search}>
         <Search
           placeholder="Search by pools or tokens name"
-          onSearch={() => { }}
-          style={{ width: 420, background: "#1E1E21", borderRadius: '8px', padding: '10px' }}
+          onSearch={filterPairs}
+          style={{
+            width: 420,
+            background: '#1E1E21',
+            borderRadius: '8px',
+            padding: '10px'
+          }}
         />
-        <div className={styles.listpools_btn} onClick={() => setIsOpenNewPoolModal(true)}>Create new pool</div>
+        <div
+          className={styles.listpools_btn}
+          onClick={() => setIsOpenNewPoolModal(true)}
+        >
+          Create new pool
+        </div>
       </div>
       <div className={styles.listpools_list}>
-        {pairInfos.map((info) => (
+        {filteredPairInfos.map((info) => (
           <PairBox {...info} key={info.pair.contract_addr} />
         ))}
       </div>
@@ -127,7 +162,7 @@ const Pools: React.FC<PoolsProps> = () => {
     filteredTokens.map((t) => t.coingeckoId)
   );
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
-  const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false)
+  const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map(
@@ -179,12 +214,14 @@ const Pools: React.FC<PoolsProps> = () => {
           oraiPrice={prices['oraichain-token'].price?.asNumber ?? 0}
         />
         <WatchList />
-        <ListPools pairInfos={pairInfos} setIsOpenNewPoolModal={setIsOpenNewPoolModal} />
+        <ListPools
+          pairInfos={pairInfos}
+          setIsOpenNewPoolModal={setIsOpenNewPoolModal}
+        />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}
           close={() => setIsOpenNewPoolModal(false)}
-
         />
       </div>
     </Content>

@@ -16,7 +16,7 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
-  simulateSwap,
+  simulateSwap
 } from 'rest/api';
 import { Pie } from '@ant-design/plots';
 
@@ -27,14 +27,14 @@ const mockBalance = {
   AIRI: 80000.09,
   ATOM: 50000.09,
   TEST1: 8000.122,
-  TEST2: 800.3434,
+  TEST2: 800.3434
 };
 
 const mockPrice = {
   ORAI: 5.01,
   AIRI: 0.89,
   TEST1: 1,
-  TEST2: 1,
+  TEST2: 1
 };
 
 type TokenDenom = keyof typeof mockToken;
@@ -64,7 +64,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       contractAddress: token.contractAddress,
       Icon: token.Icon,
       title: token.name,
-      denom: token.denom,
+      denom: token.denom
     };
   });
   const [step, setStep] = useState(1);
@@ -86,7 +86,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token1InfoData,
     error: token1InfoError,
     isError: isToken1InfoError,
-    isLoading: isToken1InfoLoading,
+    isLoading: isToken1InfoLoading
   } = useQuery(['token-info', token1], () => {
     if (!!token1) return fetchTokenInfo(mockToken[token1!]);
   });
@@ -95,7 +95,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token2InfoData,
     error: token2InfoError,
     isError: isToken2InfoError,
-    isLoading: isToken2InfoLoading,
+    isLoading: isToken2InfoLoading
   } = useQuery(['token-info', token2], () => {
     if (!!token2) return fetchTokenInfo(mockToken[token2!]);
   });
@@ -116,11 +116,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           >
             {!!token1 ? (
               (() => {
-                const Token1Icon = mockToken[token1!]?.Icon;
-
                 return (
                   <>
-                    <Token1Icon className={cx('logo')} />
+                    {Token1Icon && <Token1Icon className={cx('logo')} />}
                     <div className={cx('title')}>
                       <div>{token1InfoData?.symbol ?? ''}</div>
                       <div className={cx('des')}>Cosmos Hub</div>
@@ -163,11 +161,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           >
             {!!token2 ? (
               (() => {
-                const TokenIcon = mockToken[token2!]?.Icon;
-
                 return (
                   <>
-                    <TokenIcon className={cx('logo')} />
+                    {Token2Icon && <Token2Icon className={cx('logo')} />}
                     <div className={cx('title')}>
                       <div>{token2InfoData?.symbol ?? ''}</div>
                       <div className={cx('highlight')}>Cosmos Hub</div>
@@ -213,14 +209,14 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('balance')}>
           <span>Balance: 338.45 {token1InfoData?.symbol}</span>
           <div className={cx('btn')}>MAX</div>
-          <div className={cx('btn')} onClick={() => { }}>
+          <div className={cx('btn')} onClick={() => {}}>
             HALF
           </div>
           <span style={{ flexGrow: 1, textAlign: 'right' }}>$604.12</span>
         </div>
         <div className={cx('input')}>
           <div className={cx('token')}>
-            <Token1Icon className={cx('logo')} />
+            {Token1Icon && <Token1Icon className={cx('logo')} />}
             <div className={cx('title')}>
               <div>{token1InfoData?.symbol}</div>
               <div className={cx('des')}>Cosmos Hub</div>
@@ -246,14 +242,14 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('balance')}>
           <span>Balance: 338.45 {token2InfoData?.symbol}</span>
           <div className={cx('btn')}>MAX</div>
-          <div className={cx('btn')} onClick={() => { }}>
+          <div className={cx('btn')} onClick={() => {}}>
             HALF
           </div>
           <span style={{ flexGrow: 1, textAlign: 'right' }}>$604.12</span>
         </div>
         <div className={cx('input')}>
           <div className={cx('token')}>
-            <Token2Icon className={cx('logo')} />
+            {Token2Icon && <Token2Icon className={cx('logo')} />}
             <div className={cx('title')}>
               <div>{token2InfoData?.symbol}</div>
               <div className={cx('highlight')}>Cosmos Hub</div>
@@ -287,12 +283,12 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         {DemoPie([
           {
             type: token1InfoData?.symbol!,
-            value: amountToken1,
+            value: amountToken1
           },
           {
             type: token2InfoData?.symbol!,
-            value: amountToken2,
-          },
+            value: amountToken2
+          }
         ])}
         <div className={cx('stats_info')}>
           <div className={cx('stats_info_row')}>
@@ -300,7 +296,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               className={cx('stats_info_cl')}
               style={{ background: '#612FCA' }}
             />
-            <Token1Icon className={cx('stats_info_lg')} />
+            {Token1Icon && <Token1Icon className={cx('stats_info_lg')} />}
             <div className={cx('stats_info_name')}>
               {token1InfoData?.symbol}
             </div>
@@ -315,7 +311,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               className={cx('stats_info_cl')}
               style={{ background: '#FFD5AE' }}
             />
-            <Token2Icon className={cx('stats_info_lg')} />
+            {Token2Icon && <Token2Icon className={cx('stats_info_lg')} />}
             <div className={cx('stats_info_name')}>
               {token2InfoData?.symbol}
             </div>
@@ -339,7 +335,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
               placeholder="0"
               type="number"
-              onChange={(e) => { }}
+              onChange={(e) => {}}
             />
             <span>%</span>
           </div>
@@ -358,7 +354,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => { }}>
+        <div className={cx('swap-btn')} onClick={() => {}}>
           Create
         </div>
       </div>
@@ -469,16 +465,16 @@ const DemoPie = (
       offset: '-50%',
       content: undefined,
       style: {
-        fontSize: 0,
-      },
+        fontSize: 0
+      }
     },
     interactions: [
       {
-        type: 'element-selected',
+        type: 'element-selected'
       },
       {
-        type: 'element-active',
-      },
+        type: 'element-active'
+      }
     ],
     color: ['#612FCA', '#FFD5AE'],
     statistic: {
@@ -489,11 +485,11 @@ const DemoPie = (
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           color: '#ffffff',
-          fontSize: '14px',
+          fontSize: '14px'
         },
-        content: `${data[0].type}/${data[1].type}`,
-      },
-    },
+        content: `${data[0].type}/${data[1].type}`
+      }
+    }
   };
   return <Pie {...config} />;
 };
