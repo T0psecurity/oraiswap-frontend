@@ -46,7 +46,6 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) => mockToken[denom]);
 
-  console.log(pair, amount);
   return (
     <div
       className={styles.pairbox}
