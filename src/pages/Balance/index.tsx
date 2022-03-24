@@ -20,7 +20,6 @@ import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 import Loader from 'components/Loader';
-import { Bech32Address } from '@keplr-wallet/cosmos';
 
 interface BalanceProps {}
 
