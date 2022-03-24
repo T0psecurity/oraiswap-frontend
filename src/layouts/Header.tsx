@@ -18,7 +18,7 @@ const Header = () => {
           <a className={styles.logo} href="https://swap.orai.io">
             <img src={logo} />
           </a>
-          <span>Oraiswap</span>
+          <span>OraiDEX</span>
         </section>
 
         <section className={styles.support}>
