@@ -331,7 +331,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     balance={fromUsd}
                     className={styles.balanceDescription}
                     prefix="~$"
-                    decimalScale={from?.decimals}
+                    decimalScale={2}
                   />
                 </div>
                 {from?.name ? (
