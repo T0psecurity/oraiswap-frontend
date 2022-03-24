@@ -322,7 +322,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'terra-luna',
         coinType: 118,
         denom:
-          'bc/BA44E90EAFEA8F39D87A94A4A61C9FFED5887C2730DFBA668C197BA331372859',
+          'ibc/BA44E90EAFEA8F39D87A94A4A61C9FFED5887C2730DFBA668C197BA331372859',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
