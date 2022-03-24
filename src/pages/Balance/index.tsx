@@ -107,13 +107,15 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadAmountDetail = async (
-    address: Bech32Address,
     token: TokenItemType,
     pendingList: TokenItemType[]
   ) => {
     try {
-      // using this way we no need to enable other network
-
+      // using this way we no need to enable other network, maybe it is different cointType so we can not reuse pubkey
+      const address = await window.Keplr.getKeplrBech32Address(
+        token.coinType === network.coinType ? network.chainId : token.chainId
+      );
+      if (!address) return [token.denom, { amount: 0, usd: 0 }];
       const amount = await fetchBalance(
         address.toBech32(token.prefix!),
         token.denom,
@@ -139,7 +141,6 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       // we enable oraichain then use pubkey to calculate other address
       await window.Keplr.suggestChain(network.chainId);
-      const address = await window.Keplr.getKeplrBech32Address(network.chainId);
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.TX_FAILED, {
@@ -149,9 +150,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          pendingTokens.map((token) =>
-            loadAmountDetail(address!, token, pendingList)
-          )
+          pendingTokens.map((token) => loadAmountDetail(token, pendingList))
         )
       );
 

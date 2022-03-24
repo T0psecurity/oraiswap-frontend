@@ -11,6 +11,7 @@ import { KeplrQRCodeModalV1 } from '@keplr-wallet/wc-qrcode-modal';
 import { filteredTokens } from 'constants/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
+import { Key } from 'types/kelpr';
 
 const hash160 = (buffer: Uint8Array) => {
   var t = createHash('sha256').update(buffer).digest();
@@ -78,15 +79,18 @@ export default class Keplr {
   }
 
   suggestChain = async (chainId: string) => {
+    if (!window.keplr) return;
     const chainInfo = embedChainInfos.find(
       (chainInfo) => chainInfo.chainId === chainId
     );
-    if (!chainInfo || !window.keplr) return;
     if (!isMobile()) {
-      await window.keplr.experimentalSuggestChain(chainInfo);
-      await window.keplr.enable(chainInfo.chainId);
-    } else if (!blacklistNetworks.includes(chainInfo.chainId)) {
-      await window.keplr.enable(chainInfo.chainId);
+      // if there is chainInfo try to suggest, otherwise enable it
+      if (chainInfo) {
+        await window.keplr.experimentalSuggestChain(chainInfo);
+      }
+      await window.keplr.enable(chainId);
+    } else if (!blacklistNetworks.includes(chainId)) {
+      await window.keplr.enable(chainId);
     }
   };
 
@@ -212,7 +216,7 @@ export default class Keplr {
     });
   }
 
-  private async getKeplrKey(chain_id?: string): Promise<any | undefined> {
+  private async getKeplrKey(chain_id?: string): Promise<Key | undefined> {
     let chainId = network.chainId;
     if (chain_id) chainId = chain_id;
     if (!chainId) return undefined;
@@ -230,12 +234,12 @@ export default class Keplr {
       return address?.toBech32(network.prefix);
     }
     const key = await this.getKeplrKey(chain_id);
-    return key.bech32Address;
+    return key?.bech32Address;
   }
 
   async getKeplrPubKey(chain_id?: string): Promise<Uint8Array | undefined> {
     const key = await this.getKeplrKey(chain_id);
-    return key.pubKey;
+    return key?.pubKey;
   }
 
   async getKeplrBech32Address(

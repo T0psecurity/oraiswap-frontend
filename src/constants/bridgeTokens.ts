@@ -18,6 +18,7 @@ export type TokenItemType = {
   contractAddress?: string;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   chainId: string;
+  coinType?: number;
   rpc: string;
   lcd?: string;
   decimals: number;
@@ -57,6 +58,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coingeckoId: 'cosmos',
         denom: 'atom',
         decimals: 6,
+        coinType: 118,
         chainId: 'cosmoshub-4',
         rpc: 'https://rpc-cosmoshub.blockapsis.com',
         lcd: 'https://lcd-cosmoshub.blockapsis.com',
@@ -67,6 +69,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'OSMO',
         org: 'Osmosis',
         prefix: 'osmo',
+        coinType: 118,
         denom: 'osmosis',
         chainId: 'osmosis-1',
         rpc: 'https://rpc-osmosis.blockapsis.com',
@@ -106,6 +109,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Oraichain',
         prefix: 'orai',
         denom: 'orai',
+        coinType: 118,
         coingeckoId: 'oraichain-token',
         decimals: 6,
         chainId: 'Oraichain-testnet',
@@ -119,6 +123,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'cosmos',
+        coinType: 118,
         denom: 'ibc/atom',
         decimals: 6,
         chainId: 'Oraichain-testnet',
@@ -130,6 +135,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'OSMO',
         org: 'Oraichain',
+        coinType: 118,
         prefix: 'orai',
         denom: 'ibc/osmosis',
         chainId: 'Oraichain-testnet',
@@ -168,6 +174,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'AIRI',
         org: 'Oraichain',
         prefix: 'orai',
+        coinType: 118,
         coingeckoId: 'airight',
         denom: 'airi',
         contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
@@ -186,6 +193,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'ORAI',
         org: 'Ethereum',
         prefix: 'orai',
+        coinType: 118,
         denom: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
         coingeckoId: 'oraichain-token',
         contractAddress: 'orai',
@@ -199,6 +207,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'ATOM',
         org: 'Cosmos Hub',
+        coinType: 118,
         prefix: 'cosmos',
         coingeckoId: 'cosmos',
         denom: 'uatom',
@@ -213,6 +222,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'LUNA',
         org: 'Terra',
         prefix: 'terra',
+        coinType: 330,
         coingeckoId: 'terra-luna',
         denom: 'uluna',
         decimals: 6,
@@ -226,6 +236,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'UST',
         org: 'Terra',
         prefix: 'terra',
+        coinType: 330,
         coingeckoId: 'terrausd',
         denom: 'uusd',
         decimals: 6,
@@ -240,6 +251,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Osmosis',
         prefix: 'osmo',
         denom: 'uosmo',
+        coinType: 118,
         chainId: 'osmosis-1',
         rpc: 'https://rpc-osmosis.blockapsis.com',
         lcd: 'https://lcd-osmosis.blockapsis.com',
@@ -278,6 +290,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'ORAI',
         org: 'Oraichain',
         prefix: 'orai',
+        coinType: 118,
         denom: 'orai',
         coingeckoId: 'oraichain-token',
         decimals: 6,
@@ -292,6 +305,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'cosmos',
+        coinType: 118,
         denom:
           'ibc/45C001A5AE212D09879BE4627C45B64D5636086285590D5145A51E18E9D16722',
         decimals: 6,
@@ -306,6 +320,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'terra-luna',
+        coinType: 118,
         denom:
           'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C',
         decimals: 6,
@@ -320,6 +335,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'terrausd',
+        coinType: 118,
         denom:
           'ibc/D9CDEFD93E29F5C2175C7606DFF67490B2123BB93F299B3AFA53E8BB1DDD4FC4',
         decimals: 6,
@@ -337,6 +353,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'airi',
         contractAddress: 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg',
         decimals: 6,
+        coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
@@ -348,6 +365,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Oraichain',
         prefix: 'orai',
         denom: 'ibc/osmosis',
+        coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
@@ -360,6 +378,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'ETH',
         org: 'Oraichain',
         prefix: 'orai',
+        coinType: 118,
         coingeckoId: 'ethereum',
         denom: 'ibc/ethereum',
         decimals: 18,
@@ -372,6 +391,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'BNB',
         org: 'Oraichain',
         prefix: 'orai',
+        coinType: 118,
         chainId: 'Oraichain-testnet',
         denom: 'bnb',
         rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',

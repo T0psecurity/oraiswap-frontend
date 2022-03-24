@@ -23,6 +23,7 @@ const startApp = async () => {
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
       await window.Keplr.suggestChain(network.chainId);
+      await window.Keplr.suggestChain('columbus-5');
     }
   } catch (ex) {
     console.log(ex);

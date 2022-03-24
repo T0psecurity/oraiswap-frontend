@@ -3,6 +3,7 @@ interface ExtNetworkConfig {
   rpc: string;
   lcd: string;
   explorer: string;
+  coinType?: number;
 }
 
 export interface NetworkConfig extends ExtNetworkConfig {
