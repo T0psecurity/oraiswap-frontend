@@ -25,7 +25,7 @@ import TokenBalance from 'components/TokenBalance';
 import useLocalStorage from 'libs/useLocalStorage';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import Pie from 'components/Pie';
-
+import NumberFormat from 'react-number-format';
 
 const cx = cn.bind(style);
 
@@ -56,14 +56,12 @@ const mapTokenToIdPrice = {
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
-  const allToken: ValidToken[] = Object.values(mockToken).map((token) => {
+  const allToken = Object.values(mockToken).map((token) => {
     return {
-      contractAddress: token.contractAddress,
-      Icon: token.Icon,
+      ...token,
       title: token.name,
-      denom: token.denom,
     };
-  });
+  });  
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
@@ -178,14 +176,14 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             )}
           </div>
           <div className={cx('amount')}>
-            <input
-              // className={cx('amount')}
-              // value={fromAmount ? fromAmount : ""}
-              value={supplyToken1 ? supplyToken1 : ''}
+            <NumberFormat
               placeholder="0"
-              type="number"
-              onChange={(e) => {
-                setSupplyToken1(+e.target.value);
+              thousandSeparator
+              decimalScale={6}
+              type="input"
+              value={supplyToken1 ? supplyToken1 : ''}
+              onValueChange={({ floatValue }) => {
+                setSupplyToken1(floatValue);
               }}
             />
             <span>%</span>
@@ -223,12 +221,14 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             )}
           </div>
           <div className={cx('amount')}>
-            <input
-              value={supplyToken2 ? supplyToken2 : ''}
+            <NumberFormat
               placeholder="0"
-              type="number"
-              onChange={(e) => {
-                setSupplyToken2(+e.target.value);
+              thousandSeparator
+              decimalScale={6}
+              type="input"
+              value={supplyToken2 ? supplyToken2 : ''}
+              onValueChange={({ floatValue }) => {
+                setSupplyToken2(floatValue);
               }}
             />
             <span>%</span>
@@ -294,13 +294,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               <div className={cx('des')}>Cosmos Hub</div>
             </div>
           </div>
-          <input
-            className={cx('amount')}
-            value={!!amountToken1 ? amountToken1 : ''}
+          <NumberFormat
             placeholder="0"
-            type="number"
-            onChange={(e) => {
-              setAmountToken1(+e.target.value);
+            className={cx('amount')}
+            thousandSeparator
+            decimalScale={6}
+            type="input"
+            value={!!amountToken1 ? amountToken1 : ''}
+            onValueChange={({ floatValue }) => {
+              setAmountToken1(floatValue);
             }}
           />
         </div>
@@ -357,13 +359,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               <div className={cx('highlight')}>Cosmos Hub</div>
             </div>
           </div>
-          <input
-            className={cx('amount')}
-            value={!!amountToken2 ? amountToken2 : ''}
+          <NumberFormat
             placeholder="0"
-            type="number"
-            onChange={(e) => {
-              setAmountToken2(+e.target.value);
+            className={cx('amount')}
+            thousandSeparator
+            decimalScale={6}
+            type="input"
+            value={!!amountToken2 ? amountToken2 : ''}
+            onValueChange={({ floatValue }) => {
+              setAmountToken2(floatValue);
             }}
           />
         </div>
@@ -387,7 +391,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const step3Component = (
     <>
       <div className={cx('stat')}>
-      <Pie percent={50}>
+        <Pie percent={50}>
           {token1InfoData?.symbol}/${token2InfoData?.symbol}
         </Pie>
         <div className={cx('stats_info')}>
@@ -405,7 +409,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <div className={cx('stats_info_row')}>
             <TokenBalance
-              balance={getBalanceValue(token1InfoData?.symbol, +amountToken2)}
+              balance={getBalanceValue(token1InfoData?.symbol, +amountToken1)}
               className={cx('stats_info_value_usd')}
               decimalScale={2}
             />
@@ -437,13 +441,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <span className={cx('title')}>Swap Fee</span>
           </div>
           <div className={cx('amount')}>
-            <input
-              // className={cx('amount')}
-              // value={fromAmount ? fromAmount : ""}
-
+            <NumberFormat
               placeholder="0"
-              type="number"
-              onChange={(e) => {}}
+              thousandSeparator
+              decimalScale={6}
+              type="input"
+              // value={supplyToken2 ? supplyToken2 : ''}
+              // onValueChange={({ floatValue }) => {
+              //   setSupplyToken2(floatValue);
+              // }}
             />
             <span>%</span>
           </div>
