@@ -15,6 +15,7 @@ export interface NetworkConfig extends ExtNetworkConfig {
   oracle: string;
   router: string;
   denom: string;
+  prefix: string;
 }
 
 export interface Network extends NetworkConfig {

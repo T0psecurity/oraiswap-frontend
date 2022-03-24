@@ -226,8 +226,8 @@ export default class Keplr {
   async getKeplrAddr(chain_id?: string): Promise<String | undefined> {
     // not support network.chainId (Oraichain)
     if (isMobile() && blacklistNetworks.includes(chain_id ?? network.chainId)) {
-      const pubkey = await this.getKeplrPubKey('osmosis-1');
-      return this.getAddressFromPubKey(pubkey!);
+      const address = await this.getKeplrBech32Address('osmosis-1');
+      return address?.toBech32(network.prefix);
     }
     const key = await this.getKeplrKey(chain_id);
     return key.bech32Address;
@@ -238,8 +238,12 @@ export default class Keplr {
     return key.pubKey;
   }
 
-  getAddressFromPubKey(pubkey: Uint8Array, denom?: string) {
+  async getKeplrBech32Address(
+    chain_id?: string
+  ): Promise<Bech32Address | undefined> {
+    const pubkey = await this.getKeplrPubKey(chain_id);
+    if (!pubkey) return undefined;
     const address = hash160(pubkey);
-    return new Bech32Address(address).toBech32(denom ?? network.denom);
+    return new Bech32Address(address);
   }
 }
