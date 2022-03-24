@@ -42,6 +42,20 @@ const ibcInfosMap: { [key: string]: IBCInfoMap } = {
         timeout: 60
       }
     },
+    'columbus-5': {
+      Oraichain: {
+        source: 'transfer',
+        channel: 'channel-40',
+        timeout: 480
+      }
+    },
+    'osmosis-1': {
+      Oraichain: {
+        source: 'transfer',
+        channel: 'channel-214',
+        timeout: 480,
+      }
+    },
     Oraichain: {
       'cosmoshub-4': {
         source: 'transfer',
@@ -53,13 +67,11 @@ const ibcInfosMap: { [key: string]: IBCInfoMap } = {
         channel: 'channel-11',
         timeout: 60
       },
-    },
-    'columbus-5': {
-      Oraichain: {
+      'osmosis-1': {
         source: 'transfer',
-        channel: 'channel-40',
-        timeout: 480
-      }
+        channel: 'channel-12',
+        timeout: 60
+      },
     },
   }
 };
