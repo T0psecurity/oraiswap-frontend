@@ -108,7 +108,7 @@ export const embedChainInfos: ChainInfo[] = [
       coinImageUrl: window.location.origin + '/public/assets/tokens/terra.png'
     },
     bip44: {
-      coinType: 118
+      coinType: 330
     },
     bech32Config: Bech32Address.defaultBech32Config('terra'),
     currencies: [
