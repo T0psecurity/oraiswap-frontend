@@ -139,8 +139,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
-      // we enable oraichain then use pubkey to calculate other address
-      await window.Keplr.suggestChain(network.chainId);
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.TX_FAILED, {
