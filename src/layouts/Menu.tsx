@@ -150,7 +150,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 />
               )}
             </RequireAuthButton>
-            {renderLink(
+            {/* {renderLink(
               '/swap',
               'Swap',
               setLink,
@@ -161,7 +161,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               'Pools',
               setLink,
               <Pools style={{ width: 30, height: 30 }} />
-            )}
+            )} */}
             {renderLink(
               '/bridge',
               'Bridge',
