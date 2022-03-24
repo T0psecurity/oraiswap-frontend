@@ -77,4 +77,6 @@ declare global {
   declare const APP_SETTINGS: Record<string, any>;
 }
 
+declare module 'crypto-hashing';
+
 export {};

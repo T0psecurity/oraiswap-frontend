@@ -8,6 +8,8 @@ export enum NetworkKey {
 const networks: { [key: string]: NetworkConfig } = {
   [NetworkKey.MAINNET]: {
     chainId: 'Oraichain',
+    prefix: 'orai',
+    denom: 'orai',
     lcd: 'https://lcd.orai.io',
     rpc: 'https://rpc.orai.io',
     id: NetworkKey.MAINNET,
@@ -19,6 +21,8 @@ const networks: { [key: string]: NetworkConfig } = {
   },
   [NetworkKey.TESTNET]: {
     chainId: 'Oraichain-testnet',
+    prefix: 'orai',
+    denom: 'orai',
     lcd: 'https://testnet.lcd.orai.io',
     rpc: 'https://testnet.rpc.orai.io',
     id: NetworkKey.TESTNET,
@@ -49,55 +53,5 @@ export interface NetworkItem {
   rpc: string;
 }
 
-export const oraiBridgeNetwork: NetworkItem = {
-  cosmosBased: true,
-  name: 'OraiBridge',
-  chainId: 'gravity-test',
-  rpc: 'http://125.212.192.225:26657',
-  icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
-};
-
-export const bridgeNetworks: NetworkItem[] = [
-  {
-    cosmosBased: false,
-    name: 'Ethereum',
-    chainId: 'ethereum',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
-  },
-  {
-    cosmosBased: false,
-    name: 'Binance Smart Chain',
-    chainId: 'bsc',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png'
-  },
-  {
-    cosmosBased: true,
-    name: 'Oraichain-testnet',
-    chainId: 'Oraichain-testnet',
-    rpc: 'https://testnet.lcd.orai.io',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
-  },
-  {
-    cosmosBased: true,
-    name: 'Atom',
-    chainId: 'Atom',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3794.png'
-  },
-  {
-    cosmosBased: true,
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/14299.png',
-    name: 'Juno',
-    chainId: 'Juno',
-    rpc: ''
-  },
-  {
-    cosmosBased: true,
-    name: 'Osmosis',
-    chainId: 'Osmosis',
-    rpc: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/12220.png'
-  }
-];
+// sadly our Oraichain is not added into keplr yet
+export const blacklistNetworks: string[] = [network.chainId];

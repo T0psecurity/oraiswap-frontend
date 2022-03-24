@@ -1,3 +1,5 @@
+@import 'src/styles/mixins';
+
 .content {
   background-image: url(../assets/images/Background_dark.png);
   background-repeat: no-repeat;
@@ -7,4 +9,9 @@
   flex: 1;
   min-height: 100vh;
   height: auto;
+  width: 100%;
+  @include mobile {
+    min-height: calc(100vh - 110px);
+    padding: 90px 15px 20px 15px;
+  }
 }

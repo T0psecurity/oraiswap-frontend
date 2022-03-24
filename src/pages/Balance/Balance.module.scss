@@ -1,5 +1,10 @@
+@import 'src/styles/mixins';
+
 .wrapper {
   padding: 32px;
+  @include mobile {
+    padding: 0;
+  }
 }
 .header {
   display: flex;
@@ -40,6 +45,11 @@
     font-weight: 600;
     font-size: 16px;
   }
+
+  @include mobile {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 .divider {
   width: 100%;
@@ -69,7 +79,7 @@
   position: relative;
   background: linear-gradient(to top right, transparent, #777e9022);
   padding: 1px;
-  flex: 1;
+  width: 100%;
   overflow: hidden;
   border-radius: 24px;
 }

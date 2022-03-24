@@ -6,7 +6,6 @@ import './SSOWidget.scss';
 import MESSAGE from 'lang/MESSAGE.json';
 import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
-import useLocalStorage from 'libs/useLocalStorage';
 
 const cx = cn.bind(style);
 

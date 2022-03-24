@@ -83,14 +83,16 @@ const Menu: React.FC<{}> = React.memo((props) => {
   return (
     <>
       {mobileMode && (
-        <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-          <LogoFull />{' '}
+        <div className={styles.logo}>
+          <Link to={'/'} onClick={() => setLink('/')}>
+            <LogoFull />
+          </Link>
           <Icon
             size={44}
             name={open ? 'menu_open' : 'menu'}
             onClick={handleToggle}
           />
-        </Link>
+        </div>
       )}
       <div className={classNames(styles.menu, { [styles.open]: open })}>
         <div>
@@ -161,8 +163,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
               <Pools style={{ width: 30, height: 30 }} />
             )}
             {renderLink(
-              '/balance',
-              'Balance',
+              '/bridge',
+              'Bridge',
               setLink,
               <Wallet style={{ width: 30, height: 30 }} />
             )}
