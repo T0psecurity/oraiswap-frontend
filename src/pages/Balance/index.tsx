@@ -20,7 +20,6 @@ import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 import Loader from 'components/Loader';
-import { Bech32Address } from '@keplr-wallet/cosmos';
 
 interface BalanceProps {}
 
@@ -139,8 +138,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
-      // we enable oraichain then use pubkey to calculate other address
-      await window.Keplr.suggestChain(network.chainId);
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.TX_FAILED, {
@@ -333,7 +330,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     balance={fromUsd}
                     className={styles.balanceDescription}
                     prefix="~$"
-                    decimalScale={from?.decimals}
+                    decimalScale={2}
                   />
                 </div>
                 {from?.name ? (
