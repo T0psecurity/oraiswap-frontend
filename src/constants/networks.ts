@@ -8,6 +8,7 @@ export enum NetworkKey {
 const networks: { [key: string]: NetworkConfig } = {
   [NetworkKey.MAINNET]: {
     chainId: 'Oraichain',
+    prefix: 'orai',
     denom: 'orai',
     lcd: 'https://lcd.orai.io',
     rpc: 'https://rpc.orai.io',
@@ -20,6 +21,7 @@ const networks: { [key: string]: NetworkConfig } = {
   },
   [NetworkKey.TESTNET]: {
     chainId: 'Oraichain-testnet',
+    prefix: 'orai',
     denom: 'orai',
     lcd: 'https://testnet.lcd.orai.io',
     rpc: 'https://testnet.rpc.orai.io',
