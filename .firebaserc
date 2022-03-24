@@ -13,6 +13,9 @@
                 ],
                 "oraiswap-testnet": [
                     "oraiswap-testnet"
+                ],
+                "oraiswap-ibc": [
+                    "oraiswap-ibc"
                 ]
             }
         }
