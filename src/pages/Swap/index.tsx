@@ -31,6 +31,7 @@ import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(style);
 
@@ -43,16 +44,19 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
     const keplr = await window.Keplr.getKeplr();
-    if (keplr) await keplr.suggestToken(token.chainId, token.contractAddress);
-    else
-      displayToast(TToastType.KEPLR_FAILED, {
+    if (!keplr) {
+      return displayToast(TToastType.KEPLR_FAILED, {
         message: 'You need to install Keplr to continue'
       });
+    }
+
+    if (!isMobile())
+      await keplr.suggestToken(token.chainId, token.contractAddress);
   }
 };
 
@@ -262,7 +266,7 @@ const Swap: React.FC<SwapProps> = () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
-      })
+      });
 
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -453,8 +457,9 @@ const Swap: React.FC<SwapProps> = () => {
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${toTokenInfoData?.symbol
-                  }`}
+                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${
+                  toTokenInfoData?.symbol
+                }`}
               </span>
               <TooltipIcon />
             </div>
@@ -471,9 +476,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
@@ -529,7 +534,7 @@ const Swap: React.FC<SwapProps> = () => {
                 <span>Exchange rate</span>
                 <TooltipIcon />
               </div>
-              <span>{(parseFloat(exchangeRate)).toFixed(6)}</span>
+              <span>{parseFloat(exchangeRate).toFixed(6)}</span>
             </div>
           </div>
           <SettingModal

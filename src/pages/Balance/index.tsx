@@ -20,6 +20,7 @@ import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 import Loader from 'components/Loader';
+import { Bech32Address } from '@keplr-wallet/cosmos';
 
 interface BalanceProps {}
 
@@ -106,22 +107,15 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadAmountDetail = async (
+    address: Bech32Address,
     token: TokenItemType,
     pendingList: TokenItemType[]
   ) => {
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'You must install Keplr to continue'
-      });
-      return [token.denom, { amount: 0, usd: 0 }];
-    }
     try {
-      await window.Keplr.suggestChain(token.chainId);
-      const address = await window.Keplr.getKeplrAddr(token.chainId);
+      // using this way we no need to enable other network
 
       const amount = await fetchBalance(
-        address as string,
+        address.toBech32(token.prefix!),
         token.denom,
         token.contractAddress,
         token.lcd
@@ -143,10 +137,21 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
+      // we enable oraichain then use pubkey to calculate other address
+      await window.Keplr.suggestChain(network.chainId);
+      const address = await window.Keplr.getKeplrBech32Address(network.chainId);
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) {
+        return displayToast(TToastType.TX_FAILED, {
+          message: 'You must install Keplr to continue'
+        });
+      }
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          pendingTokens.map((token) => loadAmountDetail(token, pendingList))
+          pendingTokens.map((token) =>
+            loadAmountDetail(address!, token, pendingList)
+          )
         )
       );
 
@@ -165,8 +170,6 @@ const Balance: React.FC<BalanceProps> = () => {
   useEffect(() => {
     loadTokenAmounts();
   }, [prices, txHash, pendingTokens]);
-
-  // console.log(prices['oraichain-token'].price);
 
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
     if (!token.cosmosBased) {
