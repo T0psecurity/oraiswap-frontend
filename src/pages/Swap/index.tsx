@@ -84,6 +84,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [slippage, setSlippage] = useState(1);
   const [address, setAddress] = useLocalStorage<String>('address');
   const [swapLoading, setSwapLoading] = useState(false);
+  const [txHash, setTxHash] = useState<String>()
 
   const onChangeFromAmount = (amount: number) => {
     setFromAmount(amount);
@@ -141,7 +142,7 @@ const Swap: React.FC<SwapProps> = () => {
     isError: isFromTokenBalanceError,
     isLoading: isFromTokenBalanceLoading
   } = useQuery(
-    ['from-token-balance', fromToken],
+    ['from-token-balance', fromToken, txHash],
     () =>
       fetchBalance(
         address,
@@ -158,7 +159,7 @@ const Swap: React.FC<SwapProps> = () => {
     isError: isToTokenBalanceError,
     isLoading: isLoadingToTokenBalance
   } = useQuery(
-    ['to-token-balance', toToken],
+    ['to-token-balance', toToken, txHash],
     () =>
       fetchBalance(
         address,
@@ -327,6 +328,7 @@ const Swap: React.FC<SwapProps> = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setSwapLoading(false);
+        setTxHash(result.transactionHash)
         return;
       }
     } catch (error) {
