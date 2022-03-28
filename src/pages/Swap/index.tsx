@@ -44,7 +44,7 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -196,11 +196,25 @@ const Swap: React.FC<SwapProps> = () => {
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
 
-  const { data: poolData, isLoading: isPoolDataLoading } = useQuery(
-    ['pool-info-amount', fromTokenInfoData, toTokenInfoData],
-    () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate }
+  const {
+    data: simulateAverageData,
+    isLoading: isSimulateAverageDataLoading
+  } = useQuery(
+    ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
+    () =>
+      simulateSwap({
+        fromInfo: fromTokenInfoData,
+        toInfo: toTokenInfoData,
+        amount: parseAmount('1', fromTokenInfoData?.decimals)
+      }),
+    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
+
+  // const { data: poolData, isLoading: isPoolDataLoading } = useQuery(
+  //   ['pool-info-amount', fromTokenInfoData, toTokenInfoData],
+  //   () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
+  //   { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate }
+  // );
 
   // const { data: pairInfo, isLoading: isPairInfoLoading } = useQuery(
   //   ['pair-info', fromTokenInfoData, toTokenInfoData],
@@ -208,59 +222,67 @@ const Swap: React.FC<SwapProps> = () => {
   //   { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   // );
 
-  // useEffect(() => {
-  //   console.log("pair info: ", pairInfo)
-  // }, [pairInfo]);
+  useEffect(() => {
+    console.log("simulate average data: ", simulateAverageData)
+    setAverageRatio(parseFloat(
+      parseDisplayAmount(simulateAverageData?.amount, toTokenInfoData?.decimals)
+    ).toFixed(6));
+  }, [simulateAverageData]);
 
   useEffect(() => {
-    let listTo = getListPairedToken(fromToken);
-    const listToken = allToken.filter((t) => listTo.includes(t.denom));
+    setToAmount(parseFloat(
+      parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
+    ).toFixed(6));
+  }, [simulateData])
+
+  useEffect(() => {
+    const listToken = allToken.filter((t) => fromToken !== t.denom);
     setListValidTo([...listToken]);
-    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenDenom);
+    // if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenDenom);
   }, [fromToken]);
 
-  useEffect(() => {
-    if (poolData && fromAmount && fromAmount > 0) {
-      const finalToAmount =
-        calculateToAmount(
-          poolData,
-          parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)),
-          parseFloat(taxRate?.rate)
-        ) ?? 0;
-      const newToAmount = parseFloat(
-        parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)
-      ).toFixed(6);
-      setToAmount(newToAmount);
-    } else if (fromAmount === 0) setToAmount(0);
-  }, [poolData, fromAmount]);
+  // useEffect(() => {
+  //   if (poolData && fromAmount && fromAmount > 0) {
+  //     const finalToAmount =
+  //       calculateToAmount(
+  //         poolData,
+  //         parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)),
+  //         parseFloat(taxRate?.rate)
+  //       ) ?? 0;
+  //     const newToAmount = parseFloat(
+  //       parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)
+  //     ).toFixed(6);
+  //     setToAmount(newToAmount);
+  //   } else if (fromAmount === 0) setToAmount(0);
+  // }, [poolData, fromAmount]);
 
-  useEffect(() => {
-    if (poolData) {
-      const finalAverageRatio = calculateToAmount(
-        poolData,
-        1,
-        parseFloat(taxRate?.rate)
-      );
-      setAverageRatio(parseFloat(finalAverageRatio));
-    }
-  }, [poolData]);
+  // useEffect(() => {
+  //   if (poolData) {
+  //     const finalAverageRatio = calculateToAmount(
+  //       poolData,
+  //       1,
+  //       parseFloat(taxRate?.rate)
+  //     );
+  //     setAverageRatio(parseFloat(finalAverageRatio));
+  //   }
+  // }, [poolData]);
 
-  const calculateToAmount = (poolData, offerAmount, taxRate) => {
-    const offer = new Big(poolData.offerPoolAmount);
-    const ask = new Big(poolData.askPoolAmount);
+  // const calculateToAmount = (poolData, offerAmount, taxRate) => {
+  //   const offer = new Big(poolData.offerPoolAmount);
+  //   const ask = new Big(poolData.askPoolAmount);
 
-    return ask
-      .minus(
-        offer
-          .mul(poolData.askPoolAmount)
-          .div(poolData.offerPoolAmount + offerAmount)
-      )
-      .mul(1 - taxRate)
-      .toNumber();
+  //   return ask
+  //     .minus(
+  //       offer
+  //         .mul(poolData.askPoolAmount)
+  //         .div(poolData.offerPoolAmount + offerAmount)
+  //     )
+  //     .mul(1 - taxRate)
+  //     .toNumber();
 
-    // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
-    // (1 - taxRate)
-  };
+  //   // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
+  //   // (1 - taxRate)
+  // };
 
   const handleSubmit = async () => {
     if (fromAmount <= 0)
@@ -457,9 +479,8 @@ const Swap: React.FC<SwapProps> = () => {
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${
-                  toTokenInfoData?.symbol
-                }`}
+                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio} ${toTokenInfoData?.symbol
+                  }`}
               </span>
               <TooltipIcon />
             </div>
@@ -476,9 +497,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input
