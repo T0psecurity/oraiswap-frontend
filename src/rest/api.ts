@@ -4,6 +4,8 @@ import { TokenItemType } from 'constants/bridgeTokens';
 import { PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
+import { ORAI } from 'constants/constants';
+import { pairsMap } from 'constants/pools';
 
 interface TokenInfo {
   name: string;
@@ -28,6 +30,8 @@ const axios = axiosClass.create({
   timeout: 10000
 });
 
+const oraiInfo = { native_token: { denom: ORAI } };
+
 const toQueryMsg = (msg: string) => {
   try {
     return Buffer.from(JSON.stringify(JSON.parse(msg))).toString('base64');
@@ -45,9 +49,8 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${
-    lcd ?? network.lcd
-  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${lcd ?? network.lcd
+    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -57,6 +60,14 @@ const querySmart = async (
 async function fetchPairs() {
   const data = await querySmart(network.factory, { pairs: {} });
   return data;
+}
+
+function findPair(pair: string) {
+  let invertedPair = pair.split('-').reverse().join('-');
+  for (let supportedPair of Object.keys(pairsMap)) {
+    if (pair === supportedPair || invertedPair === supportedPair) return true;
+  }
+  return false;
 }
 
 async function fetchTaxRate() {
@@ -90,7 +101,8 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
       contract_addr: tokenSwap.contractAddress,
       decimals: data.decimals,
       icon: data.icon,
-      verified: data.verified
+      verified: data.verified,
+      total_supply: data.total_supply
     };
   }
   return tokenInfo;
@@ -101,24 +113,34 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
   return data;
 }
 
+function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
+  return parseInt(
+    poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
+    '0'
+  )
+}
+
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenInfo,
   toTokenInfo: TokenInfo
 ) {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
-  const pairInfo = await querySmart(network.factory, {
-    pair: { asset_infos: [fromInfo, toInfo] }
-  });
-  const poolInfo = await fetchPool(pairInfo.contract_addr);
-  const offerPoolAmount = parseInt(
-    poolInfo.assets.find((asset) => _.isEqual(asset.info, fromInfo))?.amount ??
-      '0'
-  );
-  const askPoolAmount = parseInt(
-    poolInfo.assets.find((asset) => _.isEqual(asset.info, toInfo))?.amount ??
-      '0'
-  );
+  let offerPoolAmount, askPoolAmount = 0;
+  if (findPair(`${fromTokenInfo.denom}-${toTokenInfo.denom}`)) {
+    const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
+    const poolInfo = await fetchPool(pairInfo.contract_addr);
+    offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
+    askPoolAmount = parsePoolAmount(poolInfo, toInfo);
+  } else {
+    // handle multi-swap case
+    const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
+    const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
+    const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
+    const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
+    offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
+    askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
+  }
   return { offerPoolAmount, askPoolAmount };
 }
 
@@ -127,8 +149,15 @@ async function fetchPairInfo(
 ): Promise<PairInfo> {
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+  const data = await fetchPairInfoRaw([firstAsset, secondAsset]);
+  return data;
+}
+
+async function fetchPairInfoRaw(
+  assetInfos: [any, any]
+): Promise<PairInfo> {
   const data = await querySmart(network.factory, {
-    pair: { asset_infos: [firstAsset, secondAsset] }
+    pair: { asset_infos: assetInfos }
   });
   return data;
 }
@@ -153,9 +182,8 @@ async function fetchNativeTokenBalance(
   denom: string,
   lcd?: string
 ) {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -201,30 +229,49 @@ async function fetchExchangeRate(base_denom: string, quote_denom: string) {
   return data?.item?.exchange_rate;
 }
 
+const generateSwapOperationMsgs = (data: { denom: string, offerInfo: any, askInfo: any }) => {
+  const { denom, offerInfo, askInfo } = data;
+  return findPair(denom) ? [{
+    orai_swap: {
+      offer_asset_info: offerInfo,
+      ask_asset_info: askInfo
+    }
+  }] : [{
+    orai_swap: {
+      offer_asset_info: offerInfo,
+      ask_asset_info: oraiInfo
+    }
+  },
+  {
+    orai_swap: {
+      offer_asset_info: oraiInfo,
+      ask_asset_info: askInfo
+    }
+  }];
+}
+
 async function simulateSwap(query: {
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
   amount: number | string;
 }) {
   const { amount, fromInfo, toInfo } = query;
-  const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(
+  // check if they have pairs. If not then we go through ORAI
+
+  const { info: offerInfo } = parseTokenInfo(
     fromInfo,
     amount.toString()
   );
-  const { fund: askSentFund, info: askInfo } = parseTokenInfo(
+  const { info: askInfo } = parseTokenInfo(
     toInfo,
     undefined
   );
+
+  let operations = generateSwapOperationMsgs({ denom: `${fromInfo.denom}-${toInfo.denom}`, offerInfo, askInfo });
+
   let msg = {
     simulate_swap_operations: {
-      operations: [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
-        }
-      ],
+      operations,
       offer_amount: amount.toString()
     }
   };
@@ -244,13 +291,13 @@ export type SwapQuery = {
 
 export type ProvideQuery = {
   type: Type.PROVIDE;
-  from: string;
-  to: string;
+  // from: string;
+  // to: string;
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
   fromAmount: number | string;
   toAmount: number | string;
-  slippage: number | string;
+  slippage?: number | string;
   sender: string;
   pair: string; // oraiswap pair contract addr, handle provide liquidity
 };
@@ -286,14 +333,7 @@ async function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund as Fund, askSentFund as Fund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: [
-            {
-              orai_swap: {
-                offer_asset_info: offerInfo,
-                ask_asset_info: askInfo
-              }
-            }
-          ]
+          operations: generateSwapOperationMsgs({ denom: `${swapQuery.fromInfo.denom}-${swapQuery.toInfo.denom}`, offerInfo, askInfo }),
         }
       };
       // if cw20 => has to send through cw20 contract
