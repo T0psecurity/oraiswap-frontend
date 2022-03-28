@@ -101,7 +101,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
-  const [txCount, setTxCount] = useState(0);
+  const [txHash, setTxHash] = useState<String>();
 
   const {
     data: token1InfoData,
@@ -129,14 +129,14 @@ const LiquidityModal: FC<ModalProps> = ({
     isError: isPairAmountInfoError,
     isLoading: isPairAmountInfoLoading,
   } = useQuery(
-    ['pair-amount-info', token1InfoData, token2InfoData, prices, txCount],
+    ['pair-amount-info', token1InfoData, token2InfoData, prices, txHash],
     () => {
       return getPairAmountInfo();
     },
     {
       enabled: !!prices && !!token1InfoData && !!token2InfoData,
       refetchOnWindowFocus: false,
-      // refetchInterval: 0000,
+      refetchInterval: 10000,
     }
   );
 
@@ -164,7 +164,7 @@ const LiquidityModal: FC<ModalProps> = ({
     isError: isToken1BalanceError,
     isLoading: isToken1BalanceLoading,
   } = useQuery(
-    ['token-balance', token1?.denom, txCount],
+    ['token-balance', token1?.denom, txHash],
     () =>
       fetchBalance(
         address,
@@ -184,7 +184,7 @@ const LiquidityModal: FC<ModalProps> = ({
     isError: isToken2BalanceError,
     isLoading: isLoadingToken2Balance,
   } = useQuery(
-    ['token-balance', token2?.denom, txCount],
+    ['token-balance', token2?.denom, txHash],
     () =>
       fetchBalance(
         address,
@@ -204,7 +204,7 @@ const LiquidityModal: FC<ModalProps> = ({
     isError: isLpTokenBalanceError,
     isLoading: isLpTokenBalanceLoading,
   } = useQuery(
-    ['token-balance', JSON.stringify(pairInfoData), txCount],
+    ['token-balance', JSON.stringify(pairInfoData), txHash],
     () => fetchBalance(address, '', pairInfoData?.liquidity_token),
     {
       enabled: !!address && !!pairInfoData,
@@ -309,11 +309,11 @@ const LiquidityModal: FC<ModalProps> = ({
 
     if (amount1 <= 0 || amount1 > token1Balance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Token1 amount should be higher than 0!',
+        message: 'Token1 amount invalid!',
       });
     if (amount2 <= 0 || amount2 > token2Balance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Token2 amount should be higher than 0!',
+        message: 'Token2 amount invalid!',
       });
 
     setActionLoading(true);
@@ -357,7 +357,7 @@ const LiquidityModal: FC<ModalProps> = ({
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setActionLoading(false);
-        setTxCount((prev) => prev + 1);
+        setTxHash(result.transactionHash);
         return;
       }
     } catch (error) {
@@ -424,7 +424,7 @@ const LiquidityModal: FC<ModalProps> = ({
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setActionLoading(false);
-        setTxCount((prev) => prev + 1);
+        setTxHash(result.transactionHash);
         return;
       }
     } catch (error) {
@@ -641,7 +641,9 @@ const LiquidityModal: FC<ModalProps> = ({
       <button
         className={cx('swap-btn')}
         onClick={handleAddLiquidity}
-        disabled={actionLoading}
+        disabled={
+          actionLoading || !token1InfoData || !token2InfoData || !pairInfoData
+        }
       >
         {actionLoading && <Loader width={20} height={20} />}
         <span>Add Liquidity</span>
@@ -803,7 +805,7 @@ const LiquidityModal: FC<ModalProps> = ({
       <button
         className={cx('swap-btn')}
         onClick={handleWithdrawLiquidity}
-        disabled={actionLoading}
+        disabled={actionLoading || !lpTokenInfoData || !pairInfoData}
       >
         {actionLoading && <Loader width={20} height={20} />}
         <span>Withdraw Liquidity</span>
