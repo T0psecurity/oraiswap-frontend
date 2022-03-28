@@ -301,6 +301,10 @@
     }
 
     .swap-btn {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
       width: 100%;
       background: #612fca;
       /* Inner/Button */
@@ -321,7 +325,7 @@
       /* aiRight/White */
 
       color: #ffffff;
-      cursor: pointer;
+      // cursor: pointer;
 
       margin: 32px 0 0 0;
     }

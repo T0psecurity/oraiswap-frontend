@@ -101,7 +101,8 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
       contract_addr: tokenSwap.contractAddress,
       decimals: data.decimals,
       icon: data.icon,
-      verified: data.verified
+      verified: data.verified,
+      total_supply: data.total_supply
     };
   }
   return tokenInfo;
@@ -290,13 +291,13 @@ export type SwapQuery = {
 
 export type ProvideQuery = {
   type: Type.PROVIDE;
-  from: string;
-  to: string;
+  // from: string;
+  // to: string;
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
   fromAmount: number | string;
   toAmount: number | string;
-  slippage: number | string;
+  slippage?: number | string;
   sender: string;
   pair: string; // oraiswap pair contract addr, handle provide liquidity
 };
