@@ -1,5 +1,4 @@
-// @ts-nocheck
-import React, { memo, useState } from 'react';
+import React, { FC, memo, useState } from 'react';
 import { Button, Divider, Input } from 'antd';
 import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
@@ -8,6 +7,24 @@ import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
 import Pie from 'components/Pie';
+import { mockToken, PairKey, pairsMap, TokensSwap } from 'constants/pools';
+import {
+  fetchBalance,
+  fetchExchangeRate,
+  fetchPairInfo,
+  fetchPool,
+  fetchPoolInfoAmount,
+  fetchTaxRate,
+  fetchTokenInfo,
+  generateContractMessages,
+  simulateSwap,
+} from 'rest/api';
+import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
+import { getUsd } from 'libs/utils';
+import useLocalStorage from 'libs/useLocalStorage';
+import { useQuery } from 'react-query';
+import TokenBalance from 'components/TokenBalance';
 
 const cx = cn.bind(styles);
 
@@ -15,189 +32,376 @@ const mockPair = {
   'ORAI-AIRI': {
     contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
     amount1: 100,
-    amount2: 1000
+    amount2: 1000,
   },
   'AIRI-ATOM': {
     contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
     amount1: 100,
-    amount2: 1000
+    amount2: 1000,
   },
   'ORAI-TEST2': {
     contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
     amount1: 100,
-    amount2: 1000
+    amount2: 1000,
   },
   'AIRI-TEST2': {
     contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
     amount1: 100,
-    amount2: 1000
+    amount2: 1000,
   },
   'ATOM-ORAI': {
     contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
     amount1: 100,
-    amount2: 1000
-  }
-};
-
-const mockToken = {
-  ORAI: {
-    contractAddress: 'orai',
-    denom: 'orai',
-    logo: 'oraichain.svg'
+    amount2: 1000,
   },
-  AIRI: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'airi.svg'
-  },
-  ATOM: {
-    contractAddress: 'orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf',
-    logo: 'atom.svg'
-  },
-  TEST2: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'atom.svg'
-  }
 };
-
-const mockBalance = {
-  ORAI: 800000,
-  AIRI: 80000.09,
-  ATOM: 50000.09,
-  TEST1: 8000.122,
-  TEST2: 800.3434
-};
-
-const mockPrice = {
-  ORAI: 5.01,
-  AIRI: 0.89,
-  TEST1: 1,
-  TEST2: 1
-};
-
-type TokenName = keyof typeof mockToken;
-type PairName = keyof typeof mockPair;
-
-interface ValidToken {
-  title: TokenName;
-  balance: number;
-  contractAddress: string;
-  logo: string;
-}
 
 interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
-  let { namePool } = useParams();
-  namePool = namePool?.toUpperCase();
-  let token1, token2;
-  {
-    let [_token1, _token2] = namePool?.split('-') ?? [undefined, undefined];
-    token1 = _token1 as TokenName;
-    token2 = _token2 as TokenName;
-  }
+  let { poolUrl } = useParams();
+  let pair,
+    token1: TokenItemType | undefined,
+    token2: TokenItemType | undefined;
+
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
 
+  const allToken = Object.values(mockToken).map((token) => {
+    return {
+      ...token,
+      title: token.name,
+    };
+  });
+
+  const [address] = useLocalStorage<string>('address');
+
+  const { prices } = useCoinGeckoPrices(
+    filteredTokens.map((t) => t.coingeckoId)
+  );
+
+  type PriceKey = keyof typeof prices;
+
+  const getPairInfo = async () => {
+    const pairKey = Object.keys(PairKey).find((k) => {
+      let [_token1, _token2] = poolUrl?.toUpperCase().split('-') ?? [
+        undefined,
+        undefined,
+      ];
+      return (
+        !!_token1 && !!_token2 && k.includes(_token1) && k.includes(_token2)
+      );
+    });
+    const t = PairKey[pairKey! as keyof typeof PairKey];
+
+    pair = pairsMap[t];
+    if (!pair) return;
+    let token1 = {
+        ...mockToken[pair.asset_denoms[0]],
+        contract_addr: mockToken[pair.asset_denoms[0]].contractAddress,
+      },
+      token2 = {
+        ...mockToken[pair.asset_denoms[1]],
+        contract_addr: mockToken[pair.asset_denoms[1]].contractAddress,
+      };
+
+    // Token1Icon = token1.Icon;
+    // Token2Icon = token2.Icon;
+
+    const pairInfo = await fetchPairInfo([
+      // @ts-ignore
+      token1,
+      // @ts-ignore
+      token2,
+    ]);
+
+    return {
+      ...pairInfo,
+      token1,
+      token2,
+    };
+  };
+
+  const getPairAmountInfo = async () => {
+    const token1 = pairInfoData?.token1,
+      token2 = pairInfoData?.token2;
+
+    const poolData = await fetchPoolInfoAmount(
+      // @ts-ignore
+      token1!,
+      token2!
+    );
+
+    const fromAmount = getUsd(
+      poolData.offerPoolAmount,
+      prices[token1!.coingeckoId].price,
+      token1!.decimals
+    );
+    const toAmount = getUsd(
+      poolData.askPoolAmount,
+      prices[token2!.coingeckoId].price,
+      token2!.decimals
+    );
+
+    return {
+      token1Amount: poolData.offerPoolAmount,
+      token2Amount: poolData.askPoolAmount,
+      token1Usd: fromAmount,
+      token2Usd: toAmount,
+      usdAmount: fromAmount + toAmount,
+      ratio: poolData.offerPoolAmount / poolData.askPoolAmount,
+    };
+  };
+
+  const {
+    data: pairInfoData,
+    error: pairInfoError,
+    isError: isPairInfoError,
+    isLoading: isPairInfoLoading,
+  } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
+    // enabled: !!token1! && !!token2!,
+    refetchOnWindowFocus: false,
+  });
+
+  let {
+    data: pairAmountInfoData,
+    error: pairAmountInfoError,
+    isError: isPairAmountInfoError,
+    isLoading: isPairAmountInfoLoading,
+  } = useQuery(
+    ['pair-amount-info', pairInfoData, prices],
+    () => {
+      console.log('t');
+
+      return getPairAmountInfo();
+    },
+    {
+      enabled: !!prices && !!pairInfoData,
+      refetchOnWindowFocus: false,
+      // refetchInterval: 10000,
+    }
+  );
+
+  const {
+    data: lpTokenBalance,
+    error: lpTokenBalanceError,
+    isError: isLpTokenBalanceError,
+    isLoading: isLpTokenBalanceLoading,
+  } = useQuery(
+    ['token-balance', pairInfoData],
+    () => fetchBalance(address, '', pairInfoData?.liquidity_token),
+    {
+      enabled: !!address && !!pairInfoData,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const {
+    data: lpTokenInfoData,
+    error: lpTokenInfoError,
+    isError: isLpTokenInfoError,
+    isLoading: isLpTokenInfoLoading,
+  } = useQuery(
+    ['token-info', pairInfoData],
+    () => {
+      // @ts-ignore
+      return fetchTokenInfo({
+        contractAddress: pairInfoData?.liquidity_token,
+      });
+    },
+    {
+      enabled: !!pairInfoData,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const Token1Icon = pairInfoData?.token1.Icon,
+    Token2Icon = pairInfoData?.token2.Icon;
+
+  const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
+  const liquidity1 =
+    (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) / lpTotalSupply;
+  const liquidity2 =
+    (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) / lpTotalSupply;
+  const liquidity1Usd =
+    (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply;
+  const liquidity2Usd =
+    (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply;
+
   return (
     <Content nonBackground>
-      {!!namePool && namePool! in mockPair ? (
+      {!!pairInfoData ? (
         <>
           <div className={cx('pool-detail')}>
             <div className={cx('header')}>
               <div className={cx('logo')}>
-                <img
-                  className={cx('token1')}
-                  src={
-                    require(`assets/icons/${mockToken[token1].logo}`).default
-                  }
-                />
-                <img
-                  className={cx('token2')}
-                  src={
-                    require(`assets/icons/${mockToken[token2].logo}`).default
-                  }
-                />
+                {Token1Icon! && <Token1Icon className={cx('token1')} />}
+                {Token2Icon! && <Token2Icon className={cx('token2')} />}
               </div>
               <div className={cx('title')}>
-                <div className={cx('name')}>{`${token1}/${token2}`}</div>
-                <div className={cx('value')}>$5,289,043</div>
+                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
+                  pairInfoData.token2!.name
+                }`}</div>
+                <TokenBalance
+                  balance={
+                    pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
+                  }
+                  className={cx('value')}
+                  decimalScale={2}
+                />
               </div>
-              <div className={cx('des')}>1 ATOM ≈ 4.85 ORAI</div>
+              {!!pairAmountInfoData && (
+                <div className={cx('des')}>{`1 ${
+                  pairInfoData.token1!.name
+                } ≈ ${+(+pairAmountInfoData?.ratio).toFixed(2)} ${
+                  pairInfoData.token2!.name
+                }`}</div>
+              )}
               <div className={cx('btn', 'swap')}>Quick Swap</div>
             </div>
             <div className={cx('info')}>
-              <div className={cx('row')}>
-                <div className={cx('container', 'tokens')}>
-                  <div className={cx('available-tokens')}>
-                    <div className={cx('label')}>Available LP tokens</div>
-                    <Pie percent={50}>102.57 GAMM-1 $52,749</Pie>
-                  </div>
-                  <div className={cx('liquidity')}>
-                    <div className={cx('label')}>My liquidity</div>
-                    <div className={cx('liquidity_token')}>
-                      <div className={cx('liquidity_token_name')}>
-                        <span
-                          className={cx('mark')}
-                          style={{ background: '#FFD5AE' }}
-                        ></span>
-                        <span className={cx('icon')}></span>
-                        <span className={cx('token-name')}>ATOM</span>
-                      </div>
-                      <div className={cx('liquidity_token_value')}>
-                        <span className={cx('amount')}>1,980.23</span>
-                        <span className={cx('amount-usd')}>$26,445</span>
-                      </div>
+              {!!pairAmountInfoData && (
+                <div className={cx('row')}>
+                  <div className={cx('container', 'tokens')}>
+                    <div className={cx('available-tokens')}>
+                      <div className={cx('label')}>Available LP tokens</div>
+                      <Pie percent={50}>
+                        <div>
+                          <TokenBalance
+                            balance={{
+                              amount: lpTokenBalance,
+                              denom: `${lpTokenInfoData?.symbol}`,
+                            }}
+                            decimalScale={2}
+                            className={cx('amount')}
+                          />
+                        </div>
+                        <TokenBalance
+                          balance={liquidity1Usd + liquidity2Usd}
+                          decimalScale={2}
+                          className={cx('amount-usd')}
+                        />
+                      </Pie>
                     </div>
-                    <div className={cx('liquidity_token')}>
-                      <div className={cx('liquidity_token_name')}>
-                        <span
-                          className={cx('mark')}
-                          style={{ background: '#612FCA' }}
-                        ></span>
-                        <span className={cx('icon')}></span>
-                        <span className={cx('token-name')}>ORAI</span>
+                    <div className={cx('liquidity')}>
+                      <div className={cx('label')}>My liquidity</div>
+                      <div className={cx('liquidity_token')}>
+                        <div className={cx('liquidity_token_name')}>
+                          <span
+                            className={cx('mark')}
+                            style={{ background: '#FFD5AE' }}
+                          ></span>
+                          <span className={cx('icon')}></span>
+                          <span className={cx('token-name')}>
+                            {pairInfoData.token1.name}
+                          </span>
+                        </div>
+                        <div className={cx('liquidity_token_value')}>
+                          <TokenBalance
+                            balance={{
+                              amount: liquidity1,
+                              denom: '',
+                            }}
+                            className={cx('amount')}
+                            decimalScale={2}
+                          />
+                          <TokenBalance
+                            balance={liquidity1Usd}
+                            className={cx('amount-usd')}
+                            decimalScale={2}
+                          />
+                        </div>
                       </div>
-                      <div className={cx('liquidity_token_value')}>
-                        <span className={cx('amount')}>1,980.23</span>
-                        <span className={cx('amount-usd')}>$26,445</span>
+                      <div className={cx('liquidity_token')}>
+                        <div className={cx('liquidity_token_name')}>
+                          <span
+                            className={cx('mark')}
+                            style={{ background: '#612FCA' }}
+                          ></span>
+                          <span className={cx('icon')}></span>
+                          <span className={cx('token-name')}>
+                            {pairInfoData.token2.name}
+                          </span>
+                        </div>
+                        <div className={cx('liquidity_token_value')}>
+                          <TokenBalance
+                            balance={{
+                              amount: liquidity2,
+                              denom: '',
+                            }}
+                            className={cx('amount')}
+                            decimalScale={2}
+                          />
+                          <TokenBalance
+                            balance={liquidity2Usd}
+                            className={cx('amount-usd')}
+                            decimalScale={2}
+                          />
+                        </div>
                       </div>
+                      <Button
+                        className={cx('btn')}
+                        style={{ marginTop: 30 }}
+                        onClick={() => setIsOpenLiquidityModal(true)}
+                      >
+                        Add/Remove Liquidity
+                      </Button>
                     </div>
-                    <Button
-                      className={cx('btn')}
-                      style={{ marginTop: 30 }}
-                      onClick={() => setIsOpenLiquidityModal(true)}
-                    >
-                      Add/Remove Liquidity
-                    </Button>
                   </div>
-                </div>
 
-                <div className={cx('container', 'pool-catalyst')}>
-                  <div className={cx('label')}>Pool Catalyst</div>
-                  <div className={cx('content')}>
-                    <div className={cx('pool-catalyst_token')}>
-                      <div className={cx('pool-catalyst_token_name')}>
-                        <span className={cx('icon')}></span>
-                        <span className={cx('token-name')}>ORAI</span>
+                  <div className={cx('container', 'pool-catalyst')}>
+                    <div className={cx('label')}>Pool Catalyst</div>
+                    <div className={cx('content')}>
+                      <div className={cx('pool-catalyst_token')}>
+                        <div className={cx('pool-catalyst_token_name')}>
+                          {Token1Icon! && <Token1Icon className={cx('icon')} />}
+                          <span className={cx('token-name')}>
+                            {pairInfoData.token1!.name}
+                          </span>
+                        </div>
+                        <div className={cx('pool-catalyst_token_value')}>
+                          <TokenBalance
+                            balance={{
+                              amount: pairAmountInfoData.token1Amount,
+                              denom: '',
+                            }}
+                            className={cx('amount')}
+                            decimalScale={2}
+                          />
+                          <TokenBalance
+                            balance={pairAmountInfoData.token1Usd}
+                            className={cx('amount-usd')}
+                            decimalScale={2}
+                          />
+                        </div>
                       </div>
-                      <div className={cx('pool-catalyst_token_value')}>
-                        <span className={cx('amount')}>1,980.23</span>
-                        <span className={cx('amount-usd')}>$26,445</span>
-                      </div>
-                    </div>
-                    <div className={cx('pool-catalyst_token')}>
-                      <div className={cx('pool-catalyst_token_name')}>
-                        <span className={cx('icon')}></span>
-                        <span className={cx('token-name')}>ORAI</span>
-                      </div>
-                      <div className={cx('pool-catalyst_token_value')}>
-                        <span className={cx('amount')}>1,980.23</span>
-                        <span className={cx('amount-usd')}>$26,445</span>
+                      <div className={cx('pool-catalyst_token')}>
+                        <div className={cx('pool-catalyst_token_name')}>
+                          {Token2Icon! && <Token2Icon className={cx('icon')} />}
+                          <span className={cx('token-name')}>
+                            {pairInfoData.token2.name}
+                          </span>
+                        </div>
+                        <div className={cx('pool-catalyst_token_value')}>
+                          <TokenBalance
+                            balance={{
+                              amount: pairAmountInfoData.token2Amount,
+                              denom: '',
+                            }}
+                            className={cx('amount')}
+                            decimalScale={2}
+                          />
+                          <TokenBalance
+                            balance={pairAmountInfoData.token2Usd}
+                            className={cx('amount-usd')}
+                            decimalScale={2}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className={cx('row')}>
                 <div className={cx('mining')}>
@@ -223,7 +427,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           background: '#2D2938',
                           width: '100%',
                           height: '1px',
-                          margin: '16px 0'
+                          margin: '16px 0',
                         }}
                       />
                       <div className={cx('bonded-apr')}>
@@ -256,20 +460,24 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               </div>
             </div>
           </div>
-          <LiquidityModal
-            isOpen={isOpenLiquidityModal}
-            open={() => setIsOpenLiquidityModal(true)}
-            close={() => setIsOpenLiquidityModal(false)}
-            token1Symbol={token1}
-            token2Symbol={token2}
-          />
-          <BondingModal
-            isOpen={isOpenBondingModal}
-            open={() => setIsOpenBondingModal(true)}
-            close={() => setIsOpenBondingModal(false)}
-            token1={token1}
-            token2={token2}
-          />
+          {isOpenLiquidityModal && (
+            <LiquidityModal
+              isOpen={isOpenLiquidityModal}
+              open={() => setIsOpenLiquidityModal(true)}
+              close={() => setIsOpenLiquidityModal(false)}
+              token1InfoData={pairInfoData.token1}
+              token2InfoData={pairInfoData.token2}
+            />
+          )}
+          {isOpenBondingModal && (
+            <BondingModal
+              isOpen={isOpenBondingModal}
+              open={() => setIsOpenBondingModal(true)}
+              close={() => setIsOpenBondingModal(false)}
+              token1={'ORAI'}
+              token2={'ATOM'}
+            />
+          )}
         </>
       ) : (
         <>No Pool found</>

@@ -32,14 +32,6 @@ import Loader from 'components/Loader';
 
 const cx = cn.bind(style);
 
-const mapTokenToIdPrice = {
-  ORAI: 'oraichain-token',
-  LUNA: 'terra-luna',
-  AIRI: 'airight',
-  ATOM: 'cosmos',
-  UST: 'terrausd',
-};
-
 type TokenDenom = keyof typeof mockToken;
 
 type PairInfoData = {
@@ -61,16 +53,16 @@ interface ModalProps {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
-  token1Symbol: string;
-  token2Symbol: string;
+  token1InfoData: any;
+  token2InfoData: any;
 }
 
 const LiquidityModal: FC<ModalProps> = ({
   isOpen,
   close,
   open,
-  token1Symbol,
-  token2Symbol,
+  token1InfoData,
+  token2InfoData,
 }) => {
   const allToken = Object.values(mockToken).map((token) => {
     return {
@@ -79,12 +71,8 @@ const LiquidityModal: FC<ModalProps> = ({
     };
   });
 
-  const token1 = allToken.find(
-    (t) => t.title === (token1Symbol as string).toUpperCase()
-  );
-  const token2 = allToken.find(
-    (t) => t.title === (token2Symbol as string).toUpperCase()
-  );
+  const token1 = token1InfoData
+  const token2 = token2InfoData
   const [address] = useLocalStorage<string>('address');
 
   const { prices } = useCoinGeckoPrices(
@@ -102,26 +90,6 @@ const LiquidityModal: FC<ModalProps> = ({
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
   const [txHash, setTxHash] = useState<String>();
-
-  const {
-    data: token1InfoData,
-    error: token1InfoError,
-    isError: isToken1InfoError,
-    isLoading: isToken1InfoLoading,
-  } = useQuery(['token-info', token1?.denom], () => fetchTokenInfo(token1!), {
-    enabled: !!token1,
-    refetchOnWindowFocus: false,
-  });
-
-  const {
-    data: token2InfoData,
-    error: token2InfoError,
-    isError: isToken2InfoError,
-    isLoading: isToken2InfoLoading,
-  } = useQuery(['token-info', token2?.denom], () => fetchTokenInfo(token2!), {
-    enabled: !!token2,
-    refetchOnWindowFocus: false,
-  });
 
   let {
     data: pairAmountInfoData,
@@ -265,12 +233,12 @@ const LiquidityModal: FC<ModalProps> = ({
 
     const fromAmount = getUsd(
       poolData.offerPoolAmount,
-      prices[token1!.coingeckoId].price,
+      prices[token1!.coingeckoId as PriceKey].price,
       token1!.decimals
     );
     const toAmount = getUsd(
       poolData.askPoolAmount,
-      prices[token2!.coingeckoId].price,
+      prices[token2!.coingeckoId as PriceKey].price,
       token2!.decimals
     );
 
@@ -285,8 +253,8 @@ const LiquidityModal: FC<ModalProps> = ({
   const getPairInfo = async () => {
     const pairKey = Object.keys(PairKey).find(
       (k) =>
-        k.includes(token1Symbol.toUpperCase()) &&
-        k.includes(token2Symbol.toUpperCase())
+        k.includes(token1InfoData.name.toUpperCase()) &&
+        k.includes(token2InfoData.name.toUpperCase())
     );
     const t = PairKey[pairKey! as keyof typeof PairKey];
 
@@ -463,7 +431,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: token1Balance ? token1Balance : 0,
-              denom: token1InfoData?.symbol ?? '',
+              denom: token1InfoData?.name ?? '',
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -510,7 +478,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <div className={cx('token')}>
             {Token1Icon && <Token1Icon className={cx('logo')} />}
             <div className={cx('title')}>
-              <div>{token1Symbol}</div>
+              <div>{token1InfoData?.name}</div>
               <div className={cx('des')}>Oraichain</div>
             </div>
           </div>
@@ -542,7 +510,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: token2Balance ? token2Balance : 0,
-              denom: token2InfoData?.symbol ?? '',
+              denom: token2InfoData?.name ?? '',
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -589,7 +557,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <div className={cx('token')}>
             {Token2Icon && <Token2Icon className={cx('logo')} />}
             <div className={cx('title')}>
-              <div>{token2Symbol}</div>
+              <div>{token2InfoData?.name}</div>
               <div className={cx('des')}>Oraichain</div>
             </div>
           </div>
@@ -737,7 +705,7 @@ const LiquidityModal: FC<ModalProps> = ({
             <div className={cx('row')}>
               {Token1Icon && <Token1Icon className={cx('logo')} />}
               <div className={cx('title')}>
-                <div>{token1Symbol}</div>
+                <div>{token1InfoData?.name}</div>
                 <div className={cx('des')}>Cosmos Hub</div>
               </div>
               <div className={cx('value')}>
@@ -770,7 +738,7 @@ const LiquidityModal: FC<ModalProps> = ({
             <div className={cx('row')}>
               {Token2Icon && <Token2Icon className={cx('logo')} />}
               <div className={cx('title')}>
-                <div>{token2Symbol}</div>
+                <div>{token2InfoData?.name}</div>
                 <div className={cx('des')}>Cosmos Hub</div>
               </div>
               <div className={cx('value')}>
@@ -824,7 +792,7 @@ const LiquidityModal: FC<ModalProps> = ({
       <div className={cx('container')}>
         <div
           className={cx('title')}
-        >{`${token1Symbol}/${token2Symbol} Pool`}</div>
+        >{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
         <div className={cx('switch')}>
           <div
             className={cx({ 'active-tab': activeTab === 0 })}

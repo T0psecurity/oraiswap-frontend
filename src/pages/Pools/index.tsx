@@ -49,7 +49,12 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   return (
     <div
       className={styles.pairbox}
-      onClick={() => navigate('../pool/atom-orai', { replace: true })}
+      onClick={() =>
+        navigate(
+          `../pool/${token1.name.toLowerCase()}-${token2.name.toLowerCase()}`
+          // { replace: true }
+        )
+      }
     >
       <div className={styles.pairbox_header}>
         <div className={styles.pairbox_logos}>
@@ -131,7 +136,7 @@ const ListPools = memo<{
             width: 420,
             background: '#1E1E21',
             borderRadius: '8px',
-            padding: '10px'
+            padding: '10px',
           }}
         />
         <div
@@ -169,11 +174,11 @@ const Pools: React.FC<PoolsProps> = () => {
     );
     const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
       fetchTokenInfo(fromToken),
-      fetchTokenInfo(toToken)
+      fetchTokenInfo(toToken),
     ]);
     const [poolData, infoData] = await Promise.all([
       fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-      fetchPairInfo([fromTokenInfoData, toTokenInfoData])
+      fetchPairInfo([fromTokenInfoData, toTokenInfoData]),
     ]);
 
     const fromAmount = getUsd(
@@ -189,7 +194,7 @@ const Pools: React.FC<PoolsProps> = () => {
     return {
       pair,
       amount: fromAmount + toAmount,
-      commissionRate: infoData.commission_rate
+      commissionRate: infoData.commission_rate,
     };
   };
 

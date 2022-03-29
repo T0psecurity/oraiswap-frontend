@@ -15,7 +15,7 @@ export default () => {
         <Route path="/swap" element={<Swap />} />
         <Route path="/pools" element={<Pools />} />
         <Route path="/bridge" element={<Balance />} />
-        <Route path="/pool/:namePool" element={<PoolDetail />} />
+        <Route path="/pool/:poolUrl" element={<PoolDetail />} />
         {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </Suspense>
