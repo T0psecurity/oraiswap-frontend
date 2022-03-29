@@ -403,7 +403,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
               )}
 
-              <div className={cx('row')}>
+              {/* <div className={cx('row')}>
                 <div className={cx('mining')}>
                   <div className={cx('label--bold')}>Liquidity Mining</div>
                   <div className={cx('label--sub')}>
@@ -457,7 +457,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     </Button>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           {isOpenLiquidityModal && (
