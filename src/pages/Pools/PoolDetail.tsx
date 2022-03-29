@@ -65,14 +65,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     token2: TokenItemType | undefined;
 
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
-  const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
-
-  const allToken = Object.values(mockToken).map((token) => {
-    return {
-      ...token,
-      title: token.name,
-    };
-  });
+  const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);  
 
   const [address] = useLocalStorage<string>('address');
 

@@ -585,7 +585,7 @@ const LiquidityModal: FC<ModalProps> = ({
             placeholder={'0'}
             // type="input"
             value={!!amountToken1 ? amountToken1 : ''}
-            onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
+            // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
             onChange={(e: any) => {
               onChangeAmount1(+e.target.value.replaceAll(',', ''));
             }}
