@@ -46,13 +46,13 @@ interface ModalProps {
   isCloseBtn?: boolean;
 }
 
-const mapTokenToIdPrice = {
-  ORAI: 'oraichain-token',
-  LUNA: 'terra-luna',
-  AIRI: 'airight',
-  ATOM: 'cosmos',
-  UST: 'terrausd',
-};
+// const mapTokenToIdPrice = {
+//   ORAI: 'oraichain-token',
+//   LUNA: 'terra-luna',
+//   AIRI: 'airight',
+//   ATOM: 'cosmos',
+//   UST: 'terrausd',
+// };
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
@@ -61,7 +61,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       ...token,
       title: token.name,
     };
-  });  
+  });
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
@@ -113,7 +113,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         mockToken[token1!].contractAddress,
         mockToken[token1!].lcd
       ),
-    { enabled: !!address }
+    { enabled: !!address && !!token1 }
   );
 
   const {
@@ -130,15 +130,16 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         mockToken[token2!].contractAddress,
         mockToken[token2!].lcd
       ),
-    { enabled: !!address }
+    { enabled: !!address && !!token2 }
   );
 
   const Token1Icon = mockToken[token1!]?.Icon;
   const Token2Icon = mockToken[token2!]?.Icon;
 
   const getBalanceValue = (tokenSymbol: string, amount: number) => {
+    const coingeckoId = filteredTokens.find(token => token.name === tokenSymbol)?.coingeckoId;
     const pricePer =
-      prices[mapTokenToIdPrice[tokenSymbol]]?.price?.asNumber ?? 0;
+      prices[coingeckoId]?.price?.asNumber ?? 0;
 
     return pricePer * amount;
   };
@@ -446,10 +447,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="input"
-              // value={supplyToken2 ? supplyToken2 : ''}
-              // onValueChange={({ floatValue }) => {
-              //   setSupplyToken2(floatValue);
-              // }}
+            // value={supplyToken2 ? supplyToken2 : ''}
+            // onValueChange={({ floatValue }) => {
+            //   setSupplyToken2(floatValue);
+            // }}
             />
             <span>%</span>
           </div>
@@ -468,7 +469,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => {}}>
+        <div className={cx('swap-btn')} onClick={() => { }}>
           Create
         </div>
       </div>

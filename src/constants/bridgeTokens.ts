@@ -293,7 +293,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         prefix: 'orai',
         coingeckoId: 'cosmos',
         denom:
-          'ibc/45C001A5AE212D09879BE4627C45B64D5636086285590D5145A51E18E9D16722',
+          'ibc/A2E2EEC9057A4A1C2C0A6A4C78B0239118DF5F278830F50B4A6BDD7A66506B78',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -307,7 +307,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         prefix: 'orai',
         coingeckoId: 'terra-luna',
         denom:
-          'ibc/6896F977DF5B427359BA77B5AF1052E5512D460F3CE59C8F6A7CB51408351F3C',
+          'ibc/BA44E90EAFEA8F39D87A94A4A61C9FFED5887C2730DFBA668C197BA331372859',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -321,7 +321,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         prefix: 'orai',
         coingeckoId: 'terrausd',
         denom:
-          'ibc/D9CDEFD93E29F5C2175C7606DFF67490B2123BB93F299B3AFA53E8BB1DDD4FC4',
+          'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -346,7 +346,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'OSMO',
         org: 'Oraichain',
-        denom: 'ibc/6AE2756AA7EAA8FA06E11472EA05CA681BD8D3FBC1AAA9F06C79D1EC1C90DC9B',
+        denom: 'ibc/9C4DCD21B48231D0BC2AC3D1B74A864746B37E4292694C93C617324250D002FC',
         prefix: 'orai',
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
