@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Input } from 'antd';
 import classNames from 'classnames';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
@@ -22,7 +23,7 @@ import { getUsd } from 'libs/utils';
 import Loader from 'components/Loader';
 import { Bech32Address } from '@keplr-wallet/cosmos';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -107,15 +108,15 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadAmountDetail = async (
-    address: Bech32Address,
+    address: Bech32Address | string | undefined,
     token: TokenItemType,
     pendingList: TokenItemType[]
   ) => {
+    let addr = address instanceof Bech32Address ? address.toBech32(token.prefix!) : address;
     try {
       // using this way we no need to enable other network
-
       const amount = await fetchBalance(
-        address.toBech32(token.prefix!),
+        addr,
         token.denom,
         token.contractAddress,
         token.lcd
@@ -137,20 +138,31 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
-      // we enable oraichain then use pubkey to calculate other address
-      await window.Keplr.suggestChain(network.chainId);
-      const address = await window.Keplr.getKeplrBech32Address(network.chainId);
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) {
-        return displayToast(TToastType.TX_FAILED, {
-          message: 'You must install Keplr to continue'
-        });
-      }
+      // let chainId = network.chainId;
+      // await window.Keplr.suggestChain(chainId);
+      // const address = chainId !== "columbus-5" ? await window.Keplr.getKeplrBech32Address(chainId) : await window.Keplr.getKeplrAddr(chainId);
+      // // we enable oraichain then use pubkey to calculate other address
+      // const keplr = await window.Keplr.getKeplr();
+      // if (!keplr) {
+      //   return displayToast(TToastType.TX_FAILED, {
+      //     message: 'You must install Keplr to continue'
+      //   });
+      // }
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          pendingTokens.map((token) =>
-            loadAmountDetail(address!, token, pendingList)
+          pendingTokens.map(async (token) => {
+            await window.Keplr.suggestChain(token.chainId);
+            const address = await window.Keplr.getKeplrAddr(token.chainId);
+            // we enable oraichain then use pubkey to calculate other address
+            const keplr = await window.Keplr.getKeplr();
+            if (!keplr) {
+              return displayToast(TToastType.TX_FAILED, {
+                message: 'You must install Keplr to continue'
+              });
+            }
+            return loadAmountDetail(address, token, pendingList);
+          }
           )
         )
       );
@@ -303,10 +315,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -319,10 +331,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}

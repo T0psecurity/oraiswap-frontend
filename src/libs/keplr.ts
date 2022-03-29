@@ -30,24 +30,24 @@ const sendTx = async (
 
   const params = isProtoTx
     ? {
-        tx_bytes: Buffer.from(tx as any).toString('base64'),
-        mode: (() => {
-          switch (mode) {
-            case 'async':
-              return 'BROADCAST_MODE_ASYNC';
-            case 'block':
-              return 'BROADCAST_MODE_BLOCK';
-            case 'sync':
-              return 'BROADCAST_MODE_SYNC';
-            default:
-              return 'BROADCAST_MODE_UNSPECIFIED';
-          }
-        })()
-      }
+      tx_bytes: Buffer.from(tx as any).toString('base64'),
+      mode: (() => {
+        switch (mode) {
+          case 'async':
+            return 'BROADCAST_MODE_ASYNC';
+          case 'block':
+            return 'BROADCAST_MODE_BLOCK';
+          case 'sync':
+            return 'BROADCAST_MODE_SYNC';
+          default:
+            return 'BROADCAST_MODE_UNSPECIFIED';
+        }
+      })()
+    }
     : {
-        tx,
-        mode: mode
-      };
+      tx,
+      mode: mode
+    };
 
   const result = await restInstance.post(
     isProtoTx ? '/cosmos/tx/v1beta1/txs' : '/txs',
@@ -225,10 +225,10 @@ export default class Keplr {
 
   async getKeplrAddr(chain_id?: string): Promise<String | undefined> {
     // not support network.chainId (Oraichain)
-    if (isMobile() && blacklistNetworks.includes(chain_id ?? network.chainId)) {
-      const address = await this.getKeplrBech32Address('osmosis-1');
-      return address?.toBech32(network.prefix);
-    }
+    // if (isMobile() && blacklistNetworks.includes(chain_id ?? network.chainId)) {
+    //   const address = await this.getKeplrBech32Address('osmosis-1');
+    //   return address?.toBech32(network.prefix);
+    // }
     const key = await this.getKeplrKey(chain_id);
     return key.bech32Address;
   }
