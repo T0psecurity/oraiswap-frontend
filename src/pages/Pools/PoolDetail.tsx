@@ -170,9 +170,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     isLoading: isPairAmountInfoLoading,
   } = useQuery(
     ['pair-amount-info', pairInfoData, prices],
-    () => {
-      console.log('t');
-
+    () => {      
       return getPairAmountInfo();
     },
     {
