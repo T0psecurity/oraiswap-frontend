@@ -219,6 +219,7 @@ const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
     if (fund) sent_funds.push(fund);
   }
   if (sent_funds.length === 0) return null;
+  sent_funds.sort((a,b) => a.denom.localeCompare(b.denom))  
   return sent_funds;
 };
 
