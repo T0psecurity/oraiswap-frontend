@@ -243,13 +243,13 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   );
 
-  useEffect(() => {
-    if (!pairAmountInfoData?.ratio) {
-    } else if (recentInput === 1)
-      setAmountToken2(amountToken1 / pairAmountInfoData.ratio);
-    else if (recentInput === 2)
-      setAmountToken1(amountToken2 * pairAmountInfoData.ratio);
-  }, [JSON.stringify(pairAmountInfoData)]);
+  // useEffect(() => {
+  //   if (!pairAmountInfoData?.ratio) {
+  //   } else if (recentInput === 1)
+  //     setAmountToken2(amountToken1 / pairAmountInfoData.ratio);
+  //   else if (recentInput === 2)
+  //     setAmountToken1(amountToken2 * pairAmountInfoData.ratio);
+  // }, [JSON.stringify(pairAmountInfoData)]);
 
   const getValueUsd = (token: any, amount: number) => {
     const pricePer =
@@ -260,13 +260,13 @@ const LiquidityModal: FC<ModalProps> = ({
   const onChangeAmount1 = (floatValue: number | undefined) => {
     setRecentInput(1);
     setAmountToken1(floatValue ?? 0);
-    setAmountToken2((floatValue ?? 0) / pairAmountInfoData?.ratio!);
+    // setAmountToken2((floatValue ?? 0) / pairAmountInfoData?.ratio!);
   };
 
   const onChangeAmount2 = (floatValue: number | undefined) => {
     setRecentInput(2);
     setAmountToken2(floatValue ?? 0);
-    setAmountToken1((floatValue ?? 0) * pairAmountInfoData?.ratio!);
+    // setAmountToken1((floatValue ?? 0) * pairAmountInfoData?.ratio!);
   };
 
   const getPairAmountInfo = async () => {
