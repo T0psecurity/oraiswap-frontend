@@ -241,8 +241,6 @@ const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
   }
   if (sent_funds.length === 0) return null;
   sent_funds.sort((a, b) => a.denom.localeCompare(b.denom));
-  // sent_funds.sort((a, b) => a.denom.replace('ibc/', '').localeCompare(b.denom.replace('ibc/', '')));
-  console.log(sent_funds);
   return sent_funds;
 };
 
