@@ -196,8 +196,7 @@ const LiquidityModal: FC<ModalProps> = ({
     isLoading: isToken2AllowanceToPairLoading
   } = useQuery(
     ['token-allowance', JSON.stringify(pairInfoData), token2InfoData, txHash],
-    () => {
-      console.log('allowance2');
+    () => {      
       return fetchTokenAllowance(
         token2InfoData.contract_addr,
         address,
