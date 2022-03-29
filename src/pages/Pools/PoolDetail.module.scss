@@ -173,7 +173,9 @@
           text-align: center;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
+          // justify-content: space-between;
+          align-items: center;
+          gap: 30px;
 
           .amount {
             font-weight: 600;
