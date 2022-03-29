@@ -465,8 +465,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               isOpen={isOpenLiquidityModal}
               open={() => setIsOpenLiquidityModal(true)}
               close={() => setIsOpenLiquidityModal(false)}
-              token1InfoData={pairInfoData.token1}
-              token2InfoData={pairInfoData.token2}
+              token1Symbol={pairInfoData.token1.name}
+              token2Symbol={pairInfoData.token2.name}
             />
           )}
           {isOpenBondingModal && (
