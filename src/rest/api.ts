@@ -22,7 +22,8 @@ export enum Type {
   'TRANSFER' = 'Transfer',
   'SWAP' = 'Swap',
   'PROVIDE' = 'Provide',
-  'WITHDRAW' = 'Withdraw'
+  'WITHDRAW' = 'Withdraw',
+  'INCREASE_ALLOWANCE' = 'Increase allowance'
 }
 
 // override with timeout
@@ -49,8 +50,9 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -116,8 +118,8 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-    '0'
-  )
+      '0'
+  );
 }
 
 async function fetchPoolInfoAmount(
@@ -126,7 +128,8 @@ async function fetchPoolInfoAmount(
 ) {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
-  let offerPoolAmount, askPoolAmount = 0;
+  let offerPoolAmount,
+    askPoolAmount = 0;
   if (findPair(`${fromTokenInfo.denom}-${toTokenInfo.denom}`)) {
     const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
     const poolInfo = await fetchPool(pairInfo.contract_addr);
@@ -153,9 +156,7 @@ async function fetchPairInfo(
   return data;
 }
 
-async function fetchPairInfoRaw(
-  assetInfos: [any, any]
-): Promise<PairInfo> {
+async function fetchPairInfoRaw(assetInfos: [any, any]): Promise<PairInfo> {
   const data = await querySmart(network.factory, {
     pair: { asset_infos: assetInfos }
   });
@@ -177,13 +178,33 @@ async function fetchTokenBalance(
   return data.balance;
 }
 
+async function fetchTokenAllowance(
+  tokenAddr: string,
+  walletAddr: string,
+  spender: string,
+  lcd?: string
+) {
+  const data = await querySmart(
+    tokenAddr,
+    {
+      allowance: {
+        owner: walletAddr,
+        spender
+      }
+    },
+    lcd
+  );
+  return data.allowance;
+}
+
 async function fetchNativeTokenBalance(
   walletAddr: string,
   denom: string,
   lcd?: string
 ) {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -219,7 +240,7 @@ const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
     if (fund) sent_funds.push(fund);
   }
   if (sent_funds.length === 0) return null;
-  sent_funds.sort((a,b) => a.denom.localeCompare(b.denom))  
+  sent_funds.sort((a, b) => a.denom.localeCompare(b.denom));
   return sent_funds;
 };
 
@@ -230,26 +251,36 @@ async function fetchExchangeRate(base_denom: string, quote_denom: string) {
   return data?.item?.exchange_rate;
 }
 
-const generateSwapOperationMsgs = (data: { denom: string, offerInfo: any, askInfo: any }) => {
+const generateSwapOperationMsgs = (data: {
+  denom: string;
+  offerInfo: any;
+  askInfo: any;
+}) => {
   const { denom, offerInfo, askInfo } = data;
-  return findPair(denom) ? [{
-    orai_swap: {
-      offer_asset_info: offerInfo,
-      ask_asset_info: askInfo
-    }
-  }] : [{
-    orai_swap: {
-      offer_asset_info: offerInfo,
-      ask_asset_info: oraiInfo
-    }
-  },
-  {
-    orai_swap: {
-      offer_asset_info: oraiInfo,
-      ask_asset_info: askInfo
-    }
-  }];
-}
+  return findPair(denom)
+    ? [
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
+        }
+      ]
+    : [
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo
+          }
+        }
+      ];
+};
 
 async function simulateSwap(query: {
   fromInfo: TokenInfo;
@@ -259,16 +290,14 @@ async function simulateSwap(query: {
   const { amount, fromInfo, toInfo } = query;
   // check if they have pairs. If not then we go through ORAI
 
-  const { info: offerInfo } = parseTokenInfo(
-    fromInfo,
-    amount.toString()
-  );
-  const { info: askInfo } = parseTokenInfo(
-    toInfo,
-    undefined
-  );
+  const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
+  const { info: askInfo } = parseTokenInfo(toInfo, undefined);
 
-  let operations = generateSwapOperationMsgs({ denom: `${fromInfo.denom}-${toInfo.denom}`, offerInfo, askInfo });
+  let operations = generateSwapOperationMsgs({
+    denom: `${fromInfo.denom}-${toInfo.denom}`,
+    offerInfo,
+    askInfo
+  });
 
   let msg = {
     simulate_swap_operations: {
@@ -311,8 +340,16 @@ export type WithdrawQuery = {
   pair: string; // oraiswap pair contract addr, handle withdraw liquidity
 };
 
+export type IncreaseAllowanceQuery = {
+  type: Type.INCREASE_ALLOWANCE;
+  amount: number | string;
+  sender: string;
+  spender: string;
+  token: string; //token contract addr
+};
+
 async function generateContractMessages(
-  query: SwapQuery | ProvideQuery | WithdrawQuery
+  query: SwapQuery | ProvideQuery | WithdrawQuery | IncreaseAllowanceQuery
 ) {
   // @ts-ignore
   const { type, sender, ...params } = query;
@@ -334,7 +371,11 @@ async function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund as Fund, askSentFund as Fund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs({ denom: `${swapQuery.fromInfo.denom}-${swapQuery.toInfo.denom}`, offerInfo, askInfo }),
+          operations: generateSwapOperationMsgs({
+            denom: `${swapQuery.fromInfo.denom}-${swapQuery.toInfo.denom}`,
+            offerInfo,
+            askInfo
+          })
         }
       };
       // if cw20 => has to send through cw20 contract
@@ -389,6 +430,16 @@ async function generateContractMessages(
       };
       contractAddr = withdrawQuery.lpAddr;
       break;
+    case Type.INCREASE_ALLOWANCE:
+      const increaseAllowanceQuery = params as IncreaseAllowanceQuery;
+      input = {
+        increase_allowance: {
+          amount: increaseAllowanceQuery.amount,
+          spender: increaseAllowanceQuery.spender
+        }
+      };
+      contractAddr = increaseAllowanceQuery.token;
+      break;
     default:
       break;
   }
@@ -420,5 +471,6 @@ export {
   generateContractMessages,
   fetchExchangeRate,
   simulateSwap,
-  fetchPoolInfoAmount
+  fetchPoolInfoAmount,
+  fetchTokenAllowance
 };

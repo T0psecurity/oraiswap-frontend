@@ -15,6 +15,7 @@ import {
   fetchTokenInfo,
   generateContractMessages,
   simulateSwap,
+  fetchTokenAllowance
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens } from 'constants/bridgeTokens';
@@ -62,17 +63,17 @@ const LiquidityModal: FC<ModalProps> = ({
   close,
   open,
   token1InfoData,
-  token2InfoData,
+  token2InfoData
 }) => {
   const allToken = Object.values(mockToken).map((token) => {
     return {
       ...token,
-      title: token.name,
+      title: token.name
     };
   });
 
-  const token1 = token1InfoData
-  const token2 = token2InfoData
+  const token1 = token1InfoData;
+  const token2 = token2InfoData;
   const [address] = useLocalStorage<string>('address');
 
   const { prices } = useCoinGeckoPrices(
@@ -95,7 +96,7 @@ const LiquidityModal: FC<ModalProps> = ({
     data: pairAmountInfoData,
     error: pairAmountInfoError,
     isError: isPairAmountInfoError,
-    isLoading: isPairAmountInfoLoading,
+    isLoading: isPairAmountInfoLoading
   } = useQuery(
     ['pair-amount-info', token1InfoData, token2InfoData, prices, txHash],
     () => {
@@ -104,7 +105,7 @@ const LiquidityModal: FC<ModalProps> = ({
     {
       enabled: !!prices && !!token1InfoData && !!token2InfoData,
       refetchOnWindowFocus: false,
-      refetchInterval: 10000,
+      refetchInterval: 10000
     }
   );
 
@@ -112,17 +113,17 @@ const LiquidityModal: FC<ModalProps> = ({
     data: pairInfoData,
     error: pairInfoError,
     isError: isPairInfoError,
-    isLoading: isPairInfoLoading,
+    isLoading: isPairInfoLoading
   } = useQuery(
     [
       'pair-info',
       JSON.stringify(token1InfoData),
-      JSON.stringify(token2InfoData),
+      JSON.stringify(token2InfoData)
     ],
     () => getPairInfo(),
     {
       enabled: !!token1InfoData && !!token2InfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -130,7 +131,7 @@ const LiquidityModal: FC<ModalProps> = ({
     data: token1Balance,
     error: token1BalanceError,
     isError: isToken1BalanceError,
-    isLoading: isToken1BalanceLoading,
+    isLoading: isToken1BalanceLoading
   } = useQuery(
     ['token-balance', token1?.denom, txHash],
     () =>
@@ -142,7 +143,7 @@ const LiquidityModal: FC<ModalProps> = ({
       ),
     {
       enabled: !!address && !!token1,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -150,7 +151,7 @@ const LiquidityModal: FC<ModalProps> = ({
     data: token2Balance,
     error: token2BalanceError,
     isError: isToken2BalanceError,
-    isLoading: isLoadingToken2Balance,
+    isLoading: isLoadingToken2Balance
   } = useQuery(
     ['token-balance', token2?.denom, txHash],
     () =>
@@ -162,21 +163,64 @@ const LiquidityModal: FC<ModalProps> = ({
       ),
     {
       enabled: !!address && !!token2,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
+
+  const {
+    data: token1AllowanceToPair,
+    error: token1AllowanceToPairError,
+    isError: isToken1AllowanceToPairError,
+    isLoading: isToken1AllowanceToPairLoading
+  } = useQuery(
+    ['token-allowance', JSON.stringify(pairInfoData), token1InfoData, txHash],
+    () => {
+      
+      
+      return fetchTokenAllowance(
+        token1InfoData.contract_addr,
+        address,
+        pairInfoData!.contract_addr
+      );
+    },
+    {
+      enabled: !!address && !!token1InfoData.contract_addr && !!pairInfoData,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const {
+    data: token2AllowanceToPair,
+    error: token2AllowanceToPairError,
+    isError: isToken2AllowanceToPairError,
+    isLoading: isToken2AllowanceToPairLoading
+  } = useQuery(
+    ['token-allowance', JSON.stringify(pairInfoData), token2InfoData, txHash],
+    () => {
+      console.log('allowance2');
+      return fetchTokenAllowance(
+        token2InfoData.contract_addr,
+        address,
+        pairInfoData!.contract_addr
+      );
+    },
+    {
+      enabled: !!address && !!token2InfoData.contract_addr && !!pairInfoData,
+      refetchOnWindowFocus: false
+    }
+  );  
 
   const {
     data: lpTokenBalance,
     error: lpTokenBalanceError,
     isError: isLpTokenBalanceError,
-    isLoading: isLpTokenBalanceLoading,
+    isLoading: isLpTokenBalanceLoading
   } = useQuery(
     ['token-balance', JSON.stringify(pairInfoData), txHash],
     () => fetchBalance(address, '', pairInfoData?.liquidity_token),
     {
       enabled: !!address && !!pairInfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -184,18 +228,18 @@ const LiquidityModal: FC<ModalProps> = ({
     data: lpTokenInfoData,
     error: lpTokenInfoError,
     isError: isLpTokenInfoError,
-    isLoading: isLpTokenInfoLoading,
+    isLoading: isLpTokenInfoLoading
   } = useQuery(
     ['token-info', JSON.stringify(pairInfoData?.pair.contract_addr)],
     () => {
       // @ts-ignore
       return fetchTokenInfo({
-        contractAddress: pairInfoData?.liquidity_token,
+        contractAddress: pairInfoData?.liquidity_token
       });
     },
     {
       enabled: !!pairInfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -246,7 +290,7 @@ const LiquidityModal: FC<ModalProps> = ({
       token1Amount: poolData.offerPoolAmount,
       token2Amount: poolData.askPoolAmount,
       usdAmount: fromAmount + toAmount,
-      ratio: poolData.offerPoolAmount / poolData.askPoolAmount,
+      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
     };
   };
 
@@ -265,6 +309,46 @@ const LiquidityModal: FC<ModalProps> = ({
     return { pair, ...pairData };
   };
 
+  const increaseAllowance = async (
+    amount: string,
+    token: string,
+    walletAddr: string
+  ) => {
+    const msgs = await generateContractMessages({
+      type: Type.INCREASE_ALLOWANCE,
+      amount,
+      sender: `${walletAddr}`,
+      spender: `${pairInfoData?.contract_addr}`,
+      token
+    });
+
+    const msg = msgs[0];
+
+    // console.log(
+    //   'msgs: ',
+    //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+    // );
+
+    const result = await CosmJs.execute({
+      address: msg.contract,
+      walletAddr: walletAddr! as string,
+      handleMsg: Buffer.from(msg.msg.toString()).toString(),
+      gasAmount: { denom: ORAI, amount: '0' },
+      // @ts-ignore
+      handleOptions: { funds: msg.sent_funds }
+    });
+    console.log('result increase allowance tx hash: ', result);
+
+    if (result) {
+      console.log('in correct result');
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `${network.explorer}/txs/${result.transactionHash}`
+      });
+      setTxHash(result.transactionHash);
+      return;
+    }
+  };
+
   const handleAddLiquidity = async () => {
     const amount1 = +parseAmount(
       amountToken1.toString(),
@@ -277,11 +361,11 @@ const LiquidityModal: FC<ModalProps> = ({
 
     if (amount1 <= 0 || amount1 > token1Balance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Token1 amount invalid!',
+        message: 'Token1 amount invalid!'
       });
     if (amount2 <= 0 || amount2 > token2Balance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Token2 amount invalid!',
+        message: 'Token2 amount invalid!'
       });
 
     setActionLoading(true);
@@ -292,6 +376,19 @@ const LiquidityModal: FC<ModalProps> = ({
         walletAddr = await window.Keplr.getKeplrAddr();
       else throw 'You have to install Keplr wallet to swap';
 
+      if (!!token1AllowanceToPair && +token1AllowanceToPair < amount1)
+        await increaseAllowance(
+          '9'.repeat(30),
+          token1InfoData!.contract_addr,
+          `${walletAddr}`
+        );
+      if (!!token2AllowanceToPair && +token2AllowanceToPair < amount2)
+        await increaseAllowance(
+          '9'.repeat(30),
+          token2InfoData!.contract_addr,
+          `${walletAddr}`
+        );
+
       const msgs = await generateContractMessages({
         type: Type.PROVIDE,
         sender: `${walletAddr}`,
@@ -299,7 +396,7 @@ const LiquidityModal: FC<ModalProps> = ({
         toInfo: token2InfoData!,
         fromAmount: `${amount1}`,
         toAmount: `${amount2}`,
-        pair: pairInfoData!.pair.contract_addr,
+        pair: pairInfoData!.pair.contract_addr
       });
 
       const msg = msgs[0];
@@ -315,14 +412,14 @@ const LiquidityModal: FC<ModalProps> = ({
         handleMsg: Buffer.from(msg.msg.toString()).toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
-        handleOptions: { funds: msg.sent_funds },
+        handleOptions: { funds: msg.sent_funds }
       });
       console.log('result provide tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setActionLoading(false);
         setTxHash(result.transactionHash);
@@ -335,7 +432,7 @@ const LiquidityModal: FC<ModalProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     }
     setActionLoading(false);
@@ -349,7 +446,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
     if (+amount <= 0 || +amount > lpTokenBalance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'LP amount invalid!',
+        message: 'LP amount invalid!'
       });
 
     setActionLoading(true);
@@ -365,7 +462,7 @@ const LiquidityModal: FC<ModalProps> = ({
         sender: `${walletAddr}`,
         lpAddr: `${lpTokenInfoData?.contract_addr}`,
         amount,
-        pair: pairInfoData!.pair.contract_addr,
+        pair: pairInfoData!.pair.contract_addr
       });
 
       const msg = msgs[0];
@@ -381,7 +478,7 @@ const LiquidityModal: FC<ModalProps> = ({
         handleMsg: Buffer.from(msg.msg.toString()).toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
-        handleOptions: { funds: msg.sent_funds },
+        handleOptions: { funds: msg.sent_funds }
       });
 
       console.log('result provide tx hash: ', result);
@@ -389,7 +486,7 @@ const LiquidityModal: FC<ModalProps> = ({
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setActionLoading(false);
         setTxHash(result.transactionHash);
@@ -402,7 +499,7 @@ const LiquidityModal: FC<ModalProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     }
     setActionLoading(false);
@@ -431,7 +528,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: token1Balance ? token1Balance : 0,
-              denom: token1InfoData?.name ?? '',
+              denom: token1InfoData?.name ?? ''
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -510,7 +607,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: token2Balance ? token2Balance : 0,
-              denom: token2InfoData?.name ?? '',
+              denom: token2InfoData?.name ?? ''
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -600,7 +697,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: lpTokenBalance ? lpTokenBalance : 0,
-              denom: lpTokenInfoData?.symbol ?? '',
+              denom: lpTokenInfoData?.symbol ?? ''
             }}
             decimalScale={6}
           />
@@ -610,7 +707,7 @@ const LiquidityModal: FC<ModalProps> = ({
         className={cx('swap-btn')}
         onClick={handleAddLiquidity}
         disabled={
-          actionLoading || !token1InfoData || !token2InfoData || !pairInfoData
+          actionLoading || !token1InfoData || !token2InfoData || !pairInfoData || isToken1AllowanceToPairLoading || isToken2AllowanceToPairLoading
         }
       >
         {actionLoading && <Loader width={20} height={20} />}
@@ -628,7 +725,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: lpTokenBalance ? lpTokenBalance : 0,
-              denom: lpTokenInfoData?.symbol ?? '',
+              denom: lpTokenInfoData?.symbol ?? ''
             }}
             prefix="LP Token Balance: "
             decimalScale={6}
@@ -659,7 +756,7 @@ const LiquidityModal: FC<ModalProps> = ({
           {[25, 50, 75, 100].map((option, idx) => (
             <div
               className={cx('item', {
-                isChosen: chosenWithdrawPercent === idx,
+                isChosen: chosenWithdrawPercent === idx
               })}
               key={idx}
               onClick={() => {
@@ -672,7 +769,7 @@ const LiquidityModal: FC<ModalProps> = ({
           ))}
           <div
             className={cx('item', 'border', {
-              isChosen: chosenWithdrawPercent === 4,
+              isChosen: chosenWithdrawPercent === 4
             })}
             onClick={() => setChosenWithdrawPercent(4)}
           >
