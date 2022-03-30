@@ -130,7 +130,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           <TokenBalance
                             balance={balance}
                             className={styles.token_balance}
-                            decimalScale={6}
+                            decimalScale={2}
                           />
                         );
                     })()}
