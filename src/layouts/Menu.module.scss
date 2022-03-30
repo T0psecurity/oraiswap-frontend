@@ -10,8 +10,10 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 20px;
-  --menu-width: 330px;
-  width: var(--menu-width);
+  --menu-width: 300px;
+  min-width: var(--menu-width);
+  width: 23%;
+  max-width: 330px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -115,7 +117,7 @@
 
 .menu_themes {
   display: flex;
-  width: 294px;
+  width: 100%;
   background: rgba(45, 41, 56, 0.15);
   border-radius: 8px;
   margin-bottom: 45px;
@@ -126,7 +128,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  width: 138px;
+  flex: 1;
   height: 36px;
   padding: 5px 24px 6px;
   margin: 6px;
