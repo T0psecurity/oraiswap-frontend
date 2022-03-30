@@ -20,7 +20,9 @@ import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 import Loader from 'components/Loader';
-import { Bech32Address } from '@keplr-wallet/cosmos';
+import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
+import Long from 'long';
+import { isMobile } from '@walletconnect/browser-utils';
 
 interface BalanceProps {}
 
@@ -230,34 +232,58 @@ const Balance: React.FC<BalanceProps> = () => {
           Math.round(fromAmount * 10 ** from.decimals),
           from.denom
         );
-        const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
-        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-        const client = await SigningStargateClient.connectWithSigner(
-          from.rpc,
-          offlineSigner
-        );
         const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
 
-        const result = await client.sendIbcTokens(
-          fromAddress as string,
-          toAddress as string,
-          amount,
-          ibcInfo.source,
-          ibcInfo.channel,
-          undefined,
-          Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-          {
-            gas: '200000',
-            amount: []
-          }
-        );
+        // using app protocol to sign transaction
+        if (isMobile() && from.chainId === network.chainId) {
+          // check if is blacklisted like orai, using orai wallet
+          const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
+            sourceChannel: ibcInfo.channel,
+            sourcePort: ibcInfo.source,
+            sender: fromAddress as string,
+            receiver: toAddress as string,
+            token: amount,
+            timeoutTimestamp: Long.fromNumber(
+              (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
+            )
+          });
 
-        console.log(result);
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
-        });
-        // set tx hash to trigger refetching amount values
-        setTxHash(result?.transactionHash);
+          const value = Buffer.from(
+            ibc.applications.transfer.v1.MsgTransfer.encode(msgSend).finish()
+          ).toString('base64');
+
+          // open app protocal
+          const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&value=${value}`;
+          window.open(url);
+        } else {
+          const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
+          // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+          const client = await SigningStargateClient.connectWithSigner(
+            from.rpc,
+            offlineSigner
+          );
+
+          const result = await client.sendIbcTokens(
+            fromAddress as string,
+            toAddress as string,
+            amount,
+            ibcInfo.source,
+            ibcInfo.channel,
+            undefined,
+            Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+            {
+              gas: '200000',
+              amount: []
+            }
+          );
+
+          console.log(result);
+          displayToast(TToastType.TX_SUCCESSFUL, {
+            customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
+          });
+          // set tx hash to trigger refetching amount values
+          setTxHash(result?.transactionHash);
+        }
       } else {
         displayToast(TToastType.TX_FAILED, {
           message: 'You must install Keplr to continue'
