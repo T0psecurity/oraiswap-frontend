@@ -85,8 +85,8 @@ const LiquidityModal: FC<ModalProps> = ({
   const [activeTab, setActiveTab] = useState(0);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
   const [withdrawPercent, setWithdrawPercent] = useState(10);
-  const [amountToken1, setAmountToken1] = useState(0);
-  const [amountToken2, setAmountToken2] = useState(0);
+  const [amountToken1, setAmountToken1] = useState('');
+  const [amountToken2, setAmountToken2] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
@@ -175,8 +175,6 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-allowance', JSON.stringify(pairInfoData), token1InfoData, txHash],
     () => {
-      
-      
       return fetchTokenAllowance(
         token1InfoData.contract_addr,
         address,
@@ -196,7 +194,7 @@ const LiquidityModal: FC<ModalProps> = ({
     isLoading: isToken2AllowanceToPairLoading
   } = useQuery(
     ['token-allowance', JSON.stringify(pairInfoData), token2InfoData, txHash],
-    () => {      
+    () => {
       return fetchTokenAllowance(
         token2InfoData.contract_addr,
         address,
@@ -207,7 +205,7 @@ const LiquidityModal: FC<ModalProps> = ({
       enabled: !!address && !!token2InfoData.contract_addr && !!pairInfoData,
       refetchOnWindowFocus: false
     }
-  );  
+  );
 
   const {
     data: lpTokenBalance,
@@ -244,28 +242,31 @@ const LiquidityModal: FC<ModalProps> = ({
 
   useEffect(() => {
     if (!pairAmountInfoData?.ratio) {
-    } else if (recentInput === 1)
-      setAmountToken2(amountToken1 / pairAmountInfoData.ratio);
-    else if (recentInput === 2)
-      setAmountToken1(amountToken2 * pairAmountInfoData.ratio);
+    } else if (recentInput === 1 && !!+amountToken1) {
+      setAmountToken2(`${+amountToken1 / pairAmountInfoData.ratio}`);
+    } else if (recentInput === 2 && !!+amountToken2)
+      setAmountToken1(`${+amountToken2 * pairAmountInfoData.ratio}`);
   }, [JSON.stringify(pairAmountInfoData)]);
 
-  const getValueUsd = (token: any, amount: number) => {
-    const pricePer =
-      prices[token!.coingeckoId! as PriceKey]?.price?.asNumber ?? 0;
-    return pricePer * amount;
+  const getValueUsd = (token: any, amount: number) => {  
+    let t = getUsd(
+      amount,
+      prices[token!.coingeckoId as PriceKey].price,
+      token!.decimals
+    );
+    return t;
   };
 
-  const onChangeAmount1 = (floatValue: number | undefined) => {
+  const onChangeAmount1 = (floatValue: string) => {
     setRecentInput(1);
-    setAmountToken1(floatValue ?? 0);
-    setAmountToken2((floatValue ?? 0) / pairAmountInfoData?.ratio!);
+    setAmountToken1(floatValue);
+    setAmountToken2(`${+floatValue / pairAmountInfoData?.ratio!}`);
   };
 
-  const onChangeAmount2 = (floatValue: number | undefined) => {
+  const onChangeAmount2 = (floatValue: string) => {
     setRecentInput(2);
-    setAmountToken2(floatValue ?? 0);
-    setAmountToken1((floatValue ?? 0) * pairAmountInfoData?.ratio!);
+    setAmountToken2(floatValue);
+    setAmountToken1(`${+floatValue * pairAmountInfoData?.ratio!}`);
   };
 
   const getPairAmountInfo = async () => {
@@ -536,10 +537,10 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                +parseDisplayAmount(
+                parseDisplayAmount(
                   token1Balance,
                   token1InfoData?.decimals ?? 0
-                )
+                ).toString()
               )
             }
           >
@@ -549,23 +550,17 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                +parseDisplayAmount(
+                parseDisplayAmount(
                   (token1Balance / 2)?.toString(),
                   token1InfoData?.decimals ?? 0
-                )
+                ).toString()
               )
             }
           >
             HALF
           </div>
           <TokenBalance
-            balance={getValueUsd(
-              token1,
-              +parseDisplayAmount(
-                token1Balance?.toString(),
-                token1InfoData?.decimals ?? 0
-              )
-            )}
+            balance={getValueUsd(token1, token1Balance)}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
           />
@@ -584,10 +579,10 @@ const LiquidityModal: FC<ModalProps> = ({
             decimalScale={6}
             placeholder={'0'}
             // type="input"
-            value={!!amountToken1 ? amountToken1 : ''}
+            value={amountToken1 ?? ''}
             // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
             onChange={(e: any) => {
-              onChangeAmount1(+e.target.value.replaceAll(',', ''));
+              onChangeAmount1(e.target.value.replaceAll(',', ''));
             }}
           />
         </div>
@@ -615,10 +610,10 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                +parseDisplayAmount(
+                parseDisplayAmount(
                   token2Balance,
                   token2InfoData?.decimals ?? 0
-                )
+                ).toString()
               )
             }
           >
@@ -628,23 +623,17 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                +parseDisplayAmount(
+                parseDisplayAmount(
                   (token2Balance / 2)?.toString(),
                   token2InfoData?.decimals ?? 0
-                )
+                ).toString()
               )
             }
           >
             HALF
           </div>
           <TokenBalance
-            balance={getValueUsd(
-              token2,
-              +parseDisplayAmount(
-                token2Balance?.toString(),
-                token2InfoData?.decimals ?? 0
-              )
-            )}
+            balance={getValueUsd(token2, token2Balance)}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
           />
@@ -663,9 +652,9 @@ const LiquidityModal: FC<ModalProps> = ({
             decimalScale={6}
             placeholder={'0'}
             // type="input"
-            value={!!amountToken2 ? amountToken2 : ''}
+            value={amountToken2 ?? ''}
             onChange={(e: any) => {
-              onChangeAmount2(+e.target.value.replaceAll(',', ''));
+              onChangeAmount2(e.target.value.replaceAll(',', ''));
             }}
           />
         </div>
@@ -706,7 +695,12 @@ const LiquidityModal: FC<ModalProps> = ({
         className={cx('swap-btn')}
         onClick={handleAddLiquidity}
         disabled={
-          actionLoading || !token1InfoData || !token2InfoData || !pairInfoData || isToken1AllowanceToPairLoading || isToken2AllowanceToPairLoading
+          actionLoading ||
+          !token1InfoData ||
+          !token2InfoData ||
+          !pairInfoData ||
+          isToken1AllowanceToPairLoading ||
+          isToken2AllowanceToPairLoading
         }
       >
         {actionLoading && <Loader width={20} height={20} />}
@@ -817,13 +811,10 @@ const LiquidityModal: FC<ModalProps> = ({
                 <TokenBalance
                   balance={getValueUsd(
                     token1,
-                    +parseDisplayAmount(
-                      (
-                        (lpAmountBurn * pairAmountInfoData?.token1Amount) /
-                        +lpTokenInfoData!.total_supply
-                      ).toString(),
-                      0
-                    )
+                    (lpAmountBurn *
+                      10 ** lpTokenInfoData.decimals *
+                      pairAmountInfoData?.token1Amount) /
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -850,13 +841,10 @@ const LiquidityModal: FC<ModalProps> = ({
                 <TokenBalance
                   balance={getValueUsd(
                     token2,
-                    +parseDisplayAmount(
-                      (
-                        (lpAmountBurn * pairAmountInfoData?.token2Amount) /
-                        +lpTokenInfoData!.total_supply
-                      ).toString(),
-                      0
-                    )
+                    (lpAmountBurn *
+                      10 ** lpTokenInfoData.decimals *
+                      pairAmountInfoData?.token2Amount) /
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
