@@ -69,7 +69,9 @@ const Swap: React.FC<SwapProps> = () => {
       title: token.name,
       denom: token.denom
     };
-  });
+  }).filter(t => t.title!= 'Erc20 ORAI' && t.title!= 'Bep20 ORAI');
+  
+  
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
@@ -385,7 +387,7 @@ const Swap: React.FC<SwapProps> = () => {
           <div className={cx('from')}>
             <div className={cx('header')}>
               <div className={cx('title')}>FROM</div>
-              <img
+              {/* <img
                 className={cx('btn')}
                 src={require('assets/icons/setting.svg').default}
                 onClick={() => setIsOpenSettingModal(true)}
@@ -393,7 +395,7 @@ const Swap: React.FC<SwapProps> = () => {
               <img
                 className={cx('btn')}
                 src={require('assets/icons/refresh.svg').default}
-              />
+              /> */}
             </div>
             <div className={cx('balance')}>
               <TokenBalance
