@@ -94,7 +94,7 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
 const WatchList = memo(() => {
   return (
     <div className={styles.watchlist}>
-      <div className={styles.watchlist_title}>Your watchlist</div>
+      <div className={styles.watchlist_title}></div>
     </div>
   );
 });
