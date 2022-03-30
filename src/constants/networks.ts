@@ -18,6 +18,7 @@ const networks: { [key: string]: NetworkConfig } = {
     factory: process.env.REACT_APP_FACTORY_CONTRACT,
     router: process.env.REACT_APP_ROUTER_CONTRACT,
     oracle: process.env.REACT_APP_ORACLE_CONTRACT,
+    staking: process.env.REACT_APP_STAKING_CONTRACT,
     explorer: 'https://scan.orai.io'
   },
   [NetworkKey.TESTNET]: {
@@ -32,6 +33,7 @@ const networks: { [key: string]: NetworkConfig } = {
     factory: 'orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra',
     router: 'orai1g0pwp3rgzqywvt0xdut08gknyj5q37rtn5aecx',
     oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn',
+    staking: process.env.REACT_APP_STAKING_CONTRACT,
     explorer: 'https://testnet.scan.orai.io'
   }
 };

@@ -23,7 +23,9 @@ export enum Type {
   'SWAP' = 'Swap',
   'PROVIDE' = 'Provide',
   'WITHDRAW' = 'Withdraw',
-  'INCREASE_ALLOWANCE' = 'Increase allowance'
+  'INCREASE_ALLOWANCE' = 'Increase allowance',
+  'BOND_LIQUIDITY' = 'Bond liquidity',
+  'WITHDRAW_LIQUIDITY_MINING' = 'Withdraw Liquidity Mining Rewards'
 }
 
 const oraiInfo = { native_token: { denom: ORAI } };
@@ -45,9 +47,8 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${
-    lcd ?? network.lcd
-  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${lcd ?? network.lcd
+    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -70,6 +71,17 @@ function findPair(pair: string) {
 async function fetchTaxRate() {
   const data = await querySmart(network.oracle, { treasury: { tax_rate: {} } });
   return data;
+}
+
+function fetchPoolMiningInfo(tokenInfo: TokenInfo) {
+  let { info: token_asset } = parseTokenInfo(tokenInfo);
+  if (token_asset.token) return querySmart(network.staking, { pool_info: { asset_token: token_asset.token.contract_addr } });
+  // currently ibc pool is not supported
+  else throw "IBC native pool is not supported"
+}
+
+function fetchRewardMiningInfo(address: string) {
+  return querySmart(network.staking, { reward_info: { staker_addr: address } });
 }
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
@@ -113,7 +125,7 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-      '0'
+    '0'
   );
 }
 
@@ -197,9 +209,8 @@ async function fetchNativeTokenBalance(
   denom: string,
   lcd?: string
 ) {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -254,27 +265,27 @@ const generateSwapOperationMsgs = (data: {
   const { denom, offerInfo, askInfo } = data;
   return findPair(denom)
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: {
@@ -453,6 +464,70 @@ async function generateContractMessages(
   return msgs;
 }
 
+export type BondMining = {
+  type: Type.BOND_LIQUIDITY;
+  // from: string;
+  // to: string;
+  lpToken: string;
+  amount: number | string;
+  assetToken: TokenInfo;
+  sender: string;
+};
+
+export type WithdrawMining = {
+  type: Type.WITHDRAW_LIQUIDITY_MINING;
+  sender: string;
+};
+
+async function generateMiningMsgs(
+  msg: BondMining | WithdrawMining,
+) {
+  // @ts-ignore
+  const { type, sender, ...params } = msg;
+  let sent_funds;
+  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
+  let contractAddr = network.router;
+  let input;
+  switch (type) {
+    case Type.BOND_LIQUIDITY:
+      const bondMsg = params as BondMining;
+      // currently only support cw20 token pool
+      let { info } = parseTokenInfo(bondMsg.assetToken);
+      if (info.token) {
+        input = {
+          send: {
+            contract: network.staking,
+            amount: bondMsg.amount.toString(),
+            msg: btoa(JSON.stringify({ bond: { asset_token: info.token?.contract_addr } })) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+          }
+        };
+        contractAddr = bondMsg.lpToken;
+      } else {
+        throw "IBC native pool is not currently supported when bonding"
+      }
+      break;
+    case Type.WITHDRAW_LIQUIDITY_MINING:
+      input = { withdraw: {} };
+      contractAddr = network.staking;
+      break;
+    default:
+      break;
+  }
+
+  console.log('input: ', input);
+
+  const msgs = [
+    {
+      contract: contractAddr,
+      msg: Buffer.from(JSON.stringify(input)),
+      sender,
+      sent_funds
+    }
+  ];
+
+  return msgs;
+}
+
 export {
   querySmart,
   fetchTaxRate,
@@ -467,5 +542,8 @@ export {
   fetchExchangeRate,
   simulateSwap,
   fetchPoolInfoAmount,
-  fetchTokenAllowance
+  fetchTokenAllowance,
+  fetchPoolMiningInfo,
+  fetchRewardMiningInfo,
+  generateMiningMsgs
 };

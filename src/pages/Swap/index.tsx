@@ -15,6 +15,7 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
+  generateMiningMsgs,
   simulateSwap
 } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
@@ -306,6 +307,19 @@ const Swap: React.FC<SwapProps> = () => {
         fromInfo: fromTokenInfoData,
         toInfo: toTokenInfoData
       });
+
+      // const msgs = await generateMiningMsgs({
+      //   type: Type.BOND_LIQUIDITY,
+      //   sender: `${walletAddr}`,
+      //   amount: "1000000",
+      //   lpToken: "orai1hxm433hnwthrxneyjysvhny539s9kh6s2g2n8y",
+      //   assetToken: { "symbol": "AIRI", "name": "aiRight Token", "contract_addr": "orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg", "decimals": 6, "denom": "airi", "total_supply": "1000000000000000" },
+      // })
+
+      // const msgs = await generateMiningMsgs({
+      //   type: Type.WITHDRAW_LIQUIDITY_MINING,
+      //   sender: `${walletAddr}`,
+      // })
 
       const msg = msgs[0];
       console.log(
