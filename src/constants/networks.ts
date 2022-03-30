@@ -10,19 +10,21 @@ const networks: { [key: string]: NetworkConfig } = {
     chainId: 'Oraichain',
     prefix: 'orai',
     denom: 'orai',
+    coinType: 118,
     lcd: 'https://lcd.orai.io',
     rpc: 'https://rpc.orai.io',
     id: NetworkKey.MAINNET,
     fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 ORAI
-    factory: 'orai1hemdkz4xx9kukgrunxu3yw0nvpyxf34v82d2c8',
-    router: 'orai1x7s4a42y8scugcac5vj2zre96z86lhntq7qg23',
-    oracle: 'orai18rgtdvlrev60plvucw2rz8nmj8pau9gst4q07m',
+    factory: process.env.REACT_APP_FACTORY_CONTRACT,
+    router: process.env.REACT_APP_ROUTER_CONTRACT,
+    oracle: process.env.REACT_APP_ORACLE_CONTRACT,
     explorer: 'https://scan.orai.io'
   },
   [NetworkKey.TESTNET]: {
     chainId: 'Oraichain-testnet',
     prefix: 'orai',
     denom: 'orai',
+    coinType: 118,
     lcd: 'https://testnet.lcd.orai.io',
     rpc: 'https://testnet.rpc.orai.io',
     id: NetworkKey.TESTNET,
@@ -36,14 +38,9 @@ const networks: { [key: string]: NetworkConfig } = {
 
 export default networks;
 
-let networkKey = process.env.REACT_APP_NETWORK as NetworkKey;
-if (networkKey !== NetworkKey.MAINNET) {
-  networkKey = NetworkKey.TESTNET;
-}
-
 export const network =
   // sure have value
-  networks[networkKey];
+  networks[process.env.REACT_APP_NETWORK];
 
 export interface NetworkItem {
   cosmosBased: boolean;

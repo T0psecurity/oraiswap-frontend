@@ -14,7 +14,7 @@
   width: var(--menu-width);
   position: sticky;
   top: 0;
-  min-height: 700px;
+  height: 100vh;
   transition: margin-left 0.2s ease-in-out;
   @include mobile {
     margin-left: calc(-1 * var(--menu-width));
@@ -150,7 +150,7 @@
 
 .menu_footer {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   color: #777e90;
 }
 

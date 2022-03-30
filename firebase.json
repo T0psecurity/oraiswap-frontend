@@ -42,6 +42,20 @@
                     "destination": "/index.html"
                 }
             ]
+        }, {
+            "target": "oraiswap-ibc",
+            "public": "build",
+            "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**"
+            ],
+            "rewrites": [
+                {
+                    "source": "**",
+                    "destination": "/index.html"
+                }
+            ]
         }
     ]
 }

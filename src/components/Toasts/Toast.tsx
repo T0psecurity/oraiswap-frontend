@@ -167,7 +167,7 @@ const ToastTxSuccess: FunctionComponent<{ link: string }> = ({ link }) => (
     <section className={styles.toast_section}>
       <h6>Transaction Successful</h6>
       <a target="__blank" href={link}>
-        View on OraiScan <LinkIcon />
+        View on Explorer <LinkIcon />
       </a>
     </section>
   </div>

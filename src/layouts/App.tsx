@@ -9,19 +9,19 @@ import { ThemeProvider } from 'context/theme-context';
 import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import useWindowSize from 'hooks/useWindowSize';
-import { isMobile } from '@walletconnect/browser-utils';
+// import useWindowSize from 'hooks/useWindowSize';
+// import { isMobile } from '@walletconnect/browser-utils';
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [address, setAddress] = useLocalStorage<string>('address');
-  const { windowSize } = useWindowSize();
+  // const { windowSize } = useWindowSize();
 
-  // update windowSize
-  document
-    .getElementById('oraiswap')
-    ?.style.setProperty('zoom', windowSize.width > 1480 ? '1' : '0.9');
+  // // update windowSize
+  // document
+  //   .getElementById('oraiswap')
+  //   ?.style.setProperty('zoom', windowSize.width > 1480 ? '1' : '0.9');
 
   const updateAddress = async () => {
     // automatically update. If user is also using Oraichain wallet => dont update
