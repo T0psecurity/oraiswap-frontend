@@ -143,7 +143,6 @@ const Balance: React.FC<BalanceProps> = () => {
     if (pendingTokens.length == 0) return;
     try {
       // let chainId = network.chainId;
-      // await window.Keplr.suggestChain(chainId);
       // we enable oraichain then use pubkey to calculate other address
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
@@ -155,7 +154,6 @@ const Balance: React.FC<BalanceProps> = () => {
       const amountDetails = Object.fromEntries(
         await Promise.all(
           pendingTokens.map(async (token) => {
-            await window.Keplr.suggestChain(token.chainId);
             const address = await window.Keplr.getKeplrBech32Address(
               token.coinType === network.coinType
                 ? network.chainId
