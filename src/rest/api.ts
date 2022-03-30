@@ -1,4 +1,3 @@
-import axiosClass from 'axios';
 import { network } from 'constants/networks';
 import { TokenItemType } from 'constants/bridgeTokens';
 import { PairInfo } from 'types/oraiswap_pair/pair_info';
@@ -6,6 +5,7 @@ import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'constants/constants';
 import { pairsMap } from 'constants/pools';
+import axios from './request';
 
 interface TokenInfo {
   name: string;
@@ -25,11 +25,6 @@ export enum Type {
   'WITHDRAW' = 'Withdraw',
   'INCREASE_ALLOWANCE' = 'Increase allowance'
 }
-
-// override with timeout
-const axios = axiosClass.create({
-  timeout: 10000
-});
 
 const oraiInfo = { native_token: { denom: ORAI } };
 
