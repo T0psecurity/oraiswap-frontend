@@ -54,21 +54,6 @@ const mockToken = {
   },
 };
 
-const mockBalance = {
-  ORAI: 800000,
-  AIRI: 80000.09,
-  ATOM: 50000.09,
-  TEST1: 8000.122,
-  TEST2: 800.3434,
-};
-
-const mockPrice = {
-  ORAI: 5.01,
-  AIRI: 0.89,
-  TEST1: 1,
-  TEST2: 1,
-};
-
 type TokenName = keyof typeof mockToken;
 type PairName = keyof typeof mockPair;
 

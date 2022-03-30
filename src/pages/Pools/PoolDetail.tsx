@@ -17,7 +17,7 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
-  simulateSwap,
+  simulateSwap
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
@@ -28,44 +28,14 @@ import TokenBalance from 'components/TokenBalance';
 
 const cx = cn.bind(styles);
 
-const mockPair = {
-  'ORAI-AIRI': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'AIRI-ATOM': {
-    contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'ORAI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'AIRI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'ATOM-ORAI': {
-    contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
-    amount1: 100,
-    amount2: 1000,
-  },
-};
-
 interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
-  let pair,
-    token1: TokenItemType | undefined,
-    token2: TokenItemType | undefined;
+  let pair;
 
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
-  const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);  
+  const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
 
   const [address] = useLocalStorage<string>('address');
 
@@ -73,13 +43,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     filteredTokens.map((t) => t.coingeckoId)
   );
 
-  type PriceKey = keyof typeof prices;
-
   const getPairInfo = async () => {
     const pairKey = Object.keys(PairKey).find((k) => {
       let [_token1, _token2] = poolUrl?.toUpperCase().split('-') ?? [
         undefined,
-        undefined,
+        undefined
       ];
       return (
         !!_token1 && !!_token2 && k.includes(_token1) && k.includes(_token2)
@@ -91,11 +59,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     if (!pair) return;
     let token1 = {
         ...mockToken[pair.asset_denoms[0]],
-        contract_addr: mockToken[pair.asset_denoms[0]].contractAddress,
+        contract_addr: mockToken[pair.asset_denoms[0]].contractAddress
       },
       token2 = {
         ...mockToken[pair.asset_denoms[1]],
-        contract_addr: mockToken[pair.asset_denoms[1]].contractAddress,
+        contract_addr: mockToken[pair.asset_denoms[1]].contractAddress
       };
 
     // Token1Icon = token1.Icon;
@@ -105,13 +73,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       // @ts-ignore
       token1,
       // @ts-ignore
-      token2,
+      token2
     ]);
 
     return {
       ...pairInfo,
       token1,
-      token2,
+      token2
     };
   };
 
@@ -142,7 +110,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       token1Usd: fromAmount,
       token2Usd: toAmount,
       usdAmount: fromAmount + toAmount,
-      ratio: poolData.offerPoolAmount / poolData.askPoolAmount,
+      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
     };
   };
 
@@ -150,25 +118,25 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     data: pairInfoData,
     error: pairInfoError,
     isError: isPairInfoError,
-    isLoading: isPairInfoLoading,
+    isLoading: isPairInfoLoading
   } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
     // enabled: !!token1! && !!token2!,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: false
   });
 
   let {
     data: pairAmountInfoData,
     error: pairAmountInfoError,
     isError: isPairAmountInfoError,
-    isLoading: isPairAmountInfoLoading,
+    isLoading: isPairAmountInfoLoading
   } = useQuery(
     ['pair-amount-info', pairInfoData, prices],
-    () => {      
+    () => {
       return getPairAmountInfo();
     },
     {
       enabled: !!prices && !!pairInfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
       // refetchInterval: 10000,
     }
   );
@@ -177,13 +145,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     data: lpTokenBalance,
     error: lpTokenBalanceError,
     isError: isLpTokenBalanceError,
-    isLoading: isLpTokenBalanceLoading,
+    isLoading: isLpTokenBalanceLoading
   } = useQuery(
     ['token-balance', pairInfoData],
     () => fetchBalance(address, '', pairInfoData?.liquidity_token),
     {
       enabled: !!address && !!pairInfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -191,18 +159,18 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     data: lpTokenInfoData,
     error: lpTokenInfoError,
     isError: isLpTokenInfoError,
-    isLoading: isLpTokenInfoLoading,
+    isLoading: isLpTokenInfoLoading
   } = useQuery(
     ['token-info', pairInfoData],
     () => {
       // @ts-ignore
       return fetchTokenInfo({
-        contractAddress: pairInfoData?.liquidity_token,
+        contractAddress: pairInfoData?.liquidity_token
       });
     },
     {
       enabled: !!pairInfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -261,7 +229,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: lpTokenBalance,
-                              denom: `${lpTokenInfoData?.symbol}`,
+                              denom: `${lpTokenInfoData?.symbol}`
                             }}
                             decimalScale={2}
                             className={cx('amount')}
@@ -291,7 +259,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: liquidity1,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
@@ -318,7 +286,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: liquidity2,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
@@ -354,7 +322,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: pairAmountInfoData.token1Amount,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
@@ -377,7 +345,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: pairAmountInfoData.token2Amount,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
@@ -394,60 +362,81 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
               )}
 
-              <div className={cx('row')}>
-                <div className={cx('mining')}>
-                  <div className={cx('label--bold')}>Liquidity Mining</div>
-                  <div className={cx('label--sub')}>
-                    Bond liquidity to earn ORAI liquidity reward and swap fees
+              <div
+                className={cx('row')}
+                style={{ marginBottom: '30px', marginTop: '40px' }}
+              >
+                <>
+                  <div className={cx('mining')}>
+                    <div className={cx('label--bold')}>Liquidity Mining</div>
+                    <div className={cx('label--sub')}>
+                      Bond liquidity to earn ORAI liquidity reward and swap fees
+                    </div>
                   </div>
-                  <div className={cx('container', 'container_mining')}>
-                    <img
-                      className={cx('icon')}
-                      src={
-                        require('assets/images/Liquidity_mining_illus.png')
-                          .default
-                      }
-                    />
-                    <div className={cx('bonded')}>
-                      <div className={cx('label')}>Bonded</div>
-                      <div className={cx('amount')}>2.35 GAMM-1</div>
-                      <div className={cx('amount-usd')}>$1,948.80</div>
-                      <Divider
-                        dashed
-                        style={{
-                          background: '#2D2938',
-                          width: '100%',
-                          height: '1px',
-                          margin: '16px 0',
-                        }}
+                  <div className={cx('earning')}>
+                    <Button className={cx('btn')}>Start Earning</Button>
+                  </div>
+                </>
+              </div>
+              <div className={cx('row')}>
+                <>
+                  <div className={cx('mining')}>
+                    <div className={cx('container', 'container_mining')}>
+                      <img
+                        className={cx('icon')}
+                        src={
+                          require('assets/images/Liquidity_mining_illus.png')
+                            .default
+                        }
                       />
-                      <div className={cx('bonded-apr')}>
-                        <div className={cx('bonded-name')}>Current APR</div>
-                        <div className={cx('bonded-value')}>63.08%</div>
-                      </div>
-                      <div className={cx('bonded-unbouding')}>
-                        <div className={cx('bonded-name')}>
-                          Unbonding Duration
+                      <div className={cx('bonded')}>
+                        <div className={cx('label')}>Bonded</div>
+                        <div>
+                          <div className={cx('amount')}>2.35 GAMM-1</div>
+                          <div className={cx('amount-usd')}>$1,948.80</div>
                         </div>
-                        <div className={cx('bonded-value')}>7 days</div>
+                        <Divider
+                          dashed
+                          style={{
+                            background: '#2D2938',
+                            width: '100%',
+                            height: '1px',
+                            // margin: '16px 0'
+                          }}
+                        />
+                        <div className={cx('bonded-apr')}>
+                          <div className={cx('bonded-name')}>Current APR</div>
+                          <div className={cx('bonded-value')}>63.08%</div>
+                        </div>
+                        <div className={cx('bonded-unbouding')}>
+                          <div className={cx('bonded-name')}>
+                            Unbonding Duration
+                          </div>
+                          <div className={cx('bonded-value')}>7 days</div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className={cx('earning')}>
-                  <Button className={cx('btn')}>Start Earning</Button>
-                  <div className={cx('container', 'container_earning')}>
-                    <div className={cx('label')}>Earnings</div>
-                    <div className={cx('amount')}>0 ORAI</div>
-                    <div className={cx('amount-usd')}>$0</div>
-                    <Button
-                      className={cx('btn', 'btn--dark')}
-                      onClick={() => setIsOpenBondingModal(true)}
-                    >
-                      Unbond All
-                    </Button>
+                  <div className={cx('earning')}>
+                    <div className={cx('container', 'container_earning')}>
+                      <div className={cx('label')}>Earnings</div>
+                      <>
+                        <div className={cx('amount')}>0 ORAI</div>
+                        <div className={cx('amount-usd')}>$0</div>
+                      </>
+                      <>
+                        <div className={cx('amount')}>0 ORAIX</div>
+                        <div className={cx('amount-usd')}>$0</div>
+                      </>
+                      <Button
+                        className={cx('btn', 'btn--dark')}
+                        onClick={() => setIsOpenBondingModal(true)}
+                      >
+                        Unbond All
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </>
               </div>
             </div>
           </div>

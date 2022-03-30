@@ -143,7 +143,7 @@
 
     .container {
       padding: 25px;
-      background: #17181c;
+      background: #17181c;      
       border-radius: 16px;
 
       font-family: 'IBM Plex Sans';
@@ -160,7 +160,7 @@
       color: #ffffff;
       display: flex;
       flex-direction: column;
-      margin-top: 25px;
+      // margin-top: 25px;
 
       &.tokens {
         width: 70%;
@@ -315,13 +315,14 @@
     }
 
     .mining {
-      margin-top: 50px;
+      // margin-top: 50px;
       width: 70%;
 
       .container_mining {
         display: flex;
         flex-direction: row;
         gap: 30px;
+        height: 100%;
 
         .icon {
           width: 30%;
@@ -329,10 +330,13 @@
 
         .bonded {
           width: 70%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
           &-apr,
           &-unbouding {
             display: flex;
-            margin-top: 20px;
+            // margin-top: 20px;
             justify-content: space-between;
           }
 
@@ -362,7 +366,7 @@
           font-weight: 600;
           font-size: 18px;
           line-height: 100%;
-          margin-top: 20px;
+          // margin-top: 20px;
         }
 
         .amount-usd {
@@ -376,14 +380,16 @@
     }
 
     .earning {
-      margin-top: 50px;
+      // margin-top: 50px;
       width: 27%;
 
       .container_earning {
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
         gap: 14px;
-        margin-top: 15px;
+        // margin-top: 15px;
+        height: 100%;
 
         .amount {
           font-weight: 600;
