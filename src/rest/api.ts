@@ -1,6 +1,6 @@
 import { network } from 'constants/networks';
 import { TokenItemType } from 'constants/bridgeTokens';
-import { PairInfo } from 'types/oraiswap_pair/pair_info';
+import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'constants/constants';
@@ -84,8 +84,10 @@ function fetchPoolMiningInfo(tokenInfo: TokenInfo) {
   else throw 'IBC native pool is not supported';
 }
 
-function fetchRewardMiningInfo(address: string) {
-  return querySmart(network.staking, { reward_info: { staker_addr: address } });
+function fetchRewardMiningInfo(address: string, asset_info: AssetInfo) {
+  return querySmart(network.staking, {
+    reward_info: { staker_addr: address, asset_info }
+  });
 }
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
@@ -514,7 +516,6 @@ async function generateMiningMsgs(msg: BondMining | WithdrawMining) {
             ) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
           }
         };
-        
       } else if (info.native_token) {
         // {"send":{"amount":"10","contract":"orai19p43y0tqnr5qlhfwnxft2u5unph5yn60y7tuvu","msg":"'$(echo
         // '{"bond":{"asset_info":{"native_token":{"denom":"ibc/A2E2EEC9057A4A1C2C0A6A4C78B0239118DF5F278830F50B4A6BDD7A66506B78"}}}}
@@ -532,7 +533,7 @@ async function generateMiningMsgs(msg: BondMining | WithdrawMining) {
               })
             )
           }
-        };        
+        };
       }
       contractAddr = bondMsg.lpToken;
       break;

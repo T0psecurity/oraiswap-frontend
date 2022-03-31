@@ -301,20 +301,20 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         cosmosBased: true,
         Icon: ATOMCOSMOS
       },
-      {
-        name: 'LUNA',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coingeckoId: 'terra-luna',
-        coinType: 118,
-        denom: process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
-        decimals: 6,
-        chainId: 'Oraichain',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        cosmosBased: true,
-        Icon: LUNA
-      },
+      // {
+      //   name: 'LUNA',
+      //   org: 'Oraichain',
+      //   prefix: 'orai',
+      //   coingeckoId: 'terra-luna',
+      //   coinType: 118,
+      //   denom: process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
+      //   decimals: 6,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   cosmosBased: true,
+      //   Icon: LUNA
+      // },
       {
         name: 'UST',
         org: 'Oraichain',
@@ -344,20 +344,20 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         cosmosBased: true,
         Icon: AIRI
       },
-      {
-        name: 'OSMO',
-        org: 'Oraichain',
-        denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
-        prefix: 'orai',
-        coinType: 118,
-        chainId: 'Oraichain',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        decimals: 6,
-        coingeckoId: 'osmosis',
-        cosmosBased: true,
-        Icon: OSMO
-      },
+      // {
+      //   name: 'OSMO',
+      //   org: 'Oraichain',
+      //   denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
+      //   prefix: 'orai',
+      //   coinType: 118,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   decimals: 6,
+      //   coingeckoId: 'osmosis',
+      //   cosmosBased: true,
+      //   Icon: OSMO
+      // },
       {
         name: 'Erc20 ORAI',
         org: 'Oraichain',

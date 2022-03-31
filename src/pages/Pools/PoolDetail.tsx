@@ -34,6 +34,7 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
+import { TokenInfo } from '@saberhq/token-utils';
 
 const cx = cn.bind(styles);
 
@@ -186,10 +187,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   );
 
   const { data: rewardMiningInfoData } = useQuery(
-    ['reward-info', address, bondingTxHash],
+    ['reward-info', address, bondingTxHash, pairInfoData],
     async () => {
-      let t = await fetchRewardMiningInfo(address);
-      console.log(t);
+      const token = pairInfoData?.asset_infos[1];
+      let t = await fetchRewardMiningInfo(address, token!);
+      // console.log(t);
 
       return t;
     },
@@ -510,7 +512,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                               denom: `${lpTokenInfoData?.symbol}`
                             }}
                             className={cx('amount')}
-                            decimalScale={2}
+                            decimalScale={6}
                           />
                           <div>
                             {!!pairAmountInfoData && !!lpTokenInfoData && (
@@ -552,13 +554,24 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                   <div className={cx('earning')}>
                     <div className={cx('container', 'container_earning')}>
                       <div className={cx('label')}>Earnings</div>
-                      <>
+                      {/* <>
                         <div className={cx('amount')}>0 ORAI</div>
                         <div className={cx('amount-usd')}>$0</div>
-                      </>
+                      </> */}
                       <>
-                        <div className={cx('amount')}>0 ORAIX</div>
-                        <div className={cx('amount-usd')}>$0</div>
+                        <div className={cx('amount')}>
+                          {rewardInfoFirst && (
+                            <TokenBalance
+                              balance={{
+                                amount: rewardInfoFirst.pending_reward,
+                                denom: 'ORAIX',
+                                decimals: 6
+                              }}
+                              decimalScale={6}
+                            />
+                          )}
+                        </div>
+                        {/* <div className={cx('amount-usd')}>$0</div> */}
                       </>
                       <Button
                         className={cx('btn', 'btn--dark')}
