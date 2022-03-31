@@ -86,6 +86,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [address, setAddress] = useLocalStorage<String>('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [txHash, setTxHash] = useState<String>()
+  const [refresh, setRefresh] = useState(false);
 
   const onChangeFromAmount = (amount: number) => {
     setFromAmount(amount);
@@ -385,15 +386,17 @@ const Swap: React.FC<SwapProps> = () => {
           <div className={cx('from')}>
             <div className={cx('header')}>
               <div className={cx('title')}>FROM</div>
-              <img
+              {/* <img
                 className={cx('btn')}
                 src={require('assets/icons/setting.svg').default}
                 onClick={() => setIsOpenSettingModal(true)}
-              />
-              <img
-                className={cx('btn')}
-                src={require('assets/icons/refresh.svg').default}
-              />
+              /> */}
+              <button onClick={() => setRefresh(!refresh)}>
+                <img
+                  className={cx('btn')}
+                  src={require('assets/icons/refresh.svg').default}
+                />
+              </button>
             </div>
             <div className={cx('balance')}>
               <TokenBalance
