@@ -33,21 +33,6 @@ import Loader from 'components/Loader';
 
 const cx = cn.bind(style);
 
-type TokenDenom = keyof typeof mockToken;
-
-type PairInfoData = {
-  pair: Pair;
-  token1Amount: number;
-  token2Amount: number;
-  usdAmount: number;
-  ratio: number;
-};
-interface ValidToken {
-  title: TokenDenom;
-  contractAddress: string | undefined;
-  Icon: string | FC;
-  denom: string;
-}
 interface ModalProps {
   className?: string;
   isOpen: boolean;
@@ -248,7 +233,7 @@ const LiquidityModal: FC<ModalProps> = ({
       setAmountToken1(`${+amountToken2 * pairAmountInfoData.ratio}`);
   }, [JSON.stringify(pairAmountInfoData)]);
 
-  const getValueUsd = (token: any, amount: number) => {  
+  const getValueUsd = (token: any, amount: number) => {
     let t = getUsd(
       amount,
       prices[token!.coingeckoId as PriceKey].price,
@@ -665,17 +650,14 @@ const LiquidityModal: FC<ModalProps> = ({
             <span>Total supply</span>
             <TooltipIcon />
           </div>
-          {
-            <TokenBalance
-              balance={
-                pairAmountInfoData?.usdAmount
-                  ? pairAmountInfoData?.usdAmount
-                  : 0
-              }
-              style={{ flexGrow: 1, textAlign: 'right' }}
-              decimalScale={2}
-            />
-          }
+
+          <TokenBalance
+            balance={
+              pairAmountInfoData?.usdAmount ? pairAmountInfoData?.usdAmount : 0
+            }
+            style={{ flexGrow: 1, textAlign: 'right' }}
+            decimalScale={2}
+          />
         </div>
         <div className={cx('row')}>
           <div className={cx('row-title')}>
