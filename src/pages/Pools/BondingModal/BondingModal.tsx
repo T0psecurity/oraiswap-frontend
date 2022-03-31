@@ -17,57 +17,6 @@ import Loader from 'components/Loader';
 
 const cx = cn.bind(style);
 
-const mockPair = {
-  'ORAI-AIRI': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
-  },
-  'AIRI-ATOM': {
-    contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
-    amount1: 100,
-    amount2: 1000
-  },
-  'ORAI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
-  },
-  'AIRI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000
-  },
-  'ATOM-ORAI': {
-    contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
-    amount1: 100,
-    amount2: 1000
-  }
-};
-
-const mockToken = {
-  ORAI: {
-    contractAddress: 'orai',
-    denom: 'orai',
-    logo: 'oraichain.svg'
-  },
-  AIRI: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'airi.svg'
-  },
-  ATOM: {
-    contractAddress: 'orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf',
-    logo: 'atom.svg'
-  },
-  TEST2: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'atom.svg'
-  }
-};
-
-type TokenName = keyof typeof mockToken;
-type PairName = keyof typeof mockPair;
-
 interface ModalProps {
   className?: string;
   isOpen: boolean;
@@ -254,7 +203,7 @@ const BondingModal: FC<ModalProps> = ({
           disabled={actionLoading}
         >
           {actionLoading && <Loader width={20} height={20} />}
-          <span>Bond</span> 
+          <span>Bond</span>
         </button>
       </div>
     </Modal>

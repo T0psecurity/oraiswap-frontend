@@ -19,7 +19,9 @@ import {
   generateContractMessages,
   simulateSwap,
   fetchPoolMiningInfo,
-  fetchRewardMiningInfo
+  fetchRewardMiningInfo,
+  generateMiningMsgs,
+  Type
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
@@ -28,6 +30,10 @@ import useLocalStorage from 'libs/useLocalStorage';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import CosmJs from 'libs/cosmjs';
+import { ORAI } from 'constants/constants';
+import { network } from 'constants/networks';
+import Loader from 'components/Loader';
 
 const cx = cn.bind(styles);
 
@@ -42,6 +48,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [address] = useLocalStorage<string>('address');
   const [assetToken, setAssetToken] = useState<any>();
   const [bondingTxHash, setBondingTxHash] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
 
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
@@ -222,21 +229,58 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const liquidity2Usd =
     (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply;
 
-  //   {
-  //     "asset_token": "orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg",
-  //     "staking_token": "orai1hxm433hnwthrxneyjysvhny539s9kh6s2g2n8y",
-  //     "total_bond_amount": "1000020",
-  //     "total_short_amount": "0",
-  //     "reward_index": "0.000099998000039999",
-  //     "short_reward_index": "0",
-  //     "pending_reward": "0",
-  //     "short_pending_reward": "0",
-  //     "premium_rate": "0",
-  //     "short_reward_weight": "0",
-  //     "premium_updated_time": 0,
-  //     "migration_index_snapshot": null,
-  //     "migration_deprecated_staking_token": null
-  // }
+  const handleUnbond = async () => {
+    setActionLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      let walletAddr;
+      if (await window.Keplr.getKeplr())
+        walletAddr = await window.Keplr.getKeplrAddr();
+      else throw 'You have to install Keplr wallet to swap';
+
+      const msgs = await generateMiningMsgs({
+        type: Type.WITHDRAW_LIQUIDITY_MINING,
+        sender: `${walletAddr}`
+      });
+
+      const msg = msgs[0];
+
+      // console.log(
+      //   'msgs: ',
+      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+      // );
+
+      const result = await CosmJs.execute({
+        address: msg.contract,
+        walletAddr: walletAddr! as string,
+        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        gasAmount: { denom: ORAI, amount: '0' },
+        // @ts-ignore
+        handleOptions: { funds: msg.sent_funds }
+      });
+      console.log('result provide tx hash: ', result);
+
+      if (result) {
+        console.log('in correct result');
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+        setActionLoading(false);
+        setBondingTxHash(result.transactionHash);
+        return;
+      }
+    } catch (error) {
+      console.log('error in bond form: ', error);
+      let finalError = '';
+      if (typeof error === 'string' || error instanceof String) {
+        finalError = error as string;
+      } else finalError = String(error);
+      displayToast(TToastType.TX_FAILED, {
+        message: finalError
+      });
+    }
+    setActionLoading(false);
+  };
 
   return (
     <Content nonBackground>
@@ -306,7 +350,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             {pairInfoData.token1.name}
                           </span>
                         </div>
-                        <div className={cx('liquidity_token_value')}>                          
+                        <div className={cx('liquidity_token_value')}>
                           <TokenBalance
                             balance={{
                               amount: liquidity1,
@@ -413,7 +457,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
               )}
 
-               <div
+              <div
                 className={cx('row')}
                 style={{ marginBottom: '30px', marginTop: '40px' }}
               >
@@ -471,7 +515,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                                 decimalScale={2}
                               />
                             )}
-                          </div>                          
+                          </div>
                         </div>
                         <Divider
                           dashed
@@ -506,8 +550,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('amount')}>0 ORAIX</div>
                         <div className={cx('amount-usd')}>$0</div>
                       </>
-                      <Button className={cx('btn', 'btn--dark')}>
-                        Unbond All
+                      <Button
+                        className={cx('btn', 'btn--dark')}
+                        onClick={handleUnbond}
+                        disabled={actionLoading}
+                      >
+                        {actionLoading && <Loader width={20} height={20} />}
+                        <span>Unbond All</span>
                       </Button>
                     </div>
                   </div>
