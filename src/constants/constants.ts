@@ -15,7 +15,7 @@ export const DEFAULT_MAX_SPREAD = 0.5;
 export const MAX_MSG_LENGTH = 1024;
 
 /* network:settings */
-export const IBC_TRANSFER_TIMEOUT = 1000;
+export const IBC_TRANSFER_TIMEOUT = 3600;
 export const AXIOS_THROTTLE_THRESHOLD = 2000;
 export const AXIOS_TIMEOUT = 10000;
 
