@@ -47,8 +47,9 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -75,9 +76,12 @@ async function fetchTaxRate() {
 
 function fetchPoolMiningInfo(tokenInfo: TokenInfo) {
   let { info: token_asset } = parseTokenInfo(tokenInfo);
-  if (token_asset.token) return querySmart(network.staking, { pool_info: { asset_token: token_asset.token.contract_addr } });
+  if (token_asset.token)
+    return querySmart(network.staking, {
+      pool_info: { asset_token: token_asset.token.contract_addr }
+    });
   // currently ibc pool is not supported
-  else throw "IBC native pool is not supported"
+  else throw 'IBC native pool is not supported';
 }
 
 function fetchRewardMiningInfo(address: string) {
@@ -125,7 +129,7 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-    '0'
+      '0'
   );
 }
 
@@ -209,8 +213,9 @@ async function fetchNativeTokenBalance(
   denom: string,
   lcd?: string
 ) {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -265,27 +270,27 @@ const generateSwapOperationMsgs = (data: {
   const { denom, offerInfo, askInfo } = data;
   return findPair(denom)
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: {
@@ -479,9 +484,7 @@ export type WithdrawMining = {
   sender: string;
 };
 
-async function generateMiningMsgs(
-  msg: BondMining | WithdrawMining,
-) {
+async function generateMiningMsgs(msg: BondMining | WithdrawMining) {
   // @ts-ignore
   const { type, sender, ...params } = msg;
   let sent_funds;
@@ -494,17 +497,44 @@ async function generateMiningMsgs(
       // currently only support cw20 token pool
       let { info } = parseTokenInfo(bondMsg.assetToken);
       if (info.token) {
+        // {"send":{"amount":"100","contract":"orai19p43y0tqnr5qlhfwnxft2u5unph5yn60y7tuvu",
+        // {"bond":{"asset_info":{"token":{"contract_addr":"orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg"}}}}'
         input = {
           send: {
             contract: network.staking,
             amount: bondMsg.amount.toString(),
-            msg: btoa(JSON.stringify({ bond: { asset_token: info.token?.contract_addr } })) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+            msg: btoa(
+              JSON.stringify({
+                bond: {
+                  asset_info: {
+                    token: { contract_addr: info.token?.contract_addr }
+                  }
+                }
+              })
+            ) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
           }
         };
-        contractAddr = bondMsg.lpToken;
-      } else {
-        throw "IBC native pool is not currently supported when bonding"
+        
+      } else if (info.native_token) {
+        // {"send":{"amount":"10","contract":"orai19p43y0tqnr5qlhfwnxft2u5unph5yn60y7tuvu","msg":"'$(echo
+        // '{"bond":{"asset_info":{"native_token":{"denom":"ibc/A2E2EEC9057A4A1C2C0A6A4C78B0239118DF5F278830F50B4A6BDD7A66506B78"}}}}
+        input = {
+          send: {
+            contract: network.staking,
+            amount: bondMsg.amount.toString(),
+            msg: btoa(
+              JSON.stringify({
+                bond: {
+                  asset_info: {
+                    native_token: { denom: info.native_token.denom }
+                  }
+                }
+              })
+            )
+          }
+        };        
       }
+      contractAddr = bondMsg.lpToken;
       break;
     case Type.WITHDRAW_LIQUIDITY_MINING:
       input = { withdraw: {} };

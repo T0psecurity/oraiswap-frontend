@@ -91,7 +91,8 @@
       /* aiRight/White */
 
       color: #ffffff;
-      cursor: pointer;
+      // cursor: pointer;
+      
     }
 
     .swap {
@@ -306,6 +307,10 @@
       display: flex;
       justify-content: center;
       margin: 10px auto;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
 
       &--dark {
         background: #2d2938;

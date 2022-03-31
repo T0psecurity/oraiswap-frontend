@@ -1,4 +1,4 @@
-import React, { FC, memo, useState } from 'react';
+import React, { FC, memo, useEffect, useState } from 'react';
 import { Button, Divider, Input } from 'antd';
 import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
@@ -196,25 +196,33 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     { enabled: !!address, refetchOnWindowFocus: false }
   );
 
-  const { data: poolMiningInfoData } = useQuery(
-    ['pool-mining-info', address, pairInfoData],
-    async () => {
-      if (!!pairInfoData?.token1.contract_addr) {
-        setAssetToken(pairInfoData.token1);
-        // @ts-ignore
-        let t = await fetchPoolMiningInfo(pairInfoData.token1);
-        return t;
-      } else if (!!pairInfoData?.token2.contract_addr) {
-        setAssetToken(pairInfoData.token2);
-        // @ts-ignore
-        let t = await fetchPoolMiningInfo(pairInfoData.token2);
-        return t;
-      }
+  // const { data: poolMiningInfoData } = useQuery(
+  //   ['pool-mining-info', address, pairInfoData],
+  //   async () => {
+  //     if (!!pairInfoData?.token1.contract_addr) {
+  //       setAssetToken(pairInfoData.token1);
+  //       // @ts-ignore
+  //       let t = await fetchPoolMiningInfo(pairInfoData.token1);
+  //       return t;
+  //     } else if (!!pairInfoData?.token2.contract_addr) {
+  //       setAssetToken(pairInfoData.token2);
+  //       // @ts-ignore
+  //       let t = await fetchPoolMiningInfo(pairInfoData.token2);
+  //       return t;
+  //     }
 
-      return undefined;
-    },
-    { enabled: !!address && !!pairInfoData, refetchOnWindowFocus: false }
-  );
+  //     return undefined;
+  //   },
+  //   { enabled: !!address && !!pairInfoData, refetchOnWindowFocus: false }
+  // );
+
+  useEffect(() => {
+    if (pairInfoData?.token1.name === 'orai') {
+      setAssetToken(pairInfoData.token1);
+    } else if (!!pairInfoData) {
+      setAssetToken(pairInfoData.token2);
+    }
+  }, [pairInfoData]);
 
   const Token1Icon = pairInfoData?.token1.Icon,
     Token2Icon = pairInfoData?.token2.Icon;
