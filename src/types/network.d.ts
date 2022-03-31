@@ -3,6 +3,7 @@ interface ExtNetworkConfig {
   rpc: string;
   lcd: string;
   explorer: string;
+  coinType?: number;
 }
 
 export interface NetworkConfig extends ExtNetworkConfig {
@@ -13,7 +14,10 @@ export interface NetworkConfig extends ExtNetworkConfig {
   fee: { gasPrice: string; amount: string; gas: string };
   factory: string;
   oracle: string;
+  staking: string;
   router: string;
+  denom: string;
+  prefix: string;
 }
 
 export interface Network extends NetworkConfig {

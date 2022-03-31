@@ -20,6 +20,9 @@ import { fetchBalance } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 import Loader from 'components/Loader';
+import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
+import Long from 'long';
+import { isMobile } from '@walletconnect/browser-utils';
 
 interface BalanceProps {}
 
@@ -106,22 +109,20 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadAmountDetail = async (
+    address: Bech32Address | string | undefined,
     token: TokenItemType,
     pendingList: TokenItemType[]
   ) => {
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'You must install Keplr to continue'
-      });
-      return [token.denom, { amount: 0, usd: 0 }];
-    }
-    try {
-      await window.Keplr.suggestChain(token.chainId);
-      const address = await window.Keplr.getKeplrAddr(token.chainId);
+    let addr =
+      address instanceof Bech32Address
+        ? address.toBech32(token.prefix!)
+        : address;
 
+    try {
+      if (!addr) throw new Error('Addr is undefined');
+      // using this way we no need to enable other network
       const amount = await fetchBalance(
-        address as string,
+        addr,
         token.denom,
         token.contractAddress,
         token.lcd
@@ -143,10 +144,26 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
+      // let chainId = network.chainId;
+      // we enable oraichain then use pubkey to calculate other address
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) {
+        return displayToast(TToastType.TX_FAILED, {
+          message: 'You must install Keplr to continue'
+        });
+      }
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          pendingTokens.map((token) => loadAmountDetail(token, pendingList))
+          pendingTokens.map(async (token) => {
+            const address = await window.Keplr.getKeplrBech32Address(
+              token.coinType === network.coinType
+                ? network.chainId
+                : token.chainId
+            );
+
+            return loadAmountDetail(address, token, pendingList);
+          })
         )
       );
 
@@ -165,8 +182,6 @@ const Balance: React.FC<BalanceProps> = () => {
   useEffect(() => {
     loadTokenAmounts();
   }, [prices, txHash, pendingTokens]);
-
-  // console.log(prices['oraichain-token'].price);
 
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
     if (!token.cosmosBased) {
@@ -217,34 +232,58 @@ const Balance: React.FC<BalanceProps> = () => {
           Math.round(fromAmount * 10 ** from.decimals),
           from.denom
         );
-        const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
-        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-        const client = await SigningStargateClient.connectWithSigner(
-          from.rpc,
-          offlineSigner
-        );
         const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
 
-        const result = await client.sendIbcTokens(
-          fromAddress as string,
-          toAddress as string,
-          amount,
-          ibcInfo.source,
-          ibcInfo.channel,
-          undefined,
-          Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-          {
-            gas: '200000',
-            amount: []
-          }
-        );
+        // using app protocol to sign transaction
+        if (isMobile() && from.chainId === network.chainId) {
+          // check if is blacklisted like orai, using orai wallet
+          const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
+            sourceChannel: ibcInfo.channel,
+            sourcePort: ibcInfo.source,
+            sender: fromAddress as string,
+            receiver: toAddress as string,
+            token: amount,
+            timeoutTimestamp: Long.fromNumber(
+              (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
+            )
+          });
 
-        console.log(result);
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
-        });
-        // set tx hash to trigger refetching amount values
-        setTxHash(result?.transactionHash);
+          const value = Buffer.from(
+            ibc.applications.transfer.v1.MsgTransfer.encode(msgSend).finish()
+          ).toString('base64');
+
+          // open app protocal
+          const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&value=${value}`;
+          window.open(url);
+        } else {
+          const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
+          // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+          const client = await SigningStargateClient.connectWithSigner(
+            from.rpc,
+            offlineSigner
+          );
+
+          const result = await client.sendIbcTokens(
+            fromAddress as string,
+            toAddress as string,
+            amount,
+            ibcInfo.source,
+            ibcInfo.channel,
+            undefined,
+            Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+            {
+              gas: '200000',
+              amount: []
+            }
+          );
+
+          console.log(result);
+          displayToast(TToastType.TX_SUCCESSFUL, {
+            customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
+          });
+          // set tx hash to trigger refetching amount values
+          setTxHash(result?.transactionHash);
+        }
       } else {
         displayToast(TToastType.TX_FAILED, {
           message: 'You must install Keplr to continue'
@@ -285,7 +324,7 @@ const Balance: React.FC<BalanceProps> = () => {
                       balance={{
                         amount:
                           from && amounts[from.denom]
-                            ? amounts[from.denom].amount / 10 ** from.decimals
+                            ? amounts[from.denom].amount 
                             : 0,
                         denom: from?.name ?? ''
                       }}
@@ -331,7 +370,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     balance={fromUsd}
                     className={styles.balanceDescription}
                     prefix="~$"
-                    decimalScale={from?.decimals}
+                    decimalScale={2}
                   />
                 </div>
                 {from?.name ? (
@@ -421,9 +460,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 <TokenBalance
                   balance={{
                     amount:
-                      to && amounts[to.denom]
-                        ? amounts[to.denom].amount / 10 ** to.decimals
-                        : 0,
+                      to && amounts[to.denom] ? amounts[to.denom].amount : 0,
                     denom: to?.name ?? ''
                   }}
                   className={styles.balanceDescription}

@@ -83,14 +83,16 @@ const Menu: React.FC<{}> = React.memo((props) => {
   return (
     <>
       {mobileMode && (
-        <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-          <LogoFull />{' '}
+        <div className={styles.logo}>
+          <Link to={'/'} onClick={() => setLink('/')}>
+            <LogoFull />
+          </Link>
           <Icon
             size={44}
             name={open ? 'menu_open' : 'menu'}
             onClick={handleToggle}
           />
-        </Link>
+        </div>
       )}
       <div className={classNames(styles.menu, { [styles.open]: open })}>
         <div>
@@ -128,7 +130,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           <TokenBalance
                             balance={balance}
                             className={styles.token_balance}
-                            decimalScale={6}
+                            decimalScale={2}
                           />
                         );
                     })()}
@@ -161,8 +163,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
               <Pools style={{ width: 30, height: 30 }} />
             )}
             {renderLink(
-              '/balance',
-              'Balance',
+              '/bridge',
+              'Bridge',
               setLink,
               <Wallet style={{ width: 30, height: 30 }} />
             )}
@@ -170,7 +172,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         </div>
 
         <div>
-          <div className={styles.menu_themes}>
+          {/* <div className={styles.menu_themes}>
             <Button
               className={
                 styles.menu_theme +
@@ -195,7 +197,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               <Light style={{ width: 15, height: 15 }} />
               <Text className={styles.menu_theme_text}>Light</Text>
             </Button>
-          </div>
+          </div> */}
 
           <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
         </div>

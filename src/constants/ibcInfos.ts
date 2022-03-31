@@ -1,5 +1,13 @@
 import { IBCInfo } from 'types/ibc';
+import { IBC_TRANSFER_TIMEOUT } from './constants';
 import { network, NetworkKey } from './networks';
+
+const [atom2oraichain, oraicbain2atom] =
+  process.env.REACT_APP_ATOM_ORAICHAIN_CHANNELS.split(/\s+/);
+const [terra2oraichain, oraicbain2terra] =
+  process.env.REACT_APP_TERRA_ORAICHAIN_CHANNELS.split(/\s+/);
+const [osmosis2oraichain, oraicbain2osmosis] =
+  process.env.REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS.split(/\s+/);
 
 export interface IBCInfoMap {
   [key: string]: { [key: string]: IBCInfo };
@@ -38,41 +46,41 @@ const ibcInfosMap: { [key: string]: IBCInfoMap } = {
     'cosmoshub-4': {
       Oraichain: {
         source: 'transfer',
-        channel: 'channel-295',
-        timeout: 60
+        channel: atom2oraichain,
+        timeout: IBC_TRANSFER_TIMEOUT
       }
     },
     'columbus-5': {
       Oraichain: {
         source: 'transfer',
-        channel: 'channel-40',
-        timeout: 480
+        channel: terra2oraichain,
+        timeout: IBC_TRANSFER_TIMEOUT
       }
     },
     'osmosis-1': {
       Oraichain: {
         source: 'transfer',
-        channel: 'channel-214',
-        timeout: 480,
+        channel: osmosis2oraichain,
+        timeout: IBC_TRANSFER_TIMEOUT
       }
     },
     Oraichain: {
       'cosmoshub-4': {
         source: 'transfer',
-        channel: 'channel-9',
-        timeout: 60
+        channel: oraicbain2atom,
+        timeout: IBC_TRANSFER_TIMEOUT
       },
       'columbus-5': {
         source: 'transfer',
-        channel: 'channel-11',
-        timeout: 60
+        channel: oraicbain2terra,
+        timeout: IBC_TRANSFER_TIMEOUT
       },
       'osmosis-1': {
         source: 'transfer',
-        channel: 'channel-12',
-        timeout: 60
-      },
-    },
+        channel: oraicbain2osmosis,
+        timeout: IBC_TRANSFER_TIMEOUT
+      }
+    }
   }
 };
 

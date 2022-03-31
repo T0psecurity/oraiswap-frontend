@@ -1,76 +1,37 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
+import { pairsMap, mockToken, Pair, PairKey } from 'constants/pools';
+import { useQuery } from 'react-query';
+import {
+  fetchBalance,
+  fetchExchangeRate,
+  fetchPairInfo,
+  fetchPool,
+  fetchPoolInfoAmount,
+  fetchTaxRate,
+  fetchTokenInfo,
+  generateContractMessages,
+  simulateSwap,
+  fetchTokenAllowance
+} from 'rest/api';
+import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+import { filteredTokens } from 'constants/bridgeTokens';
+import { getUsd } from 'libs/utils';
+import TokenBalance from 'components/TokenBalance';
+import useLocalStorage from 'libs/useLocalStorage';
+import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import NumberFormat from 'react-number-format';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { Type } from 'rest/api';
+import CosmJs from 'libs/cosmjs';
+import { DECIMAL_FRACTION, ORAI } from 'constants/constants';
+import { network } from 'constants/networks';
+import Loader from 'components/Loader';
 
 const cx = cn.bind(style);
-
-const mockPair = {
-  'ORAI-AIRI': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'AIRI-ATOM': {
-    contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'ORAI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'AIRI-TEST2': {
-    contractAddress: 'orai14n2lr3trew60d2cpu2xrraq5zjm8jrn8fqan8v',
-    amount1: 100,
-    amount2: 1000,
-  },
-  'ATOM-ORAI': {
-    contractAddress: 'orai16wvac5gxlxqtrhhcsa608zh5uh2zltuzjyhmwh',
-    amount1: 100,
-    amount2: 1000,
-  },
-};
-
-const mockToken = {
-  ORAI: {
-    contractAddress: 'orai',
-    denom: 'orai',
-    logo: 'oraichain.svg',
-  },
-  AIRI: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'airi.svg',
-  },
-  ATOM: {
-    contractAddress: 'orai15e5250pu72f4cq6hfe0hf4rph8wjvf4hjg7uwf',
-    logo: 'atom.svg',
-  },
-  TEST2: {
-    contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
-    logo: 'atom.svg',
-  },
-};
-
-const mockBalance = {
-  ORAI: 800000,
-  AIRI: 80000.09,
-  ATOM: 50000.09,
-  TEST1: 8000.122,
-  TEST2: 800.3434,
-};
-
-const mockPrice = {
-  ORAI: 5.01,
-  AIRI: 0.89,
-  TEST1: 1,
-  TEST2: 1,
-};
-
-type TokenName = keyof typeof mockToken;
-type PairName = keyof typeof mockPair;
 
 interface ModalProps {
   className?: string;
@@ -78,20 +39,469 @@ interface ModalProps {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
-  token1: TokenName;
-  token2: TokenName;
+  token1InfoData: any;
+  token2InfoData: any;
 }
 
 const LiquidityModal: FC<ModalProps> = ({
   isOpen,
   close,
   open,
-  token1,
-  token2,
+  token1InfoData,
+  token2InfoData
 }) => {
+  const allToken = Object.values(mockToken).map((token) => {
+    return {
+      ...token,
+      title: token.name
+    };
+  });
+
+  const token1 = token1InfoData;
+  const token2 = token2InfoData;
+  const [address] = useLocalStorage<string>('address');
+
+  const { prices } = useCoinGeckoPrices(
+    filteredTokens.map((t) => t.coingeckoId)
+  );
+
+  type PriceKey = keyof typeof prices;
+
   const [activeTab, setActiveTab] = useState(0);
-  const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(2);
+  const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
   const [withdrawPercent, setWithdrawPercent] = useState(10);
+  const [amountToken1, setAmountToken1] = useState('');
+  const [amountToken2, setAmountToken2] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+  const [recentInput, setRecentInput] = useState(1);
+  const [lpAmountBurn, setLpAmountBurn] = useState(0);
+  const [txHash, setTxHash] = useState<String>();
+
+  let {
+    data: pairAmountInfoData,
+    error: pairAmountInfoError,
+    isError: isPairAmountInfoError,
+    isLoading: isPairAmountInfoLoading
+  } = useQuery(
+    ['pair-amount-info', token1InfoData, token2InfoData, prices, txHash],
+    () => {
+      return getPairAmountInfo();
+    },
+    {
+      enabled: !!prices && !!token1InfoData && !!token2InfoData,
+      refetchOnWindowFocus: false,
+      refetchInterval: 10000
+    }
+  );
+
+  const {
+    data: pairInfoData,
+    error: pairInfoError,
+    isError: isPairInfoError,
+    isLoading: isPairInfoLoading
+  } = useQuery(
+    [
+      'pair-info',
+      JSON.stringify(token1InfoData),
+      JSON.stringify(token2InfoData)
+    ],
+    () => getPairInfo(),
+    {
+      enabled: !!token1InfoData && !!token2InfoData,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const {
+    data: token1Balance,
+    error: token1BalanceError,
+    isError: isToken1BalanceError,
+    isLoading: isToken1BalanceLoading
+  } = useQuery(
+    ['token-balance', token1?.denom, txHash],
+    () =>
+      fetchBalance(
+        address,
+        token1!.denom,
+        token1!.contractAddress,
+        token1!.lcd
+      ),
+    {
+      enabled: !!address && !!token1,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const {
+    data: token2Balance,
+    error: token2BalanceError,
+    isError: isToken2BalanceError,
+    isLoading: isLoadingToken2Balance
+  } = useQuery(
+    ['token-balance', token2?.denom, txHash],
+    () =>
+      fetchBalance(
+        address,
+        token2!.denom,
+        token2!.contractAddress,
+        token2!.lcd
+      ),
+    {
+      enabled: !!address && !!token2,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const {
+    data: token1AllowanceToPair,
+    error: token1AllowanceToPairError,
+    isError: isToken1AllowanceToPairError,
+    isLoading: isToken1AllowanceToPairLoading
+  } = useQuery(
+    ['token-allowance', JSON.stringify(pairInfoData), token1InfoData, txHash],
+    () => {
+      return fetchTokenAllowance(
+        token1InfoData.contract_addr,
+        address,
+        pairInfoData!.contract_addr
+      );
+    },
+    {
+      enabled: !!address && !!token1InfoData.contract_addr && !!pairInfoData,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const {
+    data: token2AllowanceToPair,
+    error: token2AllowanceToPairError,
+    isError: isToken2AllowanceToPairError,
+    isLoading: isToken2AllowanceToPairLoading
+  } = useQuery(
+    ['token-allowance', JSON.stringify(pairInfoData), token2InfoData, txHash],
+    () => {
+      return fetchTokenAllowance(
+        token2InfoData.contract_addr,
+        address,
+        pairInfoData!.contract_addr
+      );
+    },
+    {
+      enabled: !!address && !!token2InfoData.contract_addr && !!pairInfoData,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const {
+    data: lpTokenBalance,
+    error: lpTokenBalanceError,
+    isError: isLpTokenBalanceError,
+    isLoading: isLpTokenBalanceLoading
+  } = useQuery(
+    ['token-balance', JSON.stringify(pairInfoData), txHash],
+    () => fetchBalance(address, '', pairInfoData?.liquidity_token),
+    {
+      enabled: !!address && !!pairInfoData,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const {
+    data: lpTokenInfoData,
+    error: lpTokenInfoError,
+    isError: isLpTokenInfoError,
+    isLoading: isLpTokenInfoLoading
+  } = useQuery(
+    ['token-info', JSON.stringify(pairInfoData?.pair.contract_addr)],
+    () => {
+      // @ts-ignore
+      return fetchTokenInfo({
+        contractAddress: pairInfoData?.liquidity_token
+      });
+    },
+    {
+      enabled: !!pairInfoData,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  useEffect(() => {
+    if (!pairAmountInfoData?.ratio) {
+    } else if (recentInput === 1 && !!+amountToken1) {
+      setAmountToken2(`${+amountToken1 / pairAmountInfoData.ratio}`);
+    } else if (recentInput === 2 && !!+amountToken2)
+      setAmountToken1(`${+amountToken2 * pairAmountInfoData.ratio}`);
+  }, [JSON.stringify(pairAmountInfoData)]);
+
+  const getValueUsd = (token: any, amount: number) => {
+    let t = getUsd(
+      amount,
+      prices[token!.coingeckoId as PriceKey].price,
+      token!.decimals
+    );
+    return t;
+  };
+
+  const onChangeAmount1 = (floatValue: string) => {
+    setRecentInput(1);
+    setAmountToken1(floatValue);
+    setAmountToken2(`${+floatValue / pairAmountInfoData?.ratio!}`);
+  };
+
+  const onChangeAmount2 = (floatValue: string) => {
+    setRecentInput(2);
+    setAmountToken2(floatValue);
+    setAmountToken1(`${+floatValue * pairAmountInfoData?.ratio!}`);
+  };
+
+  const getPairAmountInfo = async () => {
+    const poolData = await fetchPoolInfoAmount(
+      token1InfoData!,
+      token2InfoData!
+    );
+
+    const fromAmount = getUsd(
+      poolData.offerPoolAmount,
+      prices[token1!.coingeckoId as PriceKey].price,
+      token1!.decimals
+    );
+    const toAmount = getUsd(
+      poolData.askPoolAmount,
+      prices[token2!.coingeckoId as PriceKey].price,
+      token2!.decimals
+    );
+
+    return {
+      token1Amount: poolData.offerPoolAmount,
+      token2Amount: poolData.askPoolAmount,
+      usdAmount: fromAmount + toAmount,
+      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
+    };
+  };
+
+  const getPairInfo = async () => {
+    const pairKey = Object.keys(PairKey).find(
+      (k) =>
+        k.includes(token1InfoData.name.toUpperCase()) &&
+        k.includes(token2InfoData.name.toUpperCase())
+    );
+    const t = PairKey[pairKey! as keyof typeof PairKey];
+
+    const pair = pairsMap[t];
+
+    const pairData = await fetchPairInfo([token1InfoData!, token2InfoData!]);
+
+    return { pair, ...pairData };
+  };
+
+  const increaseAllowance = async (
+    amount: string,
+    token: string,
+    walletAddr: string
+  ) => {
+    const msgs = await generateContractMessages({
+      type: Type.INCREASE_ALLOWANCE,
+      amount,
+      sender: `${walletAddr}`,
+      spender: `${pairInfoData?.contract_addr}`,
+      token
+    });
+
+    const msg = msgs[0];
+
+    // console.log(
+    //   'msgs: ',
+    //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+    // );
+
+    const result = await CosmJs.execute({
+      address: msg.contract,
+      walletAddr: walletAddr! as string,
+      handleMsg: Buffer.from(msg.msg.toString()).toString(),
+      gasAmount: { denom: ORAI, amount: '0' },
+      // @ts-ignore
+      handleOptions: { funds: msg.sent_funds }
+    });
+    console.log('result increase allowance tx hash: ', result);
+
+    if (result) {
+      console.log('in correct result');
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `${network.explorer}/txs/${result.transactionHash}`
+      });
+      setTxHash(result.transactionHash);
+      return;
+    }
+  };
+
+  const handleAddLiquidity = async () => {
+    const amount1 = +parseAmount(
+      amountToken1.toString(),
+      token1InfoData!.decimals
+    );
+    const amount2 = +parseAmount(
+      amountToken2.toString(),
+      token2InfoData!.decimals
+    );
+
+    if (amount1 <= 0 || amount1 > token1Balance)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Token1 amount invalid!'
+      });
+    if (amount2 <= 0 || amount2 > token2Balance)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Token2 amount invalid!'
+      });
+
+    setActionLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      let walletAddr;
+      if (await window.Keplr.getKeplr())
+        walletAddr = await window.Keplr.getKeplrAddr();
+      else throw 'You have to install Keplr wallet to swap';
+
+      if (!!token1AllowanceToPair && +token1AllowanceToPair < amount1)
+        await increaseAllowance(
+          '9'.repeat(30),
+          token1InfoData!.contract_addr,
+          `${walletAddr}`
+        );
+      if (!!token2AllowanceToPair && +token2AllowanceToPair < amount2)
+        await increaseAllowance(
+          '9'.repeat(30),
+          token2InfoData!.contract_addr,
+          `${walletAddr}`
+        );
+
+      const msgs = await generateContractMessages({
+        type: Type.PROVIDE,
+        sender: `${walletAddr}`,
+        fromInfo: token1InfoData!,
+        toInfo: token2InfoData!,
+        fromAmount: `${amount1}`,
+        toAmount: `${amount2}`,
+        pair: pairInfoData!.pair.contract_addr
+      });
+
+      const msg = msgs[0];
+
+      // console.log(
+      //   'msgs: ',
+      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+      // );
+
+      const result = await CosmJs.execute({
+        address: msg.contract,
+        walletAddr: walletAddr! as string,
+        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        gasAmount: { denom: ORAI, amount: '0' },
+        // @ts-ignore
+        handleOptions: { funds: msg.sent_funds }
+      });
+      console.log('result provide tx hash: ', result);
+
+      if (result) {
+        console.log('in correct result');
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+        setActionLoading(false);
+        setTxHash(result.transactionHash);
+        return;
+      }
+    } catch (error) {
+      console.log('error in swap form: ', error);
+      let finalError = '';
+      if (typeof error === 'string' || error instanceof String) {
+        finalError = error as string;
+      } else finalError = String(error);
+      displayToast(TToastType.TX_FAILED, {
+        message: finalError
+      });
+    }
+    setActionLoading(false);
+  };
+
+  const handleWithdrawLiquidity = async () => {
+    const amount = parseAmount(
+      lpAmountBurn.toString(),
+      lpTokenInfoData!.decimals
+    );
+
+    if (+amount <= 0 || +amount > lpTokenBalance)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'LP amount invalid!'
+      });
+
+    setActionLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      let walletAddr;
+      if (await window.Keplr.getKeplr())
+        walletAddr = await window.Keplr.getKeplrAddr();
+      else throw 'You have to install Keplr wallet to swap';
+
+      const msgs = await generateContractMessages({
+        type: Type.WITHDRAW,
+        sender: `${walletAddr}`,
+        lpAddr: `${lpTokenInfoData?.contract_addr}`,
+        amount,
+        pair: pairInfoData!.pair.contract_addr
+      });
+
+      const msg = msgs[0];
+
+      // console.log(
+      //   'msgs: ',
+      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+      // );
+
+      const result = await CosmJs.execute({
+        address: msg.contract,
+        walletAddr: `${walletAddr}`,
+        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        gasAmount: { denom: ORAI, amount: '0' },
+        // @ts-ignore
+        handleOptions: { funds: msg.sent_funds }
+      });
+
+      console.log('result provide tx hash: ', result);
+
+      if (result) {
+        console.log('in correct result');
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+        setActionLoading(false);
+        setTxHash(result.transactionHash);
+        return;
+      }
+    } catch (error) {
+      console.log('error in swap form: ', error);
+      let finalError = '';
+      if (typeof error === 'string' || error instanceof String) {
+        finalError = error as string;
+      } else finalError = String(error);
+      displayToast(TToastType.TX_FAILED, {
+        message: finalError
+      });
+    }
+    setActionLoading(false);
+  };
+
+  const onChangeWithdrawPercent = (option: number) => {
+    setWithdrawPercent(option);
+    setLpAmountBurn(
+      +parseDisplayAmount(
+        ((option * lpTokenBalance) / 100).toString(),
+        lpTokenInfoData?.decimals ?? 0
+      )
+    );
+  };
+
+  const Token1Icon = token1!.Icon;
+  const Token2Icon = token2!.Icon;
 
   const addTab = (
     <>
@@ -100,31 +510,64 @@ const LiquidityModal: FC<ModalProps> = ({
           <div className={cx('title')}>Supply</div>
         </div>
         <div className={cx('balance')}>
-          <span>Balance: 338.45 {token1}</span>
-          <div className={cx('btn')}>MAX</div>
-          <div className={cx('btn')} onClick={() => {}}>
+          <TokenBalance
+            balance={{
+              amount: token1Balance ? token1Balance : 0,
+              denom: token1InfoData?.name ?? ''
+            }}
+            prefix="Balance: "
+            decimalScale={6}
+          />
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              onChangeAmount1(
+                parseDisplayAmount(
+                  token1Balance,
+                  token1InfoData?.decimals ?? 0
+                ).toString()
+              )
+            }
+          >
+            MAX
+          </div>
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              onChangeAmount1(
+                parseDisplayAmount(
+                  (token1Balance / 2)?.toString(),
+                  token1InfoData?.decimals ?? 0
+                ).toString()
+              )
+            }
+          >
             HALF
           </div>
-          <span style={{ flexGrow: 1, textAlign: 'right' }}>$604.12</span>
+          <TokenBalance
+            balance={getValueUsd(token1, token1Balance)}
+            style={{ flexGrow: 1, textAlign: 'right' }}
+            decimalScale={2}
+          />
         </div>
         <div className={cx('input')}>
           <div className={cx('token')}>
-            <img
-              className={cx('logo')}
-              src={require(`assets/icons/${mockToken[token1].logo}`).default}
-            />
+            {Token1Icon && <Token1Icon className={cx('logo')} />}
             <div className={cx('title')}>
-              <div>{token1}</div>
-              <div className={cx('des')}>Cosmos Hub</div>
+              <div>{token1InfoData?.name}</div>
+              <div className={cx('des')}>Oraichain</div>
             </div>
           </div>
-          <input
+          <NumberFormat
             className={cx('amount')}
-            // value={fromAmount ? fromAmount : ""}
-            placeholder="0"
-            type="number"
-            onChange={(e) => {
-              // onChangeFromAmount(e.target.value);
+            thousandSeparator
+            decimalScale={6}
+            placeholder={'0'}
+            // type="input"
+            value={amountToken1 ?? ''}
+            // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
+            onChange={(e: any) => {
+              onChangeAmount1(e.target.value.replaceAll(',', ''));
             }}
           />
         </div>
@@ -140,31 +583,63 @@ const LiquidityModal: FC<ModalProps> = ({
           <div className={cx('title')}>Supply</div>
         </div>
         <div className={cx('balance')}>
-          <span>Balance: 338.45 {token1}</span>
-          <div className={cx('btn')}>MAX</div>
-          <div className={cx('btn')} onClick={() => {}}>
+          <TokenBalance
+            balance={{
+              amount: token2Balance ? token2Balance : 0,
+              denom: token2InfoData?.name ?? ''
+            }}
+            prefix="Balance: "
+            decimalScale={6}
+          />
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              onChangeAmount2(
+                parseDisplayAmount(
+                  token2Balance,
+                  token2InfoData?.decimals ?? 0
+                ).toString()
+              )
+            }
+          >
+            MAX
+          </div>
+          <div
+            className={cx('btn')}
+            onClick={() =>
+              onChangeAmount2(
+                parseDisplayAmount(
+                  (token2Balance / 2)?.toString(),
+                  token2InfoData?.decimals ?? 0
+                ).toString()
+              )
+            }
+          >
             HALF
           </div>
-          <span style={{ flexGrow: 1, textAlign: 'right' }}>$604.12</span>
+          <TokenBalance
+            balance={getValueUsd(token2, token2Balance)}
+            style={{ flexGrow: 1, textAlign: 'right' }}
+            decimalScale={2}
+          />
         </div>
         <div className={cx('input')}>
           <div className={cx('token')}>
-            <img
-              className={cx('logo')}
-              src={require(`assets/icons/${mockToken[token1].logo}`).default}
-            />
+            {Token2Icon && <Token2Icon className={cx('logo')} />}
             <div className={cx('title')}>
-              <div>{token1}</div>
-              <div className={cx('highlight')}>Cosmos Hub</div>
+              <div>{token2InfoData?.name}</div>
+              <div className={cx('des')}>Oraichain</div>
             </div>
           </div>
-          <input
+          <NumberFormat
             className={cx('amount')}
-            // value={fromAmount ? fromAmount : ""}
-            placeholder="0"
-            type="number"
-            onChange={(e) => {
-              // onChangeFromAmount(e.target.value);
+            thousandSeparator
+            decimalScale={6}
+            placeholder={'0'}
+            // type="input"
+            value={amountToken2 ?? ''}
+            onChange={(e: any) => {
+              onChangeAmount2(e.target.value.replaceAll(',', ''));
             }}
           />
         </div>
@@ -175,20 +650,46 @@ const LiquidityModal: FC<ModalProps> = ({
             <span>Total supply</span>
             <TooltipIcon />
           </div>
-          <span>$1,208.24</span>
+
+          <TokenBalance
+            balance={
+              pairAmountInfoData?.usdAmount ? pairAmountInfoData?.usdAmount : 0
+            }
+            style={{ flexGrow: 1, textAlign: 'right' }}
+            decimalScale={2}
+          />
         </div>
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Received LP asset</span>
             <TooltipIcon />
           </div>
-          <span>0.8 GAMM-1</span>
+          <TokenBalance
+            balance={{
+              amount: lpTokenBalance ? lpTokenBalance : 0,
+              denom: lpTokenInfoData?.symbol ?? ''
+            }}
+            decimalScale={6}
+          />
         </div>
       </div>
-      <div className={cx('swap-btn')}>Add Liquidity</div>
+      <button
+        className={cx('swap-btn')}
+        onClick={handleAddLiquidity}
+        disabled={
+          actionLoading ||
+          !token1InfoData ||
+          !token2InfoData ||
+          !pairInfoData ||
+          isToken1AllowanceToPairLoading ||
+          isToken2AllowanceToPairLoading
+        }
+      >
+        {actionLoading && <Loader width={20} height={20} />}
+        <span>Add Liquidity</span>
+      </button>
     </>
   );
-
   const withdrawTab = (
     <>
       <div className={cx('supply')}>
@@ -196,29 +697,45 @@ const LiquidityModal: FC<ModalProps> = ({
           <div className={cx('title')}>WITHDRAW</div>
         </div>
         <div className={cx('balance')}>
-          <span>LP Token Balance: 0.8 GAMM-1</span>
-          <span style={{ flexGrow: 1, textAlign: 'right' }}>$604.12</span>
+          <TokenBalance
+            balance={{
+              amount: lpTokenBalance ? lpTokenBalance : 0,
+              denom: lpTokenInfoData?.symbol ?? ''
+            }}
+            prefix="LP Token Balance: "
+            decimalScale={6}
+          />
+
+          {!!pairAmountInfoData && !!lpTokenInfoData && (
+            <TokenBalance
+              balance={
+                (pairAmountInfoData?.usdAmount * +lpTokenBalance) /
+                +lpTokenInfoData?.total_supply
+              }
+              style={{ flexGrow: 1, textAlign: 'right' }}
+              decimalScale={2}
+            />
+          )}
         </div>
         <div className={cx('input')}>
-          <input
+          <NumberFormat
             className={cx('amount')}
-            // value={fromAmount ? fromAmount : ""}
-            placeholder="0"
-            type="number"
-            onChange={(e) => {
-              // onChangeFromAmount(e.target.value);
-            }}
+            thousandSeparator
+            decimalScale={6}
+            placeholder={'0'}
+            value={!!lpAmountBurn ? lpAmountBurn : ''}
+            onValueChange={({ floatValue }) => setLpAmountBurn(floatValue ?? 0)}
           />
         </div>
         <div className={cx('options')}>
           {[25, 50, 75, 100].map((option, idx) => (
             <div
               className={cx('item', {
-                isChosen: chosenWithdrawPercent === idx,
+                isChosen: chosenWithdrawPercent === idx
               })}
               key={idx}
               onClick={() => {
-                setWithdrawPercent(option);
+                onChangeWithdrawPercent(option);
                 setChosenWithdrawPercent(idx);
               }}
             >
@@ -227,7 +744,7 @@ const LiquidityModal: FC<ModalProps> = ({
           ))}
           <div
             className={cx('item', 'border', {
-              isChosen: chosenWithdrawPercent === 4,
+              isChosen: chosenWithdrawPercent === 4
             })}
             onClick={() => setChosenWithdrawPercent(4)}
           >
@@ -241,7 +758,7 @@ const LiquidityModal: FC<ModalProps> = ({
                   : ''
               }
               onChange={(event) => {
-                setWithdrawPercent(+event.target.value);
+                onChangeWithdrawPercent(+event.target.value);
               }}
             />
             %
@@ -249,47 +766,84 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img
-          src={require('assets/icons/fluent-arrow-down.svg').default}
-          onClick={() => {}}
-        />
+        <img src={require('assets/icons/fluent-arrow-down.svg').default} />
       </div>
       <div className={cx('receive')}>
         <div className={cx('header')}>
           <div className={cx('title')}>RECEIVE</div>
         </div>
-        <div className={cx('row')}>
-          <img
-            className={cx('logo')}
-            src={require(`assets/icons/${mockToken[token1].logo}`).default}
-          />
-          <div className={cx('title')}>
-            <div>{token1}</div>
-            <div className={cx('des')}>Cosmos Hub</div>
-          </div>
-          <div className={cx('value')}>
-            <div>22.71831913</div>
-            <div className={cx('des')}>$604.12</div>
-          </div>
-        </div>
-        <div className={cx('seporator')} />
-        <div className={cx('row')}>
-          <img
-            className={cx('logo')}
-            src={require(`assets/icons/${mockToken[token1].logo}`).default}
-          />
-          <div className={cx('title')}>
-            <div>{token1}</div>
-            <div className={cx('highlight')}>Cosmos Hub</div>
-          </div>
-          <div className={cx('value')}>
-            <div>22.71831913</div>
-            <div className={cx('des')}>$604.12</div>
-          </div>
-        </div>
-      </div>
+        {!!pairAmountInfoData && !!lpTokenInfoData && (
+          <>
+            <div className={cx('row')}>
+              {Token1Icon && <Token1Icon className={cx('logo')} />}
+              <div className={cx('title')}>
+                <div>{token1InfoData?.name}</div>
+                <div className={cx('des')}>Cosmos Hub</div>
+              </div>
+              <div className={cx('value')}>
+                <TokenBalance
+                  balance={
+                    (lpAmountBurn * pairAmountInfoData?.token1Amount) /
+                    +lpTokenInfoData!.total_supply
+                  }
+                  decimalScale={6}
+                  prefix={''}
+                />
 
-      <div className={cx('swap-btn')}>Withdraw Liquidity</div>
+                <TokenBalance
+                  balance={getValueUsd(
+                    token1,
+                    (lpAmountBurn *
+                      10 ** lpTokenInfoData.decimals *
+                      pairAmountInfoData?.token1Amount) /
+                      +lpTokenInfoData!.total_supply
+                  )}
+                  className={cx('des')}
+                  decimalScale={2}
+                />
+              </div>
+            </div>{' '}
+            <div className={cx('seperator')} />
+            <div className={cx('row')}>
+              {Token2Icon && <Token2Icon className={cx('logo')} />}
+              <div className={cx('title')}>
+                <div>{token2InfoData?.name}</div>
+                <div className={cx('des')}>Cosmos Hub</div>
+              </div>
+              <div className={cx('value')}>
+                <TokenBalance
+                  balance={
+                    (lpAmountBurn * pairAmountInfoData?.token2Amount) /
+                    +lpTokenInfoData!.total_supply
+                  }
+                  decimalScale={6}
+                  prefix={''}
+                />
+
+                <TokenBalance
+                  balance={getValueUsd(
+                    token2,
+                    (lpAmountBurn *
+                      10 ** lpTokenInfoData.decimals *
+                      pairAmountInfoData?.token2Amount) /
+                      +lpTokenInfoData!.total_supply
+                  )}
+                  className={cx('des')}
+                  decimalScale={2}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      <button
+        className={cx('swap-btn')}
+        onClick={handleWithdrawLiquidity}
+        disabled={actionLoading || !lpTokenInfoData || !pairInfoData}
+      >
+        {actionLoading && <Loader width={20} height={20} />}
+        <span>Withdraw Liquidity</span>
+      </button>
     </>
   );
 
@@ -302,7 +856,9 @@ const LiquidityModal: FC<ModalProps> = ({
       className={cx('modal')}
     >
       <div className={cx('container')}>
-        <div className={cx('title')}>{`${token1}/${token2} Pool`}</div>
+        <div
+          className={cx('title')}
+        >{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
         <div className={cx('switch')}>
           <div
             className={cx({ 'active-tab': activeTab === 0 })}

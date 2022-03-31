@@ -15,6 +15,7 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
+  generateMiningMsgs,
   simulateSwap
 } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
@@ -31,6 +32,7 @@ import useLocalStorage from 'libs/useLocalStorage';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(style);
 
@@ -43,28 +45,34 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
     const keplr = await window.Keplr.getKeplr();
-    if (keplr) await keplr.suggestToken(token.chainId, token.contractAddress);
-    else
-      displayToast(TToastType.KEPLR_FAILED, {
+    if (!keplr) {
+      return displayToast(TToastType.KEPLR_FAILED, {
         message: 'You need to install Keplr to continue'
       });
+    }
+
+    if (!isMobile())
+      await keplr.suggestToken(token.chainId, token.contractAddress);
   }
 };
 
 const Swap: React.FC<SwapProps> = () => {
-  const allToken: ValidToken[] = Object.values(mockToken).map((token) => {
-    return {
-      contractAddress: token.contractAddress,
-      Icon: token.Icon,
-      title: token.name,
-      denom: token.denom
-    };
-  });
+  const allToken: ValidToken[] = Object.values(mockToken)
+    .map((token) => {
+      return {
+        contractAddress: token.contractAddress,
+        Icon: token.Icon,
+        title: token.name,
+        denom: token.denom
+      };
+    })
+    .filter((t) => t.title != 'Erc20 ORAI' && t.title != 'Bep20 ORAI');
+
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
@@ -80,6 +88,8 @@ const Swap: React.FC<SwapProps> = () => {
   const [slippage, setSlippage] = useState(1);
   const [address, setAddress] = useLocalStorage<String>('address');
   const [swapLoading, setSwapLoading] = useState(false);
+  const [txHash, setTxHash] = useState<String>();
+  const [refresh, setRefresh] = useState(false);
 
   const onChangeFromAmount = (amount: number) => {
     setFromAmount(amount);
@@ -137,7 +147,7 @@ const Swap: React.FC<SwapProps> = () => {
     isError: isFromTokenBalanceError,
     isLoading: isFromTokenBalanceLoading
   } = useQuery(
-    ['from-token-balance', fromToken],
+    ['from-token-balance', fromToken, txHash],
     () =>
       fetchBalance(
         address,
@@ -154,7 +164,7 @@ const Swap: React.FC<SwapProps> = () => {
     isError: isToTokenBalanceError,
     isLoading: isLoadingToTokenBalance
   } = useQuery(
-    ['to-token-balance', toToken],
+    ['to-token-balance', toToken, txHash],
     () =>
       fetchBalance(
         address,
@@ -192,11 +202,23 @@ const Swap: React.FC<SwapProps> = () => {
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
 
-  const { data: poolData, isLoading: isPoolDataLoading } = useQuery(
-    ['pool-info-amount', fromTokenInfoData, toTokenInfoData],
-    () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate }
-  );
+  const { data: simulateAverageData, isLoading: isSimulateAverageDataLoading } =
+    useQuery(
+      ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
+      () =>
+        simulateSwap({
+          fromInfo: fromTokenInfoData,
+          toInfo: toTokenInfoData,
+          amount: parseAmount('1', fromTokenInfoData?.decimals)
+        }),
+      { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+    );
+
+  // const { data: poolData, isLoading: isPoolDataLoading } = useQuery(
+  //   ['pool-info-amount', fromTokenInfoData, toTokenInfoData],
+  //   () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
+  //   { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate }
+  // );
 
   // const { data: pairInfo, isLoading: isPairInfoLoading } = useQuery(
   //   ['pair-info', fromTokenInfoData, toTokenInfoData],
@@ -204,65 +226,80 @@ const Swap: React.FC<SwapProps> = () => {
   //   { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   // );
 
-  // useEffect(() => {
-  //   console.log("pair info: ", pairInfo)
-  // }, [pairInfo]);
+  useEffect(() => {
+    console.log('simulate average data: ', simulateAverageData);
+    setAverageRatio(
+      parseFloat(
+        parseDisplayAmount(
+          simulateAverageData?.amount,
+          toTokenInfoData?.decimals
+        )
+      ).toFixed(6)
+    );
+  }, [simulateAverageData]);
 
   useEffect(() => {
-    let listTo = getListPairedToken(fromToken);
-    const listToken = allToken.filter((t) => listTo.includes(t.denom));
+    setToAmount(
+      parseFloat(
+        parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
+      ).toFixed(6)
+    );
+  }, [simulateData]);
+
+  useEffect(() => {
+    const listToken = allToken.filter((t) => fromToken !== t.denom);
     setListValidTo([...listToken]);
-    if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenDenom);
+    // if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenDenom);
   }, [fromToken]);
 
-  useEffect(() => {
-    if (poolData && fromAmount && fromAmount > 0) {
-      const finalToAmount =
-        calculateToAmount(
-          poolData,
-          parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)),
-          parseFloat(taxRate?.rate)
-        ) ?? 0;
-      const newToAmount = parseFloat(
-        parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)
-      ).toFixed(6);
-      setToAmount(newToAmount);
-    } else if (fromAmount === 0) setToAmount(0);
-  }, [poolData, fromAmount]);
+  // useEffect(() => {
+  //   if (poolData && fromAmount && fromAmount > 0) {
+  //     const finalToAmount =
+  //       calculateToAmount(
+  //         poolData,
+  //         parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)),
+  //         parseFloat(taxRate?.rate)
+  //       ) ?? 0;
+  //     const newToAmount = parseFloat(
+  //       parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)
+  //     ).toFixed(6);
+  //     setToAmount(newToAmount);
+  //   } else if (fromAmount === 0) setToAmount(0);
+  // }, [poolData, fromAmount]);
 
-  useEffect(() => {
-    if (poolData) {
-      const finalAverageRatio = calculateToAmount(
-        poolData,
-        1,
-        parseFloat(taxRate?.rate)
-      );
-      setAverageRatio(parseFloat(finalAverageRatio));
-    }
-  }, [poolData]);
+  // useEffect(() => {
+  //   if (poolData) {
+  //     const finalAverageRatio = calculateToAmount(
+  //       poolData,
+  //       1,
+  //       parseFloat(taxRate?.rate)
+  //     );
+  //     setAverageRatio(parseFloat(finalAverageRatio));
+  //   }
+  // }, [poolData]);
 
-  const calculateToAmount = (poolData, offerAmount, taxRate) => {
-    const offer = new Big(poolData.offerPoolAmount);
-    const ask = new Big(poolData.askPoolAmount);
+  // const calculateToAmount = (poolData, offerAmount, taxRate) => {
+  //   const offer = new Big(poolData.offerPoolAmount);
+  //   const ask = new Big(poolData.askPoolAmount);
 
-    return ask
-      .minus(
-        offer
-          .mul(poolData.askPoolAmount)
-          .div(poolData.offerPoolAmount + offerAmount)
-      )
-      .mul(1 - taxRate)
-      .toNumber();
+  //   return ask
+  //     .minus(
+  //       offer
+  //         .mul(poolData.askPoolAmount)
+  //         .div(poolData.offerPoolAmount + offerAmount)
+  //     )
+  //     .mul(1 - taxRate)
+  //     .toNumber();
 
-    // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
-    // (1 - taxRate)
-  };
+  //   // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
+  //   // (1 - taxRate)
+  // };
 
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
-      })
+      });
 
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -279,6 +316,19 @@ const Swap: React.FC<SwapProps> = () => {
         fromInfo: fromTokenInfoData,
         toInfo: toTokenInfoData
       });
+
+      // const msgs = await generateMiningMsgs({
+      //   type: Type.BOND_LIQUIDITY,
+      //   sender: `${walletAddr}`,
+      //   amount: "1000000",
+      //   lpToken: "orai1hxm433hnwthrxneyjysvhny539s9kh6s2g2n8y",
+      //   assetToken: { "symbol": "AIRI", "name": "aiRight Token", "contract_addr": "orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg", "decimals": 6, "denom": "airi", "total_supply": "1000000000000000" },
+      // })
+
+      // const msgs = await generateMiningMsgs({
+      //   type: Type.WITHDRAW_LIQUIDITY_MINING,
+      //   sender: `${walletAddr}`,
+      // })
 
       const msg = msgs[0];
       console.log(
@@ -301,6 +351,7 @@ const Swap: React.FC<SwapProps> = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setSwapLoading(false);
+        setTxHash(result.transactionHash);
         return;
       }
     } catch (error) {
@@ -343,15 +394,17 @@ const Swap: React.FC<SwapProps> = () => {
           <div className={cx('from')}>
             <div className={cx('header')}>
               <div className={cx('title')}>FROM</div>
-              <img
+              {/* <img
                 className={cx('btn')}
                 src={require('assets/icons/setting.svg').default}
                 onClick={() => setIsOpenSettingModal(true)}
-              />
-              <img
-                className={cx('btn')}
-                src={require('assets/icons/refresh.svg').default}
-              />
+              /> */}
+              <button onClick={() => setRefresh(!refresh)}>
+                <img
+                  className={cx('btn')}
+                  src={require('assets/icons/refresh.svg').default}
+                />
+              </button>
             </div>
             <div className={cx('balance')}>
               <TokenBalance
@@ -453,8 +506,7 @@ const Swap: React.FC<SwapProps> = () => {
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio.toFixed(6)} ${toTokenInfoData?.symbol
-                  }`}
+                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio} ${toTokenInfoData?.symbol}`}
               </span>
               <TooltipIcon />
             </div>
@@ -471,9 +523,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
@@ -501,7 +553,7 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Minimum Received</span>
-                <TooltipIcon />
+                {/* <TooltipIcon /> */}
               </div>
 
               <TokenBalance
@@ -520,17 +572,17 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Tax rate</span>
-                <TooltipIcon />
+                {/* <TooltipIcon /> */}
               </div>
               <span>{parseFloat(taxRate?.rate) * 100} %</span>
             </div>
-            <div className={cx('row')}>
+            {/* <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Exchange rate</span>
                 <TooltipIcon />
               </div>
-              <span>{(parseFloat(exchangeRate)).toFixed(6)}</span>
-            </div>
+              <span>{parseFloat(exchangeRate).toFixed(6)}</span>
+            </div> */}
           </div>
           <SettingModal
             isOpen={isOpenSettingModal}
