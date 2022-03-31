@@ -69,7 +69,9 @@ const Swap: React.FC<SwapProps> = () => {
       title: token.name,
       denom: token.denom
     };
-  });
+  }).filter(t => t.title != 'Erc20 ORAI' && t.title != 'Bep20 ORAI');
+
+
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
