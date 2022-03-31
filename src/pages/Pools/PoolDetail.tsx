@@ -290,6 +290,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     setActionLoading(false);
   };
 
+  const rewardInfoFirst = rewardMiningInfoData?.reward_infos[0];
+
   return (
     <Content nonBackground>
       {!!pairInfoData ? (
@@ -502,9 +504,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div>
                           <TokenBalance
                             balance={{
-                              amount:
-                                rewardMiningInfoData?.reward_infos[0]
-                                  .bond_amount ?? 0,
+                              amount: rewardInfoFirst
+                                ? rewardInfoFirst.bond_amount ?? 0
+                                : 0,
                               denom: `${lpTokenInfoData?.symbol}`
                             }}
                             className={cx('amount')}
@@ -514,10 +516,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             {!!pairAmountInfoData && !!lpTokenInfoData && (
                               <TokenBalance
                                 balance={
-                                  (rewardMiningInfoData?.reward_infos[0]
-                                    .bond_amount *
-                                    pairAmountInfoData.usdAmount) /
-                                  +lpTokenInfoData.total_supply
+                                  (rewardInfoFirst
+                                    ? rewardInfoFirst.bond_amount *
+                                      pairAmountInfoData.usdAmount
+                                    : 0) / +lpTokenInfoData.total_supply
                                 }
                                 className={cx('amount-usd')}
                                 decimalScale={2}
@@ -536,14 +538,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         />
                         <div className={cx('bonded-apr')}>
                           <div className={cx('bonded-name')}>Current APR</div>
-                          <div className={cx('bonded-value')}>150%</div>
+                          <div className={cx('bonded-value')}>ORAIX Bonus</div>
                         </div>
-                        <div className={cx('bonded-unbouding')}>
+                        {/* <div className={cx('bonded-unbouding')}>
                           <div className={cx('bonded-name')}>
                             Unbonding Duration
                           </div>
                           <div className={cx('bonded-value')}>7 days</div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>

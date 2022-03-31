@@ -68,7 +68,7 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
           <div className={styles.pairbox_pair_rate}>
             {token1.name} (50%)/{token2.name} (50%)
           </div>
-          <span className={styles.pairbox_pair_apr}>APR: ~150%</span>
+          <span className={styles.pairbox_pair_apr}>APR: ORAIX Bonus</span>
         </div>
       </div>
       <div className={styles.pairbox_content}>
@@ -136,7 +136,7 @@ const ListPools = memo<{
             width: 420,
             background: '#1E1E21',
             borderRadius: '8px',
-            padding: '10px',
+            padding: '10px'
           }}
         />
         {/* <div
@@ -174,11 +174,11 @@ const Pools: React.FC<PoolsProps> = () => {
     );
     const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
       fetchTokenInfo(fromToken),
-      fetchTokenInfo(toToken),
+      fetchTokenInfo(toToken)
     ]);
     const [poolData, infoData] = await Promise.all([
       fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-      fetchPairInfo([fromTokenInfoData, toTokenInfoData]),
+      fetchPairInfo([fromTokenInfoData, toTokenInfoData])
     ]);
 
     const fromAmount = getUsd(
@@ -194,7 +194,7 @@ const Pools: React.FC<PoolsProps> = () => {
     return {
       pair,
       amount: fromAmount + toAmount,
-      commissionRate: infoData.commission_rate,
+      commissionRate: infoData.commission_rate
     };
   };
 

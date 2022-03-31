@@ -45,7 +45,7 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -62,15 +62,16 @@ const suggestToken = async (token: TokenItemType) => {
 };
 
 const Swap: React.FC<SwapProps> = () => {
-  const allToken: ValidToken[] = Object.values(mockToken).map((token) => {
-    return {
-      contractAddress: token.contractAddress,
-      Icon: token.Icon,
-      title: token.name,
-      denom: token.denom
-    };
-  }).filter(t => t.title != 'Erc20 ORAI' && t.title != 'Bep20 ORAI');
-
+  const allToken: ValidToken[] = Object.values(mockToken)
+    .map((token) => {
+      return {
+        contractAddress: token.contractAddress,
+        Icon: token.Icon,
+        title: token.name,
+        denom: token.denom
+      };
+    })
+    .filter((t) => t.title != 'Erc20 ORAI' && t.title != 'Bep20 ORAI');
 
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
@@ -87,7 +88,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [slippage, setSlippage] = useState(1);
   const [address, setAddress] = useLocalStorage<String>('address');
   const [swapLoading, setSwapLoading] = useState(false);
-  const [txHash, setTxHash] = useState<String>()
+  const [txHash, setTxHash] = useState<String>();
   const [refresh, setRefresh] = useState(false);
 
   const onChangeFromAmount = (amount: number) => {
@@ -201,19 +202,17 @@ const Swap: React.FC<SwapProps> = () => {
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
 
-  const {
-    data: simulateAverageData,
-    isLoading: isSimulateAverageDataLoading
-  } = useQuery(
-    ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
-    () =>
-      simulateSwap({
-        fromInfo: fromTokenInfoData,
-        toInfo: toTokenInfoData,
-        amount: parseAmount('1', fromTokenInfoData?.decimals)
-      }),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
-  );
+  const { data: simulateAverageData, isLoading: isSimulateAverageDataLoading } =
+    useQuery(
+      ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
+      () =>
+        simulateSwap({
+          fromInfo: fromTokenInfoData,
+          toInfo: toTokenInfoData,
+          amount: parseAmount('1', fromTokenInfoData?.decimals)
+        }),
+      { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+    );
 
   // const { data: poolData, isLoading: isPoolDataLoading } = useQuery(
   //   ['pool-info-amount', fromTokenInfoData, toTokenInfoData],
@@ -228,17 +227,24 @@ const Swap: React.FC<SwapProps> = () => {
   // );
 
   useEffect(() => {
-    console.log("simulate average data: ", simulateAverageData)
-    setAverageRatio(parseFloat(
-      parseDisplayAmount(simulateAverageData?.amount, toTokenInfoData?.decimals)
-    ).toFixed(6));
+    console.log('simulate average data: ', simulateAverageData);
+    setAverageRatio(
+      parseFloat(
+        parseDisplayAmount(
+          simulateAverageData?.amount,
+          toTokenInfoData?.decimals
+        )
+      ).toFixed(6)
+    );
   }, [simulateAverageData]);
 
   useEffect(() => {
-    setToAmount(parseFloat(
-      parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
-    ).toFixed(6));
-  }, [simulateData])
+    setToAmount(
+      parseFloat(
+        parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
+      ).toFixed(6)
+    );
+  }, [simulateData]);
 
   useEffect(() => {
     const listToken = allToken.filter((t) => fromToken !== t.denom);
@@ -345,7 +351,7 @@ const Swap: React.FC<SwapProps> = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setSwapLoading(false);
-        setTxHash(result.transactionHash)
+        setTxHash(result.transactionHash);
         return;
       }
     } catch (error) {
@@ -500,8 +506,7 @@ const Swap: React.FC<SwapProps> = () => {
               />
 
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
-                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio} ${toTokenInfoData?.symbol
-                  }`}
+                {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio} ${toTokenInfoData?.symbol}`}
               </span>
               <TooltipIcon />
             </div>
@@ -518,9 +523,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
@@ -548,7 +553,7 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Minimum Received</span>
-                <TooltipIcon />
+                {/* <TooltipIcon /> */}
               </div>
 
               <TokenBalance
@@ -567,17 +572,17 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Tax rate</span>
-                <TooltipIcon />
+                {/* <TooltipIcon /> */}
               </div>
               <span>{parseFloat(taxRate?.rate) * 100} %</span>
             </div>
-            <div className={cx('row')}>
+            {/* <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Exchange rate</span>
                 <TooltipIcon />
               </div>
               <span>{parseFloat(exchangeRate).toFixed(6)}</span>
-            </div>
+            </div> */}
           </div>
           <SettingModal
             isOpen={isOpenSettingModal}
