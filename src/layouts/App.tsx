@@ -45,7 +45,7 @@ const App = () => {
       console.log(
         'Key store in Keplr is changed. You may need to refetch the account info.'
       );
-      updateAddress();
+      await updateAddress();
       window.location.reload();
     } catch (error) {
       console.log('Error: ', error);
