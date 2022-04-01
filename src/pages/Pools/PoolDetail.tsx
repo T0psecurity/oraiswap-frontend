@@ -269,11 +269,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 />
               </div>
               {!!pairAmountInfoData && (
-                <div className={cx('des')}>{`1 ${pairInfoData.token2!.name
-                  } ≈ ${+(+pairAmountInfoData?.ratio).toFixed(2)} ${pairInfoData.token1!.name
-                  }`}</div>
+                <div className={cx('des')}>
+                  <span>{`1 ${pairInfoData.token2!.name} ≈ `}</span>
+                  <span>{`${+pairAmountInfoData?.ratio.toFixed(6)} ${
+                    pairInfoData.token1!.name
+                  }`}</span>
+                </div>
               )}
-              {/* <div className={cx('btn', 'swap')}>Quick Swap</div> */}
             </div>
             <div className={cx('info')}>
               {!!pairAmountInfoData && (
