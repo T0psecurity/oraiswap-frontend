@@ -752,11 +752,11 @@ const LiquidityModal: FC<ModalProps> = ({
               placeholder="0.00"
               type={'number'}
               className={cx('input')}
-              value={
-                chosenWithdrawPercent === 4 && !!withdrawPercent
-                  ? withdrawPercent
-                  : ''
-              }
+              // value={
+              //   chosenWithdrawPercent === 4 && !!withdrawPercent
+              //     ? withdrawPercent
+              //     : ''
+              // }
               onChange={(event) => {
                 onChangeWithdrawPercent(+event.target.value);
               }}
