@@ -525,8 +525,8 @@ async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiqui
       break;
     case Type.UNBOND_LIQUIDITY:
       const unbondMsg = params as UnbondLiquidity;
-      asset_info = parseTokenInfo(unbondMsg.assetToken).info;
-      input = { asset_info, amount: unbondMsg.amount };
+      let { info: unbond_asset } = parseTokenInfo(unbondMsg.assetToken);
+      input = { unbond: { asset_info: unbond_asset, amount: unbondMsg.amount } };
       contractAddr = network.staking;
       break;
     default:
