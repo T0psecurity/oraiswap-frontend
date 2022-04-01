@@ -35,10 +35,11 @@ import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
 import { TokenInfo } from '@saberhq/token-utils';
+import UnbondModal from './UnbondModal/UnbondModal';
 
 const cx = cn.bind(styles);
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -46,6 +47,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
+  const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useLocalStorage<string>('address');
   const [assetToken, setAssetToken] = useState<any>();
   const [bondingTxHash, setBondingTxHash] = useState('');
@@ -70,9 +72,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     pair = pairsMap[t];
     if (!pair) return;
     let token1 = {
-      ...mockToken[pair.asset_denoms[0]],
-      contract_addr: mockToken[pair.asset_denoms[0]].contractAddress
-    },
+        ...mockToken[pair.asset_denoms[0]],
+        contract_addr: mockToken[pair.asset_denoms[0]].contractAddress
+      },
       token2 = {
         ...mockToken[pair.asset_denoms[1]],
         contract_addr: mockToken[pair.asset_denoms[1]].contractAddress
@@ -239,60 +241,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const liquidity2Usd =
     (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply;
 
-  const handleUnbond = async () => {
-    setActionLoading(true);
-    displayToast(TToastType.TX_BROADCASTING);
-    try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
-      const msgs = await generateMiningMsgs({
-        type: Type.WITHDRAW_LIQUIDITY_MINING,
-        sender: `${walletAddr}`
-      });
-
-      const msg = msgs[0];
-
-      // console.log(
-      //   'msgs: ',
-      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      // );
-
-      const result = await CosmJs.execute({
-        address: msg.contract,
-        walletAddr: walletAddr! as string,
-        handleMsg: Buffer.from(msg.msg.toString()).toString(),
-        gasAmount: { denom: ORAI, amount: '0' },
-        // @ts-ignore
-        handleOptions: { funds: msg.sent_funds }
-      });
-      console.log('result provide tx hash: ', result);
-
-      if (result) {
-        console.log('in correct result');
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
-        });
-        setActionLoading(false);
-        setBondingTxHash(result.transactionHash);
-        return;
-      }
-    } catch (error) {
-      console.log('error in bond form: ', error);
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = error as string;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
-    }
-    setActionLoading(false);
-  };
-
   const rewardInfoFirst = rewardMiningInfoData?.reward_infos[0];
+  const bondAmountUsd = rewardInfoFirst
+    ? (rewardInfoFirst.bond_amount * (pairAmountInfoData?.usdAmount ?? 0)) /
+      +(lpTokenInfoData?.total_supply ?? 0)
+    : 0;
 
   return (
     <Content nonBackground>
@@ -305,8 +258,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 {Token2Icon! && <Token2Icon className={cx('token2')} />}
               </div>
               <div className={cx('title')}>
-                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${pairInfoData.token2!.name
-                  }`}</div>
+                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
+                  pairInfoData.token2!.name
+                }`}</div>
                 <TokenBalance
                   balance={
                     pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
@@ -316,9 +270,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 />
               </div>
               {!!pairAmountInfoData && (
-                <div className={cx('des')}>{`1 ${pairInfoData.token2!.name
-                  } ≈ ${+(+pairAmountInfoData?.ratio).toFixed(2)} ${pairInfoData.token1!.name
-                  }`}</div>
+                <div className={cx('des')}>{`1 ${
+                  pairInfoData.token2!.name
+                } ≈ ${+(+pairAmountInfoData?.ratio).toFixed(2)} ${
+                  pairInfoData.token1!.name
+                }`}</div>
               )}
               {/* <div className={cx('btn', 'swap')}>Quick Swap</div> */}
             </div>
@@ -515,10 +471,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             {!!pairAmountInfoData && !!lpTokenInfoData && (
                               <TokenBalance
                                 balance={
-                                  (rewardInfoFirst
-                                    ? rewardInfoFirst.bond_amount *
-                                    pairAmountInfoData.usdAmount
-                                    : 0) / +lpTokenInfoData.total_supply
+                                  // (rewardInfoFirst
+                                  //   ? rewardInfoFirst.bond_amount *
+                                  //     pairAmountInfoData.usdAmount
+                                  //   : 0) / +lpTokenInfoData.total_supply
+                                  bondAmountUsd
                                 }
                                 className={cx('amount-usd')}
                                 decimalScale={2}
@@ -570,14 +527,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         </div>
                         {/* <div className={cx('amount-usd')}>$0</div> */}
                       </>
-                      {/* <Button
+                      <Button
                         className={cx('btn', 'btn--dark')}
-                        onClick={handleUnbond}
+                        onClick={() => setIsOpenUnbondModal(true)}
                         disabled={actionLoading}
                       >
                         {actionLoading && <Loader width={20} height={20} />}
                         <span>Unbond All</span>
-                      </Button> */}
+                      </Button>
                     </div>
                   </div>
                 </>
@@ -601,6 +558,20 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               lpTokenInfoData={lpTokenInfoData}
               lpTokenBalance={lpTokenBalance}
               liquidityValue={liquidity1Usd + liquidity2Usd}
+              assetToken={assetToken}
+              setTxHash={setBondingTxHash}
+            />
+          )}
+          {isOpenUnbondModal && (
+            <UnbondModal
+              isOpen={isOpenUnbondModal}
+              open={() => setIsOpenUnbondModal(true)}
+              close={() => setIsOpenUnbondModal(false)}
+              bondAmount={
+                rewardInfoFirst ? rewardInfoFirst.bond_amount ?? 0 : 0
+              }
+              bondAmountUsd={bondAmountUsd}
+              lpTokenInfoData={lpTokenInfoData}
               assetToken={assetToken}
               setTxHash={setBondingTxHash}
             />
