@@ -39,7 +39,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -72,9 +72,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     pair = pairsMap[t];
     if (!pair) return;
     let token1 = {
-        ...mockToken[pair.asset_denoms[0]],
-        contract_addr: mockToken[pair.asset_denoms[0]].contractAddress
-      },
+      ...mockToken[pair.asset_denoms[0]],
+      contract_addr: mockToken[pair.asset_denoms[0]].contractAddress
+    },
       token2 = {
         ...mockToken[pair.asset_denoms[1]],
         contract_addr: mockToken[pair.asset_denoms[1]].contractAddress
@@ -244,7 +244,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const rewardInfoFirst = rewardMiningInfoData?.reward_infos[0];
   const bondAmountUsd = rewardInfoFirst
     ? (rewardInfoFirst.bond_amount * (pairAmountInfoData?.usdAmount ?? 0)) /
-      +(lpTokenInfoData?.total_supply ?? 0)
+    +(lpTokenInfoData?.total_supply ?? 0)
     : 0;
 
   return (
@@ -258,9 +258,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 {Token2Icon! && <Token2Icon className={cx('token2')} />}
               </div>
               <div className={cx('title')}>
-                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
-                  pairInfoData.token2!.name
-                }`}</div>
+                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${pairInfoData.token2!.name
+                  }`}</div>
                 <TokenBalance
                   balance={
                     pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
@@ -270,11 +269,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 />
               </div>
               {!!pairAmountInfoData && (
-                <div className={cx('des')}>{`1 ${
-                  pairInfoData.token2!.name
-                } ≈ ${+(+pairAmountInfoData?.ratio).toFixed(2)} ${
-                  pairInfoData.token1!.name
-                }`}</div>
+                <div className={cx('des')}>{`1 ${pairInfoData.token2!.name
+                  } ≈ ${+(+pairAmountInfoData?.ratio).toFixed(2)} ${pairInfoData.token1!.name
+                  }`}</div>
               )}
               {/* <div className={cx('btn', 'swap')}>Quick Swap</div> */}
             </div>
@@ -471,11 +468,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             {!!pairAmountInfoData && !!lpTokenInfoData && (
                               <TokenBalance
                                 balance={
-                                  // (rewardInfoFirst
-                                  //   ? rewardInfoFirst.bond_amount *
-                                  //     pairAmountInfoData.usdAmount
-                                  //   : 0) / +lpTokenInfoData.total_supply
-                                  bondAmountUsd
+                                  (rewardInfoFirst
+                                    ? rewardInfoFirst.bond_amount *
+                                    pairAmountInfoData.usdAmount
+                                    : 0) / +lpTokenInfoData.total_supply
                                 }
                                 className={cx('amount-usd')}
                                 decimalScale={2}
@@ -527,14 +523,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         </div>
                         {/* <div className={cx('amount-usd')}>$0</div> */}
                       </>
-                      <Button
+                      {/* <Button
                         className={cx('btn', 'btn--dark')}
                         onClick={() => setIsOpenUnbondModal(true)}
                         disabled={actionLoading}
                       >
                         {actionLoading && <Loader width={20} height={20} />}
                         <span>Unbond All</span>
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 </>
