@@ -523,14 +523,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         </div>
                         {/* <div className={cx('amount-usd')}>$0</div> */}
                       </>
-                      {/* <Button
+                      <Button
                         className={cx('btn', 'btn--dark')}
                         onClick={() => setIsOpenUnbondModal(true)}
                         disabled={actionLoading}
                       >
                         {actionLoading && <Loader width={20} height={20} />}
-                        <span>Unbond All</span>
-                      </Button> */}
+                        <span>Unbond</span>
+                      </Button>
                     </div>
                   </div>
                 </>
