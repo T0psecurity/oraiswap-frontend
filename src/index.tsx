@@ -24,6 +24,9 @@ const startApp = async () => {
       // always trigger suggest chain when users enter the webpage
       await window.Keplr.suggestChain(network.chainId);
       await window.Keplr.suggestChain('columbus-5');
+      // init address for first time open
+      const address = await window.Keplr.getKeplrAddr(network.chainId);
+      window.localStorage.setItem('address', JSON.stringify(address));
     }
   } catch (ex) {
     console.log(ex);

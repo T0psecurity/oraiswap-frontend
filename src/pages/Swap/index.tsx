@@ -45,7 +45,7 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -318,10 +318,9 @@ const Swap: React.FC<SwapProps> = () => {
       });
 
       // const msgs = await generateMiningMsgs({
-      //   type: Type.BOND_LIQUIDITY,
+      //   type: Type.UNBOND_LIQUIDITY,
       //   sender: `${walletAddr}`,
-      //   amount: "1000000",
-      //   lpToken: "orai1hxm433hnwthrxneyjysvhny539s9kh6s2g2n8y",
+      //   amount: "1",
       //   assetToken: { "symbol": "AIRI", "name": "aiRight Token", "contract_addr": "orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg", "decimals": 6, "denom": "airi", "total_supply": "1000000000000000" },
       // })
 
@@ -523,9 +522,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input
