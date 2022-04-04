@@ -214,12 +214,18 @@ const Balance: React.FC<BalanceProps> = () => {
   );
 
   const transferIBC = async () => {
+    // disable send amount < 0
+    if (fromAmount <= 0) {
+      return;
+    }
+
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Please choose both from and to tokens'
       });
       return;
     }
+
     setIBCLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
@@ -324,7 +330,7 @@ const Balance: React.FC<BalanceProps> = () => {
                       balance={{
                         amount:
                           from && amounts[from.denom]
-                            ? amounts[from.denom].amount 
+                            ? amounts[from.denom].amount
                             : 0,
                         denom: from?.name ?? ''
                       }}
