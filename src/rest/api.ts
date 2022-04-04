@@ -483,6 +483,8 @@ export type BondMining = {
 export type WithdrawMining = {
   type: Type.WITHDRAW_LIQUIDITY_MINING;
   sender: string;
+  amount: number | string;
+  assetToken: TokenInfo;
 };
 
 export type UnbondLiquidity = {

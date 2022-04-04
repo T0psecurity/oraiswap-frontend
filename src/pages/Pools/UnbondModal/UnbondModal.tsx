@@ -1,12 +1,15 @@
 import React, { FC, useState } from 'react';
+import ReactModal from 'react-modal';
 import Modal from 'components/Modal';
-import style from './BondingModal.module.scss';
-import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
-import TokenBalance from 'components/TokenBalance';
-import { getUsd, parseAmount } from 'libs/utils';
+import style from './UnbondModal.module.scss';
+import cn from 'classnames/bind';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens } from 'constants/bridgeTokens';
+import { getUsd } from 'libs/utils';
+import TokenBalance from 'components/TokenBalance';
+import useLocalStorage from 'libs/useLocalStorage';
+import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
@@ -18,39 +21,37 @@ import Loader from 'components/Loader';
 const cx = cn.bind(style);
 
 interface ModalProps {
-  className?: string;
   isOpen: boolean;
-  open: () => void;
   close: () => void;
-  isCloseBtn?: boolean;
+  open: () => void;
+  bondAmount: number;
+  bondAmountUsd: number;
   lpTokenInfoData: any;
-  lpTokenBalance: any;
-  liquidityValue: number;
   assetToken: any;
   setTxHash: any;
 }
 
-const BondingModal: FC<ModalProps> = ({
+const SettingModal: FC<ModalProps> = ({
   isOpen,
   close,
   open,
+  bondAmount,
+  bondAmountUsd,
   lpTokenInfoData,
-  lpTokenBalance,
-  liquidityValue,
   assetToken,
   setTxHash
 }) => {
-  const [bondAmount, setBondAmount] = useState('');
+  const [chosenOption, setChosenOption] = useState(-1);
+  const [unbondAmount, setUnbondAmount] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const onChangeAmount = (value: string) => {
-    setBondAmount(value);
-  };
+  const handleUnbond = async (amount: number) => {
+    const parsedAmount = +parseAmount(
+      amount.toString(),
+      lpTokenInfoData!.decimals
+    );
 
-  const handleBond = async (amount: string) => {
-    const parsedAmount = +parseAmount(amount, lpTokenInfoData!.decimals);
-
-    if (parsedAmount <= 0 || parsedAmount > lpTokenBalance)
+    if (parsedAmount <= 0 || parsedAmount > bondAmount)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Amount is invalid!'
       });
@@ -64,17 +65,11 @@ const BondingModal: FC<ModalProps> = ({
       else throw 'You have to install Keplr wallet to swap';
 
       const msgs = await generateMiningMsgs({
-        type: Type.BOND_LIQUIDITY,
+        type: Type.UNBOND_LIQUIDITY,
         sender: `${walletAddr}`,
         amount: `${parsedAmount}`,
-        lpToken: lpTokenInfoData.contract_addr,
         assetToken
       });
-
-      // const msgs = await generateMiningMsgs({
-      //   type: Type.WITHDRAW_LIQUIDITY_MINING,
-      //   sender: `${walletAddr}`,
-      // })
 
       const msg = msgs[0];
 
@@ -103,7 +98,7 @@ const BondingModal: FC<ModalProps> = ({
         return;
       }
     } catch (error) {
-      console.log('error in bond form: ', error);
+      console.log('error in unbond form: ', error);
       let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
         finalError = error as string;
@@ -120,65 +115,32 @@ const BondingModal: FC<ModalProps> = ({
       isOpen={isOpen}
       close={close}
       open={open}
-      isCloseBtn={true}
+      isCloseBtn={false}
       className={cx('modal')}
     >
-      <div className={cx('container')}>
-        <div className={cx('title')}>Bond LP tokens</div>
-
-        <div className={cx('detail')}>
-          <div className={cx('row')}>
-            <div className={cx('row-title')}>
-              <span>Current APR</span>
-              <TooltipIcon />
-            </div>
-            <span className={cx('row-des', 'highlight')}>ORAIX Bonus</span>
-          </div>
-          {/* <div className={cx('row')}>
-            <div className={cx('row-title')}>
-              <span>Unbonding Duration</span>
-              <TooltipIcon />
-            </div>
-            <span className={cx('row-des')}>7 days</span>
-          </div> */}
+      <div className={cx('setting')}>
+        <div className={cx('title')}>
+          <div>Unbond LP tokens</div>
+          {/* <TooltipIcon
+            content="The transfer won’t go through if the bridge rate moves
+                        unfavorably by more than this percentage when the
+                        transfer is executed."
+          /> */}
         </div>
         <div className={cx('supply')}>
-          <div className={cx('header')}>
-            <div className={cx('title')}>AMOUNT TO BOND</div>
-          </div>
           <div className={cx('balance')}>
             <TokenBalance
               balance={{
-                amount: lpTokenBalance,
-                denom: `${lpTokenInfoData?.symbol}`
+                amount: bondAmount ? bondAmount : 0,
+                denom: lpTokenInfoData.symbol
               }}
-              decimalScale={2}
-              prefix="Balance: "
+              prefix="Bonded Token Balance: "
+              decimalScale={6}
             />
 
-            <div
-              className={cx('btn')}
-              onClick={() =>
-                onChangeAmount(
-                  `${lpTokenBalance / 10 ** lpTokenInfoData.decimals}`
-                )
-              }
-            >
-              MAX
-            </div>
-            <div
-              className={cx('btn')}
-              onClick={() =>
-                onChangeAmount(
-                  `${lpTokenBalance / 10 ** lpTokenInfoData.decimals / 2}`
-                )
-              }
-            >
-              HALF
-            </div>
             <TokenBalance
+              balance={bondAmountUsd}
               style={{ flexGrow: 1, textAlign: 'right' }}
-              balance={liquidityValue}
               decimalScale={2}
             />
           </div>
@@ -188,26 +150,59 @@ const BondingModal: FC<ModalProps> = ({
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}
-              // type="input"
-              value={bondAmount ?? ''}
-              onChange={(e: any) => {
-                onChangeAmount(e.target.value.replaceAll(',', ''));
-              }}
+              value={!!unbondAmount ? unbondAmount : ''}
+              onValueChange={({ floatValue }) =>
+                setUnbondAmount(floatValue ?? 0)
+              }
             />
           </div>
+          <div className={cx('options')}>
+            {[25, 50, 75, 100].map((option, idx) => (
+              <div
+                className={cx('item', {
+                  isChosen: chosenOption === idx
+                })}
+                key={idx}
+                onClick={() => {
+                  setUnbondAmount((option * bondAmount) / (10 ** 6 * 100));
+                  setChosenOption(idx);
+                }}
+              >
+                {option}%
+              </div>
+            ))}
+            <div
+              className={cx('item', 'border', {
+                isChosen: chosenOption === 4
+              })}
+              onClick={() => setChosenOption(4)}
+            >
+              <input
+                placeholder="0.00"
+                type={'number'}
+                className={cx('input')}
+                // value={chosenOption === 4 && !!unbondAmount ? unbondAmount : ''}
+                onChange={(event) => {
+                  setUnbondAmount(
+                    (+event.target.value * bondAmount) / (10 ** 6 * 100)
+                  );
+                }}
+              />
+              %
+            </div>
+          </div>
         </div>
-
         <button
           className={cx('swap-btn')}
-          onClick={() => handleBond(bondAmount)}
+          onClick={() => handleUnbond(unbondAmount)}
           disabled={actionLoading}
         >
           {actionLoading && <Loader width={20} height={20} />}
-          <span>Bond</span>
+          <span>Unbond</span>
         </button>
       </div>
     </Modal>
   );
 };
 
-export default BondingModal;
+export default SettingModal;
