@@ -221,10 +221,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   // );
 
   useEffect(() => {
-    if (pairInfoData?.token1.name === 'orai') {
-      setAssetToken(pairInfoData.token1);
-    } else if (!!pairInfoData) {
+    if (pairInfoData?.token1.name === 'ORAI') {
       setAssetToken(pairInfoData.token2);
+    } else if (!!pairInfoData) {
+      setAssetToken(pairInfoData.token1);
     }
   }, [pairInfoData]);
 
