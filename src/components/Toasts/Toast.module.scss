@@ -39,6 +39,8 @@
     font-feature-settings: 'zero' on;
     color: #bdc3d3;
     text-align: left;
+    max-width:230px;
+    overflow-wrap: break-word;
   }
   a {
     font-weight: 500;
