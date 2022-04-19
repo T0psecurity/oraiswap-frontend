@@ -189,7 +189,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ['reward-info', address, bondingTxHash, pairInfoData, assetToken],
     async () => {
       let t = await fetchRewardInfo(address, assetToken);
-      console.log(t);
 
       return t;
     },
@@ -200,7 +199,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ['reward-per-info', address, pairInfoData, assetToken],
     async () => {
       let t = await fetchRewardPerSecInfo(assetToken);
-      console.log(t);
 
       return t.assets;
     },
@@ -217,7 +215,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
-      console.log(rewardPerSecInfoData);
       const totalRewardAmount =
         +totalRewardInfoData.reward_infos[0].pending_reward;
       const totalRewardPerSec = rewardPerSecInfoData.reduce(
