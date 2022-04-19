@@ -215,8 +215,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
-      const totalRewardAmount =
-        +totalRewardInfoData.reward_infos[0].pending_reward;
+      const totalRewardAmount = !!totalRewardInfoData.reward_infos.length
+        ? +totalRewardInfoData.reward_infos[0]?.pending_reward
+        : 0;
+      console.log(totalRewardAmount);
+
       const totalRewardPerSec = rewardPerSecInfoData.reduce(
         (a: any, b: any) => +a.amount + +b.amount
       );
@@ -276,7 +279,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const liquidity2Usd =
     (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply;
 
-  const rewardInfoFirst = totalRewardInfoData?.reward_infos[0];
+  const rewardInfoFirst = !!totalRewardInfoData?.reward_infos.length
+    ? totalRewardInfoData?.reward_infos[0]
+    : 0;
   const bondAmountUsd = rewardInfoFirst
     ? (rewardInfoFirst.bond_amount * (pairAmountInfoData?.usdAmount ?? 0)) /
       +(lpTokenInfoData?.total_supply ?? 0)
@@ -542,24 +547,18 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                   <div className={cx('earning')}>
                     <div className={cx('container', 'container_earning')}>
                       <div className={cx('label')}>Earnings</div>
-                      {/* <>
-                        <div className={cx('amount')}>0 ORAI</div>
-                        <div className={cx('amount-usd')}>$0</div>
-                      </> */}
                       {!!pendingRewards &&
                         pendingRewards.map((r: any, idx) => (
                           <div key={idx}>
                             <div className={cx('amount')}>
-                              {rewardInfoFirst && (
-                                <TokenBalance
-                                  balance={{
-                                    amount: r.amount,
-                                    denom: r.name.toUpperCase(),
-                                    decimals: 6
-                                  }}
-                                  decimalScale={6}
-                                />
-                              )}
+                              <TokenBalance
+                                balance={{
+                                  amount: r.amount,
+                                  denom: r.name.toUpperCase(),
+                                  decimals: 6
+                                }}
+                                decimalScale={6}
+                              />
                             </div>
                             {/* <TokenBalance
                               balance={r.usdValue}
