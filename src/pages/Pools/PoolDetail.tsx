@@ -10,21 +10,14 @@ import Pie from 'components/Pie';
 import { mockToken, PairKey, pairsMap, TokensSwap } from 'constants/pools';
 import {
   fetchBalance,
-  fetchExchangeRate,
   fetchPairInfo,
-  fetchPool,
   fetchPoolInfoAmount,
-  fetchTaxRate,
   fetchTokenInfo,
-  generateContractMessages,
-  simulateSwap,
-  fetchPoolMiningInfo,
-  fetchRewardMiningInfo,
-  generateMiningMsgs,
-  Type
+  fetchRewardInfo,
+  fetchRewardPerSecInfo
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
 import useLocalStorage from 'libs/useLocalStorage';
 import { useQuery } from 'react-query';
@@ -34,12 +27,15 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
-import { TokenInfo } from '@saberhq/token-utils';
 import UnbondModal from './UnbondModal/UnbondModal';
 
 const cx = cn.bind(styles);
 
 interface PoolDetailProps {}
+
+const tokenAddrToName = {
+  orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge: 'ORAIX'
+};
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -52,6 +48,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [assetToken, setAssetToken] = useState<any>();
   const [bondingTxHash, setBondingTxHash] = useState('');
   const [liquidityTxHash, setLiquidityTxHash] = useState('');
+  const [pendingRewards, setPendingRewards] = useState<[any]>();
 
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
@@ -188,37 +185,27 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
-  const { data: rewardMiningInfoData } = useQuery(
-    ['reward-info', address, bondingTxHash, pairInfoData],
+  const { data: totalRewardInfoData } = useQuery(
+    ['reward-info', address, bondingTxHash, pairInfoData, assetToken],
     async () => {
-      const token = pairInfoData?.asset_infos[1];
-      let t = await fetchRewardMiningInfo(address, token!);
-      // console.log(t);
+      let t = await fetchRewardInfo(address, assetToken);
+      console.log(t);
 
       return t;
     },
-    { enabled: !!address, refetchOnWindowFocus: false }
+    { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
   );
 
-  // const { data: poolMiningInfoData } = useQuery(
-  //   ['pool-mining-info', address, pairInfoData],
-  //   async () => {
-  //     if (!!pairInfoData?.token1.contract_addr) {
-  //       setAssetToken(pairInfoData.token1);
-  //       // @ts-ignore
-  //       let t = await fetchPoolMiningInfo(pairInfoData.token1);
-  //       return t;
-  //     } else if (!!pairInfoData?.token2.contract_addr) {
-  //       setAssetToken(pairInfoData.token2);
-  //       // @ts-ignore
-  //       let t = await fetchPoolMiningInfo(pairInfoData.token2);
-  //       return t;
-  //     }
+  const { data: rewardPerSecInfoData } = useQuery(
+    ['reward-per-info', address, pairInfoData, assetToken],
+    async () => {
+      let t = await fetchRewardPerSecInfo(assetToken);
+      console.log(t);
 
-  //     return undefined;
-  //   },
-  //   { enabled: !!address && !!pairInfoData, refetchOnWindowFocus: false }
-  // );
+      return t.assets;
+    },
+    { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
+  );
 
   useEffect(() => {
     if (pairInfoData?.token1.name === 'ORAI') {
@@ -227,6 +214,57 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       setAssetToken(pairInfoData.token1);
     }
   }, [pairInfoData]);
+
+  useEffect(() => {
+    if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
+      console.log(rewardPerSecInfoData);
+      const totalRewardAmount =
+        +totalRewardInfoData.reward_infos[0].pending_reward;
+      const totalRewardPerSec = rewardPerSecInfoData.reduce(
+        (a: any, b: any) => +a.amount + +b.amount
+      );
+      let res = rewardPerSecInfoData.map((r: any) => {
+        const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;
+        if (!!r.info.token) {
+          let token = filteredTokens.find(
+            (t) => t.contractAddress === r.info.token.contract_addr!
+          );
+          // const usdValue = getUsd(
+          //   amount,
+          //   prices[token!.coingeckoId].price,
+          //   token!.decimals
+          // );
+          return {
+            ...token,
+            amount,
+            rewardPerSec: +r.amount,
+            name: tokenAddrToName[
+              r.info.token.contract_addr! as keyof typeof tokenAddrToName
+            ]
+            // usdValue
+          };
+        } else {
+          let token = filteredTokens.find(
+            (t) => t.denom === r.info.native_token.denom!
+          );
+          // const usdValue = getUsd(
+          //   amount,
+          //   prices[token!.coingeckoId].price,
+          //   token!.decimals
+          // );
+          return {
+            ...token,
+            amount,
+            rewardPerSec: +r.amount,
+            name: r.info.native_token.denom
+
+            // usdValue
+          };
+        }
+      });
+      setPendingRewards(res);
+    }
+  }, [totalRewardInfoData, rewardPerSecInfoData]);
 
   const Token1Icon = pairInfoData?.token1.Icon,
     Token2Icon = pairInfoData?.token2.Icon;
@@ -241,7 +279,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const liquidity2Usd =
     (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply;
 
-  const rewardInfoFirst = rewardMiningInfoData?.reward_infos[0];
+  const rewardInfoFirst = totalRewardInfoData?.reward_infos[0];
   const bondAmountUsd = rewardInfoFirst
     ? (rewardInfoFirst.bond_amount * (pairAmountInfoData?.usdAmount ?? 0)) /
       +(lpTokenInfoData?.total_supply ?? 0)
@@ -511,21 +549,29 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('amount')}>0 ORAI</div>
                         <div className={cx('amount-usd')}>$0</div>
                       </> */}
-                      <>
-                        <div className={cx('amount')}>
-                          {rewardInfoFirst && (
-                            <TokenBalance
-                              balance={{
-                                amount: rewardInfoFirst.pending_reward,
-                                denom: 'ORAIX',
-                                decimals: 6
-                              }}
-                              decimalScale={6}
-                            />
-                          )}
-                        </div>
-                        {/* <div className={cx('amount-usd')}>$0</div> */}
-                      </>
+                      {!!pendingRewards &&
+                        pendingRewards.map((r: any, idx) => (
+                          <div key={idx}>
+                            <div className={cx('amount')}>
+                              {rewardInfoFirst && (
+                                <TokenBalance
+                                  balance={{
+                                    amount: r.amount,
+                                    denom: r.name.toUpperCase(),
+                                    decimals: 6
+                                  }}
+                                  decimalScale={6}
+                                />
+                              )}
+                            </div>
+                            {/* <TokenBalance
+                              balance={r.usdValue}
+                              className={cx('amount-usd')}
+                              decimalScale={2}
+                            /> */}
+                          </div>
+                        ))}
+
                       <Button
                         className={cx('btn', 'btn--dark')}
                         onClick={() => setIsOpenUnbondModal(true)}

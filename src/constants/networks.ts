@@ -19,6 +19,7 @@ const networks: { [key: string]: NetworkConfig } = {
     router: process.env.REACT_APP_ROUTER_CONTRACT,
     oracle: process.env.REACT_APP_ORACLE_CONTRACT,
     staking: process.env.REACT_APP_STAKING_CONTRACT,
+    rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
     explorer: 'https://scan.orai.io'
   },
   [NetworkKey.TESTNET]: {

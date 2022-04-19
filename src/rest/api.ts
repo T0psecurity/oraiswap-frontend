@@ -48,8 +48,9 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -131,7 +132,7 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-    '0'
+      '0'
   );
 }
 
@@ -210,13 +211,49 @@ async function fetchTokenAllowance(
   return data.allowance;
 }
 
+async function fetchRewardInfo(
+  staker_addr: string,
+  asset_token: TokenInfo,
+  lcd?: string
+) {
+  let { info: asset_info } = parseTokenInfo(asset_token);
+  const data = await querySmart(
+    network.staking,
+    {
+      reward_info: {
+        staker_addr,
+        asset_info
+      }
+    },
+    lcd
+  );
+
+  return data;
+}
+
+async function fetchRewardPerSecInfo(assetToken: TokenInfo, lcd?: string) {
+  let { info: asset_info } = parseTokenInfo(assetToken);
+  const data = await querySmart(
+    network.staking,
+    {
+      rewards_per_sec: {
+        asset_info
+      }
+    },
+    lcd
+  );
+
+  return data;
+}
+
 async function fetchNativeTokenBalance(
   walletAddr: string,
   denom: string,
   lcd?: string
 ) {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -271,27 +308,27 @@ const generateSwapOperationMsgs = (data: {
   const { denom, offerInfo, askInfo } = data;
   return findPair(denom)
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: {
@@ -491,10 +528,12 @@ export type UnbondLiquidity = {
   type: Type.UNBOND_LIQUIDITY;
   sender: string;
   amount: string;
-  assetToken: TokenInfo,
+  assetToken: TokenInfo;
 };
 
-async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
+async function generateMiningMsgs(
+  msg: BondMining | WithdrawMining | UnbondLiquidity
+) {
   // @ts-ignore
   const { type, sender, ...params } = msg;
   let sent_funds;
@@ -518,7 +557,7 @@ async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiqui
             })
           ) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
         }
-      }
+      };
       contractAddr = bondMsg.lpToken;
       break;
     case Type.WITHDRAW_LIQUIDITY_MINING:
@@ -528,7 +567,9 @@ async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiqui
     case Type.UNBOND_LIQUIDITY:
       const unbondMsg = params as UnbondLiquidity;
       let { info: unbond_asset } = parseTokenInfo(unbondMsg.assetToken);
-      input = { unbond: { asset_info: unbond_asset, amount: unbondMsg.amount } };
+      input = {
+        unbond: { asset_info: unbond_asset, amount: unbondMsg.amount }
+      };
       contractAddr = network.staking;
       break;
     default:
@@ -566,5 +607,7 @@ export {
   fetchTokenAllowance,
   fetchPoolMiningInfo,
   fetchRewardMiningInfo,
-  generateMiningMsgs
+  generateMiningMsgs,
+  fetchRewardInfo,
+  fetchRewardPerSecInfo
 };
