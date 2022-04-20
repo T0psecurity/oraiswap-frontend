@@ -281,7 +281,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           </div>
           <div className={cx('earning')}>
             <div className={cx('container', 'container_earning')}>
-              <div className={cx('label')}>Earnings</div>
+              <div className={cx('label')}>Estimated Earnings</div>
               {!!pendingRewards &&
                 pendingRewards.map((r: any, idx) => (
                   <div key={idx}>
@@ -302,32 +302,17 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                             /> */}
                   </div>
                 ))}
-
               <Button
                 className={cx('btn')}
                 onClick={() => handleBond()}
-                disabled={actionLoading}
+                disabled={
+                  actionLoading ||
+                  !+totalRewardInfoData?.reward_infos[0]?.pending_reward
+                }
               >
                 {actionLoading && <Loader width={20} height={20} />}
                 <span>Claim Rewards</span>
               </Button>
-              {/* {!!+totalRewardInfoData?.reward_infos[0]?.pending_reward ? (
-                <Button
-                  className={cx('btn')}
-                  onClick={() => handleBond()}
-                  disabled={actionLoading}
-                >
-                  {actionLoading && <Loader width={20} height={20} />}
-                  <span>Claim Rewards</span>
-                </Button>
-              ) : (
-                <Button
-                  className={cx('btn', 'btn--dark')}
-                  onClick={() => setIsOpenUnbondModal(true)}
-                >
-                  <span>Unbond</span>
-                </Button>
-              )} */}
               <Button
                 className={cx('btn', 'btn--dark')}
                 onClick={() => setIsOpenUnbondModal(true)}
