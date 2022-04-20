@@ -45,7 +45,7 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -71,7 +71,10 @@ const Swap: React.FC<SwapProps> = () => {
         denom: token.denom
       };
     })
-    .filter((t) => t.title != 'Erc20 ORAI' && t.title != 'Bep20 ORAI');
+    .filter(
+      (t) =>
+        t.title != 'Erc20 ORAI' && t.title != 'Bep20 ORAI' && t.title != 'ORAIX'
+    );
 
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
@@ -522,9 +525,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
