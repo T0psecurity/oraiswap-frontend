@@ -168,7 +168,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={
                           (rewardInfoFirst
                             ? rewardInfoFirst.bond_amount *
-                              pairAmountInfoData.usdAmount
+                            pairAmountInfoData.usdAmount
                             : 0) / +lpTokenInfoData.total_supply
                         }
                         className={cx('amount-usd')}
@@ -223,7 +223,15 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   </div>
                 ))}
 
-              {!!+totalRewardInfoData?.reward_infos[0]?.pending_reward ? (
+              <Button
+                className={cx('btn')}
+                onClick={() => handleBond()}
+                disabled={actionLoading}
+              >
+                {actionLoading && <Loader width={20} height={20} />}
+                <span>Claim Rewards</span>
+              </Button>
+              {/* {!!+totalRewardInfoData?.reward_infos[0]?.pending_reward ? (
                 <Button
                   className={cx('btn')}
                   onClick={() => handleBond()}
@@ -239,7 +247,13 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 >
                   <span>Unbond</span>
                 </Button>
-              )}
+              )} */}
+              <Button
+                className={cx('btn', 'btn--dark')}
+                onClick={() => setIsOpenUnbondModal(true)}
+              >
+                <span>Unbond</span>
+              </Button>
             </div>
           </div>
         </>
