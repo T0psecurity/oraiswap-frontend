@@ -32,7 +32,6 @@ interface LiquidityMiningProps {
   totalRewardInfoData: any;
   rewardPerSecInfoData: any;
   stakingPoolInfoData: any;
-  distributionInfoData: any;
 }
 
 const LiquidityMining: React.FC<LiquidityMiningProps> = ({
@@ -45,48 +44,32 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   setWithdrawTxHash,
   totalRewardInfoData,
   rewardPerSecInfoData,
-  stakingPoolInfoData,
-  distributionInfoData
+  stakingPoolInfoData
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<[any]>();
 
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
-      let interval = setInterval(() => setNewReward(), 1000);
-      return () => clearInterval(interval);
+      // let interval = setInterval(() => setNewReward(), 1000);
+      // return () => clearInterval(interval);
+      setNewReward();
     }
   }, [
     JSON.stringify(totalRewardInfoData),
     JSON.stringify(rewardPerSecInfoData),
-    JSON.stringify(stakingPoolInfoData),
-    JSON.stringify(distributionInfoData)
+    JSON.stringify(stakingPoolInfoData)
   ]);
 
   const setNewReward = () => {
     let totalRewardAmount = !!totalRewardInfoData.reward_infos.length
       ? +totalRewardInfoData.reward_infos[0]?.pending_reward
       : 0;
-    let bondAmount = !!totalRewardInfoData.reward_infos.length
-      ? +totalRewardInfoData.reward_infos[0]?.bond_amount
-      : 0;
 
     const totalRewardPerSec =
       rewardPerSecInfoData.length > 1
         ? rewardPerSecInfoData.reduce((a: any, b: any) => +a.amount + +b.amount)
         : +rewardPerSecInfoData[0].amount;
-
-    if (
-      !!stakingPoolInfoData?.total_bond_amount &&
-      !!distributionInfoData?.last_distributed
-    ) {
-      const totalBond = +stakingPoolInfoData.total_bond_amount;
-      const lastDistribution = distributionInfoData?.last_distributed;
-      totalRewardAmount +=
-        ((Date.now() / 1000 - lastDistribution) *
-          (totalRewardPerSec * bondAmount)) /
-        totalBond;
-    }
 
     let res = rewardPerSecInfoData.map((r: any) => {
       const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;

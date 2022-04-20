@@ -222,16 +222,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
   );
 
-  const { data: distributionInfoData } = useQuery(
-    ['distribution-info', address, pairInfoData, assetToken],
-    async () => {
-      let t = await fetchDistributionInfo(assetToken);
-
-      return t;
-    },
-    { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
-  );
-
   useEffect(() => {
     if (pairInfoData?.token1.name === 'ORAI') {
       setAssetToken(pairInfoData.token2);
@@ -447,7 +437,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 totalRewardInfoData={totalRewardInfoData}
                 rewardPerSecInfoData={rewardPerSecInfoData}
                 stakingPoolInfoData={stakingPoolInfoData}
-                distributionInfoData={distributionInfoData}
               />
             </div>
           </div>
