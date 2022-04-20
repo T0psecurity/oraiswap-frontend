@@ -68,7 +68,9 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
           <div className={styles.pairbox_pair_rate}>
             {token1.name} (50%)/{token2.name} (50%)
           </div>
-          <span className={styles.pairbox_pair_apr}>APR: ORAIX Bonus</span>
+          <span className={styles.pairbox_pair_apr}>
+            APR: 150% + ORAIX Bonus
+          </span>
         </div>
       </div>
       <div className={styles.pairbox_content}>
