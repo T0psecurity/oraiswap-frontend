@@ -262,7 +262,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 />
                 <div className={cx('bonded-apr')}>
                   <div className={cx('bonded-name')}>Current APR</div>
-                  <div className={cx('bonded-value')}>ORAIX Bonus</div>
+                  <div className={cx('bonded-value')}>150% + ORAIX Bonus</div>
                 </div>
                 {/* <div className={cx('bonded-unbouding')}>
                           <div className={cx('bonded-name')}>
