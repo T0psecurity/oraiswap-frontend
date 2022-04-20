@@ -245,7 +245,6 @@ async function fetchRewardPerSecInfo(assetToken: TokenInfo, lcd?: string) {
 
   return data;
 }
-// QueryMsg::PoolInfo { asset_info } => to_binary(&query_pool_info(deps, asset_info)?),
 
 async function fetchStakingPoolInfo(assetToken: TokenInfo, lcd?: string) {
   let { info: asset_info } = parseTokenInfo(assetToken);
@@ -253,6 +252,21 @@ async function fetchStakingPoolInfo(assetToken: TokenInfo, lcd?: string) {
     network.staking,
     {
       pool_info: {
+        asset_info
+      }
+    },
+    lcd
+  );
+
+  return data;
+}
+
+async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
+  let { info: asset_info } = parseTokenInfo(assetToken);
+  const data = await querySmart(
+    network.rewarder,
+    {
+      distribution_info: {
         asset_info
       }
     },
@@ -629,5 +643,6 @@ export {
   generateMiningMsgs,
   fetchRewardInfo,
   fetchRewardPerSecInfo,
-  fetchStakingPoolInfo
+  fetchStakingPoolInfo,
+  fetchDistributionInfo
 };

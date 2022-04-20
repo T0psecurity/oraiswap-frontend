@@ -15,7 +15,8 @@ import {
   fetchTokenInfo,
   fetchRewardInfo,
   fetchRewardPerSecInfo,
-  fetchStakingPoolInfo
+  fetchStakingPoolInfo,
+  fetchDistributionInfo
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
@@ -23,21 +24,12 @@ import { getUsd, parseAmount } from 'libs/utils';
 import useLocalStorage from 'libs/useLocalStorage';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import CosmJs from 'libs/cosmjs';
-import { ORAI } from 'constants/constants';
-import { network } from 'constants/networks';
-import Loader from 'components/Loader';
 import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 
 const cx = cn.bind(styles);
 
 interface PoolDetailProps {}
-
-const tokenAddrToName = {
-  orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge: 'ORAIX'
-};
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -225,6 +217,16 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ['staking-pool-info', address, pairInfoData, assetToken],
     async () => {
       let t = await fetchStakingPoolInfo(assetToken);
+
+      return t;
+    },
+    { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
+  );
+
+  const { data: distributionInfoData } = useQuery(
+    ['distribution-info', address, pairInfoData, assetToken],
+    async () => {
+      let t = await fetchDistributionInfo(assetToken);
       console.log(t);
 
       return t;
@@ -447,6 +449,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 totalRewardInfoData={totalRewardInfoData}
                 rewardPerSecInfoData={rewardPerSecInfoData}
                 stakingPoolInfoData={stakingPoolInfoData}
+                distributionInfoData={distributionInfoData}
               />
             </div>
           </div>
