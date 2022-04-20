@@ -28,6 +28,7 @@ import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
 import UnbondModal from './UnbondModal/UnbondModal';
+import LiquidityMining from './LiquidityMining/LiquidityMining';
 
 const cx = cn.bind(styles);
 
@@ -48,6 +49,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [assetToken, setAssetToken] = useState<any>();
   const [bondingTxHash, setBondingTxHash] = useState('');
   const [liquidityTxHash, setLiquidityTxHash] = useState('');
+  const [withdrawTxHash, setWithdrawTxHash] = useState('');
   const [pendingRewards, setPendingRewards] = useState<[any]>();
 
   const { prices } = useCoinGeckoPrices(
@@ -158,7 +160,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     isError: isLpTokenBalanceError,
     isLoading: isLpTokenBalanceLoading
   } = useQuery(
-    ['token-balance', pairInfoData, bondingTxHash, liquidityTxHash],
+    [
+      'token-balance',
+      pairInfoData,
+      bondingTxHash,
+      liquidityTxHash,
+      withdrawTxHash
+    ],
     () => fetchBalance(address, '', pairInfoData?.liquidity_token),
     {
       enabled: !!address && !!pairInfoData,
@@ -186,7 +194,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   );
 
   const { data: totalRewardInfoData } = useQuery(
-    ['reward-info', address, bondingTxHash, pairInfoData, assetToken],
+    [
+      'reward-info',
+      address,
+      bondingTxHash,
+      pairInfoData,
+      assetToken,
+      withdrawTxHash
+    ],
     async () => {
       let t = await fetchRewardInfo(address, assetToken);
 
@@ -196,7 +211,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   );
 
   const { data: rewardPerSecInfoData } = useQuery(
-    ['reward-per-info', address, pairInfoData, assetToken],
+    ['reward-per-sec-info', address, pairInfoData, assetToken],
     async () => {
       let t = await fetchRewardPerSecInfo(assetToken);
 
@@ -218,7 +233,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       const totalRewardAmount = !!totalRewardInfoData.reward_infos.length
         ? +totalRewardInfoData.reward_infos[0]?.pending_reward
         : 0;
-      console.log(totalRewardAmount);
 
       const totalRewardPerSec = rewardPerSecInfoData.reduce(
         (a: any, b: any) => +a.amount + +b.amount
@@ -462,122 +476,17 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
               )}
 
-              <div
-                className={cx('row')}
-                style={{ marginBottom: '30px', marginTop: '40px' }}
-              >
-                <>
-                  <div className={cx('mining')}>
-                    <div className={cx('label--bold')}>Liquidity Mining</div>
-                    <div className={cx('label--sub')}>
-                      Bond liquidity to earn ORAI liquidity reward and swap fees
-                    </div>
-                  </div>
-                  <div className={cx('earning')}>
-                    <Button
-                      className={cx('btn')}
-                      onClick={() => setIsOpenBondingModal(true)}
-                    >
-                      Start Earning
-                    </Button>
-                  </div>
-                </>
-              </div>
-              <div className={cx('row')}>
-                <>
-                  <div className={cx('mining')}>
-                    <div className={cx('container', 'container_mining')}>
-                      <img
-                        className={cx('icon')}
-                        src={
-                          require('assets/images/Liquidity_mining_illus.png')
-                            .default
-                        }
-                      />
-                      <div className={cx('bonded')}>
-                        <div className={cx('label')}>Bonded</div>
-                        <div>
-                          <TokenBalance
-                            balance={{
-                              amount: rewardInfoFirst
-                                ? rewardInfoFirst.bond_amount ?? 0
-                                : 0,
-                              denom: `${lpTokenInfoData?.symbol}`
-                            }}
-                            className={cx('amount')}
-                            decimalScale={6}
-                          />
-                          <div>
-                            {!!pairAmountInfoData && !!lpTokenInfoData && (
-                              <TokenBalance
-                                balance={
-                                  (rewardInfoFirst
-                                    ? rewardInfoFirst.bond_amount *
-                                      pairAmountInfoData.usdAmount
-                                    : 0) / +lpTokenInfoData.total_supply
-                                }
-                                className={cx('amount-usd')}
-                                decimalScale={2}
-                              />
-                            )}
-                          </div>
-                        </div>
-                        <Divider
-                          dashed
-                          style={{
-                            background: '#2D2938',
-                            width: '100%',
-                            height: '1px'
-                            // margin: '16px 0'
-                          }}
-                        />
-                        <div className={cx('bonded-apr')}>
-                          <div className={cx('bonded-name')}>Current APR</div>
-                          <div className={cx('bonded-value')}>ORAIX Bonus</div>
-                        </div>
-                        {/* <div className={cx('bonded-unbouding')}>
-                          <div className={cx('bonded-name')}>
-                            Unbonding Duration
-                          </div>
-                          <div className={cx('bonded-value')}>7 days</div>
-                        </div> */}
-                      </div>
-                    </div>
-                  </div>
-                  <div className={cx('earning')}>
-                    <div className={cx('container', 'container_earning')}>
-                      <div className={cx('label')}>Earnings</div>
-                      {!!pendingRewards &&
-                        pendingRewards.map((r: any, idx) => (
-                          <div key={idx}>
-                            <div className={cx('amount')}>
-                              <TokenBalance
-                                balance={{
-                                  amount: r.amount,
-                                  denom: r.name.toUpperCase(),
-                                  decimals: 6
-                                }}
-                                decimalScale={6}
-                              />
-                            </div>
-                            {/* <TokenBalance
-                              balance={r.usdValue}
-                              className={cx('amount-usd')}
-                              decimalScale={2}
-                            /> */}
-                          </div>
-                        ))}
-
-                      <Button
-                        className={cx('btn', 'btn--dark')}
-                        onClick={() => setIsOpenUnbondModal(true)}
-                      >
-                        <span>Unbond</span>
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              </div>
+              <LiquidityMining
+                setIsOpenBondingModal={setIsOpenBondingModal}
+                rewardInfoFirst={rewardInfoFirst}
+                lpTokenInfoData={lpTokenInfoData}
+                pendingRewards={pendingRewards}
+                setIsOpenUnbondModal={setIsOpenUnbondModal}
+                pairAmountInfoData={pairAmountInfoData}
+                assetToken={assetToken}
+                setWithdrawTxHash={setWithdrawTxHash}
+                totalRewardInfoData={totalRewardInfoData}
+              />
             </div>
           </div>
           {isOpenLiquidityModal && (
