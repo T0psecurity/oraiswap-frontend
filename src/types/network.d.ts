@@ -18,7 +18,7 @@ export interface NetworkConfig extends ExtNetworkConfig {
   router: string;
   denom: string;
   prefix: string;
-  rewarder?: string;
+  rewarder: string;
 }
 
 export interface Network extends NetworkConfig {

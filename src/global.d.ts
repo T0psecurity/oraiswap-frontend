@@ -37,6 +37,7 @@ declare global {
       REACT_APP_ORACLE_CONTRACT: string;
       REACT_APP_GRAVITY_CONTRACT: string;
       REACT_APP_STAKING_CONTRACT: string;
+      REACT_APP_REWARDER_CONTRACT: string;
     }
   }
 }

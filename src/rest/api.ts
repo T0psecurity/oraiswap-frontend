@@ -246,6 +246,36 @@ async function fetchRewardPerSecInfo(assetToken: TokenInfo, lcd?: string) {
   return data;
 }
 
+async function fetchStakingPoolInfo(assetToken: TokenInfo, lcd?: string) {
+  let { info: asset_info } = parseTokenInfo(assetToken);
+  const data = await querySmart(
+    network.staking,
+    {
+      pool_info: {
+        asset_info
+      }
+    },
+    lcd
+  );
+
+  return data;
+}
+
+async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
+  let { info: asset_info } = parseTokenInfo(assetToken);
+  const data = await querySmart(
+    network.rewarder,
+    {
+      distribution_info: {
+        asset_info
+      }
+    },
+    lcd
+  );
+
+  return data;
+}
+
 async function fetchNativeTokenBalance(
   walletAddr: string,
   denom: string,
@@ -612,5 +642,7 @@ export {
   fetchRewardMiningInfo,
   generateMiningMsgs,
   fetchRewardInfo,
-  fetchRewardPerSecInfo
+  fetchRewardPerSecInfo,
+  fetchStakingPoolInfo,
+  fetchDistributionInfo
 };
