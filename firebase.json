@@ -14,7 +14,8 @@
                     "destination": "/index.html"
                 }
             ]
-        }, {
+        },
+        {
             "target": "oraiswap-staging",
             "public": "build",
             "ignore": [
@@ -28,7 +29,8 @@
                     "destination": "/index.html"
                 }
             ]
-        }, {
+        },
+        {
             "target": "oraiswap-testnet",
             "public": "build",
             "ignore": [
@@ -42,8 +44,24 @@
                     "destination": "/index.html"
                 }
             ]
-        }, {
+        },
+        {
             "target": "oraiswap-ibc",
+            "public": "build",
+            "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**"
+            ],
+            "rewrites": [
+                {
+                    "source": "**",
+                    "destination": "/index.html"
+                }
+            ]
+        },
+        {
+            "target": "oraiswap-staging-v1",
             "public": "build",
             "ignore": [
                 "firebase.json",

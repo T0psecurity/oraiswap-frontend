@@ -31,7 +31,7 @@ interface ModalProps {
   setTxHash: any;
 }
 
-const SettingModal: FC<ModalProps> = ({
+const UnbondModal: FC<ModalProps> = ({
   isOpen,
   close,
   open,
@@ -205,4 +205,4 @@ const SettingModal: FC<ModalProps> = ({
   );
 };
 
-export default SettingModal;
+export default UnbondModal;

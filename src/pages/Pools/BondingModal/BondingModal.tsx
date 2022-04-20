@@ -132,7 +132,9 @@ const BondingModal: FC<ModalProps> = ({
               <span>Current APR</span>
               <TooltipIcon />
             </div>
-            <span className={cx('row-des', 'highlight')}>ORAIX Bonus</span>
+            <span className={cx('row-des', 'highlight')}>
+              150% + ORAIX Bonus
+            </span>
           </div>
           {/* <div className={cx('row')}>
             <div className={cx('row-title')}>
@@ -152,7 +154,7 @@ const BondingModal: FC<ModalProps> = ({
                 amount: lpTokenBalance,
                 denom: `${lpTokenInfoData?.symbol}`
               }}
-              decimalScale={2}
+              decimalScale={6}
               prefix="Balance: "
             />
 

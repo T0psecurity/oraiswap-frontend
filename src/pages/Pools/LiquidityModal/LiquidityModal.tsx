@@ -41,6 +41,10 @@ interface ModalProps {
   isCloseBtn?: boolean;
   token1InfoData: any;
   token2InfoData: any;
+  lpTokenInfoData: any;
+  lpTokenBalance: any;
+  setLiquidityHash: any;
+  liquidityHash: any;
 }
 
 const LiquidityModal: FC<ModalProps> = ({
@@ -48,7 +52,11 @@ const LiquidityModal: FC<ModalProps> = ({
   close,
   open,
   token1InfoData,
-  token2InfoData
+  token2InfoData,
+  lpTokenInfoData,
+  lpTokenBalance,
+  setLiquidityHash: setTxHash,
+  liquidityHash: txHash
 }) => {
   const allToken = Object.values(mockToken).map((token) => {
     return {
@@ -75,7 +83,6 @@ const LiquidityModal: FC<ModalProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
-  const [txHash, setTxHash] = useState<String>();
 
   let {
     data: pairAmountInfoData,
@@ -192,38 +199,38 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   );
 
-  const {
-    data: lpTokenBalance,
-    error: lpTokenBalanceError,
-    isError: isLpTokenBalanceError,
-    isLoading: isLpTokenBalanceLoading
-  } = useQuery(
-    ['token-balance', JSON.stringify(pairInfoData), txHash],
-    () => fetchBalance(address, '', pairInfoData?.liquidity_token),
-    {
-      enabled: !!address && !!pairInfoData,
-      refetchOnWindowFocus: false
-    }
-  );
+  // const {
+  //   data: lpTokenBalance,
+  //   error: lpTokenBalanceError,
+  //   isError: isLpTokenBalanceError,
+  //   isLoading: isLpTokenBalanceLoading
+  // } = useQuery(
+  //   ['token-balance', JSON.stringify(pairInfoData), txHash],
+  //   () => fetchBalance(address, '', pairInfoData?.liquidity_token),
+  //   {
+  //     enabled: !!address && !!pairInfoData,
+  //     refetchOnWindowFocus: false
+  //   }
+  // );
 
-  const {
-    data: lpTokenInfoData,
-    error: lpTokenInfoError,
-    isError: isLpTokenInfoError,
-    isLoading: isLpTokenInfoLoading
-  } = useQuery(
-    ['token-info', JSON.stringify(pairInfoData?.pair.contract_addr)],
-    () => {
-      // @ts-ignore
-      return fetchTokenInfo({
-        contractAddress: pairInfoData?.liquidity_token
-      });
-    },
-    {
-      enabled: !!pairInfoData,
-      refetchOnWindowFocus: false
-    }
-  );
+  // const {
+  //   data: lpTokenInfoData,
+  //   error: lpTokenInfoError,
+  //   isError: isLpTokenInfoError,
+  //   isLoading: isLpTokenInfoLoading
+  // } = useQuery(
+  //   ['token-info', JSON.stringify(pairInfoData?.pair.contract_addr)],
+  //   () => {
+  //     // @ts-ignore
+  //     return fetchTokenInfo({
+  //       contractAddress: pairInfoData?.liquidity_token
+  //     });
+  //   },
+  //   {
+  //     enabled: !!pairInfoData,
+  //     refetchOnWindowFocus: false
+  //   }
+  // );
 
   useEffect(() => {
     if (!pairAmountInfoData?.ratio) {
