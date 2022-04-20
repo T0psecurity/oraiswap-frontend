@@ -86,12 +86,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         ((Date.now() / 1000 - lastDistribution) *
           (totalRewardPerSec * bondAmount)) /
         totalBond;
-      console.log(
-        (Date.now() - lastDistribution) / 1000,
-        totalRewardPerSec,
-        bondAmount,
-        totalBond
-      );
     }
 
     let res = rewardPerSecInfoData.map((r: any) => {

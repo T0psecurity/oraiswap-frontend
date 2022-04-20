@@ -196,7 +196,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ],
     async () => {
       let t = await fetchRewardInfo(address, assetToken);
-      console.log(t);
 
       return t;
     },
@@ -227,7 +226,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ['distribution-info', address, pairInfoData, assetToken],
     async () => {
       let t = await fetchDistributionInfo(assetToken);
-      console.log(t);
 
       return t;
     },
