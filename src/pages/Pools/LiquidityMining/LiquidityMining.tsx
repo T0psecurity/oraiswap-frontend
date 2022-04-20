@@ -6,16 +6,7 @@ import { useParams } from 'react-router-dom';
 import Content from 'layouts/Content';
 import Pie from 'components/Pie';
 import { mockToken, PairKey, pairsMap, TokensSwap } from 'constants/pools';
-import {
-  fetchBalance,
-  fetchPairInfo,
-  fetchPoolInfoAmount,
-  fetchTokenInfo,
-  fetchRewardInfo,
-  fetchRewardPerSecInfo,
-  Type,
-  generateMiningMsgs
-} from 'rest/api';
+import { Type, generateMiningMsgs } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
@@ -30,30 +21,100 @@ import Loader from 'components/Loader';
 
 const cx = cn.bind(styles);
 
+const initTime = Date.now();
 interface LiquidityMiningProps {
   setIsOpenBondingModal: any;
   rewardInfoFirst: any;
   lpTokenInfoData: any;
-  pendingRewards: [any] | undefined;
   setIsOpenUnbondModal: any;
   pairAmountInfoData: any;
   assetToken: any;
   setWithdrawTxHash: any;
   totalRewardInfoData: any;
+  rewardPerSecInfoData: any;
+  stakingPoolInfoData: any;
 }
 
 const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   setIsOpenBondingModal,
   rewardInfoFirst,
   lpTokenInfoData,
-  pendingRewards,
   setIsOpenUnbondModal,
   pairAmountInfoData,
   assetToken,
   setWithdrawTxHash,
-  totalRewardInfoData
+  totalRewardInfoData,
+  rewardPerSecInfoData,
+  stakingPoolInfoData
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
+  const [pendingRewards, setPendingRewards] = useState<[any]>();
+
+  useEffect(() => {
+    if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
+      let interval = setInterval(() => setNewReward(), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [totalRewardInfoData, rewardPerSecInfoData]);
+
+  const setNewReward = () => {
+    let totalRewardAmount = !!totalRewardInfoData.reward_infos.length
+      ? +totalRewardInfoData.reward_infos[0]?.pending_reward
+      : 0;
+    let bondAmount = !!totalRewardInfoData.reward_infos.length
+      ? +totalRewardInfoData.reward_infos[0]?.bond_amount
+      : 0;
+
+    const totalRewardPerSec =
+      rewardPerSecInfoData.length > 1
+        ? rewardPerSecInfoData.reduce((a: any, b: any) => +a.amount + +b.amount)
+        : +rewardPerSecInfoData[0].amount;
+    if (!!stakingPoolInfoData?.total_bond_amount) {
+      const totalBond = stakingPoolInfoData.total_bond_amount;
+      totalRewardAmount +=
+        (((Date.now() - initTime) / 1000) * (totalRewardPerSec * bondAmount)) /
+        totalBond;
+    }
+    let res = rewardPerSecInfoData.map((r: any) => {
+      const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;
+      if (!!r.info.token) {
+        let token = filteredTokens.find(
+          (t) => t.contractAddress === r.info.token.contract_addr!
+        );
+        // const usdValue = getUsd(
+        //   amount,
+        //   prices[token!.coingeckoId].price,
+        //   token!.decimals
+        // );
+        return {
+          ...token,
+          amount,
+          rewardPerSec: +r.amount
+
+          // usdValue
+        };
+      } else {
+        let token = filteredTokens.find(
+          (t) => t.denom === r.info.native_token.denom!
+        );
+        // const usdValue = getUsd(
+        //   amount,
+        //   prices[token!.coingeckoId].price,
+        //   token!.decimals
+        // );
+        return {
+          ...token,
+          amount,
+          rewardPerSec: +r.amount
+
+          // usdValue
+        };
+      }
+    });
+
+    setPendingRewards(res);
+  };
+
   const handleBond = async () => {
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -168,7 +229,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={
                           (rewardInfoFirst
                             ? rewardInfoFirst.bond_amount *
-                            pairAmountInfoData.usdAmount
+                              pairAmountInfoData.usdAmount
                             : 0) / +lpTokenInfoData.total_supply
                         }
                         className={cx('amount-usd')}
@@ -209,7 +270,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       <TokenBalance
                         balance={{
                           amount: r.amount,
-                          denom: r.name.toUpperCase(),
+                          denom: r.denom.toUpperCase(),
                           decimals: 6
                         }}
                         decimalScale={6}
