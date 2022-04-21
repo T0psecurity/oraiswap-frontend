@@ -28,7 +28,14 @@ const App = () => {
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) throw 'You must install Keplr to continue';
     const newAddress = await window.Keplr.getKeplrAddr();
-    if (newAddress) setAddress(newAddress as string);
+    if (newAddress) {
+      if (newAddress === address) {
+        // same address, trigger update by clear address then re-update
+        setAddress('');
+      }
+      // finally update new address
+      setAddress(newAddress as string);
+    }
   };
 
   useEffect(() => {
