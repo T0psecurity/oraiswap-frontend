@@ -4,10 +4,10 @@ import styles from './Header.module.scss';
 import LoginWidget from 'components/LoginWidget';
 import MESSAGE from 'lang/MESSAGE.json';
 import LoginMetamask from 'components/LoginMetamask';
-import useLocalStorage from 'libs/useLocalStorage';
+import useGlobalState from 'hooks/useGlobalState';
 
 const Header = () => {
-  const [address, setAddress] = useLocalStorage<String>('address');
+  const [address, setAddress] = useGlobalState('address');
   const onAddress = (address: string) => {
     setAddress(address);
   };

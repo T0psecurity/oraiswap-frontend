@@ -1,40 +1,36 @@
-import React, { FC } from "react"
-import Tippy, { TippyProps } from "@tippyjs/react"
-import classNames from "classnames"
-import { isNil } from "ramda"
-import Icon from "./Icon"
+import React, { FC } from 'react';
+import Tippy, { TippyProps } from '@tippyjs/react';
+import classNames from 'classnames';
+import { isNil } from 'ramda';
+import Icon from './Icon';
 
-import "tippy.js/dist/tippy.css"
-import "tippy.js/themes/light-border.css"
-import styles from "./Tooltip.module.scss"
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light-border.css';
+import styles from './Tooltip.module.scss';
 
 export const DefaultTippyProps: TippyProps = {
   animation: false,
   interactive: true,
-  appendTo: document.body,
-}
+  appendTo: document.body
+};
 
 const TooltipTippyProps: TippyProps = {
   ...DefaultTippyProps,
-  placement: "top",
-  theme: "dark-border",
-  className: styles.tooltip,
-}
+  placement: 'top',
+  theme: 'dark-border',
+  className: styles.tooltip
+};
 
-interface Props extends Omit<TippyProps, "children"> {
-  onClick?: () => void
+interface Props extends Omit<TippyProps, 'children'> {
+  onClick?: () => void;
 }
 
 const Tooltip: FC<Props> = ({ className, onClick, children, ...props }) => {
   const button = (
-    <button
-      type="button"
-      className={classNames(styles.button, className)}
-      onClick={onClick}
-    >
+    <span className={classNames(styles.button, className)} onClick={onClick}>
       {children}
-    </button>
-  )
+    </span>
+  );
 
   return props.content ? (
     <Tippy
@@ -46,8 +42,8 @@ const Tooltip: FC<Props> = ({ className, onClick, children, ...props }) => {
     </Tippy>
   ) : (
     button
-  )
-}
+  );
+};
 
 export const TooltipIcon: FC<Props> = ({ children, ...props }) => (
   <div className={styles.flex}>
@@ -58,6 +54,6 @@ export const TooltipIcon: FC<Props> = ({ children, ...props }) => (
       </Tooltip>
     </div>
   </div>
-)
+);
 
-export default Tooltip
+export default Tooltip;

@@ -20,7 +20,6 @@ import styles from './Menu.module.scss';
 import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 // import { isLoggedIn } from 'providers/AuthProvider';
 import { network } from 'constants/networks';
-import useLocalStorage from 'libs/useLocalStorage';
 import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
@@ -30,6 +29,7 @@ import Loader from 'components/Loader';
 import { isMobile } from '@walletconnect/browser-utils';
 import Icon from 'components/Icon';
 import classNames from 'classnames';
+import useGlobalState from 'hooks/useGlobalState';
 
 const { Text } = Typography;
 
@@ -37,7 +37,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
-  const [address, setAddress] = useLocalStorage<String>('address');
+  const [address, setAddress] = useGlobalState('address');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -143,8 +143,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 <Logout
                   onClick={(e) => {
                     setAddress('');
-                    // LocalStorage.removeItem(LocalStorageKey.token);
-                    // window.location.reload();
                   }}
                   style={{ width: 35, height: 35 }}
                 />

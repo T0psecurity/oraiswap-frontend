@@ -23,6 +23,7 @@
 
 .button {
     @include flex;
+    cursor: pointer;
 }
 
 /* with tooltip */

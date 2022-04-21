@@ -6,6 +6,7 @@ import { TooltipIcon } from 'components/Tooltip';
 import SettingModal from './Modals/SettingModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
 import { useQuery } from 'react-query';
+import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
   fetchExchangeRate,
@@ -89,7 +90,7 @@ const Swap: React.FC<SwapProps> = () => {
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState(0);
   const [slippage, setSlippage] = useState(1);
-  const [address, setAddress] = useLocalStorage<String>('address');
+  const [address, setAddress] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [txHash, setTxHash] = useState<String>();
   const [refresh, setRefresh] = useState(false);

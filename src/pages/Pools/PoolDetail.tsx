@@ -21,11 +21,11 @@ import {
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
-import useLocalStorage from 'libs/useLocalStorage';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
+import useGlobalState from 'hooks/useGlobalState';
 
 const cx = cn.bind(styles);
 
@@ -54,7 +54,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
-  const [address] = useLocalStorage<string>('address');
+  const [address] = useGlobalState('address');
   const [assetToken, setAssetToken] = useState<any>();
   const [bondingTxHash, setBondingTxHash] = useState('');
   const [liquidityTxHash, setLiquidityTxHash] = useState('');

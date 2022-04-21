@@ -7,7 +7,6 @@ import styles from './Balance.module.scss';
 import { ReactComponent as ToggleTransfer } from 'assets/icons/toggle_transfer.svg';
 
 import { SigningStargateClient } from '@cosmjs/stargate';
-import useLocalStorage from 'libs/useLocalStorage';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
@@ -23,6 +22,7 @@ import Loader from 'components/Loader';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
+import useGlobalState from 'hooks/useGlobalState';
 
 interface BalanceProps {}
 
@@ -85,7 +85,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
 type AmountDetails = { [key: string]: AmountDetail };
 
 const Balance: React.FC<BalanceProps> = () => {
-  const [keplrAddress] = useLocalStorage<string>('address');
+  const [keplrAddress] = useGlobalState('address');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([

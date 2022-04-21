@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import useLocalStorage from 'libs/useLocalStorage';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
 
 import routes from 'routes';
@@ -9,13 +8,14 @@ import { ThemeProvider } from 'context/theme-context';
 import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import useGlobalState from 'hooks/useGlobalState';
 // import useWindowSize from 'hooks/useWindowSize';
 // import { isMobile } from '@walletconnect/browser-utils';
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [address, setAddress] = useLocalStorage<string>('address');
+  const [address, setAddress] = useGlobalState('address');
   // const { windowSize } = useWindowSize();
 
   // // update windowSize
@@ -28,7 +28,14 @@ const App = () => {
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) throw 'You must install Keplr to continue';
     const newAddress = await window.Keplr.getKeplrAddr();
-    if (newAddress) setAddress(newAddress as string);
+    if (newAddress) {
+      if (newAddress === address) {
+        // same address, trigger update by clear address then re-update
+        setAddress('');
+      }
+      // finally update new address
+      setAddress(newAddress as string);
+    }
   };
 
   useEffect(() => {
@@ -46,7 +53,7 @@ const App = () => {
         'Key store in Keplr is changed. You may need to refetch the account info.'
       );
       await updateAddress();
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.log('Error: ', error);
       displayToast(TToastType.TX_INFO, {
