@@ -47,10 +47,12 @@ jobs:
       - name: Install Dependencies
         run: yarn install
       - name: Copy env
-        run: 'echo "$ENV_VAR" > .env'
-        shell: bash
-        env:
-          ENV_VAR: ${{secrets.ENV_MAINNET}}
+        run: cp .env.example .env
+      #- name: Copy env
+      #  run: 'echo "$ENV_VAR" > .env'
+      #  shell: bash
+      #  env:
+      #    ENV_VAR: ${{secrets.ENV_MAINNET}}
       - name: Build Production
         run: yarn build
         env:
