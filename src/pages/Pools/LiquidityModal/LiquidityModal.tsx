@@ -21,7 +21,6 @@ import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens } from 'constants/bridgeTokens';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import useLocalStorage from 'libs/useLocalStorage';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -30,6 +29,7 @@ import CosmJs from 'libs/cosmjs';
 import { DECIMAL_FRACTION, ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
+import useGlobalState from 'hooks/useGlobalState';
 
 const cx = cn.bind(style);
 
@@ -67,7 +67,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const token1 = token1InfoData;
   const token2 = token2InfoData;
-  const [address] = useLocalStorage<string>('address');
+  const [address] = useGlobalState('address');
 
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)

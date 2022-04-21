@@ -2,7 +2,6 @@ import LoginMetamask from 'components/LoginMetamask';
 import LoginWidget from 'components/LoginWidget';
 import Modal from 'components/Modal';
 import React from 'react';
-import './SSOWidget.scss';
 import MESSAGE from 'lang/MESSAGE.json';
 import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';

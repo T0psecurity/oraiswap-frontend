@@ -7,6 +7,7 @@ import { TooltipIcon } from 'components/Tooltip';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { pairsMap as mockPair, mockToken } from 'constants/pools';
 import { useQuery } from 'react-query';
+import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
   fetchExchangeRate,
@@ -16,7 +17,7 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
-  simulateSwap,
+  simulateSwap
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens } from 'constants/bridgeTokens';
@@ -59,7 +60,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const allToken = Object.values(mockToken).map((token) => {
     return {
       ...token,
-      title: token.name,
+      title: token.name
     };
   });
   const { prices } = useCoinGeckoPrices(
@@ -79,13 +80,13 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState(0);
   const [amountToken2, setAmountToken2] = useState(0);
-  const [address] = useLocalStorage<String>('address');
+  const [address] = useGlobalState('address');
 
   const {
     data: token1InfoData,
     error: token1InfoError,
     isError: isToken1InfoError,
-    isLoading: isToken1InfoLoading,
+    isLoading: isToken1InfoLoading
   } = useQuery(['token-info', token1], () => {
     if (!!token1) return fetchTokenInfo(mockToken[token1!]);
   });
@@ -94,7 +95,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token2InfoData,
     error: token2InfoError,
     isError: isToken2InfoError,
-    isLoading: isToken2InfoLoading,
+    isLoading: isToken2InfoLoading
   } = useQuery(['token-info', token2], () => {
     if (!!token2) return fetchTokenInfo(mockToken[token2!]);
   });
@@ -103,7 +104,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token1Balance,
     error: token1BalanceError,
     isError: isToken1BalanceError,
-    isLoading: isToken1BalanceLoading,
+    isLoading: isToken1BalanceLoading
   } = useQuery(
     ['token-balance', token1],
     () =>
@@ -120,7 +121,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token2Balance,
     error: token2BalanceError,
     isError: isToken2BalanceError,
-    isLoading: isLoadingToken2Balance,
+    isLoading: isLoadingToken2Balance
   } = useQuery(
     ['token-balance', token2],
     () =>
@@ -137,9 +138,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const Token2Icon = mockToken[token2!]?.Icon;
 
   const getBalanceValue = (tokenSymbol: string, amount: number) => {
-    const coingeckoId = filteredTokens.find(token => token.name === tokenSymbol)?.coingeckoId;
-    const pricePer =
-      prices[coingeckoId]?.price?.asNumber ?? 0;
+    const coingeckoId = filteredTokens.find(
+      (token) => token.name === tokenSymbol
+    )?.coingeckoId;
+    const pricePer = prices[coingeckoId]?.price?.asNumber ?? 0;
 
     return pricePer * amount;
   };
@@ -253,7 +255,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <TokenBalance
             balance={{
               amount: token1Balance ? token1Balance : 0,
-              denom: token1InfoData?.symbol ?? '',
+              denom: token1InfoData?.symbol ?? ''
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -318,7 +320,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <TokenBalance
             balance={{
               amount: token2Balance ? token2Balance : 0,
-              denom: token2InfoData?.symbol ?? '',
+              denom: token2InfoData?.symbol ?? ''
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -447,10 +449,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="input"
-            // value={supplyToken2 ? supplyToken2 : ''}
-            // onValueChange={({ floatValue }) => {
-            //   setSupplyToken2(floatValue);
-            // }}
+              // value={supplyToken2 ? supplyToken2 : ''}
+              // onValueChange={({ floatValue }) => {
+              //   setSupplyToken2(floatValue);
+              // }}
             />
             <span>%</span>
           </div>
@@ -469,7 +471,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => { }}>
+        <div className={cx('swap-btn')} onClick={() => {}}>
           Create
         </div>
       </div>
@@ -580,16 +582,16 @@ const DemoPie = (
       offset: '-50%',
       content: undefined,
       style: {
-        fontSize: 0,
-      },
+        fontSize: 0
+      }
     },
     interactions: [
       {
-        type: 'element-selected',
+        type: 'element-selected'
       },
       {
-        type: 'element-active',
-      },
+        type: 'element-active'
+      }
     ],
     color: ['#612FCA', '#FFD5AE'],
     statistic: {
@@ -600,11 +602,11 @@ const DemoPie = (
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           color: '#ffffff',
-          fontSize: '14px',
+          fontSize: '14px'
         },
-        content: `${data[0].type}/${data[1].type}`,
-      },
-    },
+        content: `${data[0].type}/${data[1].type}`
+      }
+    }
   };
   return <Pie {...config} />;
 };

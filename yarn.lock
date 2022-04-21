@@ -14119,6 +14119,11 @@ react-hook-form@^7.1.1:
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.27.0.tgz#2c05e54ca557f71c55f645311ff612ec936c6c7c"
   integrity sha512-NEh3Qbz1Rg3w95SRZv0kHorHN3frtMKasplznMBr8RkFrE4pVxjd/zo3clnFXpD0FppUVHBMfsTMtTsa6wyQrA==
 
+react-hooks-global-state@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-hooks-global-state/-/react-hooks-global-state-1.0.2.tgz#37bbc3203a0be9f3ac0658abfd28dd7ce7ee166c"
+  integrity sha512-UcWz+VjcUUCQ7bXGmOhanGII3j22zyPSjwJnQWeycxFYj/etBxIbz9xziEm4sv5+OqGuS7bzvpx24XkCxgJ7Bg==
+
 react-is@^16.12.0, react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
