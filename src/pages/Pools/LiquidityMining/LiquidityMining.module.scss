@@ -349,6 +349,8 @@
       }
 
       &-apr {
+        display: flex;
+        align-items: center;
         .bonded-value {
           background: #612fca;
           border-radius: 8px;
