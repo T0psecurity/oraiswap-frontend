@@ -31,6 +31,22 @@ const cx = cn.bind(styles);
 
 interface PoolDetailProps {}
 
+filteredTokens.push({
+  name: 'ORAIX',
+  org: 'Oraichain',
+  prefix: 'orai',
+  coinType: 118,
+  denom: 'oraix',
+  contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
+  // coingeckoId: 'oraichain-token',
+  decimals: 6,
+  chainId: 'Oraichain',
+  rpc: 'https://rpc.orai.io',
+  lcd: 'https://lcd.orai.io'
+  // cosmosBased: true,
+  // Icon: ORAI
+} as TokenItemType);
+
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
   let pair;
