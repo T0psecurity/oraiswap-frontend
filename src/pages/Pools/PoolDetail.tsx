@@ -26,6 +26,7 @@ import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
+import { Fraction } from '@saberhq/token-utils';
 
 const cx = cn.bind(styles);
 
@@ -43,10 +44,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [bondingTxHash, setBondingTxHash] = useState('');
   const [liquidityTxHash, setLiquidityTxHash] = useState('');
   const [withdrawTxHash, setWithdrawTxHash] = useState('');
-
-  const { prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
-  );
 
   const getPairInfo = async () => {
     const pairKey = Object.keys(PairKey).find((k) => {
@@ -92,29 +89,59 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     const token1 = pairInfoData?.token1,
       token2 = pairInfoData?.token2;
 
+    let oraiPrice = Fraction.ZERO;
+
     const poolData = await fetchPoolInfoAmount(
       // @ts-ignore
       token1!,
       token2!
     );
 
-    const fromAmount = getUsd(
-      poolData.offerPoolAmount,
-      prices[token1!.coingeckoId].price,
-      token1!.decimals
-    );
-    const toAmount = getUsd(
-      poolData.askPoolAmount,
-      prices[token2!.coingeckoId].price,
-      token2!.decimals
-    );
+    if (
+      token1?.denom === 'orai' &&
+      token2?.denom ===
+        'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4'
+    ) {
+      oraiPrice = new Fraction(
+        poolData.askPoolAmount,
+        poolData.offerPoolAmount
+      );
+    } else {
+      const _poolData = await fetchPoolInfoAmount(
+        // @ts-ignore
+        mockToken['orai']!,
+        mockToken[
+          'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4'
+        ]!
+      );
+      oraiPrice = new Fraction(
+        _poolData.askPoolAmount,
+        _poolData.offerPoolAmount
+      );
+    }
+    let halfValue = 0;
+    if (token1?.denom == 'orai') {
+      const oraiValue = getUsd(
+        poolData.offerPoolAmount,
+        oraiPrice,
+        token1.decimals
+      );
+      halfValue = oraiValue;
+    } else if (token2?.denom == 'orai') {
+      const oraiValue = getUsd(
+        poolData.askPoolAmount,
+        oraiPrice,
+        token2.decimals
+      );
+      halfValue = oraiValue;
+    }
 
     return {
       token1Amount: poolData.offerPoolAmount,
       token2Amount: poolData.askPoolAmount,
-      token1Usd: fromAmount,
-      token2Usd: toAmount,
-      usdAmount: fromAmount + toAmount,
+      token1Usd: halfValue,
+      token2Usd: halfValue,
+      usdAmount: 2 * halfValue,
       ratio: poolData.offerPoolAmount / poolData.askPoolAmount
     };
   };
@@ -135,12 +162,12 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     isError: isPairAmountInfoError,
     isLoading: isPairAmountInfoLoading
   } = useQuery(
-    ['pair-amount-info', pairInfoData, prices],
+    ['pair-amount-info', pairInfoData],
     () => {
       return getPairAmountInfo();
     },
     {
-      enabled: !!prices && !!pairInfoData,
+      enabled: !!pairInfoData,
       refetchOnWindowFocus: false
       // refetchInterval: 10000,
     }

@@ -4,7 +4,7 @@ import { ReactComponent as Logo } from 'assets/icons/logo.svg';
 import { Button, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
-import { mockToken, Pair, pairsMap } from 'constants/pools';
+import { mockToken, Pair, pairsMap, PairKey } from 'constants/pools';
 import { fetchPairInfo, fetchPoolInfoAmount, fetchTokenInfo } from 'rest/api';
 import { useQuery } from 'react-query';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
@@ -13,34 +13,42 @@ import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
+import { Fraction } from '@saberhq/token-utils';
 
 const { Search } = Input;
 
 interface PoolsProps {}
 
-const Header = memo<{ amount: number; oraiPrice: number }>(
-  ({ amount, oraiPrice }) => {
-    return (
-      <div className={styles.header}>
-        <div className={styles.header_title}>Pools</div>
-        <div className={styles.header_data}>
-          <div className={styles.header_data_item}>
-            <span className={styles.header_data_name}>ORAI Price</span>
-            <span className={styles.header_data_value}>${oraiPrice}</span>
-          </div>
-          <div className={styles.header_data_item}>
-            <span className={styles.header_data_name}>Total Liquidity</span>
+const Header: FC<{ amount: number; oraiPrice: number }> = ({
+  amount,
+  oraiPrice
+}) => {
+  return (
+    <div className={styles.header}>
+      <div className={styles.header_title}>Pools</div>
+      <div className={styles.header_data}>
+        <div className={styles.header_data_item}>
+          <span className={styles.header_data_name}>ORAI Price</span>
+          <span className={styles.header_data_value}>
             <TokenBalance
-              balance={amount}
+              balance={oraiPrice}
               className={styles.header_data_value}
               decimalScale={2}
             />
-          </div>
+          </span>
+        </div>
+        <div className={styles.header_data_item}>
+          <span className={styles.header_data_name}>Total Liquidity</span>
+          <TokenBalance
+            balance={amount}
+            className={styles.header_data_value}
+            decimalScale={2}
+          />
         </div>
       </div>
-    );
-  }
-);
+    </div>
+  );
+};
 
 const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   const navigate = useNavigate();
@@ -132,7 +140,7 @@ const ListPools = memo<{
       <div className={styles.listpools_title}>All pools</div>
       <div className={styles.listpools_search}>
         <Search
-          placeholder="Search by pools or tokens name"
+          placeholder='Search by pools or tokens name'
           onSearch={filterPairs}
           style={{
             width: 420,
@@ -161,16 +169,17 @@ type PairInfoData = {
   pair: Pair;
   amount: number;
   commissionRate: string;
+  fromToken: any;
+  toToken: any;
 };
 
 const Pools: React.FC<PoolsProps> = () => {
-  const { prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
-  );
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
+  const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
 
-  const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
+  let _oraiPrice = Fraction.ZERO;
+  const fetchPairInfoData = async (pair: Pair): Promise<any> => {
     const [fromToken, toToken] = pair.asset_denoms.map(
       (denom) => mockToken[denom]
     );
@@ -183,42 +192,64 @@ const Pools: React.FC<PoolsProps> = () => {
       fetchPairInfo([fromTokenInfoData, toTokenInfoData])
     ]);
 
-    const fromAmount = getUsd(
-      poolData.offerPoolAmount,
-      prices[fromToken.coingeckoId].price,
-      fromToken.decimals
-    );
-    const toAmount = getUsd(
-      poolData.askPoolAmount,
-      prices[toToken.coingeckoId].price,
-      toToken.decimals
-    );
+    if (
+      fromToken.denom == 'orai' &&
+      toToken.denom ===
+        'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4'
+    ) {
+      _oraiPrice = new Fraction(
+        poolData.askPoolAmount,
+        poolData.offerPoolAmount
+      );
+    }
+
+    let amount = 0;
+    if (fromToken.denom == 'orai') {
+      const oraiValue = getUsd(
+        poolData.offerPoolAmount,
+        _oraiPrice,
+        fromToken.decimals
+      );
+      amount = 2 * oraiValue;
+    } else if (toToken.denom == 'orai') {
+      const oraiValue = getUsd(
+        poolData.askPoolAmount,
+        _oraiPrice,
+        toToken.decimals
+      );
+      amount = 2 * oraiValue;
+    }
     return {
+      ...poolData,
       pair,
-      amount: fromAmount + toAmount,
-      commissionRate: infoData.commission_rate
+      amount,
+      commissionRate: infoData.commission_rate,
+      fromToken,
+      toToken
     };
   };
 
   const fetchPairInfoDataList = async () => {
+    const t = await fetchPairInfoData(pairsMap[PairKey.ORAI_UST]);
     const poolList = await Promise.all(
-      Object.values(pairsMap).map(fetchPairInfoData)
+      Object.keys(pairsMap)
+        .filter((k) => k != PairKey.ORAI_UST)
+        .map((k) => fetchPairInfoData(pairsMap[k]))
     );
-    setPairInfos(poolList);
+    setPairInfos([...poolList, t]);
+    setOraiPrice(_oraiPrice);
   };
+
   useEffect(() => {
     fetchPairInfoDataList();
-  }, [prices]);
+  }, []);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
 
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header
-          amount={totalAmount}
-          oraiPrice={prices['oraichain-token'].price?.asNumber ?? 0}
-        />
+        <Header amount={totalAmount} oraiPrice={oraiPrice?.asNumber ?? 0} />
         <WatchList />
         <ListPools
           pairInfos={pairInfos}
