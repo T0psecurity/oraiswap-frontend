@@ -2,7 +2,7 @@ import { FC } from 'react';
 import styles from './LoginWidget.module.scss';
 import cn from 'classnames/bind';
 import CenterEllipsis from 'components/CenterEllipsis';
-import Icon from 'components/Icon';
+import { ReactComponent as Logout } from 'assets/icons/logout.svg';
 
 const cx = cn.bind(styles);
 
@@ -33,7 +33,7 @@ export const LoginWidget: FC<{
       </div>
       {address ? (
         <div>
-          <Icon size={20} name="close" />
+          <Logout />
         </div>
       ) : (
         <></>

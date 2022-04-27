@@ -9,6 +9,8 @@ import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ETHIcon } from 'assets/icons/eth.svg';
 import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+
 import { ThemeContext, Themes } from 'context/theme-context';
 
 import React, {
@@ -28,9 +30,8 @@ import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
 import { ORAI } from 'constants/constants';
-import Loader from 'components/Loader';
 import { isMobile } from '@walletconnect/browser-utils';
-import Icon from 'components/Icon';
+
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
 
@@ -98,11 +99,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <Link to={'/'} onClick={() => setLink('/')}>
             <LogoFull />
           </Link>
-          <Icon
-            size={44}
-            name={open ? 'menu_open' : 'menu'}
-            onClick={handleToggle}
-          />
+          <CloseIcon onClick={handleToggle} />
         </div>
       )}
       <div className={classNames(styles.menu, { [styles.open]: open })}>
