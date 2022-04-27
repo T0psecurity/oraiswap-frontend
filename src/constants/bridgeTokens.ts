@@ -9,6 +9,12 @@ import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
+import {
+  BSC_CHAIN_ID,
+  ETHEREUM_CHAIN_ID,
+  ORAI_BSC_CONTRACT,
+  ORAI_ETH_CONTRACT
+} from './constants';
 
 export type TokenItemType = {
   name: string;
@@ -23,14 +29,14 @@ export type TokenItemType = {
   lcd?: string;
   decimals: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna';
   cosmosBased: Boolean;
 };
 
@@ -252,9 +258,9 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Ethereum',
         coingeckoId: 'oraichain-token',
         denom: 'erc20_orai',
-        contractAddress: '0x4c11249814f11b9346808179cf06e71ac328c1b5',
+        contractAddress: ORAI_ETH_CONTRACT,
         decimals: 18,
-        chainId: '1',
+        chainId: ETHEREUM_CHAIN_ID,
         rpc: 'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978',
         cosmosBased: false,
         Icon: ETH
@@ -262,9 +268,9 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'Bep20 ORAI',
         org: 'BNB Chain',
-        chainId: '',
+        chainId: BSC_CHAIN_ID,
         denom: 'bep20_orai',
-        contractAddress: '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0',
+        contractAddress: ORAI_BSC_CONTRACT,
         rpc: 'https://bsc-dataseed1.ninicoin.io',
         decimals: 18,
         coingeckoId: 'oraichain-token',
