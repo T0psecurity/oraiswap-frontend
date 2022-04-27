@@ -18,6 +18,7 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
+import _ from 'lodash';
 
 const cx = cn.bind(styles);
 
@@ -75,8 +76,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;
       const pendingWithdraw = !!totalRewardInfoData.reward_infos.length
         ? +totalRewardInfoData.reward_infos[0]?.pending_withdraw.find(
-            (e: any) => JSON.stringify(e.info) === JSON.stringify(r.info)
-          ).amount
+          (e: any) => _.isEqual(e.info, r.info)
+        ).amount
         : 0;
 
       if (!!r.info.token) {
@@ -232,7 +233,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={
                           (rewardInfoFirst
                             ? rewardInfoFirst.bond_amount *
-                              pairAmountInfoData.usdAmount
+                            pairAmountInfoData.usdAmount
                             : 0) / +lpTokenInfoData.total_supply
                         }
                         className={cx('amount-usd')}
