@@ -73,6 +73,12 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
     let res = rewardPerSecInfoData.map((r: any) => {
       const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;
+      const pendingWithdraw = !!totalRewardInfoData.reward_infos.length
+        ? +totalRewardInfoData.reward_infos[0]?.pending_withdraw.find(
+            (e: any) => JSON.stringify(e.info) === JSON.stringify(r.info)
+          ).amount
+        : 0;
+
       if (!!r.info.token) {
         let token = filteredTokens.find(
           (t) => t.contractAddress === r.info.token.contract_addr!
@@ -85,8 +91,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         return {
           ...token,
           amount,
-          rewardPerSec: +r.amount
-
+          rewardPerSec: +r.amount + pendingWithdraw,
+          pendingWithdraw
           // usdValue
         };
       } else {
@@ -101,7 +107,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         return {
           ...token,
           amount,
-          rewardPerSec: +r.amount
+          rewardPerSec: +r.amount + pendingWithdraw,
+          pendingWithdraw
 
           // usdValue
         };
