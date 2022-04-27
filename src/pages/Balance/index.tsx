@@ -24,7 +24,7 @@ import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -366,7 +366,8 @@ const Balance: React.FC<BalanceProps> = () => {
                           from && amounts[from.denom]
                             ? amounts[from.denom].amount
                             : 0,
-                        denom: from?.name ?? ''
+                        denom: from?.name ?? '',
+                        decimals: from?.decimals,
                       }}
                       className={styles.balanceDescription}
                       prefix="Balance: "
@@ -379,10 +380,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -395,10 +396,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -501,7 +502,8 @@ const Balance: React.FC<BalanceProps> = () => {
                   balance={{
                     amount:
                       to && amounts[to.denom] ? amounts[to.denom].amount : 0,
-                    denom: to?.name ?? ''
+                    denom: to?.name ?? '',
+                    decimals: to?.decimals,
                   }}
                   className={styles.balanceDescription}
                   prefix="Balance: "
