@@ -24,7 +24,7 @@ import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -144,6 +144,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
+      let filteredPendingTokens = pendingTokens.filter(pending => pending.chainId);
+      console.log("filtered pending: ", filteredPendingTokens)
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
       const keplr = await window.Keplr.getKeplr();
@@ -155,7 +157,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          pendingTokens.map(async (token) => {
+          filteredPendingTokens.map(async (token) => {
             const address = await window.Keplr.getKeplrBech32Address(
               token.coinType === network.coinType
                 ? network.chainId
@@ -345,10 +347,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -361,10 +363,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}

@@ -46,7 +46,7 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -526,9 +526,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input

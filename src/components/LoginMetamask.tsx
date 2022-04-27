@@ -11,7 +11,7 @@ import cn from 'classnames/bind';
 const cx = cn.bind(styles);
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 3, 4, 5, 15]
+  supportedChainIds: [1, 3, 4, 5, 15, 56]
 });
 
 const LoginMetamask: FC<{ text: string }> = ({ text }) => {

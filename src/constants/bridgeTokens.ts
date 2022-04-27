@@ -262,7 +262,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'Bep20 ORAI',
         org: 'BNB Chain',
-        chainId: '56',
+        chainId: '',
         denom: 'bep20_orai',
         contractAddress: process.env.REACT_APP_ORAI_CONTRACT_BSC,
         rpc: process.env.REACT_APP_BSC_NODE,
