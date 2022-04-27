@@ -23,14 +23,14 @@ export type TokenItemType = {
   lcd?: string;
   decimals: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna';
   cosmosBased: Boolean;
 };
 
@@ -376,7 +376,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'oraichain-token',
-        denom: 'ibc/bep20_orai',
+        denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM,
         decimals: 18,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -415,7 +415,7 @@ export const filteredTokens = _.uniqBy(
   (c) => c.denom
 );
 
-export const emvTokens = _.uniqBy(
+export const evmTokens = _.uniqBy(
   _.flatten(tokens).filter(
     // TODO: contractAddress for ethereum use different method
     (token) =>

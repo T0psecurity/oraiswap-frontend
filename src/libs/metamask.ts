@@ -1,25 +1,23 @@
 // @ts-nocheck
 import Web3 from 'web3';
 import tokenABI from 'constants/abi/erc20.json';
-import { emvTokens } from 'constants/bridgeTokens';
-
-const EthereumChainId = '0x1';
-const BscChainId = '0x38';
+import { evmTokens } from 'constants/bridgeTokens';
+import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID, ORAI_BSC_CONTRACT, ORAI_ETH_CONTRACT } from 'constants/constants';
 
 const ethNetworks = {
-  [EthereumChainId]: {
-    ORAI: '0x4c11249814f11b9346808179cf06e71ac328c1b5'
+  [ETHEREUM_CHAIN_ID]: {
+    ORAI: ORAI_ETH_CONTRACT
   },
-  [BscChainId]: {
-    ORAI: '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0'
+  [BSC_CHAIN_ID]: {
+    ORAI: ORAI_BSC_CONTRACT
   }
 };
 
 export default class Metamask {
-  constructor() {}
+  constructor() { }
 
   public isBsc() {
-    return window.ethereum?.chainId === BscChainId;
+    return window.ethereum?.chainId === BSC_CHAIN_ID;
   }
 
   public async getOraiBalance(address: string, denom: string) {
@@ -28,7 +26,7 @@ export default class Metamask {
 
     let provider;
     if (denom) {
-      const token = emvTokens.find((item) => item.denom === denom);
+      const token = evmTokens.find((item) => item.denom === denom);
       provider = token?.rpc;
     }
     const web3 = new Web3(provider || window.ethereum);

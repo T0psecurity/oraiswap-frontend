@@ -24,7 +24,7 @@ import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -123,6 +123,9 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (!addr) throw new Error('Addr is undefined');
       // using this way we no need to enable other network
+      if (token.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
+        console.log("token denom: ", token)
+      }
       const amount = await fetchBalance(
         addr,
         token.denom,
@@ -379,10 +382,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -395,10 +398,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}

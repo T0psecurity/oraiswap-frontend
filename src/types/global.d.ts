@@ -94,6 +94,7 @@ declare global {
       REACT_APP_LUNA_ORAICHAIN_DENOM: string;
       REACT_APP_UST_ORAICHAIN_DENOM: string;
       REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
+      REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
@@ -103,7 +104,8 @@ declare global {
       REACT_APP_FACTORY_CONTRACT: string;
       REACT_APP_ROUTER_CONTRACT: string;
       REACT_APP_ORACLE_CONTRACT: string;
-      REACT_APP_GRAVITY_CONTRACT: string;
+      REACT_APP_GRAVITY_BSC_CONTRACT: string;
+      REACT_APP_GRAVITY_ETH_CONTRACT: string;
       REACT_APP_STAKING_CONTRACT: string;
       REACT_APP_REWARDER_CONTRACT: string;
     }
@@ -112,4 +114,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export {};
+export { };
