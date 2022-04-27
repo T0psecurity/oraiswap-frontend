@@ -123,9 +123,6 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (!addr) throw new Error('Addr is undefined');
       // using this way we no need to enable other network
-      if (token.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
-        console.log("token denom: ", token)
-      }
       const amount = await fetchBalance(
         addr,
         token.denom,
@@ -369,7 +366,8 @@ const Balance: React.FC<BalanceProps> = () => {
                           from && amounts[from.denom]
                             ? amounts[from.denom].amount
                             : 0,
-                        denom: from?.name ?? ''
+                        denom: from?.name ?? '',
+                        decimals: from?.decimals,
                       }}
                       className={styles.balanceDescription}
                       prefix="Balance: "
@@ -504,7 +502,8 @@ const Balance: React.FC<BalanceProps> = () => {
                   balance={{
                     amount:
                       to && amounts[to.denom] ? amounts[to.denom].amount : 0,
-                    denom: to?.name ?? ''
+                    denom: to?.name ?? '',
+                    decimals: to?.decimals,
                   }}
                   className={styles.balanceDescription}
                   prefix="Balance: "
