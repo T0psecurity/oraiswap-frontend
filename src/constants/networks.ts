@@ -20,7 +20,8 @@ const networks: { [key: string]: NetworkConfig } = {
     oracle: process.env.REACT_APP_ORACLE_CONTRACT,
     staking: process.env.REACT_APP_STAKING_CONTRACT,
     rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
-    explorer: 'https://scan.orai.io'
+    explorer: 'https://scan.orai.io',    
+    gravity: process.env.REACT_APP_GRAVITY_CONTRACT
   },
   [NetworkKey.TESTNET]: {
     chainId: 'Oraichain-testnet',
@@ -36,7 +37,8 @@ const networks: { [key: string]: NetworkConfig } = {
     oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn',
     staking: process.env.REACT_APP_STAKING_CONTRACT,
     explorer: 'https://testnet.scan.orai.io',
-    rewarder: process.env.REACT_APP_REWARDER_CONTRACT
+    rewarder: process.env.REACT_APP_REWARDER_CONTRACT,    
+    gravity: process.env.REACT_APP_GRAVITY_CONTRACT
   }
 };
 

@@ -254,7 +254,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'erc20_orai',
         contractAddress: '0x4c11249814f11b9346808179cf06e71ac328c1b5',
         decimals: 18,
-        chainId: '1',
+        chainId: '0x1',
         rpc: 'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978',
         cosmosBased: false,
         Icon: ETH
@@ -262,7 +262,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'Bep20 ORAI',
         org: 'BNB Chain',
-        chainId: '',
+        chainId: '0x38',
         denom: 'bep20_orai',
         contractAddress: '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0',
         rpc: 'https://bsc-dataseed1.ninicoin.io',

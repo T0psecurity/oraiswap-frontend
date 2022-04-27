@@ -23,6 +23,11 @@ import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
+import { AbiItem } from 'web3-utils';
+import GravityABI from 'constants/abi/gravity.json';
+import Web3 from 'web3';
+import { useWeb3React } from '@web3-react/core';
+// import detectEthereumProvider from '@metamask/detect-provider';
 
 interface BalanceProps {}
 
@@ -85,7 +90,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
 
 type AmountDetails = { [key: string]: AmountDetail };
 
-const Balance: React.FC<BalanceProps> = () => {
+const Balance: React.FC<BalanceProps> = () => {  
+  const { account, chainId, library } = useWeb3React();
   const [keplrAddress] = useGlobalState('address');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [from, setFrom] = useState<TokenItemType>();
@@ -101,7 +107,7 @@ const Balance: React.FC<BalanceProps> = () => {
     filteredTokens.map((t) => t.coingeckoId)
   );
   // this help to retry loading and show something in processing
-  const [pendingTokens, setPendingTokens] = useState(filteredTokens);
+  const [pendingTokens, setPendingTokens] = useState(filteredTokens);  
 
   const toggleTransfer = () => {
     setTokens([toTokens, fromTokens]);
@@ -166,8 +172,9 @@ const Balance: React.FC<BalanceProps> = () => {
         }
       ]
     ]);
-
     // update amounts
+    setAmounts((old) => ({ ...old, ...amountDetails }));
+
     return amountDetails;
   };
 
@@ -201,10 +208,6 @@ const Balance: React.FC<BalanceProps> = () => {
         )
       );
 
-      // update amounts
-      const evmAmountDetails = await loadEvmOraiAmounts();
-      setAmounts((old) => ({ ...old, ...amountDetails, ...evmAmountDetails }));
-
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
       if (pendingList.length > 0) {
         setTimeout(() => setPendingTokens(pendingList), 3000);
@@ -217,6 +220,12 @@ const Balance: React.FC<BalanceProps> = () => {
   useEffect(() => {
     loadTokenAmounts();
   }, [prices, txHash, pendingTokens]);
+
+  useEffect(() => {
+    if (!!metamaskAddress) {
+      loadEvmOraiAmounts();
+    }
+  }, [metamaskAddress, prices]);
 
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
     if (!token.cosmosBased) {
@@ -338,6 +347,75 @@ const Balance: React.FC<BalanceProps> = () => {
     setIBCLoading(false);
   };
 
+  // const transferFromGravity = async (amountVal: string) => {
+
+  //   if (!metamaskAddress) return
+  //   await window.keplr.enable(network.chainId);
+  //   const rawAmount = Math.round(
+  //     parseFloat(amountVal) * 10 ** 18
+  //   ).toString();
+
+  //   const offlineSigner = window.getOfflineSigner(network.chainId);
+  //   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+  //   const client = await SigningStargateClient.connectWithSigner(
+  //     network.rpc,
+  //     offlineSigner,
+  //     { registry: gravityRegistry }
+  //   );
+
+  //   const message = {
+  //     typeUrl: '/gravity.v1.MsgSendToEth',
+  //     value: MsgSendToEth.fromPartial({
+  //       sender: keplrAddress,
+  //       ethDest: metamaskAddress,
+  //       amount: {
+  //         denom: selectedToken.contract_addr,
+  //         amount: rawAmount
+  //       },
+  //       bridgeFee: {
+  //         denom: selectedToken.contract_addr,
+  //         // just a number to make sure there is a friction
+  //         amount: '50000000000'
+  //       }
+  //     })
+  //   };
+  //   const fee = {
+  //     amount: [],
+  //     gas: '200000'
+  //   };
+  //   const result = await client.signAndBroadcast(keplrAddress, [message], fee);
+  //   return result;
+  // };
+  console.log("test");
+  const transferToGravity = async (chainId: string,  amountVal: string, tokenContract: string) => {    
+    const balance = Web3.utils.toWei(amountVal);        
+
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId }]
+    });
+
+    const web3 = new Web3(window.ethereum);
+    
+    const gravityContract = new web3.eth.Contract(
+      GravityABI as AbiItem[],
+      network.gravity
+    );
+    const result = await gravityContract.methods
+      .sendToCosmos(tokenContract, keplrAddress, balance)
+      .send({
+        from: metamaskAddress
+      });
+    return result;
+  };
+
+  const onClickTransfer = () => {
+    if (from?.denom === 'bep20_orai' && to?.denom === 'ibc/bep20_orai') {
+      return transferToGravity(from?.chainId, fromAmount.toString(), from?.contractAddress!);
+    }
+    transferIBC();
+  };
+
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   return (
@@ -369,7 +447,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         denom: from?.name ?? ''
                       }}
                       className={styles.balanceDescription}
-                      prefix="Balance: "
+                      prefix='Balance: '
                       decimalScale={from?.decimals}
                     />
 
@@ -409,7 +487,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   <TokenBalance
                     balance={fromUsd}
                     className={styles.balanceDescription}
-                    prefix="~$"
+                    prefix='~$'
                     decimalScale={2}
                   />
                 </div>
@@ -483,7 +561,7 @@ const Balance: React.FC<BalanceProps> = () => {
             </button>
             <button
               className={styles.tfBtn}
-              onClick={transferIBC}
+              onClick={onClickTransfer}
               disabled={ibcLoading}
             >
               {ibcLoading && <Loader width={40} height={40} />}
@@ -504,7 +582,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     denom: to?.name ?? ''
                   }}
                   className={styles.balanceDescription}
-                  prefix="Balance: "
+                  prefix='Balance: '
                   decimalScale={to?.decimals}
                 />
 

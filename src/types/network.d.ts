@@ -18,7 +18,8 @@ export interface NetworkConfig extends ExtNetworkConfig {
   router: string;
   denom: string;
   prefix: string;
-  rewarder: string;
+  rewarder: string;  
+  gravity: string;
 }
 
 export interface Network extends NetworkConfig {
