@@ -352,48 +352,8 @@ const Balance: React.FC<BalanceProps> = () => {
     setIBCLoading(false);
   };
 
-  // const transferFromGravity = async (amountVal: string) => {
-
-  //   if (!metamaskAddress) return
-  //   await window.keplr.enable(network.chainId);
-  //   const rawAmount = Math.round(
-  //     parseFloat(amountVal) * 10 ** 18
-  //   ).toString();
-
-  //   const offlineSigner = window.getOfflineSigner(network.chainId);
-  //   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-  //   const client = await SigningStargateClient.connectWithSigner(
-  //     network.rpc,
-  //     offlineSigner,
-  //     { registry: gravityRegistry }
-  //   );
-
-  //   const message = {
-  //     typeUrl: '/gravity.v1.MsgSendToEth',
-  //     value: MsgSendToEth.fromPartial({
-  //       sender: keplrAddress,
-  //       ethDest: metamaskAddress,
-  //       amount: {
-  //         denom: selectedToken.contract_addr,
-  //         amount: rawAmount
-  //       },
-  //       bridgeFee: {
-  //         denom: selectedToken.contract_addr,
-  //         // just a number to make sure there is a friction
-  //         amount: '50000000000'
-  //       }
-  //     })
-  //   };
-  //   const fee = {
-  //     amount: [],
-  //     gas: '200000'
-  //   };
-  //   const result = await client.signAndBroadcast(keplrAddress, [message], fee);
-  //   return result;
-  // };
-
   const onClickTransfer = () => {
-    if (from?.denom === 'bep20_orai' && to?.denom === 'ibc/bep20_orai') {
+    if (from?.denom === 'bep20_orai') {
       if (!metamaskAddress || !keplrAddress) {
         displayToast(TToastType.TX_FAILED, {
           message: 'Please choose both from and to tokens'
