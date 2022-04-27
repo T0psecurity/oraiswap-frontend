@@ -3,9 +3,12 @@ import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
-import { ReactComponent as Dark } from 'assets/icons/dark.svg';
-import { ReactComponent as Light } from 'assets/icons/light.svg';
-import { ReactComponent as Logout } from 'assets/icons/logout.svg';
+// import { ReactComponent as Dark } from 'assets/icons/dark.svg';
+// import { ReactComponent as Light } from 'assets/icons/light.svg';
+// import { ReactComponent as Logout } from 'assets/icons/logout.svg';
+import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
+import { ReactComponent as ETHIcon } from 'assets/icons/eth.svg';
+import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ThemeContext, Themes } from 'context/theme-context';
 
 import React, {
@@ -38,6 +41,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
+  const [metamaskAddress, setMetamaskAddress] =
+    useGlobalState('metamaskAddress');
+  const [metamaskBalance, setMetamaskBalance] = useState('0');
+
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -59,6 +66,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
   useEffect(() => {
     setLink(location.pathname);
   }, []);
+
+  useEffect(() => {
+    window.Metamask.getOraiBalance(metamaskAddress).then(setMetamaskBalance);
+  });
 
   const renderLink = (
     to: string,
@@ -105,14 +116,17 @@ const Menu: React.FC<{}> = React.memo((props) => {
             <RequireAuthButton
               address={address}
               setAddress={setAddress}
+              metamaskAddress={metamaskAddress}
+              setMetamaskAddress={setMetamaskAddress}
               className={styles.connect_btn}
             >
-              {address ? (
+              {address && (
                 <div className={styles.token_info}>
                   <AvatarPlaceholder
                     address={address}
                     className={styles.token_avatar}
                   />
+                  <ORAIIcon className={styles.network_icon} />
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
                       size={6}
@@ -130,24 +144,63 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           <TokenBalance
                             balance={balance}
                             className={styles.token_balance}
-                            decimalScale={2}
+                            decimalScale={6}
                           />
                         );
                     })()}
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {metamaskAddress && (
+                <div className={styles.token_info}>
+                  <AvatarPlaceholder
+                    address={metamaskAddress}
+                    className={styles.token_avatar}
+                  />
+                  {window.Metamask.isBsc() ? (
+                    <BNBIcon className={styles.network_icon} />
+                  ) : (
+                    <ETHIcon className={styles.network_icon} />
+                  )}
+                  <div className={styles.token_info_balance}>
+                    <CenterEllipsis
+                      size={6}
+                      text={metamaskAddress}
+                      className={styles.token_address}
+                    />
+                    {(() => {
+                      if (!!metamaskBalance)
+                        return (
+                          <TokenBalance
+                            balance={{
+                              amount: metamaskBalance,
+                              decimals: 18,
+                              denom: ORAI
+                            }}
+                            className={styles.token_balance}
+                            decimalScale={6}
+                          />
+                        );
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {!address && !metamaskAddress && (
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
-              {!!address && (
+
+              {/* {!!address && (
                 <Logout
                   onClick={(e) => {
                     setAddress('');
                   }}
                   style={{ width: 35, height: 35 }}
                 />
-              )}
+              )} */}
             </RequireAuthButton>
+
             {renderLink(
               '/swap',
               'Swap',

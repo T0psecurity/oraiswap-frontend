@@ -28,10 +28,15 @@
 }
 
 .token_info {
-  display: flex;
-  justify-content: space-between;
+  display: flex;  
   align-items: center;
   margin-right: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  position: relative;
+  &:last-child{
+    margin-bottom: 0;
+  }
 }
 
 .token_address {
@@ -162,13 +167,18 @@
   border-radius: 8px;
   padding: 16px;
   margin-top: 32px;
-  margin-bottom: 32px;
-  justify-content: space-around;
-  display: flex;
-  align-items: center;
+  margin-bottom: 32px;  
 }
 
 .connect {
   font-weight: 600;
   font-size: 16px;
+}
+
+.network_icon{
+  position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 24px;
+    height: 24px;
 }

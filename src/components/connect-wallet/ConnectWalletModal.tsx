@@ -1,10 +1,11 @@
-import LoginMetamask from 'components/LoginMetamask';
-import LoginWidget from 'components/LoginWidget';
+import LoginWidget from './LoginWidget';
 import Modal from 'components/Modal';
 import React from 'react';
 import MESSAGE from 'lang/MESSAGE.json';
 import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
+import MetamaskImage from 'assets/icons/metamask.svg';
+import KeplrImage from 'assets/images/keplr.png';
 
 const cx = cn.bind(style);
 
@@ -12,19 +13,25 @@ interface ConnectWalletModalProps {
   isOpen: boolean;
   close: () => void;
   open: () => void;
-  setAddress: (address: string) => void;
+  address: string;
+  metamaskAddress: string | null;
+  disconnectMetamask: () => Promise<void>;
+  disconnectKeplr: () => Promise<void>;
+  connectKeplr: () => Promise<void>;
+  connectMetamask: () => Promise<void>;
 }
 
 const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
   isOpen,
   close,
-  setAddress,
+  connectKeplr,
+  disconnectKeplr,
+  connectMetamask,
+  metamaskAddress,
+  disconnectMetamask,
+  address,
   open
 }) => {
-  const onAddress = (address: string) => {
-    setAddress(address);
-    close();
-  };
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
       <div className={cx('select')}>
@@ -34,9 +41,18 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
         <div className={cx('options')}>
           <LoginWidget
             text={MESSAGE.Form.Button.ConnectKeplr}
-            onAddress={onAddress}
+            address={address}
+            logo={KeplrImage}
+            connect={connectKeplr}
+            disconnect={disconnectKeplr}
           />
-          <LoginMetamask text={MESSAGE.Form.Button.ConnectMetamask} />
+          <LoginWidget
+            address={metamaskAddress}
+            logo={MetamaskImage}
+            text={MESSAGE.Form.Button.ConnectMetamask}
+            connect={connectMetamask}
+            disconnect={disconnectMetamask}
+          />
         </div>
       </div>
     </Modal>

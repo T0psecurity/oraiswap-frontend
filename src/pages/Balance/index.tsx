@@ -67,7 +67,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
         <TokenBalance
           balance={{
             amount: amountDetail ? amountDetail.amount.toString() : '0',
-            denom: ''
+            denom: '',
+            decimals: token.decimals
           }}
           className={styles.tokenAmount}
           decimalScale={token.decimals}
@@ -86,6 +87,7 @@ type AmountDetails = { [key: string]: AmountDetail };
 
 const Balance: React.FC<BalanceProps> = () => {
   const [keplrAddress] = useGlobalState('address');
+  const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
@@ -135,10 +137,38 @@ const Balance: React.FC<BalanceProps> = () => {
 
       return [token.denom, amountDetail];
     } catch (ex) {
-      console.log(ex);
       pendingList.push(token);
       return [token.denom, { amount: 0, usd: 0 }];
     }
+  };
+
+  const loadEvmOraiAmounts = async () => {
+    const bep20OraiAmount = await window.Metamask.getOraiBalance(
+      metamaskAddress
+    );
+    const erc20OraiAmount = await window.Metamask.getOraiBalance(
+      metamaskAddress,
+      'erc20_orai'
+    );
+    const amountDetails = Object.fromEntries([
+      [
+        'bep20_orai',
+        {
+          amount: bep20OraiAmount,
+          usd: getUsd(bep20OraiAmount, prices['oraichain-token'].price, 18)
+        }
+      ],
+      [
+        'erc20_orai',
+        {
+          amount: erc20OraiAmount,
+          usd: getUsd(erc20OraiAmount, prices['oraichain-token'].price, 18)
+        }
+      ]
+    ]);
+
+    // update amounts
+    return amountDetails;
   };
 
   const loadTokenAmounts = async () => {
@@ -168,7 +198,8 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       // update amounts
-      setAmounts((old) => ({ ...old, ...amountDetails }));
+      const evmAmountDetails = await loadEvmOraiAmounts();
+      setAmounts((old) => ({ ...old, ...amountDetails, ...evmAmountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
       if (pendingList.length > 0) {
@@ -283,7 +314,6 @@ const Balance: React.FC<BalanceProps> = () => {
             }
           );
 
-          console.log(result);
           displayToast(TToastType.TX_SUCCESSFUL, {
             customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
           });

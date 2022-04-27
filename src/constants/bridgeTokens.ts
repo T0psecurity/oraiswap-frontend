@@ -255,7 +255,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         contractAddress: '0x4c11249814f11b9346808179cf06e71ac328c1b5',
         decimals: 18,
         chainId: '1',
-        rpc: 'https://mainnet.infura.io/v3/',
+        rpc: 'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978',
         cosmosBased: false,
         Icon: ETH
       },
@@ -411,6 +411,16 @@ export const filteredTokens = _.uniqBy(
     (token) =>
       // !token.contractAddress &&
       token.denom && token.cosmosBased && token.coingeckoId
+  ),
+  (c) => c.denom
+);
+
+export const emvTokens = _.uniqBy(
+  _.flatten(tokens).filter(
+    // TODO: contractAddress for ethereum use different method
+    (token) =>
+      // !token.contractAddress &&
+      token.denom && !token.cosmosBased && token.coingeckoId
   ),
   (c) => c.denom
 );

@@ -24,6 +24,7 @@
 .button {
     @include flex;
     cursor: pointer;
+    justify-content: flex-start;
 }
 
 /* with tooltip */

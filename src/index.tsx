@@ -11,9 +11,11 @@ import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import Metamask from 'libs/metamask';
 
 // enable Keplr
 window.Keplr = new Keplr();
+window.Metamask = new Metamask();
 const queryClient = new QueryClient();
 
 const startApp = async () => {
