@@ -73,13 +73,13 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         : +rewardPerSecInfoData[0].amount;
 
     let res = rewardPerSecInfoData.map((r: any) => {
-      const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;
-      const pendingWithdraw = !!totalRewardInfoData.reward_infos.length
-        ? +totalRewardInfoData.reward_infos[0]?.pending_withdraw.find(
-          (e: any) => _.isEqual(e.info, r.info)
-        ).amount
-        : 0;
-
+      const pendingWithdraw = +(
+        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e: any) =>
+          _.isEqual(e.info, r.info)
+        )?.amount ?? 0
+      );
+      const amount =
+        (totalRewardAmount * +r.amount) / totalRewardPerSec + pendingWithdraw;
       if (!!r.info.token) {
         let token = filteredTokens.find(
           (t) => t.contractAddress === r.info.token.contract_addr!
@@ -92,7 +92,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         return {
           ...token,
           amount,
-          rewardPerSec: +r.amount + pendingWithdraw,
+          rewardPerSec: +r.amount,
           pendingWithdraw
           // usdValue
         };
@@ -108,9 +108,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         return {
           ...token,
           amount,
-          rewardPerSec: +r.amount + pendingWithdraw,
+          rewardPerSec: +r.amount,
           pendingWithdraw
-
           // usdValue
         };
       }
@@ -233,7 +232,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={
                           (rewardInfoFirst
                             ? rewardInfoFirst.bond_amount *
-                            pairAmountInfoData.usdAmount
+                              pairAmountInfoData.usdAmount
                             : 0) / +lpTokenInfoData.total_supply
                         }
                         className={cx('amount-usd')}
