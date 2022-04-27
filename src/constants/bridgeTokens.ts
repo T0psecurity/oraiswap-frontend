@@ -430,3 +430,8 @@ export const evmTokens = _.uniqBy(
   ),
   (c) => c.denom
 );
+
+export const gravityContracts: { [key: string]: string } = {
+  [BSC_CHAIN_ID]: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
+  [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT
+};
