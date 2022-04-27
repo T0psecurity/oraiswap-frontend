@@ -4,6 +4,7 @@ import Keplr from '../libs/kelpr';
 import { Keplr as keplr } from './kelpr/wallet';
 import Wasm from '../libs/wasm';
 import Web3 from 'web3';
+import Metamask from '../libs/metamask';
 
 declare global {
   type Fund = {

@@ -391,40 +391,21 @@ const Balance: React.FC<BalanceProps> = () => {
   //   const result = await client.signAndBroadcast(keplrAddress, [message], fee);
   //   return result;
   // };
-  console.log('test');
-  const transferToGravity = async (
-    chainId: string,
-    amountVal: string,
-    tokenContract: string
-  ) => {
-    const balance = Web3.utils.toWei(amountVal);
-
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId }]
-    });
-
-    const web3 = new Web3(window.ethereum);
-    const gravityContractAddr = gravityContracts[chainId] as string;
-    if (!gravityContractAddr) return;
-    const gravityContract = new web3.eth.Contract(
-      GravityABI as AbiItem[],
-      gravityContractAddr
-    );
-    const result = await gravityContract.methods
-      .sendToCosmos(tokenContract, keplrAddress, balance)
-      .send({
-        from: metamaskAddress
-      });
-    return result;
-  };
 
   const onClickTransfer = () => {
     if (from?.denom === 'bep20_orai' && to?.denom === 'ibc/bep20_orai') {
-      return transferToGravity(
+      if (!metamaskAddress || !keplrAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please choose both from and to tokens'
+        });
+        return;
+      }
+      return window.Metamask.transferToGravity(
         from?.chainId,
         fromAmount.toString(),
-        from?.contractAddress!
+        from?.contractAddress!,
+        metamaskAddress,
+        keplrAddress
       );
     }
     transferIBC();
