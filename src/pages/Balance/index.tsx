@@ -28,11 +28,6 @@ import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
-import { AbiItem } from 'web3-utils';
-import GravityABI from 'constants/abi/gravity.json';
-import Web3 from 'web3';
-import { useWeb3React } from '@web3-react/core';
-// import detectEthereumProvider from '@metamask/detect-provider';
 
 interface BalanceProps {}
 
@@ -96,7 +91,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
 type AmountDetails = { [key: string]: AmountDetail };
 
 const Balance: React.FC<BalanceProps> = () => {
-  const { account, chainId, library } = useWeb3React();
   const [keplrAddress] = useGlobalState('address');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [from, setFrom] = useState<TokenItemType>();
@@ -189,7 +183,7 @@ const Balance: React.FC<BalanceProps> = () => {
       let filteredPendingTokens = pendingTokens.filter(
         (pending) => pending.chainId
       );
-      // console.log("filtered pending: ", filteredPendingTokens)
+
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
       const keplr = await window.Keplr.getKeplr();
@@ -201,17 +195,20 @@ const Balance: React.FC<BalanceProps> = () => {
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          filteredPendingTokens.map(async (token) => {
-            const address = await window.Keplr.getKeplrBech32Address(
-              token.coinType === network.coinType
-                ? network.chainId
-                : token.chainId
-            );
+          filteredPendingTokens
+            .filter((token) => token.chainId != '0x38')
+            .map(async (token) => {
+              const address = await window.Keplr.getKeplrBech32Address(
+                token.coinType === network.coinType
+                  ? network.chainId
+                  : token.chainId
+              );
 
-            return loadAmountDetail(address, token, pendingList);
-          })
+              return loadAmountDetail(address, token, pendingList);
+            })
         )
       );
+      setAmounts((old) => ({ ...old, ...amountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
       if (pendingList.length > 0) {
@@ -263,34 +260,20 @@ const Balance: React.FC<BalanceProps> = () => {
   );
 
   const transferIBC = async () => {
-    // disable send amount < 0
-    if (fromAmount <= 0) {
-      return;
-    }
-
-    if (!from || !to) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Please choose both from and to tokens'
-      });
-      return;
-    }
-
-    setIBCLoading(true);
-    displayToast(TToastType.TX_BROADCASTING);
     try {
       const keplr = await window.Keplr.getKeplr();
       if (keplr) {
-        await window.Keplr.suggestChain(from.chainId);
-        const fromAddress = await window.Keplr.getKeplrAddr(from.chainId);
-        const toAddress = await window.Keplr.getKeplrAddr(to.chainId);
+        await window.Keplr.suggestChain(from!.chainId);
+        const fromAddress = await window.Keplr.getKeplrAddr(from!.chainId);
+        const toAddress = await window.Keplr.getKeplrAddr(to!.chainId);
         const amount = coin(
-          Math.round(fromAmount * 10 ** from.decimals),
-          from.denom
+          Math.round(fromAmount * 10 ** from!.decimals),
+          from!.denom
         );
-        const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
+        const ibcInfo: IBCInfo = ibcInfos[from!.chainId][to!.chainId];
 
         // using app protocol to sign transaction
-        if (isMobile() && from.chainId === network.chainId) {
+        if (isMobile() && from!.chainId === network.chainId) {
           // check if is blacklisted like orai, using orai wallet
           const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
             sourceChannel: ibcInfo.channel,
@@ -311,10 +294,10 @@ const Balance: React.FC<BalanceProps> = () => {
           const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&value=${value}`;
           window.open(url);
         } else {
-          const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
+          const offlineSigner = window.keplr.getOfflineSigner(from!.chainId);
           // Initialize the gaia api with the offline signer that is injected by Keplr extension.
           const client = await SigningStargateClient.connectWithSigner(
-            from.rpc,
+            from!.rpc,
             offlineSigner
           );
 
@@ -333,7 +316,9 @@ const Balance: React.FC<BalanceProps> = () => {
           );
 
           displayToast(TToastType.TX_SUCCESSFUL, {
-            customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
+            customLink: `${from!.lcd}/cosmos/tx/v1beta1/txs/${
+              result?.transactionHash
+            }`
           });
           // set tx hash to trigger refetching amount values
           setTxHash(result?.transactionHash);
@@ -352,23 +337,68 @@ const Balance: React.FC<BalanceProps> = () => {
     setIBCLoading(false);
   };
 
-  const onClickTransfer = () => {
-    if (from?.denom === 'bep20_orai') {
-      if (!metamaskAddress || !keplrAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please choose both from and to tokens'
-        });
-        return;
-      }
-      return window.Metamask.transferToGravity(
-        from?.chainId,
+  const transferEvmToIBC = async () => {
+    if (!metamaskAddress || !keplrAddress) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Please login both metamask and keplr!'
+      });
+      return;
+    }
+    try {
+      const gravityContractAddr = gravityContracts[from!.chainId!] as string;
+      if (!gravityContractAddr || !from) return;
+
+      await window.Metamask.checkOrIncreaseAllowance(
+        from!.chainId,
+        from!.contractAddress!,
+        metamaskAddress,
+        gravityContractAddr,
+        fromAmount.toString()
+      );
+      const result = await window.Metamask.transferToGravity(
+        from!.chainId,
         fromAmount.toString(),
-        from?.contractAddress!,
+        from!.contractAddress!,
         metamaskAddress,
         keplrAddress
       );
+      console.log(result);
+
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `
+        https://bscscan.com/tx/${result?.transactionHash}`
+      });
+      setTxHash(result?.transactionHash);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message
+      });
     }
-    transferIBC();
+    setIBCLoading(false);
+  };
+
+  const onClickTransfer = async () => {
+    // disable send amount < 0
+
+    if (!from || !to) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Please choose both from and to tokens'
+      });
+      return;
+    }
+    const fromBalance =
+      from && amounts[from.denom] ? amounts[from.denom].amount : 0;
+    if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
+      return;
+    }
+    setIBCLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
+
+    if (from.denom === 'bep20_orai') {
+      transferEvmToIBC();
+    } else {
+      transferIBC();
+    }
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
@@ -403,7 +433,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         decimals: from?.decimals
                       }}
                       className={styles.balanceDescription}
-                      prefix="Balance: "
+                      prefix='Balance: '
                       decimalScale={from?.decimals}
                     />
 
@@ -443,7 +473,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   <TokenBalance
                     balance={fromUsd}
                     className={styles.balanceDescription}
-                    prefix="~$"
+                    prefix='~$'
                     decimalScale={2}
                   />
                 </div>
@@ -539,7 +569,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     decimals: to?.decimals
                   }}
                   className={styles.balanceDescription}
-                  prefix="Balance: "
+                  prefix='Balance: '
                   decimalScale={to?.decimals}
                 />
 

@@ -2,6 +2,7 @@ import Web3 from 'web3';
 import tokenABI from 'constants/abi/erc20.json';
 import { evmTokens, gravityContracts } from 'constants/bridgeTokens';
 import GravityABI from 'constants/abi/gravity.json';
+import erc20ABI from 'constants/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
 import {
   BSC_CHAIN_ID,
@@ -51,6 +52,39 @@ export default class Metamask {
       .sendToCosmos(tokenContract, to, balance)
       .send({
         from
+      });
+    return result;
+  }
+
+  public async checkOrIncreaseAllowance(
+    chainId: string,
+    tokenAddr: string,
+    owner: string,
+    spender: string,
+    amount: string
+  ) {
+    const weiAmount = Web3.utils.toWei(amount);
+    const web3 = new Web3(window.ethereum);
+    const tokenContract = new web3.eth.Contract(
+      erc20ABI as AbiItem[],
+      tokenAddr
+    );
+    const currentAllowance = await tokenContract.methods
+      .allowance(owner, spender)
+      .call();
+
+    if (+currentAllowance >= +weiAmount) return;
+
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId }]
+    });
+    const allowance = Web3.utils.toWei('99999999999999999');
+
+    const result = await tokenContract.methods
+      .approve(spender, allowance)
+      .send({
+        from: owner
       });
     return result;
   }
