@@ -23,14 +23,14 @@ export type TokenItemType = {
   lcd?: string;
   decimals: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna';
   cosmosBased: Boolean;
 };
 
@@ -262,13 +262,13 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'Bep20 ORAI',
         org: 'BNB Chain',
-        chainId: '56',
+        chainId: '',
         denom: 'bep20_orai',
-        contractAddress: '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0',
-        rpc: 'https://bsc-dataseed1.ninicoin.io',
+        contractAddress: process.env.REACT_APP_ORAI_CONTRACT_BSC,
+        rpc: process.env.REACT_APP_BSC_NODE,
         decimals: 18,
         coingeckoId: 'oraichain-token',
-        cosmosBased: false,
+        cosmosBased: true,
         Icon: BNB
       }
     ],
