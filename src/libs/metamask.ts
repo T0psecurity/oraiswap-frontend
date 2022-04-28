@@ -8,7 +8,7 @@ import {
 import GravityABI from 'constants/abi/gravity.json';
 import erc20ABI from 'constants/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
-import { BSC_CHAIN_ID } from 'constants/constants';
+import { BEP20_ORAI, BSC_CHAIN_ID, ERC20_ORAI } from 'constants/constants';
 
 export default class Metamask {
   constructor() {}
@@ -81,7 +81,7 @@ export default class Metamask {
 
   public getOraiToken(): TokenItemType | undefined {
     return evmTokens.find(
-      (token) => token.denom === (this.isBsc() ? 'bep20_orai' : 'erc20_orai')
+      (token) => token.denom === (this.isBsc() ? BEP20_ORAI : ERC20_ORAI)
     );
   }
 

@@ -11,8 +11,10 @@ import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 import {
   AIRI_BSC_CONTRACT,
+  BEP20_ORAI,
   BSC_CHAIN_ID,
   BSC_RPC,
+  ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
   ORAI_BSC_CONTRACT,
@@ -260,7 +262,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'ERC20 ORAI',
         org: 'Ethereum',
         coingeckoId: 'oraichain-token',
-        denom: 'erc20_orai',
+        denom: ERC20_ORAI,
         contractAddress: ORAI_ETH_CONTRACT,
         decimals: 18,
         chainId: ETHEREUM_CHAIN_ID,
@@ -272,7 +274,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         name: 'BEP20 ORAI',
         org: 'BNB Chain',
         chainId: BSC_CHAIN_ID,
-        denom: 'bep20_orai',
+        denom: BEP20_ORAI,
         contractAddress: ORAI_BSC_CONTRACT,
         rpc: BSC_RPC,
         decimals: 18,

@@ -6,6 +6,8 @@ export const UAIRI = 'uAIRI';
 export const AIRI = 'AIRI';
 export const ATOM = 'ATOM';
 export const LP = 'LP';
+export const BEP20_ORAI = 'bep20_orai';
+export const ERC20_ORAI = 'erc20_orai';
 
 export const NATIVE_TOKENS = [ORAI];
 export const DECIMAL_FRACTION = Math.pow(10, 18);
@@ -28,7 +30,8 @@ export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 
 // bsc and eth information
 export const ETHEREUM_CHAIN_ID = '0x1';
-export const ETHEREUM_RPC = 'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978';
+export const ETHEREUM_RPC =
+  'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978';
 export const BSC_CHAIN_ID = '0x38';
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
 
