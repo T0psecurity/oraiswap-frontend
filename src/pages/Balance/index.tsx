@@ -183,9 +183,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
-      let filteredPendingTokens = pendingTokens.filter(
-        (pending) => pending.denom
-      );
 
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
@@ -198,7 +195,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          filteredPendingTokens
+          pendingTokens
             .filter((token) => token.chainId != '0x38')
             .map(async (token) => {
               const address = await window.Keplr.getKeplrBech32Address(
