@@ -5,7 +5,7 @@ export enum NetworkKey {
   TESTNET = 'testnet'
 }
 
-const networks: { [key: string]: NetworkConfig } = {
+const networks: Record<NetworkKey, NetworkConfig> = {
   [NetworkKey.MAINNET]: {
     chainId: 'Oraichain',
     prefix: 'orai',

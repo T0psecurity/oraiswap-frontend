@@ -4,7 +4,7 @@ import { ReactComponent as Logo } from 'assets/icons/logo.svg';
 import { Button, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
-import { mockToken, Pair, PairKey, pairsMap } from 'constants/pools';
+import { getPair, Pair, pairs } from 'constants/pools';
 import { fetchPairInfo, fetchPoolInfoAmount, fetchTokenInfo } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
@@ -12,6 +12,7 @@ import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
 import { ORAI } from 'constants/constants';
+import { filteredTokens } from 'constants/bridgeTokens';
 
 const { Search } = Input;
 
@@ -50,14 +51,20 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({
 
 const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
   const navigate = useNavigate();
-  const [token1, token2] = pair.asset_denoms.map((denom) => mockToken[denom]);
+  const [token1, token2] = pair.asset_denoms.map((denom) =>
+    filteredTokens.find((token) => token.denom === denom)
+  );
+
+  if (!token1 || !token2) return null;
 
   return (
     <div
       className={styles.pairbox}
       onClick={() =>
         navigate(
-          `../pool/${token1.name}_${token2.name}`
+          `/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(
+            token2.denom
+          )}`
           // { replace: true }
         )
       }
@@ -125,8 +132,11 @@ const ListPools = memo<{
     }
     const searchReg = new RegExp(text, 'i');
     const ret = pairInfos.filter((pairInfo) =>
-      pairInfo.pair.asset_denoms.some(
-        (denom) => mockToken[denom].name.search(searchReg) !== -1
+      pairInfo.pair.asset_denoms.some((denom) =>
+        filteredTokens.find(
+          (token) =>
+            token.denom === denom && token.name.search(searchReg) !== -1
+        )
       )
     );
 
@@ -178,9 +188,11 @@ const Pools: React.FC<PoolsProps> = () => {
 
   let _oraiPrice = Fraction.ZERO;
   const fetchPairInfoData = async (pair: Pair): Promise<any> => {
-    const [fromToken, toToken] = pair.asset_denoms.map(
-      (denom) => mockToken[denom]
+    const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
+      filteredTokens.find((token) => token.denom === denom)
     );
+
+    if (!fromToken || !toToken) return;
     const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
       fetchTokenInfo(fromToken),
       fetchTokenInfo(toToken)
@@ -217,12 +229,22 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
-    const t = await fetchPairInfoData(pairsMap.ORAI_UST);
-    const poolList = await Promise.all(
-      Object.keys(pairsMap)
-        .filter((k) => k !== 'ORAI_UST')
-        .map((k) => fetchPairInfoData(pairsMap[k as PairKey]))
+    const oraiUstPair = getPair(
+      ORAI,
+      process.env.REACT_APP_UST_ORAICHAIN_DENOM
     );
+
+    if (!oraiUstPair) return;
+    const t = await fetchPairInfoData(oraiUstPair);
+    const poolList = await Promise.all(
+      pairs
+        .filter(
+          (pair) =>
+            pair.asset_denoms[1] !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        )
+        .map(fetchPairInfoData)
+    );
+
     setPairInfos([...poolList, t]);
     setOraiPrice(_oraiPrice);
   };

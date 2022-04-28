@@ -1,3 +1,5 @@
+import { NetworkKey } from 'constants/networks';
+
 interface ExtNetworkConfig {
   chainId: string;
   rpc: string;
@@ -8,7 +10,7 @@ interface ExtNetworkConfig {
 
 export interface NetworkConfig extends ExtNetworkConfig {
   /** Chain ID */
-  id: string;
+  id: NetworkKey;
 
   /** Fixed fee */
   fee: { gasPrice: string; amount: string; gas: string };

@@ -45,7 +45,7 @@ export type TokenItemType = {
   cosmosBased: Boolean;
 };
 
-const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
+const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
   [NetworkKey.TESTNET]: [
     [
       {
