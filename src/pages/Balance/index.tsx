@@ -30,6 +30,7 @@ import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 import Big from 'big.js';
+import { ERC20_ORAI } from 'constants/constants';
 
 interface BalanceProps {}
 
@@ -186,17 +187,15 @@ const Balance: React.FC<BalanceProps> = () => {
       const pendingList: TokenItemType[] = [];
       const amountDetails = Object.fromEntries(
         await Promise.all(
-          pendingTokens
-            .filter((token) => token.chainId != '0x38')
-            .map(async (token) => {
-              const address = await window.Keplr.getKeplrBech32Address(
-                token.coinType === network.coinType
-                  ? network.chainId
-                  : token.chainId
-              );
+          pendingTokens.map(async (token) => {
+            const address = await window.Keplr.getKeplrBech32Address(
+              token.coinType === network.coinType
+                ? network.chainId
+                : token.chainId
+            );
 
-              return loadAmountDetail(address, token, pendingList);
-            })
+            return loadAmountDetail(address, token, pendingList);
+          })
         )
       );
       setAmounts((old) => ({ ...old, ...amountDetails }));
@@ -221,7 +220,7 @@ const Balance: React.FC<BalanceProps> = () => {
   }, [metamaskAddress, prices]);
 
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
-    if (!token.cosmosBased) {
+    if (token.denom === ERC20_ORAI) {
       displayToast(TToastType.TX_INFO, {
         message: `Token ${token.name} on ${token.org} is currently not supported`
       });
@@ -325,7 +324,6 @@ const Balance: React.FC<BalanceProps> = () => {
         message: ex.message
       });
     }
-    setIBCLoading(false);
   };
 
   const transferEvmToIBC = async () => {
@@ -337,7 +335,9 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     try {
       const gravityContractAddr = gravityContracts[from!.chainId!] as string;
-      if (!gravityContractAddr || !from) return;
+      if (!gravityContractAddr || !from) {
+        return;
+      }
 
       await window.Metamask.checkOrIncreaseAllowance(
         from!.chainId,
@@ -365,7 +365,6 @@ const Balance: React.FC<BalanceProps> = () => {
         message: ex.message
       });
     }
-    setIBCLoading(false);
   };
 
   const onClickTransfer = async () => {
@@ -382,14 +381,14 @@ const Balance: React.FC<BalanceProps> = () => {
     if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
       return;
     }
-    setIBCLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
-
-    if (from.denom === 'bep20_orai') {
-      transferEvmToIBC();
+    setIBCLoading(true);
+    if (from.cosmosBased) {
+      await transferIBC();
     } else {
-      transferIBC();
+      await transferEvmToIBC();
     }
+    setIBCLoading(false);
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
