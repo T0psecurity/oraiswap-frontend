@@ -211,7 +211,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'uatom',
         decimals: 6,
         chainId: 'cosmoshub-4',
-        rpc: 'https://rpc-cosmoshub.keplr.app',
+        rpc: 'https://rpc-cosmos.oraidex.io',
         lcd: 'https://lcd-cosmoshub.keplr.app',
         cosmosBased: true,
         Icon: ATOMCOSMOS
@@ -225,7 +225,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'uluna',
         decimals: 6,
         chainId: 'columbus-5',
-        rpc: 'https://rpc-columbus.keplr.app',
+        rpc: 'https://rpc-terra.orai.io',
         lcd: 'https://lcd-columbus.keplr.app',
         cosmosBased: true,
         Icon: LUNA
@@ -239,7 +239,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'uusd',
         decimals: 6,
         chainId: 'columbus-5',
-        rpc: 'https://rpc-columbus.keplr.app',
+        rpc: 'https://rpc-terra.orai.io',
         lcd: 'https://lcd-columbus.keplr.app',
         cosmosBased: true,
         Icon: UST
@@ -251,7 +251,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         denom: 'uosmo',
         coinType: 118,
         chainId: 'osmosis-1',
-        rpc: 'https://rpc-osmosis.keplr.ap',
+        rpc: 'https://osmosis.rpc.orai.io',
         lcd: 'https://lcd-osmosis.keplr.app',
         decimals: 6,
         coingeckoId: 'osmosis',
