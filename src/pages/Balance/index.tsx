@@ -14,6 +14,7 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
 import {
+  evmTokens,
   filteredTokens,
   gravityContracts,
   TokenItemType,
@@ -30,7 +31,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 import Big from 'big.js';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetail = {
   amount: number;
@@ -65,9 +66,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
         <div className={styles.tokenInfo}>
           <div className={styles.tokenName}>{token.name}</div>
           <div className={styles.tokenOrg}>
-            <span className={styles.tokenOrgTxt}>
-              {token.org}
-            </span>
+            <span className={styles.tokenOrgTxt}>{token.org}</span>
           </div>
         </div>
       </div>
@@ -79,7 +78,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             decimals: token.decimals
           }}
           className={styles.tokenAmount}
-          decimalScale={token.decimals}
+          decimalScale={Math.min(6, token.decimals)}
         />
         <TokenBalance
           balance={amountDetail ? amountDetail.usd : 0}
@@ -151,39 +150,31 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadEvmOraiAmounts = async () => {
-    const bep20OraiAmount = await window.Metamask.getOraiBalance(
-      metamaskAddress
+    const entries = await Promise.all(
+      evmTokens.map(async (token) => {
+        const amount = await window.Metamask.getOraiBalance(
+          metamaskAddress,
+          token
+        );
+
+        return [
+          token.denom,
+          {
+            amount,
+            usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+          }
+        ];
+      })
     );
-    const erc20OraiAmount = await window.Metamask.getOraiBalance(
-      metamaskAddress,
-      'erc20_orai'
-    );
-    const amountDetails = Object.fromEntries([
-      [
-        'bep20_orai',
-        {
-          amount: bep20OraiAmount,
-          usd: getUsd(bep20OraiAmount, prices['oraichain-token'].price, 18)
-        }
-      ],
-      [
-        'erc20_orai',
-        {
-          amount: erc20OraiAmount,
-          usd: getUsd(erc20OraiAmount, prices['oraichain-token'].price, 18)
-        }
-      ]
-    ]);
+
+    const amountDetails = Object.fromEntries(entries);
     // update amounts
     setAmounts((old) => ({ ...old, ...amountDetails }));
-
-    return amountDetails;
   };
 
   const loadTokenAmounts = async () => {
     if (pendingTokens.length == 0) return;
     try {
-
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
       const keplr = await window.Keplr.getKeplr();
@@ -316,8 +307,9 @@ const Balance: React.FC<BalanceProps> = () => {
           );
 
           displayToast(TToastType.TX_SUCCESSFUL, {
-            customLink: `${from!.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash
-              }`
+            customLink: `${from!.lcd}/cosmos/tx/v1beta1/txs/${
+              result?.transactionHash
+            }`
           });
           // set tx hash to trigger refetching amount values
           setTxHash(result?.transactionHash);
@@ -432,8 +424,8 @@ const Balance: React.FC<BalanceProps> = () => {
                         decimals: from?.decimals
                       }}
                       className={styles.balanceDescription}
-                      prefix='Balance: '
-                      decimalScale={from?.decimals}
+                      prefix="Balance: "
+                      decimalScale={Math.min(6, from?.decimals || 0)}
                     />
 
                     <button
@@ -442,10 +434,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                              amounts[from.denom].amount /
-                              10 ** from.decimals,
-                              amounts[from.denom].usd
-                            ]
+                                amounts[from.denom].amount /
+                                  10 ** from.decimals,
+                                amounts[from.denom].usd
+                              ]
                             : [0, 0]
                         );
                       }}
@@ -458,10 +450,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                              amounts[from.denom].amount /
-                              (2 * 10 ** from.decimals),
-                              amounts[from.denom].usd / 2
-                            ]
+                                amounts[from.denom].amount /
+                                  (2 * 10 ** from.decimals),
+                                amounts[from.denom].usd / 2
+                              ]
                             : [0, 0]
                         );
                       }}
@@ -472,7 +464,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   <TokenBalance
                     balance={fromUsd}
                     className={styles.balanceDescription}
-                    prefix='~$'
+                    prefix="~$"
                     decimalScale={2}
                   />
                 </div>
@@ -490,14 +482,16 @@ const Balance: React.FC<BalanceProps> = () => {
 
                     <NumberFormat
                       thousandSeparator
-                      decimalScale={from.decimals}
+                      decimalScale={Math.min(6, from.decimals)}
                       customInput={Input}
                       value={fromAmount}
                       onValueChange={({ floatValue }) => {
                         setFromAmount([
                           floatValue ?? 0,
                           getUsd(
-                            new Big((floatValue ?? 0)).mul(new Big(10).pow(from.decimals)),
+                            new Big(floatValue ?? 0).mul(
+                              new Big(10).pow(from.decimals)
+                            ),
                             prices[from.coingeckoId].price,
                             from.decimals
                           )
@@ -568,8 +562,8 @@ const Balance: React.FC<BalanceProps> = () => {
                     decimals: to?.decimals
                   }}
                   className={styles.balanceDescription}
-                  prefix='Balance: '
-                  decimalScale={to?.decimals}
+                  prefix="Balance: "
+                  decimalScale={Math.min(6, to?.decimals || 0)}
                 />
 
                 {to ? (

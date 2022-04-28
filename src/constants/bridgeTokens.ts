@@ -9,7 +9,15 @@ import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
-import { AIRI_BSC_CONTRACT, BSC_CHAIN_ID, BSC_RPC, ETHEREUM_CHAIN_ID, ETHEREUM_RPC, ORAI_BSC_CONTRACT, ORAI_ETH_CONTRACT } from './constants';
+import {
+  AIRI_BSC_CONTRACT,
+  BSC_CHAIN_ID,
+  BSC_RPC,
+  ETHEREUM_CHAIN_ID,
+  ETHEREUM_RPC,
+  ORAI_BSC_CONTRACT,
+  ORAI_ETH_CONTRACT
+} from './constants';
 
 export type TokenItemType = {
   name: string;
@@ -24,14 +32,14 @@ export type TokenItemType = {
   lcd?: string;
   decimals: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna';
   cosmosBased: Boolean;
 };
 
@@ -269,19 +277,19 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: BSC_RPC,
         decimals: 18,
         coingeckoId: 'oraichain-token',
-        cosmosBased: true,
+        cosmosBased: false,
         Icon: ORAI
       },
       {
         name: 'BEP20 AIRI',
         org: 'BNB Chain',
         chainId: BSC_CHAIN_ID,
-        denom: '',
+        denom: 'bep20_airi',
         contractAddress: AIRI_BSC_CONTRACT,
         rpc: BSC_RPC,
         decimals: 18,
         coingeckoId: 'airight',
-        cosmosBased: true,
+        cosmosBased: false,
         Icon: AIRI
       }
     ],

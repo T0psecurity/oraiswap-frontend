@@ -69,6 +69,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   }, []);
 
   useEffect(() => {
+    // we use default Orai token
     window.Metamask.getOraiBalance(metamaskAddress!).then(setMetamaskBalance);
   });
 

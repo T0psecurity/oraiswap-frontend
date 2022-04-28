@@ -1,24 +1,14 @@
 import Web3 from 'web3';
 import tokenABI from 'constants/abi/erc20.json';
-import { evmTokens, gravityContracts } from 'constants/bridgeTokens';
+import {
+  evmTokens,
+  gravityContracts,
+  TokenItemType
+} from 'constants/bridgeTokens';
 import GravityABI from 'constants/abi/gravity.json';
 import erc20ABI from 'constants/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
-import {
-  BSC_CHAIN_ID,
-  ETHEREUM_CHAIN_ID,
-  ORAI_BSC_CONTRACT,
-  ORAI_ETH_CONTRACT
-} from 'constants/constants';
-
-const ethNetworks: { [key: string]: { [key: string]: string } } = {
-  [ETHEREUM_CHAIN_ID]: {
-    ORAI: ORAI_ETH_CONTRACT
-  },
-  [BSC_CHAIN_ID]: {
-    ORAI: ORAI_BSC_CONTRACT
-  }
-};
+import { BSC_CHAIN_ID } from 'constants/constants';
 
 export default class Metamask {
   constructor() {}
@@ -89,20 +79,28 @@ export default class Metamask {
     return result;
   }
 
-  public async getOraiBalance(address: string | null, denom?: string) {
-    const ethNetwork = ethNetworks[window.ethereum?.chainId];
-    if (!ethNetwork || !window.ethereum) return '0';
+  public getOraiToken(): TokenItemType | undefined {
+    return evmTokens.find(
+      (token) => token.denom === (this.isBsc() ? 'bep20_orai' : 'erc20_orai')
+    );
+  }
 
-    let provider;
-    if (denom) {
-      const token = evmTokens.find((item) => item.denom === denom);
-      provider = token?.rpc;
-    }
-    const web3 = new Web3(provider || window.ethereum);
+  public async getOraiBalance(
+    address: string | null,
+    inputToken?: TokenItemType
+  ) {
+    // must has chainId and contractAddress
+    const token = inputToken || this.getOraiToken();
+    if (!token || !token.contractAddress) return '0';
+
+    const provider =
+      token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
+
+    const web3 = new Web3(provider);
     try {
       const tokenInst = new web3.eth.Contract(
         tokenABI as AbiItem[],
-        ethNetwork.ORAI
+        token.contractAddress
       );
       const balance = await tokenInst.methods.balanceOf(address).call();
       return balance;
