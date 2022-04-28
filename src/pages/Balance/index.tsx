@@ -489,9 +489,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount([
                           floatValue ?? 0,
                           getUsd(
-                            new Big(floatValue ?? 0).mul(
-                              new Big(10).pow(from.decimals)
-                            ),
+                            (floatValue ?? 0) * 10 ** from.decimals,
                             prices[from.coingeckoId].price,
                             from.decimals
                           )

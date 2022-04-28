@@ -4,12 +4,12 @@ import Big from 'big.js';
 
 type Props = {
   balance:
-  | number
-  | {
-    amount: string | number;
-    decimals?: number;
-    denom: string;
-  };
+    | number
+    | {
+        amount: string | number;
+        decimals?: number;
+        denom: string;
+      };
 
   className?: string;
 } & NumberFormatProps;
@@ -18,9 +18,9 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
   const amount =
     typeof balance === 'number'
       ? balance
-      : new Big(!!balance?.amount && isFinite(+balance?.amount)  ? balance?.amount: 0)
-        .div(10 ** (balance?.decimals || 6))
-        .toString();
+      : new Big(balance.amount)
+          .div(new Big(10).pow(balance.decimals ?? 6))
+          .toNumber();
 
   return (
     <NumberFormat
