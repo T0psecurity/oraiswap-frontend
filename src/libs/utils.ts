@@ -114,13 +114,13 @@ export const numberToFraction = function (_decimal) {
 };
 
 export const getUsd = (
-  amount: number,
+  amount: number | Big,
   price: Fraction | null,
   decimals: number
 ) => {
   if (!amount) return 0;
   if (!price) return 0;
 
-  return price.multiply(numberToFraction(amount)).divide(10 ** decimals)
+  return price.multiply(numberToFraction(amount.toString())).divide(10 ** decimals)
     .asNumber;
 };

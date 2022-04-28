@@ -28,15 +28,28 @@
 }
 
 .token_info {
-  display: flex;  
-  align-items: center;
-  margin-right: 10px;
-  margin-bottom: 20px;
+  background: #612fca;
+  border:1px solid #A871DF;  
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;    
+  align-items: center;  
+  margin: 32px 10px 0 0;
   width: 100%;
   position: relative;
-  &:last-child{
-    margin-bottom: 0;
+  &:last-child{    
+    margin-bottom: 32px;
+    margin-top: 15px;
   }
+}
+
+
+.network_icon {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 24px;
+  height: 24px;
 }
 
 .token_address {
@@ -161,24 +174,7 @@
   color: #777e90;
 }
 
-.connect_btn {
-  background: #612fca;
-  box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 32px;
-  margin-bottom: 32px;  
-}
-
 .connect {
   font-weight: 600;
   font-size: 16px;
-}
-
-.network_icon{
-  position: absolute;
-    right: 0px;
-    top: 0px;
-    width: 24px;
-    height: 24px;
 }

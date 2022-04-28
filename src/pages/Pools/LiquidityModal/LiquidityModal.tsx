@@ -785,7 +785,7 @@ const LiquidityModal: FC<ModalProps> = ({
               {Token1Icon && <Token1Icon className={cx('logo')} />}
               <div className={cx('title')}>
                 <div>{token1InfoData?.name}</div>
-                <div className={cx('des')}>Cosmos Hub</div>
+                <div className={cx('des')}>Oraichain</div>
               </div>
               <div className={cx('value')}>
                 <TokenBalance
@@ -815,7 +815,7 @@ const LiquidityModal: FC<ModalProps> = ({
               {Token2Icon && <Token2Icon className={cx('logo')} />}
               <div className={cx('title')}>
                 <div>{token2InfoData?.name}</div>
-                <div className={cx('des')}>Cosmos Hub</div>
+                <div className={cx('des')}>Oraichain</div>
               </div>
               <div className={cx('value')}>
                 <TokenBalance

@@ -400,7 +400,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       {
         name: 'BEP20 AIRI',
         org: 'Oraichain',
-        prefix: 'airi',
+        prefix: 'orai',
         coingeckoId: 'airight',
         denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
         decimals: 18,
@@ -450,3 +450,8 @@ export const evmTokens = _.uniqBy(
   ),
   (c) => c.denom
 );
+
+export const gravityContracts: { [key: string]: string } = {
+  [BSC_CHAIN_ID]: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
+  [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT
+};

@@ -69,7 +69,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   }, []);
 
   useEffect(() => {
-    window.Metamask.getOraiBalance(metamaskAddress).then(setMetamaskBalance);
+    window.Metamask.getOraiBalance(metamaskAddress!).then(setMetamaskBalance);
   });
 
   const renderLink = (
@@ -115,7 +115,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
               setAddress={setAddress}
               metamaskAddress={metamaskAddress}
               setMetamaskAddress={setMetamaskAddress}
-              className={styles.connect_btn}
             >
               {address && (
                 <div className={styles.token_info}>
