@@ -9,6 +9,7 @@ import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
+import { AIRI_BSC_CONTRACT, BSC_CHAIN_ID, BSC_RPC, ETHEREUM_CHAIN_ID, ETHEREUM_RPC, ORAI_BSC_CONTRACT, ORAI_ETH_CONTRACT } from './constants';
 
 export type TokenItemType = {
   name: string;
@@ -147,7 +148,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         Icon: OSMO
       },
       {
-        name: 'Erc20 ORAI',
+        name: 'ERC20 ORAI',
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'oraichain-token',
@@ -248,28 +249,40 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         Icon: OSMO
       },
       {
-        name: 'Erc20 ORAI',
+        name: 'ERC20 ORAI',
         org: 'Ethereum',
         coingeckoId: 'oraichain-token',
-        denom: 'erc20_orai',
-        contractAddress: '0x4c11249814f11b9346808179cf06e71ac328c1b5',
+        denom: '',
+        contractAddress: ORAI_ETH_CONTRACT,
         decimals: 18,
-        chainId: '1',
-        rpc: 'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978',
+        chainId: ETHEREUM_CHAIN_ID,
+        rpc: ETHEREUM_RPC,
         cosmosBased: false,
-        Icon: ETH
+        Icon: ORAI
       },
       {
-        name: 'Bep20 ORAI',
+        name: 'BEP20 ORAI',
         org: 'BNB Chain',
-        chainId: '',
-        denom: 'bep20_orai',
-        contractAddress: '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0',
-        rpc: 'https://bsc-dataseed1.ninicoin.io',
+        chainId: BSC_CHAIN_ID,
+        denom: '',
+        contractAddress: ORAI_BSC_CONTRACT,
+        rpc: BSC_RPC,
         decimals: 18,
         coingeckoId: 'oraichain-token',
         cosmosBased: true,
-        Icon: BNB
+        Icon: ORAI
+      },
+      {
+        name: 'BEP20 AIRI',
+        org: 'BNB Chain',
+        chainId: BSC_CHAIN_ID,
+        denom: '',
+        contractAddress: AIRI_BSC_CONTRACT,
+        rpc: BSC_RPC,
+        decimals: 18,
+        coingeckoId: 'airight',
+        cosmosBased: true,
+        Icon: AIRI
       }
     ],
     [
@@ -358,21 +371,21 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
       //   cosmosBased: true,
       //   Icon: OSMO
       // },
+      // {
+      //   name: 'Erc20 ORAI',
+      //   org: 'Oraichain',
+      //   prefix: 'orai',
+      //   coingeckoId: 'oraichain-token',
+      //   denom: 'ibc/erc20_orai',
+      //   decimals: 18,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   cosmosBased: true,
+      //   Icon: ETH
+      // },
       {
-        name: 'Erc20 ORAI',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coingeckoId: 'oraichain-token',
-        denom: 'ibc/erc20_orai',
-        decimals: 18,
-        chainId: 'Oraichain',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        cosmosBased: true,
-        Icon: ETH
-      },
-      {
-        name: 'Bep20 ORAI',
+        name: 'BEP20 ORAI',
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'oraichain-token',
@@ -382,7 +395,20 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: BNB
+        Icon: ORAI
+      },
+      {
+        name: 'BEP20 AIRI',
+        org: 'Oraichain',
+        prefix: 'airi',
+        coingeckoId: 'airight',
+        denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
+        decimals: 18,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: AIRI
       },
       {
         name: 'ORAIX',

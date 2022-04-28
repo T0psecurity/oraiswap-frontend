@@ -28,7 +28,10 @@ export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 
 // bsc and eth information
 export const ETHEREUM_CHAIN_ID = '0x1';
+export const ETHEREUM_RPC = 'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978';
 export const BSC_CHAIN_ID = '0x38';
+export const BSC_RPC = 'https://bsc-dataseed1.ninicoin.io';
 
 export const ORAI_ETH_CONTRACT = '0x4c11249814f11b9346808179cf06e71ac328c1b5';
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
+export const AIRI_BSC_CONTRACT = '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f';

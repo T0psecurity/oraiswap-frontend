@@ -95,6 +95,7 @@ declare global {
       REACT_APP_UST_ORAICHAIN_DENOM: string;
       REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
       REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
+      REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;

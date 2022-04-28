@@ -175,7 +175,7 @@ const Balance: React.FC<BalanceProps> = () => {
     if (pendingTokens.length == 0) return;
     try {
       let filteredPendingTokens = pendingTokens.filter(
-        (pending) => pending.chainId
+        (pending) => pending.denom
       );
       // console.log("filtered pending: ", filteredPendingTokens)
       // let chainId = network.chainId;
