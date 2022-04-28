@@ -27,6 +27,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
 import { Fraction } from '@saberhq/token-utils';
+import { ORAI } from 'constants/constants';
 
 const cx = cn.bind(styles);
 
@@ -46,18 +47,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [withdrawTxHash, setWithdrawTxHash] = useState('');
 
   const getPairInfo = async () => {
-    const pairKey = Object.keys(PairKey).find((k) => {
-      let [_token1, _token2] = poolUrl?.toUpperCase().split('-') ?? [
-        undefined,
-        undefined
-      ];
-      return (
-        !!_token1 && !!_token2 && k.includes(_token1) && k.includes(_token2)
-      );
-    });
-    const t = PairKey[pairKey! as keyof typeof PairKey];
-
-    pair = pairsMap[t];
+    if (!poolUrl) return;
+    let [_token1, _token2] = poolUrl.toUpperCase().split('_');
+    if (!_token2) return;
+    if (_token2 === ORAI) {
+      [_token1, _token2] = [_token2, _token1];
+    }
+    const k = [_token1, _token2].join('_') as PairKey;
+    pair = pairsMap[k];
     if (!pair) return;
     let token1 = {
         ...mockToken[pair.asset_denoms[0]],
@@ -99,8 +96,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     if (
       token1?.denom === 'orai' &&
-      token2?.denom ===
-        'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4'
+      token2?.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
     ) {
       oraiPrice = new Fraction(
         poolData.askPoolAmount,
@@ -110,9 +106,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       const _poolData = await fetchPoolInfoAmount(
         // @ts-ignore
         mockToken['orai']!,
-        mockToken[
-          'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4'
-        ]!
+        mockToken[process.env.REACT_APP_UST_ORAICHAIN_DENOM]!
       );
       oraiPrice = new Fraction(
         _poolData.askPoolAmount,
@@ -508,7 +502,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
           )}
         </>
       ) : (
-        <>No Pool found</>
+        <></>
       )}
     </Content>
   );

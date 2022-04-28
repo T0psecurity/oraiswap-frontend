@@ -4,7 +4,7 @@ import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'constants/constants';
-import { pairsMap } from 'constants/pools';
+import { PairKey, pairsMap } from 'constants/pools';
 import axios from './request';
 
 interface TokenInfo {
@@ -60,14 +60,6 @@ const querySmart = async (
 async function fetchPairs() {
   const data = await querySmart(network.factory, { pairs: {} });
   return data;
-}
-
-function findPair(pair: string) {
-  let invertedPair = pair.split('-').reverse().join('-');
-  for (let supportedPair of Object.keys(pairsMap)) {
-    if (pair === supportedPair || invertedPair === supportedPair) return true;
-  }
-  return false;
 }
 
 async function fetchTaxRate() {
@@ -142,14 +134,19 @@ async function fetchPoolInfoAmount(
 ) {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
-  let offerPoolAmount,
+
+  let offerPoolAmount = 0,
     askPoolAmount = 0;
-  if (findPair(`${fromTokenInfo.denom}-${toTokenInfo.denom}`)) {
+  const keyPair = `${fromTokenInfo.symbol || fromTokenInfo.name}_${
+    toTokenInfo.symbol || toTokenInfo.name
+  }` as PairKey;
+
+  if (pairsMap[keyPair]) {
     const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
     const poolInfo = await fetchPool(pairInfo.contract_addr);
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
-  } else {
+  } else if (fromTokenInfo.denom !== ORAI && toTokenInfo.denom !== ORAI) {
     // handle multi-swap case
     const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
     const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
@@ -336,7 +333,7 @@ const generateSwapOperationMsgs = (data: {
   askInfo: any;
 }) => {
   const { denom, offerInfo, askInfo } = data;
-  return findPair(denom)
+  return pairsMap[denom as PairKey]
     ? [
         {
           orai_swap: {
@@ -373,7 +370,7 @@ async function simulateSwap(query: {
   const { info: askInfo } = parseTokenInfo(toInfo, undefined);
 
   let operations = generateSwapOperationMsgs({
-    denom: `${fromInfo.denom}-${toInfo.denom}`,
+    denom: `${fromInfo.name}_${toInfo.name}`,
     offerInfo,
     askInfo
   });
@@ -451,7 +448,7 @@ async function generateContractMessages(
       let inputTemp = {
         execute_swap_operations: {
           operations: generateSwapOperationMsgs({
-            denom: `${swapQuery.fromInfo.denom}-${swapQuery.toInfo.denom}`,
+            denom: `${swapQuery.fromInfo.name}_${swapQuery.toInfo.name}`,
             offerInfo,
             askInfo
           })
