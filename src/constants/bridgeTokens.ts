@@ -190,7 +190,7 @@ const tokensMap: { [key: string]: [TokenItemType[], TokenItemType[]] } = {
         coinType: 118,
         coingeckoId: 'airight',
         denom: 'airi',
-        contractAddress: 'orai1gwe4q8gme54wdk0gcrtsh4ykwvd7l9n3dxxas2',
+        contractAddress: '',
         decimals: 6,
         chainId: 'Oraichain-testnet',
         rpc: 'https://testnet-rpc.orai.io',

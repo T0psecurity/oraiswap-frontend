@@ -287,17 +287,9 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const getPairInfo = async () => {
-    const pairKey = Object.keys(PairKey).find(
-      (k) =>
-        k.includes(token1InfoData.name.toUpperCase()) &&
-        k.includes(token2InfoData.name.toUpperCase())
-    );
-    const t = PairKey[pairKey! as keyof typeof PairKey];
-
+    const t = [token1InfoData.name, token2InfoData.name].join('_') as PairKey;
     const pair = pairsMap[t];
-
     const pairData = await fetchPairInfo([token1InfoData!, token2InfoData!]);
-
     return { pair, ...pairData };
   };
 
