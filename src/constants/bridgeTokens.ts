@@ -264,7 +264,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'oraichain-token',
         denom: ERC20_ORAI,
         contractAddress: ORAI_ETH_CONTRACT,
-        decimals: 6,
+        decimals: 18,
         chainId: ETHEREUM_CHAIN_ID,
         rpc: ETHEREUM_RPC,
         cosmosBased: false,
@@ -277,7 +277,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         denom: BEP20_ORAI,
         contractAddress: ORAI_BSC_CONTRACT,
         rpc: BSC_RPC,
-        decimals: 6,
+        decimals: 18,
         coingeckoId: 'oraichain-token',
         cosmosBased: false,
         Icon: ORAI
@@ -289,7 +289,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         denom: 'bep20_airi',
         contractAddress: AIRI_BSC_CONTRACT,
         rpc: BSC_RPC,
-        decimals: 6,
+        decimals: 18,
         coingeckoId: 'airight',
         cosmosBased: false,
         Icon: AIRI
