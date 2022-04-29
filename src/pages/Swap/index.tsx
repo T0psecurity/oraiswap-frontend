@@ -16,6 +16,7 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
+  generateConvertMsgs,
   generateMiningMsgs,
   simulateSwap
 } from 'rest/api';
@@ -46,7 +47,7 @@ interface ValidToken {
   denom: string;
 }
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -299,17 +300,7 @@ const Swap: React.FC<SwapProps> = () => {
         toInfo: toTokenInfoData!
       });
 
-      // const msgs = await generateMiningMsgs({
-      //   type: Type.UNBOND_LIQUIDITY,
-      //   sender: `${walletAddr}`,
-      //   amount: "1",
-      //   assetToken: { "symbol": "AIRI", "name": "aiRight Token", "contract_addr": "orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg", "decimals": 6, "denom": "airi", "total_supply": "1000000000000000" },
-      // })
-
-      // const msgs = await generateMiningMsgs({
-      //   type: Type.WITHDRAW_LIQUIDITY_MINING,
-      //   sender: `${walletAddr}`,
-      // })
+      // const msgs = await generateConvertMsgs({ type: Type.CONVERT_TOKEN, fromToken: fromTokenInfoData, fromAmount: "1", sender: `${walletAddr}` })
 
       const msg = msgs[0];
       console.log(
@@ -479,7 +470,6 @@ const Swap: React.FC<SwapProps> = () => {
               <span style={{ flexGrow: 1, textAlign: 'right' }}>
                 {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio} ${toTokenInfoData?.symbol}`}
               </span>
-              <TooltipIcon />
             </div>
             <div className={cx('input')}>
               <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
@@ -494,9 +484,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input
