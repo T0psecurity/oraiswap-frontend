@@ -38,7 +38,7 @@ const networks: Record<NetworkKey, NetworkConfig> = {
     staking: process.env.REACT_APP_STAKING_CONTRACT,
     explorer: 'https://testnet.scan.orai.io',
     rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
-    converter: process.env.REACT_APP_CONVERTER_CONTRACT,
+    converter: process.env.REACT_APP_CONVERTER_CONTRACT
   }
 };
 

@@ -355,7 +355,7 @@ const generateSwapOperationMsgs = (
   offerInfo: any,
   askInfo: any
 ) => {
-  const pair = getPair(denoms[0], denoms[1]);
+  const pair = getPair(denoms);
   return pair
     ? [
       {

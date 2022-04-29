@@ -43,8 +43,11 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
 
 export const pairs = pairsMap[network.id];
 
-export const getPair = (denom1: string, denom2: string): Pair | undefined => {
-  const asset_denoms = [denom1, denom2];
+export const getPair = (
+  denom1: string | string[],
+  denom2?: string
+): Pair | undefined => {
+  const asset_denoms = typeof denom1 === 'string' ? [denom1, denom2] : denom1;
   const denom = asset_denoms[1] === ORAI ? asset_denoms[0] : asset_denoms[1];
 
   return pairs.find((pair) => pair.asset_denoms[1] === denom);

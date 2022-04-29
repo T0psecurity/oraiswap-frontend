@@ -1,6 +1,5 @@
 import React, { FC, memo, useEffect, useState } from 'react';
 import styles from './index.module.scss';
-import { ReactComponent as Logo } from 'assets/icons/logo.svg';
 import { Button, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
@@ -186,16 +185,14 @@ const Pools: React.FC<PoolsProps> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
 
-  let _oraiPrice = Fraction.ZERO;
   const fetchPairInfoData = async (pair: Pair): Promise<any> => {
     const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
       filteredTokens.find((token) => token.denom === denom)
     );
 
-    if (!fromToken || !toToken) return;
     const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
-      fetchTokenInfo(fromToken),
-      fetchTokenInfo(toToken)
+      fetchTokenInfo(fromToken!),
+      fetchTokenInfo(toToken!)
     ]);
 
     const [poolData, infoData] = await Promise.all([
@@ -203,25 +200,9 @@ const Pools: React.FC<PoolsProps> = () => {
       fetchPairInfo([fromTokenInfoData, toTokenInfoData])
     ]);
 
-    if (toToken.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM) {
-      _oraiPrice = new Fraction(
-        poolData.askPoolAmount,
-        poolData.offerPoolAmount
-      );
-    }
-
-    let amount = 0;
-    const oraiValue = getUsd(
-      poolData.offerPoolAmount,
-      _oraiPrice,
-      fromToken.decimals
-    );
-    amount = 2 * oraiValue;
-
     return {
       ...poolData,
       pair,
-      amount,
       commissionRate: infoData.commission_rate,
       fromToken,
       toToken
@@ -229,24 +210,27 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
-    const oraiUstPair = getPair(
-      ORAI,
-      process.env.REACT_APP_UST_ORAICHAIN_DENOM
+    const poolList = await Promise.all(pairs.map(fetchPairInfoData));
+    const oraiUstPool = poolList.find(
+      (pool) =>
+        pool.pair.asset_denoms[1] === process.env.REACT_APP_UST_ORAICHAIN_DENOM
+    )!;
+
+    const oraiPrice = new Fraction(
+      oraiUstPool.askPoolAmount,
+      oraiUstPool.offerPoolAmount
     );
 
-    if (!oraiUstPair) return;
-    const t = await fetchPairInfoData(oraiUstPair);
-    const poolList = await Promise.all(
-      pairs
-        .filter(
-          (pair) =>
-            pair.asset_denoms[1] !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
-        )
-        .map(fetchPairInfoData)
-    );
+    poolList.forEach((pool) => {
+      pool.amount = getUsd(
+        2 * pool.offerPoolAmount,
+        oraiPrice,
+        pool.fromToken.decimals
+      );
+    });
 
-    setPairInfos([...poolList, t]);
-    setOraiPrice(_oraiPrice);
+    setPairInfos(poolList);
+    setOraiPrice(oraiPrice);
   };
 
   useEffect(() => {
