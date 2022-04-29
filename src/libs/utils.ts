@@ -95,9 +95,12 @@ export const parseAmount = (value: string | number, decimal: number = 6) => {
   return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
 };
 
-export const parseDisplayAmount = (value: string | number, decimal: number) => {
+export const parseDisplayAmount = (
+  value: string | number,
+  decimal: number = 6
+) => {
   if (value) return `${(parseFloat(value) / Math.pow(10, decimal)).toFixed(6)}`;
-  return 0;
+  return '0';
 };
 
 const gcd = (a, b) => {

@@ -12,7 +12,7 @@ interface ModalProps {
   close: () => void;
   isCloseBtn?: boolean;
   listToken: any[];
-  setToken: any;
+  setToken: (denom: string) => void;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({

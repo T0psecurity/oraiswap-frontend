@@ -1,4 +1,3 @@
-//@ts-nocheck
 import React, { useEffect, useState } from 'react';
 import style from './index.module.scss';
 import cn from 'classnames/bind';
@@ -13,9 +12,10 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
-  simulateSwap
+  simulateSwap,
+  SwapQuery
 } from 'rest/api';
-import CosmJs from 'libs/cosmjs';
+import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import {
   BEP20_ORAI,
   DECIMAL_FRACTION,
@@ -57,14 +57,13 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [isSelectFee, setIsSelectFee] = useState(false);
-  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<string>([
-    'orai',
-    'airi'
-  ]);
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
+    [string, string]
+  >(['orai', 'airi']);
   // const [feeToken, setFeeToken] = useState<string>('airi');
   const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
-  const [averageRatio, setAverageRatio] = useState(0);
+  const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
   const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
@@ -206,7 +205,7 @@ const Swap: React.FC<SwapProps> = () => {
       fromAmount,
       parseFloat(
         parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
-      ).toFixed(6)
+      )
     ]);
   }, [simulateData]);
 
@@ -225,7 +224,7 @@ const Swap: React.FC<SwapProps> = () => {
         amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!
-      });
+      } as SwapQuery);
 
       // const msgs = await generateConvertMsgs({ type: Type.CONVERT_TOKEN, fromToken: fromTokenInfoData, fromAmount: "1", sender: `${walletAddr}` })
       const msg = msgs[0];
@@ -237,10 +236,10 @@ const Swap: React.FC<SwapProps> = () => {
       const result = await CosmJs.execute({
         prefix: ORAI,
         address: msg.contract,
-        walletAddr,
-        handleMsg: Buffer.from(msg.msg.toString()),
+        walletAddr: address,
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
       console.log('result swap tx hash: ', result);
 
@@ -257,7 +256,7 @@ const Swap: React.FC<SwapProps> = () => {
       console.log('error in swap form: ', error);
       let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
-        finalError = error;
+        finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
         message: finalError
@@ -340,10 +339,10 @@ const Swap: React.FC<SwapProps> = () => {
                 className={cx('amount')}
                 thousandSeparator
                 decimalScale={6}
-                type="input"
+                type="text"
                 value={fromAmount}
                 onValueChange={({ floatValue }) => {
-                  onChangeFromAmount(floatValue);
+                  onChangeFromAmount(floatValue ?? 0);
                 }}
               />
 
@@ -405,7 +404,7 @@ const Swap: React.FC<SwapProps> = () => {
                 className={cx('amount')}
                 thousandSeparator
                 decimalScale={6}
-                type="input"
+                type="text"
                 value={toAmount}
                 // onValueChange={({ floatValue }) => {
                 //   onChangeToAmount(floatValue);
