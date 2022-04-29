@@ -229,14 +229,18 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     Token2Icon = pairInfoData?.token2?.Icon;
 
   const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
-  const liquidity1 =
-    (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) / lpTotalSupply;
-  const liquidity2 =
-    (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) / lpTotalSupply;
-  const liquidity1Usd =
-    (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply;
-  const liquidity2Usd =
-    (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply;
+  const liquidity1 = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) / lpTotalSupply
+    : 0;
+  const liquidity2 = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) / lpTotalSupply
+    : 0;
+  const liquidity1Usd = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply
+    : 0;
+  const liquidity2Usd = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply
+    : 0;
 
   const rewardInfoFirst = !!totalRewardInfoData?.reward_infos.length
     ? totalRewardInfoData?.reward_infos[0]
@@ -453,7 +457,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 liquidityHash={liquidityTxHash}
               />
             )}
-          {isOpenBondingModal && lpTokenInfoData && (
+          {isOpenBondingModal && lpTokenInfoData && lpTokenBalance && (
             <BondingModal
               isOpen={isOpenBondingModal}
               open={() => setIsOpenBondingModal(true)}

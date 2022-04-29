@@ -24,7 +24,7 @@ interface ModalProps {
   close: () => void;
   isCloseBtn?: boolean;
   lpTokenInfoData: TokenInfo;
-  lpTokenBalance: any;
+  lpTokenBalance: number;
   liquidityValue: number;
   assetToken: any;
   setTxHash: any;

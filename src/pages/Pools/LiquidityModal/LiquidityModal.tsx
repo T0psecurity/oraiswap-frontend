@@ -110,7 +110,7 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   const {
-    data: token1Balance,
+    data: token1Balance = 0,
     error: token1BalanceError,
     isError: isToken1BalanceError,
     isLoading: isToken1BalanceLoading
@@ -130,7 +130,7 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   const {
-    data: token2Balance,
+    data: token2Balance = 0,
     error: token2BalanceError,
     isError: isToken2BalanceError,
     isLoading: isLoadingToken2Balance
