@@ -9,20 +9,11 @@ import { useQuery } from 'react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
-  fetchExchangeRate,
-  fetchPairInfo,
-  fetchPool,
-  fetchPoolInfoAmount,
-  fetchTaxRate,
   fetchTokenInfo,
-  generateContractMessages,
-  simulateSwap
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens } from 'constants/bridgeTokens';
-import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import useLocalStorage from 'libs/useLocalStorage';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import Pie from 'components/Pie';
 import NumberFormat from 'react-number-format';
@@ -449,10 +440,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="input"
-              // value={supplyToken2 ? supplyToken2 : ''}
-              // onValueChange={({ floatValue }) => {
-              //   setSupplyToken2(floatValue);
-              // }}
+            // value={supplyToken2 ? supplyToken2 : ''}
+            // onValueChange={({ floatValue }) => {
+            //   setSupplyToken2(floatValue);
+            // }}
             />
             <span>%</span>
           </div>
@@ -471,7 +462,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => {}}>
+        <div className={cx('swap-btn')} onClick={() => { }}>
           Create
         </div>
       </div>
