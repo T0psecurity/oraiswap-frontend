@@ -94,9 +94,7 @@ const BondingModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in bond form: ', error);
@@ -107,8 +105,9 @@ const BondingModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   return (

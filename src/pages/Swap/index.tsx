@@ -243,8 +243,6 @@ const Swap: React.FC<SwapProps> = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setSwapLoading(false);
-        setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -255,8 +253,9 @@ const Swap: React.FC<SwapProps> = () => {
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setSwapLoading(false);
     }
-    setSwapLoading(false);
   };
 
   const FromIcon = fromToken?.Icon;
