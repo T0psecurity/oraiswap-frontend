@@ -125,3 +125,8 @@ export const getUsd = (
     .multiply(numberToFraction(amount.toString()))
     .divide(10 ** decimals).asNumber;
 };
+
+export const parseBalanceNumber = (balance: number) => {
+  if (isFinite(balance) && !isNaN(balance)) return balance;
+  else return 0;
+}

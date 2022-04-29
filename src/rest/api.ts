@@ -4,7 +4,7 @@ import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'constants/constants';
-import { getPair, pairs } from 'constants/pools';
+import { getPair, Pair, pairs } from 'constants/pools';
 import axios from './request';
 
 type TokenInfo = TokenItemType & {
@@ -125,6 +125,35 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   );
 }
 
+// async function fetchPoolInfoAmount(
+//   fromTokenInfo: TokenInfo,
+//   toTokenInfo: TokenInfo
+// ) {
+//   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
+//   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
+
+//   let offerPoolAmount = 0,
+//     askPoolAmount = 0;
+
+//   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
+
+//   if (pair) {
+//     const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
+//     const poolInfo = await fetchPool(pairInfo.contract_addr);
+//     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
+//     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
+//   } else if (fromTokenInfo.denom !== ORAI && toTokenInfo.denom !== ORAI) {
+//     // handle multi-swap case
+//     const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
+//     const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
+//     const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
+//     const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
+//     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
+//     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
+//   }
+//   return { offerPoolAmount, askPoolAmount };
+// }
+
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenInfo,
   toTokenInfo: TokenInfo
@@ -138,14 +167,13 @@ async function fetchPoolInfoAmount(
   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
 
   if (pair) {
-    const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
-    const poolInfo = await fetchPool(pairInfo.contract_addr);
+    const poolInfo = await fetchPool(pair.contract_addr);
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else if (fromTokenInfo.denom !== ORAI && toTokenInfo.denom !== ORAI) {
     // handle multi-swap case
-    const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
-    const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
+    const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
+    const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
     const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
     const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);

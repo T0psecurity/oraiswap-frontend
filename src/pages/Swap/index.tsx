@@ -10,14 +10,9 @@ import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
   fetchExchangeRate,
-  fetchPairInfo,
-  fetchPool,
-  fetchPoolInfoAmount,
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
-  generateConvertMsgs,
-  generateMiningMsgs,
   simulateSwap
 } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
