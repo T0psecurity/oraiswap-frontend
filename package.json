@@ -16,7 +16,7 @@
     "@keplr-wallet/wc-qrcode-modal": "^0.9.0",
     "@sunnyag/react-coingecko": "^2.1.0",
     "@tippyjs/react": "^4.2.0",
-    "@ubeswap/token-math": "^4.4.6",
+    "@saberhq/token-utils": "^1.12.69",
     "@walletconnect/browser-utils": "^1.7.5",
     "@walletconnect/client": "^1.7.5",
     "@web3-react/core": "^6.1.9",

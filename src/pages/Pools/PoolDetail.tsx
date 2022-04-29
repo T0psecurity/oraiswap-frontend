@@ -26,7 +26,7 @@ import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
-import { Fraction } from '@ubeswap/token-math';
+import { Fraction } from '@saberhq/token-utils';
 import { ORAI } from 'constants/constants';
 
 const cx = cn.bind(styles);

@@ -9,7 +9,7 @@ import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
-import { Fraction } from '@ubeswap/token-math';
+import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
 
 const { Search } = Input;
