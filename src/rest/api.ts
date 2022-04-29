@@ -119,35 +119,6 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   );
 }
 
-// async function fetchPoolInfoAmount(
-//   fromTokenInfo: TokenInfo,
-//   toTokenInfo: TokenInfo
-// ) {
-//   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
-//   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
-
-//   let offerPoolAmount = 0,
-//     askPoolAmount = 0;
-
-//   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
-
-//   if (pair) {
-//     const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
-//     const poolInfo = await fetchPool(pairInfo.contract_addr);
-//     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
-//     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
-//   } else if (fromTokenInfo.denom !== ORAI && toTokenInfo.denom !== ORAI) {
-//     // handle multi-swap case
-//     const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
-//     const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
-//     const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
-//     const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
-//     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
-//     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
-//   }
-//   return { offerPoolAmount, askPoolAmount };
-// }
-
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType
@@ -178,7 +149,7 @@ async function fetchPoolInfoAmount(
 }
 
 async function fetchPairInfo(
-  assetInfos: [TokenInfo, TokenInfo]
+  assetInfos: [TokenItemType, TokenItemType]
 ): Promise<PairInfo> {
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
@@ -230,7 +201,7 @@ async function fetchTokenAllowance(
 
 async function fetchRewardInfo(
   staker_addr: string,
-  asset_token: TokenInfo,
+  asset_token: TokenItemType,
   lcd?: string
 ) {
   let { info: asset_info } = parseTokenInfo(asset_token);
@@ -248,7 +219,7 @@ async function fetchRewardInfo(
   return data;
 }
 
-async function fetchRewardPerSecInfo(assetToken: TokenInfo, lcd?: string) {
+async function fetchRewardPerSecInfo(assetToken: TokenItemType, lcd?: string) {
   let { info: asset_info } = parseTokenInfo(assetToken);
   const data = await querySmart(
     network.staking,
@@ -263,7 +234,7 @@ async function fetchRewardPerSecInfo(assetToken: TokenInfo, lcd?: string) {
   return data;
 }
 
-async function fetchStakingPoolInfo(assetToken: TokenInfo, lcd?: string) {
+async function fetchStakingPoolInfo(assetToken: TokenItemType, lcd?: string) {
   let { info: asset_info } = parseTokenInfo(assetToken);
   const data = await querySmart(
     network.staking,

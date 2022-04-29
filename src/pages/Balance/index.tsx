@@ -543,7 +543,7 @@ const Balance: React.FC<BalanceProps> = () => {
         address: msg.contract,
         walletAddr,
         // @ts-ignore
-        handleMsg: Buffer.from(msg.msg.toString()),
+        handleMsg: Buffer.from(msg.msg.toString()).toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
