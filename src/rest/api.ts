@@ -353,6 +353,7 @@ const generateSwapOperationMsgs = (
   askInfo: any
 ) => {
   const pair = getPair(denoms);
+
   return pair
     ? [
         {
@@ -462,14 +463,13 @@ async function generateContractMessages(
         swapQuery.amount.toString()
       );
       const { fund: askSentFund, info: askInfo } = parseTokenInfo(
-        swapQuery.toInfo,
-        undefined
+        swapQuery.toInfo
       );
       sent_funds = handleSentFunds(offerSentFund as Fund, askSentFund as Fund);
       let inputTemp = {
         execute_swap_operations: {
           operations: generateSwapOperationMsgs(
-            [swapQuery.fromInfo.name, swapQuery.toInfo.name],
+            [swapQuery.fromInfo.denom, swapQuery.toInfo.denom],
             offerInfo,
             askInfo
           )
@@ -540,8 +540,6 @@ async function generateContractMessages(
     default:
       break;
   }
-
-  console.log('input: ', input);
 
   const msgs = [
     {
@@ -626,8 +624,6 @@ async function generateMiningMsgs(
     default:
       break;
   }
-
-  console.log('input: ', input);
 
   const msgs = [
     {
