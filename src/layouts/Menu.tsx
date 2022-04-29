@@ -54,7 +54,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     error,
     data: balance
   } = useQuery('balance', () => fetchNativeTokenBalance(address), {
-    enabled: address ? address.length > 0 : false
+    enabled: address?.length > 0
   });
 
   useEffect(() => {
@@ -123,11 +123,17 @@ const Menu: React.FC<{}> = React.memo((props) => {
                       text={address}
                       className={styles.token_address}
                     />
-                    <TokenBalance
-                      balance={balance ?? 0}
-                      className={styles.token_balance}
-                      decimalScale={6}
-                    />
+                    {!!balance && (
+                      <TokenBalance
+                        balance={{
+                          amount: balance,
+                          decimals: 6,
+                          denom: ORAI
+                        }}
+                        className={styles.token_balance}
+                        decimalScale={6}
+                      />
+                    )}
                   </div>
                 </div>
               )}
@@ -149,20 +155,17 @@ const Menu: React.FC<{}> = React.memo((props) => {
                       text={metamaskAddress}
                       className={styles.token_address}
                     />
-                    {(() => {
-                      if (!!metamaskBalance)
-                        return (
-                          <TokenBalance
-                            balance={{
-                              amount: metamaskBalance,
-                              decimals: 18,
-                              denom: ORAI
-                            }}
-                            className={styles.token_balance}
-                            decimalScale={6}
-                          />
-                        );
-                    })()}
+                    {!!metamaskBalance && (
+                      <TokenBalance
+                        balance={{
+                          amount: metamaskBalance,
+                          decimals: 18,
+                          denom: ORAI
+                        }}
+                        className={styles.token_balance}
+                        decimalScale={6}
+                      />
+                    )}
                   </div>
                 </div>
               )}
