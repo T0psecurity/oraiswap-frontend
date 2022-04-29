@@ -6,13 +6,13 @@ import { FC } from 'react';
 const cx = cn.bind(styles);
 
 const Pie: FC<{
-  percent: number;
+  percent?: number;
   width?: number;
   backgroundColor?: string;
   indicatorColor?: string;
-  children: any;
+  children?: any;
 }> = ({
-  percent,
+  percent = 0,
   width = 6,
   backgroundColor = '#FFD5AE',
   indicatorColor = '#612FCA',

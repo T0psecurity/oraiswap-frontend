@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Button } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { network } from 'constants/networks';
