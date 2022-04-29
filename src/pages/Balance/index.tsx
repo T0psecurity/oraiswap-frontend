@@ -55,21 +55,22 @@ interface TokenItemProps {
   className?: string;
   onClick?: Function;
   amountDetail?: AmountDetail;
-  convertToNavie?: any;
+  convertToken?: any;
 }
 interface ConvertToNativeProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
-  convertToNavie: any;
+  convertToken: any;
 }
 
 const ConvertToNative: FC<ConvertToNativeProps> = ({
   token,
   amountDetail,
-  convertToNavie
+  convertToken
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
-
+  // get token name
+  const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   return (
     <div
       className={classNames(styles.tokenFromGroup, styles.small)}
@@ -140,9 +141,9 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
       <div className={styles.transferTab} style={{ marginTop: '0px' }}>
         <div
           className={styles.tfBtn}
-          onClick={() => convertToNavie(convertAmount, token)}
+          onClick={() => convertToken(convertAmount, token)}
         >
-          Convert To Native Token
+          Convert To <strong style={{ marginLeft: 5 }}>{name}</strong>
         </div>
       </div>
     </div>
@@ -155,7 +156,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   active,
   className,
   onClick,
-  convertToNavie
+  convertToken
 }) => {
   return (
     <div
@@ -198,7 +199,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <ConvertToNative
             token={token}
             amountDetail={amountDetail}
-            convertToNavie={convertToNavie}
+            convertToken={convertToken}
           />
         )}
       </div>
@@ -506,7 +507,7 @@ const Balance: React.FC<BalanceProps> = () => {
     setIBCLoading(false);
   };
 
-  const convertToNavie = async (amount: number, token: TokenItemType) => {
+  const convertToken = async (amount: number, token: TokenItemType) => {
     if (amount <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
@@ -766,7 +767,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           active={to?.name === t.name}
                           token={t}
                           onClick={onClickTokenTo}
-                          convertToNavie={convertToNavie}
+                          convertToken={convertToken}
                         />
                       );
                     })}
