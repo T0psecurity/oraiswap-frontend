@@ -628,7 +628,7 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Total supply</span>
-            <TooltipIcon />
+            {/* <TooltipIcon /> */}
           </div>
 
           <TokenBalance
@@ -642,7 +642,7 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Received LP asset</span>
-            <TooltipIcon />
+            {/* <TooltipIcon /> */}
           </div>
           <TokenBalance
             balance={{

@@ -82,7 +82,7 @@ const BondingModal: FC<ModalProps> = ({
       const result = await CosmJs.execute({
         address: msg.contract,
         walletAddr: address,
-        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
@@ -126,7 +126,7 @@ const BondingModal: FC<ModalProps> = ({
           <div className={cx('row')}>
             <div className={cx('row-title')}>
               <span>Current APR</span>
-              <TooltipIcon />
+              {/* <TooltipIcon /> */}
             </div>
             <span className={cx('row-des', 'highlight')}>
               150% + ORAIX Bonus

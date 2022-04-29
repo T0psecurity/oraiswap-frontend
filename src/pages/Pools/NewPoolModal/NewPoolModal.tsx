@@ -445,7 +445,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Pool Creation Fee</span>
-            <TooltipIcon />
+            {/* <TooltipIcon /> */}
           </div>
           <span>50 ORAI</span>
         </div>
