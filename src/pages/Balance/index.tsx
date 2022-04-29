@@ -1,6 +1,12 @@
 import { Input } from 'antd';
 import classNames from 'classnames';
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, {
+  FC,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
@@ -21,7 +27,7 @@ import {
   tokens
 } from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
-import { fetchBalance } from 'rest/api';
+import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
 import Content from 'layouts/Content';
 import { getUsd } from 'libs/utils';
 import Loader from 'components/Loader';
@@ -44,14 +50,100 @@ interface TokenItemProps {
   className?: string;
   onClick?: Function;
   amountDetail?: AmountDetail;
+  convertToNavie?: any;
 }
+interface ConvertToNativeProps {
+  token: TokenItemType;
+  amountDetail?: AmountDetail;
+  convertToNavie: any;
+}
+
+const parseAmount = (amount: number, decimals: number) => {
+  return new Big(amount).mul(new Big(10).pow(decimals));
+};
+
+const ConvertToNative: FC<ConvertToNativeProps> = ({
+  token,
+  amountDetail,
+  convertToNavie
+}) => {
+  const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
+
+  return (
+    <div className={styles.tokenFromGroup} style={{ flexWrap: 'wrap' }}>
+      <div
+        className={styles.balanceDescription}
+        style={{ width: '100%', textAlign: 'left' }}
+      >
+        Amount
+      </div>
+      <NumberFormat
+        thousandSeparator
+        decimalScale={Math.min(6, token.decimals)}
+        customInput={Input}
+        value={convertAmount}
+        onValueChange={({ floatValue }) => {
+          const _floatValue = 10 ** token.decimals * (floatValue ?? 0);
+          const usdValue =
+            (_floatValue / (amountDetail?.amount ?? 0)) *
+            (amountDetail?.usd ?? 0);
+
+          if (!floatValue) return;
+          setConvertAmount([floatValue ?? 0, usdValue]);
+        }}
+        className={styles.amount}
+      />
+      <div className={styles.balanceFromGroup} style={{ flexGrow: 1 }}>
+        <button
+          className={styles.balanceBtn}
+          onClick={() => {
+            if (!amountDetail) return;
+            const _amount = new Big(amountDetail.amount)
+              .div(new Big(10).pow(token.decimals))
+              .toNumber();
+            setConvertAmount([_amount, amountDetail.usd]);
+          }}
+        >
+          MAX
+        </button>
+        <button
+          className={styles.balanceBtn}
+          onClick={() => {
+            if (!amountDetail) return;
+            const _amount = new Big(amountDetail.amount)
+              .div(new Big(10).pow(token.decimals))
+              .toNumber();
+            setConvertAmount([_amount / 2, amountDetail.usd / 2]);
+          }}
+        >
+          HALF
+        </button>
+      </div>
+      <TokenBalance
+        balance={convertUsd}
+        className={styles.balanceDescription}
+        prefix='~$'
+        decimalScale={2}
+      />
+      <div className={styles.transferTab}>
+        <span
+          className={styles.tfBtn}
+          onClick={() => convertToNavie(convertAmount, token)}
+        >
+          Convert To Native Token
+        </span>
+      </div>
+    </div>
+  );
+};
 
 const TokenItem: React.FC<TokenItemProps> = ({
   token,
   amountDetail,
   active,
   className,
-  onClick
+  onClick,
+  convertToNavie
 }) => {
   return (
     <div
@@ -62,30 +154,41 @@ const TokenItem: React.FC<TokenItemProps> = ({
       )}
       onClick={() => onClick?.(token)}
     >
-      <div className={styles.token}>
-        {token.Icon && <token.Icon className={styles.tokenIcon} />}
-        <div className={styles.tokenInfo}>
-          <div className={styles.tokenName}>{token.name}</div>
-          <div className={styles.tokenOrg}>
-            <span className={styles.tokenOrgTxt}>{token.org}</span>
+      <div className={styles.balanceAmountInfo}>
+        <div className={styles.token}>
+          {token.Icon && <token.Icon className={styles.tokenIcon} />}
+          <div className={styles.tokenInfo}>
+            <div className={styles.tokenName}>{token.name}</div>
+            <div className={styles.tokenOrg}>
+              <span className={styles.tokenOrgTxt}>{token.org}</span>
+            </div>
           </div>
         </div>
+        <div className={styles.tokenBalance}>
+          <TokenBalance
+            balance={{
+              amount: amountDetail ? amountDetail.amount.toString() : '0',
+              denom: '',
+              decimals: token.decimals
+            }}
+            className={styles.tokenAmount}
+            decimalScale={Math.min(6, token.decimals)}
+          />
+          <TokenBalance
+            balance={amountDetail ? amountDetail.usd : 0}
+            className={styles.subLabel}
+            decimalScale={2}
+          />
+        </div>
       </div>
-      <div className={styles.tokenBalance}>
-        <TokenBalance
-          balance={{
-            amount: amountDetail ? amountDetail.amount.toString() : '0',
-            denom: '',
-            decimals: token.decimals
-          }}
-          className={styles.tokenAmount}
-          decimalScale={Math.min(6, token.decimals)}
-        />
-        <TokenBalance
-          balance={amountDetail ? amountDetail.usd : 0}
-          className={styles.subLabel}
-          decimalScale={2}
-        />
+      <div>
+        {token.decimals === 18 && token.cosmosBased && (
+          <ConvertToNative
+            token={token}
+            amountDetail={amountDetail}
+            convertToNavie={convertToNavie}
+          />
+        )}
       </div>
     </div>
   );
@@ -391,6 +494,76 @@ const Balance: React.FC<BalanceProps> = () => {
     setIBCLoading(false);
   };
 
+  const convertToNavie = async (amount: number, token: TokenItemType) => {
+    if (amount <= 0)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'From amount should be higher than 0!'
+      });
+
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      let walletAddr;
+      if (await window.Keplr.getKeplr())
+        walletAddr = await window.Keplr.getKeplrAddr();
+      else throw 'You have to install Keplr wallet to swap';
+
+      const _fromAmount = parseAmount(amount, token.decimals);
+      console.log(_fromAmount);
+
+      // const msgs = await generateConvertMsgs({
+      //   type: Type.CONVERT_TOKEN,
+      //   sender: `${walletAddr}`,
+      //   fromAmount: (amount * 10 ** token.decimals),
+      //   // @ts-ignore
+      //   fromToken: token
+      // });
+
+      // const msgs = await generateContractMessages({
+      //   type: Type.SWAP,
+      //   sender: `${walletAddr}`,
+      //   amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
+      //   fromInfo: fromTokenInfoData!,
+      //   toInfo: toTokenInfoData!
+      // });
+
+      // const msgs = await generateConvertMsgs({ type: Type.CONVERT_TOKEN, fromToken: fromTokenInfoData, fromAmount: "1", sender: `${walletAddr}` })
+
+      // const msg = msgs[0];
+      // console.log(
+      //   'msgs: ',
+      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+      // );
+      // const result = await CosmJs.execute({
+      //   prefix: ORAI,
+      //   address: msg.contract,
+      //   walletAddr,
+      //   handleMsg: Buffer.from(msg.msg.toString()),
+      //   gasAmount: { denom: ORAI, amount: '0' },
+      //   handleOptions: { funds: msg.sent_funds }
+      // });
+      // console.log('result swap tx hash: ', result);
+
+      // if (result) {
+      //   console.log('in correct result');
+      //   displayToast(TToastType.TX_SUCCESSFUL, {
+      //     customLink: `${network.explorer}/txs/${result.transactionHash}`
+      //   });
+      //   setSwapLoading(false);
+      //   setTxHash(result.transactionHash);
+      //   return;
+      // }
+    } catch (error) {
+      // console.log('error in swap form: ', error);
+      // let finalError = '';
+      // if (typeof error === 'string' || error instanceof String) {
+      //   finalError = error;
+      // } else finalError = String(error);
+      // displayToast(TToastType.TX_FAILED, {
+      //   message: finalError
+      // });
+    }
+  };
+
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   return (
@@ -423,7 +596,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         decimals: from?.decimals
                       }}
                       className={styles.balanceDescription}
-                      prefix="Balance: "
+                      prefix='Balance: '
                       decimalScale={Math.min(6, from?.decimals || 0)}
                     />
 
@@ -463,7 +636,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   <TokenBalance
                     balance={fromUsd}
                     className={styles.balanceDescription}
-                    prefix="~$"
+                    prefix='~$'
                     decimalScale={2}
                   />
                 </div>
@@ -559,7 +732,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     decimals: to?.decimals
                   }}
                   className={styles.balanceDescription}
-                  prefix="Balance: "
+                  prefix='Balance: '
                   decimalScale={Math.min(6, to?.decimals || 0)}
                 />
 
@@ -591,6 +764,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           active={to?.name === t.name}
                           token={t}
                           onClick={onClickTokenTo}
+                          convertToNavie={convertToNavie}
                         />
                       );
                     })}
