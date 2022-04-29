@@ -293,7 +293,7 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
-        fund: { denom: tokenInfo.denom, amount },
+        fund: { denom: tokenInfo.denom, amount: amount.toString() },
         info: { native_token: { denom: tokenInfo.denom } }
       };
     return { info: { native_token: { denom: tokenInfo.denom } } };
@@ -477,9 +477,9 @@ async function generateContractMessages(
           assets: [
             {
               info: toInfoData,
-              amount: provideQuery.toAmount
+              amount: provideQuery.toAmount.toString()
             },
-            { info: fromInfoData, amount: provideQuery.fromAmount }
+            { info: fromInfoData, amount: provideQuery.fromAmount.toString() }
           ]
         }
       };
@@ -492,7 +492,7 @@ async function generateContractMessages(
         send: {
           owner: sender,
           contract: withdrawQuery.pair,
-          amount: withdrawQuery.amount,
+          amount: withdrawQuery.amount.toString(),
           msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
         }
       };
@@ -502,7 +502,7 @@ async function generateContractMessages(
       const increaseAllowanceQuery = params as IncreaseAllowanceQuery;
       input = {
         increase_allowance: {
-          amount: increaseAllowanceQuery.amount,
+          amount: increaseAllowanceQuery.amount.toString(),
           spender: increaseAllowanceQuery.spender
         }
       };
@@ -543,7 +543,7 @@ export type WithdrawMining = {
 export type UnbondLiquidity = {
   type: Type.UNBOND_LIQUIDITY;
   sender: string;
-  amount: string;
+  amount: number | string;
   assetToken: TokenInfo;
 };
 
@@ -588,7 +588,10 @@ async function generateMiningMsgs(
       const unbondMsg = params as UnbondLiquidity;
       let { info: unbond_asset } = parseTokenInfo(unbondMsg.assetToken);
       input = {
-        unbond: { asset_info: unbond_asset, amount: unbondMsg.amount }
+        unbond: {
+          asset_info: unbond_asset,
+          amount: unbondMsg.amount.toString()
+        }
       };
       contractAddr = network.staking;
       break;
