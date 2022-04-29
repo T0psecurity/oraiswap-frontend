@@ -110,7 +110,7 @@ const Swap: React.FC<SwapProps> = () => {
   }, [fromToken, toToken]);
 
   const {
-    data: fromTokenBalance,
+    data: fromTokenBalance = 0,
     error: fromTokenBalanceError,
     isError: isFromTokenBalanceError,
     isLoading: isFromTokenBalanceLoading
@@ -290,7 +290,7 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('balance')}>
               <TokenBalance
                 balance={{
-                  amount: fromTokenBalance ? fromTokenBalance : 0,
+                  amount: fromTokenBalance,
                   denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "

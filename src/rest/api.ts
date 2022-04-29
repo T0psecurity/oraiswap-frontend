@@ -169,7 +169,7 @@ async function fetchTokenBalance(
   tokenAddr: string,
   walletAddr: string,
   lcd?: string
-) {
+): Promise<number> {
   const data = await querySmart(
     tokenAddr,
     {
@@ -177,7 +177,7 @@ async function fetchTokenBalance(
     },
     lcd
   );
-  return data.balance;
+  return parseInt(data.balance);
 }
 
 async function fetchTokenAllowance(
@@ -284,7 +284,7 @@ async function fetchBalance(
   denom: string,
   tokenAddr?: string,
   lcd?: string
-) {
+): Promise<number> {
   if (!tokenAddr) return fetchNativeTokenBalance(walletAddr, denom, lcd);
   else return fetchTokenBalance(tokenAddr, walletAddr, lcd);
 }
