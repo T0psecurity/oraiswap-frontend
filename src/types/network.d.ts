@@ -21,6 +21,7 @@ export interface NetworkConfig extends ExtNetworkConfig {
   denom: string;
   prefix: string;
   rewarder: string;
+  converter: string;
 }
 
 export interface Network extends NetworkConfig {

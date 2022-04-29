@@ -22,7 +22,8 @@ export enum Type {
   'INCREASE_ALLOWANCE' = 'Increase allowance',
   'BOND_LIQUIDITY' = 'Bond liquidity',
   'WITHDRAW_LIQUIDITY_MINING' = 'Withdraw Liquidity Mining Rewards',
-  'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens'
+  'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens',
+  'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens'
 }
 
 const oraiInfo = { native_token: { denom: ORAI } };
@@ -44,9 +45,8 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${
-    lcd ?? network.lcd
-  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${lcd ?? network.lcd
+    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -120,7 +120,7 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-      '0'
+    '0'
   );
 }
 
@@ -274,9 +274,8 @@ async function fetchNativeTokenBalance(
   denom: string,
   lcd?: string
 ) {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -331,27 +330,27 @@ const generateSwapOperationMsgs = (
   const pair = getPair(denoms);
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: {
@@ -616,6 +615,65 @@ async function generateMiningMsgs(
   return msgs;
 }
 
+export type Convert = {
+  type: Type.CONVERT_TOKEN;
+  sender: string;
+  fromToken: TokenInfo;
+  fromAmount: string;
+};
+
+async function generateConvertMsgs(
+  msg: Convert
+) {
+  // @ts-ignore
+  const { type, sender, fromToken, fromAmount } = msg;
+  let sent_funds;
+  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
+  let contractAddr = network.converter;
+  let input;
+  switch (type) {
+    case Type.CONVERT_TOKEN: {
+      // currently only support cw20 token pool
+      let { info: assetInfo, fund } = parseTokenInfo(fromToken, fromAmount);
+      // native case  
+      if (assetInfo.native_token) {
+        input = {
+          convert: {}
+        }
+        sent_funds = handleSentFunds(fund as Fund);
+      } else {
+        // cw20 case
+        input = {
+          send: {
+            contract: network.converter,
+            amount: fromAmount,
+            msg: btoa(
+              JSON.stringify({
+                convert: {}
+              })
+            )
+          }
+        };
+        contractAddr = assetInfo.token.contract_addr;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  const msgs = [
+    {
+      contract: contractAddr,
+      msg: Buffer.from(JSON.stringify(input)),
+      sender,
+      sent_funds
+    }
+  ];
+
+  return msgs;
+}
+
 export {
   querySmart,
   fetchTaxRate,
@@ -634,6 +692,7 @@ export {
   fetchPoolMiningInfo,
   fetchRewardMiningInfo,
   generateMiningMsgs,
+  generateConvertMsgs,
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,

@@ -110,10 +110,11 @@ declare global {
       REACT_APP_GRAVITY_ETH_CONTRACT: string;
       REACT_APP_STAKING_CONTRACT: string;
       REACT_APP_REWARDER_CONTRACT: string;
+      REACT_APP_CONVERTER_CONTRACT: string;
     }
   }
 }
 
 declare module 'crypto-hashing';
 
-export {};
+export { };
