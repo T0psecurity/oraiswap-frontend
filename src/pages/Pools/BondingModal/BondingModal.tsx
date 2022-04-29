@@ -13,6 +13,7 @@ import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
+import { TokenInfo } from 'types/token';
 
 const cx = cn.bind(style);
 
@@ -22,7 +23,7 @@ interface ModalProps {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
-  lpTokenInfoData: any;
+  lpTokenInfoData: TokenInfo;
   lpTokenBalance: any;
   liquidityValue: number;
   assetToken: any;
@@ -62,7 +63,7 @@ const BondingModal: FC<ModalProps> = ({
         type: Type.BOND_LIQUIDITY,
         sender: address,
         amount: parsedAmount,
-        lpToken: lpTokenInfoData.contract_addr,
+        lpToken: lpTokenInfoData.contractAddress!,
         assetToken
       });
 
