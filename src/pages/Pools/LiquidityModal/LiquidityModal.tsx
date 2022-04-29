@@ -21,7 +21,7 @@ import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
-import CosmJs from 'libs/cosmjs';
+import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { DECIMAL_FRACTION, ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
@@ -318,7 +318,6 @@ const LiquidityModal: FC<ModalProps> = ({
         customLink: `${network.explorer}/txs/${result.transactionHash}`
       });
       setTxHash(result.transactionHash);
-      return;
     }
   };
 
@@ -391,9 +390,8 @@ const LiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
+
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -404,8 +402,9 @@ const LiquidityModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   const handleWithdrawLiquidity = async () => {
@@ -442,8 +441,8 @@ const LiquidityModal: FC<ModalProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        // @ts-ignore
-        handleOptions: { funds: msg.sent_funds }
+
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
 
       console.log('result provide tx hash: ', result);
@@ -453,9 +452,7 @@ const LiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -466,8 +463,9 @@ const LiquidityModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   const onChangeWithdrawPercent = (option: number) => {

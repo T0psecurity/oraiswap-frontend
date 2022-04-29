@@ -556,7 +556,6 @@ const Balance: React.FC<BalanceProps> = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
