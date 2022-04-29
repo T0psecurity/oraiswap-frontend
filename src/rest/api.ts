@@ -323,14 +323,12 @@ async function fetchExchangeRate(base_denom: string, quote_denom: string) {
   return data?.item?.exchange_rate;
 }
 
-const generateSwapOperationMsgs = (data: {
-  denom: string;
-  offerInfo: any;
-  askInfo: any;
-}) => {
-  const { denom, offerInfo, askInfo } = data;
-  const [denom1, denom2] = denom.split(/[-_]/);
-  const pair = getPair(denom1, denom2);
+const generateSwapOperationMsgs = (
+  denoms: [string, string],
+  offerInfo: any,
+  askInfo: any
+) => {
+  const pair = getPair(denoms[0], denoms[1]);
   return pair
     ? [
         {
@@ -367,11 +365,11 @@ async function simulateSwap(query: {
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo, undefined);
 
-  let operations = generateSwapOperationMsgs({
-    denom: `${fromInfo.name}_${toInfo.name}`,
+  let operations = generateSwapOperationMsgs(
+    [fromInfo.denom, toInfo.denom],
     offerInfo,
     askInfo
-  });
+  );
 
   let msg = {
     simulate_swap_operations: {
@@ -445,11 +443,11 @@ async function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund as Fund, askSentFund as Fund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs({
-            denom: `${swapQuery.fromInfo.name}_${swapQuery.toInfo.name}`,
+          operations: generateSwapOperationMsgs(
+            [swapQuery.fromInfo.name, swapQuery.toInfo.name],
             offerInfo,
             askInfo
-          })
+          )
         }
       };
       // if cw20 => has to send through cw20 contract
