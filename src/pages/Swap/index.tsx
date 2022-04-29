@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import style from './index.module.scss';
 import cn from 'classnames/bind';
-import { TooltipIcon } from 'components/Tooltip';
 import SettingModal from './Modals/SettingModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
 import { useQuery } from 'react-query';
@@ -16,12 +15,7 @@ import {
   SwapQuery
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import {
-  BEP20_ORAI,
-  DECIMAL_FRACTION,
-  ERC20_ORAI,
-  ORAI
-} from 'constants/constants';
+import { ORAI } from 'constants/constants';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
