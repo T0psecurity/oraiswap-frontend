@@ -7,7 +7,7 @@ import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
 import Pie from 'components/Pie';
-import { mockToken, PairKey, pairsMap, TokensSwap } from 'constants/pools';
+import { getPair, Pair, pairs } from 'constants/pools';
 import {
   fetchBalance,
   fetchPairInfo,
@@ -35,7 +35,7 @@ interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
-  let pair;
+  let pair: Pair | undefined;
 
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
@@ -48,23 +48,17 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   const getPairInfo = async () => {
     if (!poolUrl) return;
-    let [_token1, _token2] = poolUrl.toUpperCase().split('_');
-    if (!_token2) return;
-    if (_token2 === ORAI) {
-      [_token1, _token2] = [_token2, _token1];
-    }
-    const k = [_token1, _token2].join('_') as PairKey;
-    pair = pairsMap[k];
-    if (!pair) return;
-    let token1 = {
-        ...mockToken[pair.asset_denoms[0]],
-        contract_addr: mockToken[pair.asset_denoms[0]].contractAddress
-      },
-      token2 = {
-        ...mockToken[pair.asset_denoms[1]],
-        contract_addr: mockToken[pair.asset_denoms[1]].contractAddress
-      };
+    let [_token1, _token2] = poolUrl.split('_');
 
+    pair = getPair(_token1, _token2);
+    if (!pair) return;
+    const token1 = filteredTokens.find(
+      (token) => token.denom === pair!.asset_denoms[0]
+    );
+
+    const token2 = filteredTokens.find(
+      (token) => token.denom === pair!.asset_denoms[1]
+    );
     // Token1Icon = token1.Icon;
     // Token2Icon = token2.Icon;
 
@@ -105,8 +99,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     } else {
       const _poolData = await fetchPoolInfoAmount(
         // @ts-ignore
-        mockToken['orai']!,
-        mockToken[process.env.REACT_APP_UST_ORAICHAIN_DENOM]!
+        filteredTokens.find((token) => token.denom === ORAI)!,
+        filteredTokens.find(
+          (token) => token.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        )!
       );
       oraiPrice = new Fraction(
         _poolData.askPoolAmount,
@@ -244,15 +240,15 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   );
 
   useEffect(() => {
-    if (pairInfoData?.token1.name === 'ORAI') {
+    if (pairInfoData?.token1?.name === 'ORAI') {
       setAssetToken(pairInfoData.token2);
     } else if (!!pairInfoData) {
       setAssetToken(pairInfoData.token1);
     }
   }, [pairInfoData]);
 
-  const Token1Icon = pairInfoData?.token1.Icon,
-    Token2Icon = pairInfoData?.token2.Icon;
+  const Token1Icon = pairInfoData?.token1?.Icon,
+    Token2Icon = pairInfoData?.token2?.Icon;
 
   const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
   const liquidity1 =
@@ -337,7 +333,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           ></span>
                           <span className={cx('icon')}></span>
                           <span className={cx('token-name')}>
-                            {pairInfoData.token1.name}
+                            {pairInfoData.token1?.name}
                           </span>
                         </div>
                         <div className={cx('liquidity_token_value')}>
@@ -364,7 +360,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           ></span>
                           <span className={cx('icon')}></span>
                           <span className={cx('token-name')}>
-                            {pairInfoData.token2.name}
+                            {pairInfoData.token2?.name}
                           </span>
                         </div>
                         <div className={cx('liquidity_token_value')}>
@@ -423,7 +419,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('pool-catalyst_token_name')}>
                           {Token2Icon! && <Token2Icon className={cx('icon')} />}
                           <span className={cx('token-name')}>
-                            {pairInfoData.token2.name}
+                            {pairInfoData.token2?.name}
                           </span>
                         </div>
                         <div className={cx('pool-catalyst_token_value')}>

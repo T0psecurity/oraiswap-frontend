@@ -20,16 +20,18 @@ import {
   simulateSwap
 } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
-import { DECIMAL_FRACTION, ORAI } from 'constants/constants';
+import {
+  BEP20_ORAI,
+  DECIMAL_FRACTION,
+  ERC20_ORAI,
+  ORAI
+} from 'constants/constants';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'constants/networks';
-import Big from 'big.js';
 import NumberFormat from 'react-number-format';
-import { pairsMap as mockPair, mockToken } from 'constants/pools';
-import { TokenItemType, tokens } from 'constants/bridgeTokens';
-import useLocalStorage from 'libs/useLocalStorage';
+import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
@@ -37,16 +39,14 @@ import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(style);
 
-type TokenDenom = keyof typeof mockToken;
-
 interface ValidToken {
-  title: TokenDenom;
+  title: string;
   contractAddress: string;
   Icon: string;
   denom: string;
 }
 
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -63,27 +63,17 @@ const suggestToken = async (token: TokenItemType) => {
 };
 
 const Swap: React.FC<SwapProps> = () => {
-  const allToken: ValidToken[] = Object.values(mockToken)
-    .map((token) => {
-      return {
-        contractAddress: token.contractAddress,
-        Icon: token.Icon,
-        title: token.name,
-        denom: token.denom
-      };
-    })
-    .filter(
-      (t) =>
-        t.title != 'Erc20 ORAI' && t.title != 'Bep20 ORAI' && t.title != 'ORAIX'
-    );
+  const allToken = filteredTokens.filter(
+    (t) => t.denom !== ERC20_ORAI && t.denom !== BEP20_ORAI && t.name != 'ORAIX'
+  );
 
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [isSelectFee, setIsSelectFee] = useState(false);
-  const [fromToken, setFromToken] = useState<TokenDenom>('orai');
-  const [toToken, setToToken] = useState<TokenDenom>('airi');
-  const [feeToken, setFeeToken] = useState<TokenDenom>('airi');
+  const [fromTokenDenom, setFromToken] = useState<string>('orai');
+  const [toTokenDenom, setToToken] = useState<string>('airi');
+  const [feeToken, setFeeToken] = useState<string>('airi');
   const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
   const [fromAmount, setFromAmount] = useState(0);
   const [toAmount, setToAmount] = useState(0);
@@ -101,7 +91,7 @@ const Swap: React.FC<SwapProps> = () => {
 
   const onMaxFromAmount = (amount: number) => {
     let finalAmount = parseFloat(
-      parseDisplayAmount(amount, fromTokenInfoData?.decimals)
+      parseDisplayAmount(amount, fromTokenInfoData?.decimals) as string
     );
     setFromAmount(finalAmount);
   };
@@ -116,13 +106,18 @@ const Swap: React.FC<SwapProps> = () => {
     () => fetchTaxRate()
   );
 
+  const fromToken = filteredTokens.find(
+    (token) => token.denom === fromTokenDenom
+  );
+  const toToken = filteredTokens.find((token) => token.denom === toTokenDenom);
+
   const {
     data: fromTokenInfoData,
     error: fromTokenInfoError,
     isError: isFromTokenInfoError,
     isLoading: isFromTokenInfoLoading
   } = useQuery(['from-token-info', fromToken], () =>
-    fetchTokenInfo(mockToken[fromToken])
+    fetchTokenInfo(fromToken!)
   );
 
   const {
@@ -130,20 +125,15 @@ const Swap: React.FC<SwapProps> = () => {
     error: toTokenInfoError,
     isError: isToTokenInfoError,
     isLoading: isToTokenInfoLoading
-  } = useQuery(['to-token-info', toToken], () =>
-    fetchTokenInfo(mockToken[toToken])
-  );
-
-  const mockFromToken = mockToken[fromToken];
-  const mockToToken = mockToken[toToken];
+  } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(toToken!));
 
   // suggest tokens
   useEffect(() => {
-    if (mockFromToken && mockToToken) {
-      suggestToken(mockFromToken);
-      suggestToken(mockToToken);
+    if (fromToken && toToken) {
+      suggestToken(fromToken);
+      suggestToken(toToken);
     }
-  }, [mockFromToken, mockToToken]);
+  }, [fromToken, toToken]);
 
   const {
     data: fromTokenBalance,
@@ -155,11 +145,11 @@ const Swap: React.FC<SwapProps> = () => {
     () =>
       fetchBalance(
         address,
-        mockFromToken.denom,
-        mockFromToken.contractAddress,
-        mockFromToken.lcd
+        fromToken!.denom,
+        fromToken!.contractAddress,
+        fromToken!.lcd
       ),
-    { enabled: !!address }
+    { enabled: !!address && !!fromToken }
   );
 
   const {
@@ -172,11 +162,11 @@ const Swap: React.FC<SwapProps> = () => {
     () =>
       fetchBalance(
         address,
-        mockToToken.denom,
-        mockToToken.contractAddress,
-        mockToToken.lcd
+        toToken!.denom,
+        toToken!.contractAddress,
+        toToken!.lcd
       ),
-    { enabled: !!address }
+    { enabled: !!address && !!toToken }
   );
 
   const {
@@ -186,7 +176,7 @@ const Swap: React.FC<SwapProps> = () => {
     isLoading: isExchangeRateLoading
   } = useQuery(
     ['exchange-rate', fromTokenInfoData, toTokenInfoData],
-    () => fetchExchangeRate(toTokenInfoData?.denom, fromTokenInfoData?.denom),
+    () => fetchExchangeRate(toTokenInfoData!.denom, fromTokenInfoData!.denom),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
 
@@ -199,8 +189,8 @@ const Swap: React.FC<SwapProps> = () => {
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
     () =>
       simulateSwap({
-        fromInfo: fromTokenInfoData,
-        toInfo: toTokenInfoData,
+        fromInfo: fromTokenInfoData!,
+        toInfo: toTokenInfoData!,
         amount: parseAmount(fromAmount, fromTokenInfoData?.decimals)
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
@@ -211,24 +201,12 @@ const Swap: React.FC<SwapProps> = () => {
       ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
       () =>
         simulateSwap({
-          fromInfo: fromTokenInfoData,
-          toInfo: toTokenInfoData,
+          fromInfo: fromTokenInfoData!,
+          toInfo: toTokenInfoData!,
           amount: parseAmount('1', fromTokenInfoData?.decimals)
         }),
       { enabled: !!fromTokenInfoData && !!toTokenInfoData }
     );
-
-  // const { data: poolData, isLoading: isPoolDataLoading } = useQuery(
-  //   ['pool-info-amount', fromTokenInfoData, toTokenInfoData],
-  //   () => fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-  //   { enabled: !!fromTokenInfoData && !!toTokenInfoData && !!taxRate }
-  // );
-
-  // const { data: pairInfo, isLoading: isPairInfoLoading } = useQuery(
-  //   ['pair-info', fromTokenInfoData, toTokenInfoData],
-  //   () => fetchPairInfo(mockToken),
-  //   { enabled: !!fromTokenInfoData && !!toTokenInfoData }
-  // );
 
   useEffect(() => {
     console.log('simulate average data: ', simulateAverageData);
@@ -253,7 +231,7 @@ const Swap: React.FC<SwapProps> = () => {
   useEffect(() => {
     const listToken = allToken.filter((t) => fromToken !== t.denom);
     setListValidTo([...listToken]);
-    // if (!listTo.includes(toToken)) setToToken(listTo[0] as TokenDenom);
+    // if (!listTo.includes(toToken)) setToToken(listTo[0] as string);
   }, [fromToken]);
 
   // useEffect(() => {
@@ -317,8 +295,8 @@ const Swap: React.FC<SwapProps> = () => {
         type: Type.SWAP,
         sender: `${walletAddr}`,
         amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
-        fromInfo: fromTokenInfoData,
-        toInfo: toTokenInfoData
+        fromInfo: fromTokenInfoData!,
+        toInfo: toTokenInfoData!
       });
 
       // const msgs = await generateMiningMsgs({
@@ -370,18 +348,8 @@ const Swap: React.FC<SwapProps> = () => {
     setSwapLoading(false);
   };
 
-  const getListPairedToken = (tokenDenom: TokenDenom) => {
-    let pairs = Object.keys(mockPair).filter((denom) =>
-      denom.includes(tokenDenom)
-    );
-    return pairs!.map((denom) =>
-      denom.replace(tokenDenom, '').replace('-', '')
-    );
-  };
-
-  const FromIcon = mockToken[fromToken]?.Icon;
-  const ToIcon = mockToken[toToken]?.Icon;
-  // const FeeIcon = mockToken[feeToken].Icon;
+  const FromIcon = fromToken?.Icon;
+  const ToIcon = toToken?.Icon;
 
   return (
     <Content>
@@ -526,9 +494,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input

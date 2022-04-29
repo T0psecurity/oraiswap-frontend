@@ -5,7 +5,6 @@ import style from './NewPoolModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
-import { pairsMap as mockPair, mockToken } from 'constants/pools';
 import { useQuery } from 'react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import {
@@ -30,10 +29,8 @@ import NumberFormat from 'react-number-format';
 
 const cx = cn.bind(style);
 
-type TokenDenom = keyof typeof mockToken;
-
 interface ValidToken {
-  title: TokenDenom;
+  title: string;
   contractAddress: string | undefined;
   Icon: string | FC;
   denom: string;
@@ -57,12 +54,6 @@ interface ModalProps {
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
-  const allToken = Object.values(mockToken).map((token) => {
-    return {
-      ...token,
-      title: token.name
-    };
-  });
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
@@ -70,12 +61,12 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [isSelectingToken, setIsSelectingToken] = useState<
     'token1' | 'token2' | null
   >(null);
-  const [token1, setToken1] = useState<TokenDenom | null>(null);
-  const [token2, setToken2] = useState<TokenDenom | null>(null);
+  const [token1, setToken1] = useState<string | null>(null);
+  const [token2, setToken2] = useState<string | null>(null);
   const [listToken1Option, setListToken1Option] =
-    useState<ValidToken[]>(allToken);
+    useState<ValidToken[]>(filteredTokens);
   const [listToken2Option, setListToken2Option] =
-    useState<ValidToken[]>(allToken);
+    useState<ValidToken[]>(filteredTokens);
   const [supplyToken1, setSupplyToken1] = useState(0);
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState(0);
@@ -88,7 +79,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     isError: isToken1InfoError,
     isLoading: isToken1InfoLoading
   } = useQuery(['token-info', token1], () => {
-    if (!!token1) return fetchTokenInfo(mockToken[token1!]);
+    if (!!token1)
+      return fetchTokenInfo(
+        filteredTokens.find((token) => token.denom === token1)
+      );
   });
 
   const {
@@ -97,8 +91,14 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     isError: isToken2InfoError,
     isLoading: isToken2InfoLoading
   } = useQuery(['token-info', token2], () => {
-    if (!!token2) return fetchTokenInfo(mockToken[token2!]);
+    if (!!token2)
+      return fetchTokenInfo(
+        filteredTokens.find((token) => token.denom === token2)
+      );
   });
+
+  const tokenObj1 = filteredTokens.find((token) => token.denom === token1);
+  const tokenObj2 = filteredTokens.find((token) => token.denom === token2);
 
   const {
     data: token1Balance,
@@ -110,9 +110,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     () =>
       fetchBalance(
         address,
-        mockToken[token1!].denom,
-        mockToken[token1!].contractAddress,
-        mockToken[token1!].lcd
+        tokenObj1.denom,
+        tokenObj1.contractAddress,
+        tokenObj1.lcd
       ),
     { enabled: !!address && !!token1 }
   );
@@ -127,15 +127,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     () =>
       fetchBalance(
         address,
-        mockToken[token2!].denom,
-        mockToken[token2!].contractAddress,
-        mockToken[token2!].lcd
+        tokenObj2.denom,
+        tokenObj2.contractAddress,
+        tokenObj2.lcd
       ),
     { enabled: !!address && !!token2 }
   );
 
-  const Token1Icon = mockToken[token1!]?.Icon;
-  const Token2Icon = mockToken[token2!]?.Icon;
+  const Token1Icon = tokenObj1?.Icon;
+  const Token2Icon = tokenObj2?.Icon;
 
   const getBalanceValue = (tokenSymbol: string, amount: number) => {
     const coingeckoId = filteredTokens.find(
@@ -539,7 +539,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         isOpen={isSelectingToken === 'token1'}
         open={() => setIsSelectingToken('token1')}
         close={() => setIsSelectingToken(null)}
-        setToken={(token1: TokenDenom) => {
+        setToken={(token1: string) => {
           setToken1(token1);
 
           setListToken2Option(allToken.filter((t) => t.denom !== token1));
@@ -550,7 +550,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         isOpen={isSelectingToken === 'token2'}
         open={() => setIsSelectingToken('token2')}
         close={() => setIsSelectingToken(null)}
-        setToken={(token2: TokenDenom) => {
+        setToken={(token2: string) => {
           setToken2(token2);
           setListToken1Option(allToken.filter((t) => t.denom !== token2));
         }}

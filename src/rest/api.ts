@@ -4,19 +4,15 @@ import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'constants/constants';
-import { PairKey, pairsMap } from 'constants/pools';
+import { getPair, pairs } from 'constants/pools';
 import axios from './request';
 
-interface TokenInfo {
-  name: string;
+type TokenInfo = TokenItemType & {
   symbol: string;
-  denom: string;
-  decimals: number;
   total_supply: string;
-  contract_addr?: string;
   icon?: string;
   verified?: boolean;
-}
+};
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -85,18 +81,18 @@ function fetchRewardMiningInfo(address: string, asset_info: AssetInfo) {
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   let tokenInfo: TokenInfo = {
+    ...tokenSwap,
     symbol: '',
     name: tokenSwap.name,
-    contract_addr: tokenSwap.contractAddress,
+    contractAddress: tokenSwap.contractAddress,
     decimals: 6,
-    denom: tokenSwap.denom,
     icon: '',
+    denom: tokenSwap.denom,
     verified: false,
     total_supply: ''
   };
   if (!tokenSwap.contractAddress) {
     tokenInfo.symbol = tokenSwap.name;
-    tokenInfo.icon = tokenSwap.name;
     tokenInfo.verified = true;
   } else {
     const data = await querySmart(tokenSwap.contractAddress, {
@@ -106,7 +102,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
       ...tokenInfo,
       symbol: data.symbol,
       name: data.name,
-      contract_addr: tokenSwap.contractAddress,
+      contractAddress: tokenSwap.contractAddress,
       decimals: data.decimals,
       icon: data.icon,
       verified: data.verified,
@@ -137,11 +133,10 @@ async function fetchPoolInfoAmount(
 
   let offerPoolAmount = 0,
     askPoolAmount = 0;
-  const keyPair = `${fromTokenInfo.symbol || fromTokenInfo.name}_${
-    toTokenInfo.symbol || toTokenInfo.name
-  }` as PairKey;
 
-  if (pairsMap[keyPair]) {
+  const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
+
+  if (pair) {
     const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
     const poolInfo = await fetchPool(pairInfo.contract_addr);
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
@@ -163,6 +158,7 @@ async function fetchPairInfo(
 ): Promise<PairInfo> {
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+
   const data = await fetchPairInfoRaw([firstAsset, secondAsset]);
   return data;
 }
@@ -299,7 +295,7 @@ async function fetchBalance(
 }
 
 const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string | number) => {
-  if (!tokenInfo?.contract_addr) {
+  if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
         fund: { denom: tokenInfo.denom, amount },
@@ -307,7 +303,7 @@ const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string | number) => {
       };
     return { info: { native_token: { denom: tokenInfo.denom } } };
   }
-  return { info: { token: { contract_addr: tokenInfo?.contract_addr } } };
+  return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
 };
 
 const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
@@ -333,7 +329,9 @@ const generateSwapOperationMsgs = (data: {
   askInfo: any;
 }) => {
   const { denom, offerInfo, askInfo } = data;
-  return pairsMap[denom as PairKey]
+  const [denom1, denom2] = denom.split(/[-_]/);
+  const pair = getPair(denom1, denom2);
+  return pair
     ? [
         {
           orai_swap: {
@@ -455,7 +453,7 @@ async function generateContractMessages(
         }
       };
       // if cw20 => has to send through cw20 contract
-      if (!swapQuery.fromInfo.contract_addr) {
+      if (!swapQuery.fromInfo.contractAddress) {
         input = inputTemp;
       } else {
         input = {
@@ -465,7 +463,7 @@ async function generateContractMessages(
             msg: btoa(JSON.stringify(inputTemp))
           }
         };
-        contractAddr = swapQuery.fromInfo.contract_addr;
+        contractAddr = swapQuery.fromInfo.contractAddress;
       }
       break;
     // TODO: provide liquidity and withdraw liquidity

@@ -13,7 +13,7 @@ export interface IBCInfoMap {
   [key: string]: { [key: string]: IBCInfo };
 }
 
-const ibcInfosMap: { [key: string]: IBCInfoMap } = {
+const ibcInfosMap: Record<NetworkKey, IBCInfoMap> = {
   [NetworkKey.TESTNET]: {
     'gravity-test': {
       'Oraichain-testnet': {

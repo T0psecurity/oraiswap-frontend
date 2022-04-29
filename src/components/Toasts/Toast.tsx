@@ -69,6 +69,11 @@ export type DisplayToastFn = ((
     type: TToastType.TX_FAILED,
     extraData?: Partial<Pick<IToastExtra, 'message'>>,
     options?: Partial<ToastOptions>
+  ) => void) &
+  ((
+    type: TToastType.KEPLR_FAILED,
+    extraData?: Partial<Pick<IToastExtra, 'message'>>,
+    options?: Partial<ToastOptions>
   ) => void);
 
 export interface DisplayToast {
