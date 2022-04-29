@@ -66,7 +66,7 @@ const Swap: React.FC<SwapProps> = () => {
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState(0);
   const [slippage, setSlippage] = useState(1);
-  const [address, setAddress] = useGlobalState('address');
+  const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [txHash, setTxHash] = useState<String>();
   const [refresh, setRefresh] = useState(false);
@@ -219,26 +219,21 @@ const Swap: React.FC<SwapProps> = () => {
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       const msgs = await generateContractMessages({
         type: Type.SWAP,
-        sender: `${walletAddr}`,
+        sender: address,
         amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!
       });
 
       // const msgs = await generateConvertMsgs({ type: Type.CONVERT_TOKEN, fromToken: fromTokenInfoData, fromAmount: "1", sender: `${walletAddr}` })
-
       const msg = msgs[0];
       console.log(
         'msgs: ',
         msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
       );
+
       const result = await CosmJs.execute({
         prefix: ORAI,
         address: msg.contract,
