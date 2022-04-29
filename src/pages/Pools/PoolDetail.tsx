@@ -48,9 +48,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   const getPairInfo = async () => {
     if (!poolUrl) return;
-    let [_token1, _token2] = poolUrl.split('_');
 
-    pair = getPair(_token1, _token2);
+    pair = getPair(poolUrl.split('_'));
     if (!pair) return;
     const token1 = filteredTokens.find(
       (token) => token.denom === pair!.asset_denoms[0]
