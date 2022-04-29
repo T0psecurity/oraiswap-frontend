@@ -189,39 +189,6 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   );
 
-  // const {
-  //   data: lpTokenBalance,
-  //   error: lpTokenBalanceError,
-  //   isError: isLpTokenBalanceError,
-  //   isLoading: isLpTokenBalanceLoading
-  // } = useQuery(
-  //   ['token-balance', JSON.stringify(pairInfoData), txHash],
-  //   () => fetchBalance(address, '', pairInfoData?.liquidity_token),
-  //   {
-  //     enabled: !!address && !!pairInfoData,
-  //     refetchOnWindowFocus: false
-  //   }
-  // );
-
-  // const {
-  //   data: lpTokenInfoData,
-  //   error: lpTokenInfoError,
-  //   isError: isLpTokenInfoError,
-  //   isLoading: isLpTokenInfoLoading
-  // } = useQuery(
-  //   ['token-info', JSON.stringify(pairInfoData?.pair.contract_addr)],
-  //   () => {
-  //     // @ts-ignore
-  //     return fetchTokenInfo({
-  //       contractAddress: pairInfoData?.liquidity_token
-  //     });
-  //   },
-  //   {
-  //     enabled: !!pairInfoData,
-  //     refetchOnWindowFocus: false
-  //   }
-  // );
-
   useEffect(() => {
     if (!pairAmountInfoData?.ratio) {
     } else if (recentInput === 1 && !!+amountToken1) {
@@ -307,8 +274,7 @@ const LiquidityModal: FC<ModalProps> = ({
       walletAddr,
       handleMsg: msg.msg.toString(),
       gasAmount: { denom: ORAI, amount: '0' },
-      // @ts-ignore
-      handleOptions: { funds: msg.sent_funds }
+      handleOptions: { funds: msg.sent_funds } as HandleOptions
     });
     console.log('result increase allowance tx hash: ', result);
 
@@ -380,8 +346,7 @@ const LiquidityModal: FC<ModalProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        // @ts-ignore
-        handleOptions: { funds: msg.sent_funds }
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
       console.log('result provide tx hash: ', result);
 

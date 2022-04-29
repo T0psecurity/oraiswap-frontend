@@ -7,7 +7,7 @@ import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
 import Pie from 'components/Pie';
-import { getPair, Pair, pairs } from 'constants/pools';
+import { getPair, Pair, pairs, poolTokens } from 'constants/pools';
 import {
   fetchBalance,
   fetchPairInfo,
@@ -19,7 +19,7 @@ import {
   fetchDistributionInfo
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
+import { TokenItemType } from 'constants/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
@@ -32,22 +32,6 @@ import { ORAI } from 'constants/constants';
 const cx = cn.bind(styles);
 
 interface PoolDetailProps {}
-
-filteredTokens.push({
-  name: 'ORAIX',
-  org: 'Oraichain',
-  prefix: 'orai',
-  coinType: 118,
-  denom: 'oraix',
-  contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
-  // coingeckoId: 'oraichain-token',
-  decimals: 6,
-  chainId: 'Oraichain',
-  rpc: 'https://rpc.orai.io',
-  lcd: 'https://lcd.orai.io'
-  // cosmosBased: true,
-  // Icon: ORAI
-} as TokenItemType);
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -67,22 +51,17 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     pair = getPair(poolUrl.split('_'));
     if (!pair) return;
-    const token1 = filteredTokens.find(
+    const token1 = poolTokens.find(
       (token) => token.denom === pair!.asset_denoms[0]
     );
 
-    const token2 = filteredTokens.find(
+    const token2 = poolTokens.find(
       (token) => token.denom === pair!.asset_denoms[1]
     );
     // Token1Icon = token1.Icon;
     // Token2Icon = token2.Icon;
 
-    const pairInfo = await fetchPairInfo([
-      // @ts-ignore
-      token1,
-      // @ts-ignore
-      token2
-    ]);
+    const pairInfo = await fetchPairInfo([token1!, token2!]);
 
     return {
       ...pairInfo,
@@ -109,8 +88,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       );
     } else {
       const _poolData = await fetchPoolInfoAmount(
-        filteredTokens.find((token) => token.denom === ORAI)!,
-        filteredTokens.find(
+        poolTokens.find((token) => token.denom === ORAI)!,
+        poolTokens.find(
           (token) => token.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
         )!
       );
@@ -200,12 +179,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     isLoading: isLpTokenInfoLoading
   } = useQuery(
     ['token-info', pairInfoData],
-    () => {
-      // @ts-ignore
-      return fetchTokenInfo({
+    () =>
+      fetchTokenInfo({
         contractAddress: pairInfoData?.liquidity_token
-      });
-    },
+      } as TokenItemType),
     {
       enabled: !!pairInfoData,
       refetchOnWindowFocus: false

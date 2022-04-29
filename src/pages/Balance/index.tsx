@@ -41,7 +41,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 import Big from 'big.js';
 import { ERC20_ORAI, ORAI } from 'constants/constants';
-import CosmJs from 'libs/cosmjs';
+import CosmJs, { HandleOptions } from 'libs/cosmjs';
 
 interface BalanceProps {}
 
@@ -518,18 +518,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       const _fromAmount = parseAmountTo(amount, token.decimals).toString();
 
       const msgs = await generateConvertMsgs({
         type: Type.CONVERT_TOKEN,
-        sender: `${walletAddr}`,
+        sender: keplrAddress,
         fromAmount: _fromAmount,
-        // @ts-ignore
         fromToken: token
       });
 
@@ -541,12 +535,10 @@ const Balance: React.FC<BalanceProps> = () => {
       const result = await CosmJs.execute({
         prefix: ORAI,
         address: msg.contract,
-        walletAddr,
-        // @ts-ignore
+        walletAddr: keplrAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        // @ts-ignore
-        handleOptions: { funds: msg.sent_funds }
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
       console.log('result swap tx hash: ', result);
 

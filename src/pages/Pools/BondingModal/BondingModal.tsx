@@ -84,7 +84,6 @@ const BondingModal: FC<ModalProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
       });
       console.log('result provide tx hash: ', result);

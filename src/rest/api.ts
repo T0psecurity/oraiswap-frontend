@@ -420,7 +420,6 @@ export type IncreaseAllowanceQuery = {
 async function generateContractMessages(
   query: SwapQuery | ProvideQuery | WithdrawQuery | IncreaseAllowanceQuery
 ) {
-  // @ts-ignore
   const { type, sender, ...params } = query;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
@@ -550,7 +549,6 @@ export type UnbondLiquidity = {
 async function generateMiningMsgs(
   msg: BondMining | WithdrawMining | UnbondLiquidity
 ) {
-  // @ts-ignore
   const { type, sender, ...params } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
@@ -614,12 +612,11 @@ async function generateMiningMsgs(
 export type Convert = {
   type: Type.CONVERT_TOKEN;
   sender: string;
-  fromToken: TokenInfo;
+  fromToken: TokenItemType;
   fromAmount: string;
 };
 
 async function generateConvertMsgs(msg: Convert) {
-  // @ts-ignore
   const { type, sender, fromToken, fromAmount } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
