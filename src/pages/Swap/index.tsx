@@ -32,17 +32,11 @@ import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
 import { isMobile } from '@walletconnect/browser-utils';
+import { poolTokens } from 'constants/pools';
 
 const cx = cn.bind(style);
 
-interface ValidToken {
-  title: string;
-  contractAddress: string;
-  Icon: string;
-  denom: string;
-}
-
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -59,10 +53,6 @@ const suggestToken = async (token: TokenItemType) => {
 };
 
 const Swap: React.FC<SwapProps> = () => {
-  const allToken = filteredTokens.filter(
-    (t) => t.denom !== ERC20_ORAI && t.denom !== BEP20_ORAI && t.name != 'ORAIX'
-  );
-
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
@@ -70,7 +60,6 @@ const Swap: React.FC<SwapProps> = () => {
   const [fromTokenDenom, setFromToken] = useState<string>('orai');
   const [toTokenDenom, setToToken] = useState<string>('airi');
   const [feeToken, setFeeToken] = useState<string>('airi');
-  const [listValidTo, setListValidTo] = useState<ValidToken[]>([]);
   const [fromAmount, setFromAmount] = useState(0);
   const [toAmount, setToAmount] = useState(0);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
@@ -187,7 +176,7 @@ const Swap: React.FC<SwapProps> = () => {
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: parseAmount(fromAmount, fromTokenInfoData?.decimals)
+        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals)
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
@@ -199,7 +188,7 @@ const Swap: React.FC<SwapProps> = () => {
         simulateSwap({
           fromInfo: fromTokenInfoData!,
           toInfo: toTokenInfoData!,
-          amount: parseAmount('1', fromTokenInfoData?.decimals)
+          amount: parseAmount('1', fromTokenInfoData!.decimals)
         }),
       { enabled: !!fromTokenInfoData && !!toTokenInfoData }
     );
@@ -223,12 +212,6 @@ const Swap: React.FC<SwapProps> = () => {
       ).toFixed(6)
     );
   }, [simulateData]);
-
-  useEffect(() => {
-    const listToken = allToken.filter((t) => fromToken !== t.denom);
-    setListValidTo([...listToken]);
-    // if (!listTo.includes(toToken)) setToToken(listTo[0] as string);
-  }, [fromToken]);
 
   // useEffect(() => {
   //   if (poolData && fromAmount && fromAmount > 0) {
@@ -479,9 +462,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="input"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
@@ -553,7 +536,9 @@ const Swap: React.FC<SwapProps> = () => {
               isOpen={isSelectFrom}
               open={() => setIsSelectFrom(true)}
               close={() => setIsSelectFrom(false)}
-              listToken={allToken}
+              listToken={poolTokens.filter(
+                (token) => token.denom !== toTokenDenom
+              )}
               setToken={setFromToken}
             />
           ) : (
@@ -561,17 +546,12 @@ const Swap: React.FC<SwapProps> = () => {
               isOpen={isSelectTo}
               open={() => setIsSelectTo(true)}
               close={() => setIsSelectTo(false)}
-              listToken={listValidTo}
+              listToken={poolTokens.filter(
+                (token) => token.denom !== fromTokenDenom
+              )}
               setToken={setToToken}
             />
           )}
-          {/* <SelectTokenModal
-            isOpen={isSelectFee}
-            open={() => setIsSelectFee(true)}
-            close={() => setIsSelectFee(false)}
-            listToken={allToken}
-            setToken={setFeeToken}
-          /> */}
         </div>
       </div>
     </Content>

@@ -1,6 +1,7 @@
-import { TokenItemType, tokens } from './bridgeTokens';
+import { filteredTokens, TokenItemType, tokens } from './bridgeTokens';
 import { ORAI } from './constants';
 import { network, NetworkKey } from './networks';
+import _ from 'lodash';
 
 export type Pair = {
   contract_addr: string;
@@ -43,12 +44,28 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
 
 export const pairs = pairsMap[network.id];
 
+export const pairDenoms = _.uniq(
+  _.flatten(pairs.map((pair) => pair.asset_denoms))
+);
+
+export const poolTokens = filteredTokens.filter((token) =>
+  pairDenoms.includes(token.denom)
+);
+
 export const getPair = (
   denom1: string | string[],
   denom2?: string
 ): Pair | undefined => {
   const asset_denoms = typeof denom1 === 'string' ? [denom1, denom2] : denom1;
-  const denom = asset_denoms[1] === ORAI ? asset_denoms[0] : asset_denoms[1];
 
-  return pairs.find((pair) => pair.asset_denoms[1] === denom);
+  // ORAI should be at the start
+  if (asset_denoms[1] === ORAI) {
+    asset_denoms.reverse();
+  }
+
+  return pairs.find(
+    (pair) =>
+      pair.asset_denoms[0] === asset_denoms[0] &&
+      pair.asset_denoms[1] === asset_denoms[1]
+  );
 };

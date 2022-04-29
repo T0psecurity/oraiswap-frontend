@@ -170,7 +170,7 @@ async function fetchPoolInfoAmount(
     const poolInfo = await fetchPool(pair.contract_addr);
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
-  } else if (fromTokenInfo.denom !== ORAI && toTokenInfo.denom !== ORAI) {
+  } else {
     // handle multi-swap case
     const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
     const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
@@ -179,6 +179,7 @@ async function fetchPoolInfoAmount(
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
+
   return { offerPoolAmount, askPoolAmount };
 }
 
@@ -406,6 +407,7 @@ async function simulateSwap(query: {
       offer_amount: amount.toString()
     }
   };
+
   const data = await querySmart(network.router, msg);
   return data;
 }

@@ -7,16 +7,13 @@ import { TooltipIcon } from 'components/Tooltip';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { useQuery } from 'react-query';
 import useGlobalState from 'hooks/useGlobalState';
-import {
-  fetchBalance,
-  fetchTokenInfo,
-} from 'rest/api';
+import { fetchBalance, fetchTokenInfo } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { filteredTokens } from 'constants/bridgeTokens';
 import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import Pie from 'components/Pie';
 import NumberFormat from 'react-number-format';
+import { poolTokens } from 'constants/pools';
 
 const cx = cn.bind(style);
 
@@ -45,9 +42,7 @@ interface ModalProps {
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
-  const { prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
-  );
+  const { prices } = useCoinGeckoPrices(poolTokens.map((t) => t.coingeckoId));
   const [step, setStep] = useState(1);
   const [isSelectingToken, setIsSelectingToken] = useState<
     'token1' | 'token2' | null
@@ -55,9 +50,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [token1, setToken1] = useState<string | null>(null);
   const [token2, setToken2] = useState<string | null>(null);
   const [listToken1Option, setListToken1Option] =
-    useState<ValidToken[]>(filteredTokens);
+    useState<ValidToken[]>(poolTokens);
   const [listToken2Option, setListToken2Option] =
-    useState<ValidToken[]>(filteredTokens);
+    useState<ValidToken[]>(poolTokens);
   const [supplyToken1, setSupplyToken1] = useState(0);
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState(0);
@@ -71,9 +66,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     isLoading: isToken1InfoLoading
   } = useQuery(['token-info', token1], () => {
     if (!!token1)
-      return fetchTokenInfo(
-        filteredTokens.find((token) => token.denom === token1)
-      );
+      return fetchTokenInfo(poolTokens.find((token) => token.denom === token1));
   });
 
   const {
@@ -83,13 +76,11 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     isLoading: isToken2InfoLoading
   } = useQuery(['token-info', token2], () => {
     if (!!token2)
-      return fetchTokenInfo(
-        filteredTokens.find((token) => token.denom === token2)
-      );
+      return fetchTokenInfo(poolTokens.find((token) => token.denom === token2));
   });
 
-  const tokenObj1 = filteredTokens.find((token) => token.denom === token1);
-  const tokenObj2 = filteredTokens.find((token) => token.denom === token2);
+  const tokenObj1 = poolTokens.find((token) => token.denom === token1);
+  const tokenObj2 = poolTokens.find((token) => token.denom === token2);
 
   const {
     data: token1Balance,
@@ -129,7 +120,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const Token2Icon = tokenObj2?.Icon;
 
   const getBalanceValue = (tokenSymbol: string, amount: number) => {
-    const coingeckoId = filteredTokens.find(
+    const coingeckoId = poolTokens.find(
       (token) => token.name === tokenSymbol
     )?.coingeckoId;
     const pricePer = prices[coingeckoId]?.price?.asNumber ?? 0;
@@ -440,10 +431,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="input"
-            // value={supplyToken2 ? supplyToken2 : ''}
-            // onValueChange={({ floatValue }) => {
-            //   setSupplyToken2(floatValue);
-            // }}
+              // value={supplyToken2 ? supplyToken2 : ''}
+              // onValueChange={({ floatValue }) => {
+              //   setSupplyToken2(floatValue);
+              // }}
             />
             <span>%</span>
           </div>
@@ -462,7 +453,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => { }}>
+        <div className={cx('swap-btn')} onClick={() => {}}>
           Create
         </div>
       </div>
@@ -532,7 +523,6 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         close={() => setIsSelectingToken(null)}
         setToken={(token1: string) => {
           setToken1(token1);
-
           setListToken2Option(allToken.filter((t) => t.denom !== token1));
         }}
         listToken={listToken1Option}
