@@ -117,4 +117,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export { };
+export {};
