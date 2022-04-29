@@ -29,14 +29,19 @@ import {
 import { network } from 'constants/networks';
 import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
 import Content from 'layouts/Content';
-import { getUsd } from 'libs/utils';
+import {
+  getUsd,
+  parseAmountFromWithDecimal as parseAmountFrom,
+  parseAmountToWithDecimal as parseAmountTo
+} from 'libs/utils';
 import Loader from 'components/Loader';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 import Big from 'big.js';
-import { ERC20_ORAI } from 'constants/constants';
+import { ERC20_ORAI, ORAI } from 'constants/constants';
+import CosmJs from 'libs/cosmjs';
 
 interface BalanceProps {}
 
@@ -58,10 +63,6 @@ interface ConvertToNativeProps {
   convertToNavie: any;
 }
 
-const parseAmount = (amount: number, decimals: number) => {
-  return new Big(amount).mul(new Big(10).pow(decimals));
-};
-
 const ConvertToNative: FC<ConvertToNativeProps> = ({
   token,
   amountDetail,
@@ -75,7 +76,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
         className={styles.balanceDescription}
         style={{ width: '100%', textAlign: 'left' }}
       >
-        Amount
+        Convert Amount:
       </div>
       <NumberFormat
         thousandSeparator
@@ -83,13 +84,17 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
         customInput={Input}
         value={convertAmount}
         onValueChange={({ floatValue }) => {
-          const _floatValue = 10 ** token.decimals * (floatValue ?? 0);
+          if (!floatValue) return setConvertAmount([0, 0]);
+
+          const _floatValue = parseAmountTo(
+            floatValue!,
+            token.decimals
+          ).toNumber();
           const usdValue =
             (_floatValue / (amountDetail?.amount ?? 0)) *
             (amountDetail?.usd ?? 0);
 
-          if (!floatValue) return;
-          setConvertAmount([floatValue ?? 0, usdValue]);
+          setConvertAmount([floatValue!, usdValue]);
         }}
         className={styles.amount}
       />
@@ -98,9 +103,10 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
           className={styles.balanceBtn}
           onClick={() => {
             if (!amountDetail) return;
-            const _amount = new Big(amountDetail.amount)
-              .div(new Big(10).pow(token.decimals))
-              .toNumber();
+            const _amount = parseAmountFrom(
+              amountDetail.amount,
+              token.decimals
+            ).toNumber();
             setConvertAmount([_amount, amountDetail.usd]);
           }}
         >
@@ -110,28 +116,31 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
           className={styles.balanceBtn}
           onClick={() => {
             if (!amountDetail) return;
-            const _amount = new Big(amountDetail.amount)
-              .div(new Big(10).pow(token.decimals))
-              .toNumber();
+            const _amount = parseAmountFrom(
+              amountDetail.amount,
+              token.decimals
+            ).toNumber();
             setConvertAmount([_amount / 2, amountDetail.usd / 2]);
           }}
         >
           HALF
         </button>
       </div>
-      <TokenBalance
-        balance={convertUsd}
-        className={styles.balanceDescription}
-        prefix='~$'
-        decimalScale={2}
-      />
-      <div className={styles.transferTab}>
-        <span
+      <div>
+        <TokenBalance
+          balance={convertUsd}
+          className={styles.balanceDescription}
+          prefix='~$'
+          decimalScale={2}
+        />
+      </div>
+      <div className={styles.transferTab} style={{ marginTop: '0px' }}>
+        <div
           className={styles.tfBtn}
           onClick={() => convertToNavie(convertAmount, token)}
         >
           Convert To Native Token
-        </span>
+        </div>
       </div>
     </div>
   );
@@ -182,7 +191,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
         </div>
       </div>
       <div>
-        {token.decimals === 18 && token.cosmosBased && (
+        {active && token.decimals === 18 && token.cosmosBased && (
           <ConvertToNative
             token={token}
             amountDetail={amountDetail}
@@ -507,60 +516,50 @@ const Balance: React.FC<BalanceProps> = () => {
         walletAddr = await window.Keplr.getKeplrAddr();
       else throw 'You have to install Keplr wallet to swap';
 
-      const _fromAmount = parseAmount(amount, token.decimals);
-      console.log(_fromAmount);
+      const _fromAmount = parseAmountTo(amount, token.decimals).toString();
 
-      // const msgs = await generateConvertMsgs({
-      //   type: Type.CONVERT_TOKEN,
-      //   sender: `${walletAddr}`,
-      //   fromAmount: (amount * 10 ** token.decimals),
-      //   // @ts-ignore
-      //   fromToken: token
-      // });
+      const msgs = await generateConvertMsgs({
+        type: Type.CONVERT_TOKEN,
+        sender: `${walletAddr}`,
+        fromAmount: _fromAmount,
+        // @ts-ignore
+        fromToken: token
+      });
 
-      // const msgs = await generateContractMessages({
-      //   type: Type.SWAP,
-      //   sender: `${walletAddr}`,
-      //   amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
-      //   fromInfo: fromTokenInfoData!,
-      //   toInfo: toTokenInfoData!
-      // });
+      const msg = msgs[0];
+      console.log(
+        'msgs: ',
+        msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+      );
+      const result = await CosmJs.execute({
+        prefix: ORAI,
+        address: msg.contract,
+        walletAddr,
+        // @ts-ignore
+        handleMsg: Buffer.from(msg.msg.toString()),
+        gasAmount: { denom: ORAI, amount: '0' },
+        // @ts-ignore
+        handleOptions: { funds: msg.sent_funds }
+      });
+      console.log('result swap tx hash: ', result);
 
-      // const msgs = await generateConvertMsgs({ type: Type.CONVERT_TOKEN, fromToken: fromTokenInfoData, fromAmount: "1", sender: `${walletAddr}` })
-
-      // const msg = msgs[0];
-      // console.log(
-      //   'msgs: ',
-      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      // );
-      // const result = await CosmJs.execute({
-      //   prefix: ORAI,
-      //   address: msg.contract,
-      //   walletAddr,
-      //   handleMsg: Buffer.from(msg.msg.toString()),
-      //   gasAmount: { denom: ORAI, amount: '0' },
-      //   handleOptions: { funds: msg.sent_funds }
-      // });
-      // console.log('result swap tx hash: ', result);
-
-      // if (result) {
-      //   console.log('in correct result');
-      //   displayToast(TToastType.TX_SUCCESSFUL, {
-      //     customLink: `${network.explorer}/txs/${result.transactionHash}`
-      //   });
-      //   setSwapLoading(false);
-      //   setTxHash(result.transactionHash);
-      //   return;
-      // }
+      if (result) {
+        console.log('in correct result');
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+        setTxHash(result.transactionHash);
+        return;
+      }
     } catch (error) {
-      // console.log('error in swap form: ', error);
-      // let finalError = '';
-      // if (typeof error === 'string' || error instanceof String) {
-      //   finalError = error;
-      // } else finalError = String(error);
-      // displayToast(TToastType.TX_FAILED, {
-      //   message: finalError
-      // });
+      console.log('error in swap form: ', error);
+      let finalError = '';
+      if (typeof error === 'string' || error instanceof String) {
+        finalError = `${error}`;
+      } else finalError = String(error);
+      displayToast(TToastType.TX_FAILED, {
+        message: finalError
+      });
     }
   };
 

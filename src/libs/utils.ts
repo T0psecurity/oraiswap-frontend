@@ -130,3 +130,13 @@ export const parseBalanceNumber = (balance: number) => {
   if (isFinite(balance) && !isNaN(balance)) return balance;
   else return 0;
 };
+export const parseAmountToWithDecimal = (amount: number, decimals: number) => {
+  return new Big(amount).mul(new Big(10).pow(decimals));
+};
+
+export const parseAmountFromWithDecimal = (
+  amount: number,
+  decimals: number
+) => {
+  return new Big(amount).div(new Big(10).pow(decimals));
+};
