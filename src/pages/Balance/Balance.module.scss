@@ -238,7 +238,24 @@
   align-items: center;
   justify-content: space-between;
   margin: 5px 0;
+
+  &.small{
+    .amount {
+      height: 36px;
+      font-size: 16px;
+      border-radius:4px;
+    }
+    .balanceBtn{
+      font-size: 12px;
+    }
+    .tfBtn {
+      margin-top: 15px;
+      padding: 5px 10px;
+    }
+  }
 }
+
+
 .tokenIcon {
   width: 44px;
   height: 44px;

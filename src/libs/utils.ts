@@ -2,7 +2,7 @@
 import { is } from 'ramda';
 import bech32 from 'bech32';
 import Big from 'big.js';
-import { Fraction } from '@saberhq/token-utils';
+import { Fraction } from '@ubeswap/token-math';
 
 /* object */
 export const record = <T, V>(
