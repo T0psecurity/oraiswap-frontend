@@ -11,7 +11,7 @@ import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
 import { ORAI } from 'constants/constants';
-import { filteredTokens } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
 
 const { Search } = Input;
 
@@ -178,14 +178,14 @@ type PairInfoData = {
   commissionRate: string;
   fromToken: any;
   toToken: any;
-};
+} & PoolInfo;
 
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
 
-  const fetchPairInfoData = async (pair: Pair): Promise<any> => {
+  const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
       filteredTokens.find((token) => token.denom === denom)
     );
@@ -202,6 +202,7 @@ const Pools: React.FC<PoolsProps> = () => {
 
     return {
       ...poolData,
+      amount: 0,
       pair,
       commissionRate: infoData.commission_rate,
       fromToken,

@@ -45,8 +45,9 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -120,14 +121,14 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-    '0'
+      '0'
   );
 }
 
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenInfo,
   toTokenInfo: TokenInfo
-) {
+): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
 
@@ -274,8 +275,9 @@ async function fetchNativeTokenBalance(
   denom: string,
   lcd?: string
 ) {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -330,27 +332,27 @@ const generateSwapOperationMsgs = (
   const pair = getPair(denoms);
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: {
@@ -622,9 +624,7 @@ export type Convert = {
   fromAmount: string;
 };
 
-async function generateConvertMsgs(
-  msg: Convert
-) {
+async function generateConvertMsgs(msg: Convert) {
   // @ts-ignore
   const { type, sender, fromToken, fromAmount } = msg;
   let sent_funds;
@@ -635,11 +635,11 @@ async function generateConvertMsgs(
     case Type.CONVERT_TOKEN: {
       // currently only support cw20 token pool
       let { info: assetInfo, fund } = parseTokenInfo(fromToken, fromAmount);
-      // native case  
+      // native case
       if (assetInfo.native_token) {
         input = {
           convert: {}
-        }
+        };
         sent_funds = handleSentFunds(fund as Fund);
       } else {
         // cw20 case

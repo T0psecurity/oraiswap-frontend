@@ -52,6 +52,11 @@ declare global {
     data: Buffer;
   }
 
+  interface PoolInfo {
+    offerPoolAmount: number;
+    askPoolAmount: number;
+  }
+
   interface ChildKeyData {
     privateKey: Buffer;
     chainCode: Buffer;
