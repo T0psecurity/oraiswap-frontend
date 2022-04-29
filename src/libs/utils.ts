@@ -129,4 +129,4 @@ export const getUsd = (
 export const parseBalanceNumber = (balance: number) => {
   if (isFinite(balance) && !isNaN(balance)) return balance;
   else return 0;
-}
+};
