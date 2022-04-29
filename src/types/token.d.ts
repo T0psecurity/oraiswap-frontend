@@ -1,9 +1,6 @@
-export interface TokenInfo {
+export type TokenInfo = TokenItemType & {
   symbol: string;
-  name: string;
-  contract_addr: string;
-  denom?: string;
-  decimals: number;
-  icon: string;
-  verified: boolean;
-}
+  total_supply: string;
+  icon?: string;
+  verified?: boolean;
+};

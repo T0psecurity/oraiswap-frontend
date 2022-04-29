@@ -31,7 +31,7 @@ import { ORAI } from 'constants/constants';
 
 const cx = cn.bind(styles);
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -81,14 +81,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     let oraiPrice = Fraction.ZERO;
 
-    const poolData = await fetchPoolInfoAmount(
-      // @ts-ignore
-      token1!,
-      token2!
-    );
+    const poolData = await fetchPoolInfoAmount(token1!, token2!);
 
     if (
-      token1?.denom === 'orai' &&
+      token1?.denom === ORAI &&
       token2?.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
     ) {
       oraiPrice = new Fraction(
@@ -97,7 +93,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       );
     } else {
       const _poolData = await fetchPoolInfoAmount(
-        // @ts-ignore
         filteredTokens.find((token) => token.denom === ORAI)!,
         filteredTokens.find(
           (token) => token.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
@@ -109,14 +104,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       );
     }
     let halfValue = 0;
-    if (token1?.denom == 'orai') {
+    if (token1?.denom === ORAI) {
       const oraiValue = getUsd(
         poolData.offerPoolAmount,
         oraiPrice,
         token1.decimals
       );
       halfValue = oraiValue;
-    } else if (token2?.denom == 'orai') {
+    } else if (token2?.denom === ORAI) {
       const oraiValue = getUsd(
         poolData.askPoolAmount,
         oraiPrice,
@@ -264,7 +259,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     : 0;
   const bondAmountUsd = rewardInfoFirst
     ? (rewardInfoFirst.bond_amount * (pairAmountInfoData?.usdAmount ?? 0)) /
-    +(lpTokenInfoData?.total_supply ?? 0)
+      +(lpTokenInfoData?.total_supply ?? 0)
     : 0;
 
   return (
@@ -278,8 +273,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 {Token2Icon! && <Token2Icon className={cx('token2')} />}
               </div>
               <div className={cx('title')}>
-                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${pairInfoData.token2!.name
-                  }`}</div>
+                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
+                  pairInfoData.token2!.name
+                }`}</div>
                 <TokenBalance
                   balance={
                     pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
@@ -291,8 +287,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               {!!pairAmountInfoData && (
                 <div className={cx('des')}>
                   <span>{`1 ${pairInfoData.token2!.name} ≈ `}</span>
-                  <span>{`${+pairAmountInfoData?.ratio.toFixed(6)} ${pairInfoData.token1!.name
-                    }`}</span>
+                  <span>{`${+pairAmountInfoData?.ratio.toFixed(6)} ${
+                    pairInfoData.token1!.name
+                  }`}</span>
                 </div>
               )}
             </div>

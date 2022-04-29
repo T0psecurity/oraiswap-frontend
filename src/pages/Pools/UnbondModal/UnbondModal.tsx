@@ -8,7 +8,6 @@ import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens } from 'constants/bridgeTokens';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import useLocalStorage from 'libs/useLocalStorage';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';

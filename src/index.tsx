@@ -6,7 +6,6 @@ import ScrollToTop from './layouts/ScrollToTop';
 import App from './layouts/App';
 import Keplr from 'libs/keplr';
 import { network } from 'constants/networks';
-import AuthProvider from 'providers/AuthProvider';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
@@ -26,9 +25,6 @@ const startApp = async () => {
       // always trigger suggest chain when users enter the webpage
       await window.Keplr.suggestChain(network.chainId);
       await window.Keplr.suggestChain('columbus-5');
-      // init address for first time open
-      const address = await window.Keplr.getKeplrAddr(network.chainId);
-      window.localStorage.setItem('address', JSON.stringify(address));
     }
   } catch (ex) {
     console.log(ex);
@@ -38,12 +34,10 @@ const startApp = async () => {
     <StrictMode>
       <ToastProvider>
         <Router>
-          <AuthProvider>
-            <ScrollToTop />
-            <QueryClientProvider client={queryClient}>
-              <App />
-            </QueryClientProvider>
-          </AuthProvider>
+          <ScrollToTop />
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
         </Router>
         <ToastContainer transition={Bounce} />
       </ToastProvider>

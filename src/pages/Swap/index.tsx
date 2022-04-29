@@ -213,49 +213,6 @@ const Swap: React.FC<SwapProps> = () => {
     );
   }, [simulateData]);
 
-  // useEffect(() => {
-  //   if (poolData && fromAmount && fromAmount > 0) {
-  //     const finalToAmount =
-  //       calculateToAmount(
-  //         poolData,
-  //         parseInt(parseAmount(fromAmount, fromTokenInfoData?.decimals)),
-  //         parseFloat(taxRate?.rate)
-  //       ) ?? 0;
-  //     const newToAmount = parseFloat(
-  //       parseDisplayAmount(finalToAmount, toTokenInfoData?.decimals)
-  //     ).toFixed(6);
-  //     setToAmount(newToAmount);
-  //   } else if (fromAmount === 0) setToAmount(0);
-  // }, [poolData, fromAmount]);
-
-  // useEffect(() => {
-  //   if (poolData) {
-  //     const finalAverageRatio = calculateToAmount(
-  //       poolData,
-  //       1,
-  //       parseFloat(taxRate?.rate)
-  //     );
-  //     setAverageRatio(parseFloat(finalAverageRatio));
-  //   }
-  // }, [poolData]);
-
-  // const calculateToAmount = (poolData, offerAmount, taxRate) => {
-  //   const offer = new Big(poolData.offerPoolAmount);
-  //   const ask = new Big(poolData.askPoolAmount);
-
-  //   return ask
-  //     .minus(
-  //       offer
-  //         .mul(poolData.askPoolAmount)
-  //         .div(poolData.offerPoolAmount + offerAmount)
-  //     )
-  //     .mul(1 - taxRate)
-  //     .toNumber();
-
-  //   // (poolData.askPoolAmount - cp / (poolData.offerPoolAmount + offerAmount)) *
-  //   // (1 - taxRate)
-  // };
-
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {

@@ -6,13 +6,7 @@ import _ from 'lodash';
 import { ORAI } from 'constants/constants';
 import { getPair, Pair, pairs } from 'constants/pools';
 import axios from './request';
-
-type TokenInfo = TokenItemType & {
-  symbol: string;
-  total_supply: string;
-  icon?: string;
-  verified?: boolean;
-};
+import { TokenInfo } from 'types/token';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -155,8 +149,8 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
 // }
 
 async function fetchPoolInfoAmount(
-  fromTokenInfo: TokenInfo,
-  toTokenInfo: TokenInfo
+  fromTokenInfo: TokenItemType,
+  toTokenInfo: TokenItemType
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
@@ -301,7 +295,7 @@ async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
 
 async function fetchNativeTokenBalance(
   walletAddr: string,
-  denom: string,
+  denom: string = ORAI,
   lcd?: string
 ) {
   const url = `${
@@ -324,7 +318,7 @@ async function fetchBalance(
   else return fetchTokenBalance(tokenAddr, walletAddr, lcd);
 }
 
-const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string | number) => {
+const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
