@@ -57,11 +57,12 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [isSelectFee, setIsSelectFee] = useState(false);
-  const [fromTokenDenom, setFromToken] = useState<string>('orai');
-  const [toTokenDenom, setToToken] = useState<string>('airi');
-  const [feeToken, setFeeToken] = useState<string>('airi');
-  const [fromAmount, setFromAmount] = useState(0);
-  const [toAmount, setToAmount] = useState(0);
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<string>([
+    'orai',
+    'airi'
+  ]);
+  // const [feeToken, setFeeToken] = useState<string>('airi');
+  const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState(0);
   const [slippage, setSlippage] = useState(1);
@@ -71,20 +72,15 @@ const Swap: React.FC<SwapProps> = () => {
   const [refresh, setRefresh] = useState(false);
 
   const onChangeFromAmount = (amount: number) => {
-    setFromAmount(amount);
+    setSwapAmount([amount, toAmount]);
   };
 
   const onMaxFromAmount = (amount: number) => {
     let finalAmount = parseFloat(
       parseDisplayAmount(amount, fromTokenInfoData?.decimals) as string
     );
-    setFromAmount(finalAmount);
+    setSwapAmount([finalAmount, toAmount]);
   };
-
-  // const onChangeToAmount = (amount: number) => {
-  //   setToAmount(amount);
-  //   setFromAmount(amount / fromToRatio);
-  // };
 
   const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(
     ['tax-rate'],
@@ -206,11 +202,12 @@ const Swap: React.FC<SwapProps> = () => {
   }, [simulateAverageData]);
 
   useEffect(() => {
-    setToAmount(
+    setSwapAmount([
+      fromAmount,
       parseFloat(
         parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
       ).toFixed(6)
-    );
+    ]);
   }, [simulateData]);
 
   const handleSubmit = async () => {
@@ -379,12 +376,8 @@ const Swap: React.FC<SwapProps> = () => {
             <img
               src={require('assets/icons/ant_swap.svg').default}
               onClick={() => {
-                const t = fromToken,
-                  k = fromAmount;
-                setFromToken(toToken);
-                setToToken(t);
-                setFromAmount(toAmount);
-                setToAmount(fromAmount);
+                setSwapTokens([toTokenDenom, fromTokenDenom]);
+                setSwapAmount([toAmount, fromAmount]);
               }}
             />
           </div>
@@ -496,7 +489,7 @@ const Swap: React.FC<SwapProps> = () => {
               listToken={poolTokens.filter(
                 (token) => token.denom !== toTokenDenom
               )}
-              setToken={setFromToken}
+              setToken={(denom) => setSwapTokens([denom, toTokenDenom])}
             />
           ) : (
             <SelectTokenModal
@@ -506,7 +499,7 @@ const Swap: React.FC<SwapProps> = () => {
               listToken={poolTokens.filter(
                 (token) => token.denom !== fromTokenDenom
               )}
-              setToken={setToToken}
+              setToken={(denom) => setSwapTokens([fromTokenDenom, denom])}
             />
           )}
         </div>
