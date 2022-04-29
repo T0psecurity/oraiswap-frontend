@@ -61,16 +61,16 @@ interface ConvertToNativeProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
   convertToken: any;
+  name: string;
 }
 
 const ConvertToNative: FC<ConvertToNativeProps> = ({
   token,
+  name,
   amountDetail,
   convertToken
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
-  // get token name
-  const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   return (
     <div
       className={classNames(styles.tokenFromGroup, styles.small)}
@@ -158,6 +158,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
   onClick,
   convertToken
 }) => {
+  // get token name
+  const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   return (
     <div
       className={classNames(
@@ -195,8 +197,9 @@ const TokenItem: React.FC<TokenItemProps> = ({
         </div>
       </div>
       <div>
-        {active && token.decimals === 18 && token.cosmosBased && (
+        {active && evmName && token.cosmosBased && (
           <ConvertToNative
+            name={evmName}
             token={token}
             amountDetail={amountDetail}
             convertToken={convertToken}
