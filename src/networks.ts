@@ -96,8 +96,8 @@ export const embedChainInfos: ChainInfo[] = [
     features: ['stargate', 'ibc-transfer', 'cosmwasm']
   },
   {
-    rpc: 'https://rpc-terra.orai.io',
-    rest: 'https://lcd-terra.orai.io',
+    rpc: 'https://rpc-columbus.keplr.app',
+    rest: 'https://lcd-columbus.keplr.app',
     chainId: 'columbus-5',
     chainName: 'Terra',
     stakeCurrency: {

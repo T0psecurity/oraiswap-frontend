@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import Tippy, { TippyProps } from '@tippyjs/react';
 import classNames from 'classnames';
 import { isNil } from 'ramda';
-import Icon from './Icon';
+import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light-border.css';
@@ -50,7 +50,7 @@ export const TooltipIcon: FC<Props> = ({ children, ...props }) => (
     {children}
     <div className={styles.icon}>
       <Tooltip {...props}>
-        <Icon name="info" size={16} />
+        <InfoIcon name="info" />
       </Tooltip>
     </div>
   </div>

@@ -1,6 +1,7 @@
 //@ts-nocheck
 import { is } from 'ramda';
 import bech32 from 'bech32';
+import Big from 'big.js';
 import { Fraction } from '@saberhq/token-utils';
 
 /* object */
@@ -89,12 +90,12 @@ export const checkPrefixAndLength = (
   }
 };
 
-export const parseAmount = (value: string, decimal: number) => {
+export const parseAmount = (value: string | number, decimal: number = 6) => {
   if (!value) return '0';
   return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
 };
 
-export const parseDisplayAmount = (value: string, decimal: number) => {
+export const parseDisplayAmount = (value: string | number, decimal: number) => {
   if (value) return `${(parseFloat(value) / Math.pow(10, decimal)).toFixed(6)}`;
   return 0;
 };
@@ -114,13 +115,28 @@ export const numberToFraction = function (_decimal) {
 };
 
 export const getUsd = (
-  amount: number,
+  amount: number | Big,
   price: Fraction | null,
   decimals: number
 ) => {
-  if (!amount) return 0;
-  if (!price) return 0;
+  if (!amount || !price) return 0;
 
-  return price.multiply(numberToFraction(amount)).divide(10 ** decimals)
-    .asNumber;
+  return price
+    .multiply(numberToFraction(amount.toString()))
+    .divide(new Big(10).pow(decimals)).asNumber;
+};
+
+export const parseBalanceNumber = (balance: number) => {
+  if (isFinite(balance) && !isNaN(balance)) return balance;
+  else return 0;
+};
+export const parseAmountToWithDecimal = (amount: number, decimals: number) => {
+  return new Big(amount).mul(new Big(10).pow(decimals));
+};
+
+export const parseAmountFromWithDecimal = (
+  amount: number,
+  decimals: number
+) => {
+  return new Big(amount).div(new Big(10).pow(decimals));
 };

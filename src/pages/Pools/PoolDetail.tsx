@@ -7,7 +7,7 @@ import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
 import Pie from 'components/Pie';
-import { mockToken, PairKey, pairsMap, TokensSwap } from 'constants/pools';
+import { getPair, Pair, pairs } from 'constants/pools';
 import {
   fetchBalance,
   fetchPairInfo,
@@ -27,6 +27,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
 import { Fraction } from '@saberhq/token-utils';
+import { ORAI } from 'constants/constants';
 
 const cx = cn.bind(styles);
 
@@ -50,7 +51,7 @@ filteredTokens.push({
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
-  let pair;
+  let pair: Pair | undefined;
 
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
@@ -62,28 +63,17 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [withdrawTxHash, setWithdrawTxHash] = useState('');
 
   const getPairInfo = async () => {
-    const pairKey = Object.keys(PairKey).find((k) => {
-      let [_token1, _token2] = poolUrl?.toUpperCase().split('-') ?? [
-        undefined,
-        undefined
-      ];
-      return (
-        !!_token1 && !!_token2 && k.includes(_token1) && k.includes(_token2)
-      );
-    });
-    const t = PairKey[pairKey! as keyof typeof PairKey];
+    if (!poolUrl) return;
 
-    pair = pairsMap[t];
+    pair = getPair(poolUrl.split('_'));
     if (!pair) return;
-    let token1 = {
-        ...mockToken[pair.asset_denoms[0]],
-        contract_addr: mockToken[pair.asset_denoms[0]].contractAddress
-      },
-      token2 = {
-        ...mockToken[pair.asset_denoms[1]],
-        contract_addr: mockToken[pair.asset_denoms[1]].contractAddress
-      };
+    const token1 = filteredTokens.find(
+      (token) => token.denom === pair!.asset_denoms[0]
+    );
 
+    const token2 = filteredTokens.find(
+      (token) => token.denom === pair!.asset_denoms[1]
+    );
     // Token1Icon = token1.Icon;
     // Token2Icon = token2.Icon;
 
@@ -107,16 +97,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     let oraiPrice = Fraction.ZERO;
 
-    const poolData = await fetchPoolInfoAmount(
-      // @ts-ignore
-      token1!,
-      token2!
-    );
+    const poolData = await fetchPoolInfoAmount(token1!, token2!);
 
     if (
-      token1?.denom === 'orai' &&
-      token2?.denom ===
-        'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4'
+      token1?.denom === ORAI &&
+      token2?.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
     ) {
       oraiPrice = new Fraction(
         poolData.askPoolAmount,
@@ -124,11 +109,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       );
     } else {
       const _poolData = await fetchPoolInfoAmount(
-        // @ts-ignore
-        mockToken['orai']!,
-        mockToken[
-          'ibc/9E4F68298EE0A201969E583100E5F9FAD145BAA900C04ED3B6B302D834D8E3C4'
-        ]!
+        filteredTokens.find((token) => token.denom === ORAI)!,
+        filteredTokens.find(
+          (token) => token.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        )!
       );
       oraiPrice = new Fraction(
         _poolData.askPoolAmount,
@@ -136,14 +120,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       );
     }
     let halfValue = 0;
-    if (token1?.denom == 'orai') {
+    if (token1?.denom === ORAI) {
       const oraiValue = getUsd(
         poolData.offerPoolAmount,
         oraiPrice,
         token1.decimals
       );
       halfValue = oraiValue;
-    } else if (token2?.denom == 'orai') {
+    } else if (token2?.denom === ORAI) {
       const oraiValue = getUsd(
         poolData.askPoolAmount,
         oraiPrice,
@@ -266,15 +250,15 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   );
 
   useEffect(() => {
-    if (pairInfoData?.token1.name === 'ORAI') {
+    if (pairInfoData?.token1?.name === 'ORAI') {
       setAssetToken(pairInfoData.token2);
     } else if (!!pairInfoData) {
       setAssetToken(pairInfoData.token1);
     }
   }, [pairInfoData]);
 
-  const Token1Icon = pairInfoData?.token1.Icon,
-    Token2Icon = pairInfoData?.token2.Icon;
+  const Token1Icon = pairInfoData?.token1?.Icon,
+    Token2Icon = pairInfoData?.token2?.Icon;
 
   const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
   const liquidity1 =
@@ -343,7 +327,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           />
                         </div>
                         <TokenBalance
-                          balance={liquidity1Usd + liquidity2Usd}
+                          balance={liquidity1Usd ?? 0 + liquidity2Usd ?? 0}
                           decimalScale={2}
                           className={cx('amount-usd')}
                         />
@@ -359,20 +343,20 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           ></span>
                           <span className={cx('icon')}></span>
                           <span className={cx('token-name')}>
-                            {pairInfoData.token1.name}
+                            {pairInfoData.token1?.name}
                           </span>
                         </div>
                         <div className={cx('liquidity_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: liquidity1,
+                              amount: liquidity1 ?? 0,
                               denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
                           />
                           <TokenBalance
-                            balance={liquidity1Usd}
+                            balance={liquidity1Usd ?? 0}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -386,20 +370,20 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           ></span>
                           <span className={cx('icon')}></span>
                           <span className={cx('token-name')}>
-                            {pairInfoData.token2.name}
+                            {pairInfoData.token2?.name}
                           </span>
                         </div>
                         <div className={cx('liquidity_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: liquidity2,
+                              amount: liquidity2 ?? 0,
                               denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
                           />
                           <TokenBalance
-                            balance={liquidity2Usd}
+                            balance={liquidity2Usd ?? 0}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -428,14 +412,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: pairAmountInfoData.token1Amount,
+                              amount: pairAmountInfoData?.token1Amount,
                               denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
                           />
                           <TokenBalance
-                            balance={pairAmountInfoData.token1Usd}
+                            balance={pairAmountInfoData?.token1Usd}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -445,20 +429,20 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('pool-catalyst_token_name')}>
                           {Token2Icon! && <Token2Icon className={cx('icon')} />}
                           <span className={cx('token-name')}>
-                            {pairInfoData.token2.name}
+                            {pairInfoData.token2?.name}
                           </span>
                         </div>
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: pairAmountInfoData.token2Amount,
+                              amount: pairAmountInfoData?.token2Amount,
                               denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={2}
                           />
                           <TokenBalance
-                            balance={pairAmountInfoData.token2Usd}
+                            balance={pairAmountInfoData?.token2Usd}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -524,7 +508,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
           )}
         </>
       ) : (
-        <>No Pool found</>
+        <></>
       )}
     </Content>
   );

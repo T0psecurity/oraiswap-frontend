@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import ReactModal from 'react-modal';
 import styles from './Modal.module.scss';
-import Icon from './Icon';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 
 ReactModal.setAppElement('#oraiswap');
 
@@ -21,7 +21,7 @@ const Modal: FC<Modal> = ({
     {isCloseBtn && (
       <div className={styles.close}>
         <span onClick={close}>
-          <Icon name="close" size={30} color={'#ffffff'} />
+          <CloseIcon color={'#ffffff'} width={20} height={20} />
         </span>
       </div>
     )}

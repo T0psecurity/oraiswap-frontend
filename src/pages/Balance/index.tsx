@@ -1,6 +1,12 @@
 import { Input } from 'antd';
 import classNames from 'classnames';
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, {
+  FC,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
@@ -13,16 +19,29 @@ import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'constants/ibcInfos';
-import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
+import {
+  evmTokens,
+  filteredTokens,
+  gravityContracts,
+  TokenItemType,
+  tokens
+} from 'constants/bridgeTokens';
 import { network } from 'constants/networks';
-import { fetchBalance } from 'rest/api';
+import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
 import Content from 'layouts/Content';
-import { getUsd } from 'libs/utils';
+import {
+  getUsd,
+  parseAmountFromWithDecimal as parseAmountFrom,
+  parseAmountToWithDecimal as parseAmountTo
+} from 'libs/utils';
 import Loader from 'components/Loader';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
+import Big from 'big.js';
+import { ERC20_ORAI, ORAI } from 'constants/constants';
+import CosmJs from 'libs/cosmjs';
 
 interface BalanceProps {}
 
@@ -36,15 +55,111 @@ interface TokenItemProps {
   className?: string;
   onClick?: Function;
   amountDetail?: AmountDetail;
+  convertToken?: any;
 }
+interface ConvertToNativeProps {
+  token: TokenItemType;
+  amountDetail?: AmountDetail;
+  convertToken: any;
+  name: string;
+}
+
+const ConvertToNative: FC<ConvertToNativeProps> = ({
+  token,
+  name,
+  amountDetail,
+  convertToken
+}) => {
+  const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
+  return (
+    <div
+      className={classNames(styles.tokenFromGroup, styles.small)}
+      style={{ flexWrap: 'wrap' }}
+    >
+      <div
+        className={styles.balanceDescription}
+        style={{ width: '100%', textAlign: 'left' }}
+      >
+        Convert Amount:
+      </div>
+      <NumberFormat
+        thousandSeparator
+        decimalScale={Math.min(6, token.decimals)}
+        customInput={Input}
+        value={convertAmount}
+        onValueChange={({ floatValue }) => {
+          if (!floatValue) return setConvertAmount([0, 0]);
+
+          const _floatValue = parseAmountTo(
+            floatValue!,
+            token.decimals
+          ).toNumber();
+          const usdValue =
+            (_floatValue / (amountDetail?.amount ?? 0)) *
+            (amountDetail?.usd ?? 0);
+
+          setConvertAmount([floatValue!, usdValue]);
+        }}
+        className={styles.amount}
+      />
+      <div className={styles.balanceFromGroup} style={{ flexGrow: 1 }}>
+        <button
+          className={styles.balanceBtn}
+          onClick={() => {
+            if (!amountDetail) return;
+            const _amount = parseAmountFrom(
+              amountDetail.amount,
+              token.decimals
+            ).toNumber();
+            setConvertAmount([_amount, amountDetail.usd]);
+          }}
+        >
+          MAX
+        </button>
+        <button
+          className={styles.balanceBtn}
+          onClick={() => {
+            if (!amountDetail) return;
+            const _amount = parseAmountFrom(
+              amountDetail.amount,
+              token.decimals
+            ).toNumber();
+            setConvertAmount([_amount / 2, amountDetail.usd / 2]);
+          }}
+        >
+          HALF
+        </button>
+      </div>
+      <div>
+        <TokenBalance
+          balance={convertUsd}
+          className={styles.balanceDescription}
+          prefix="~$"
+          decimalScale={2}
+        />
+      </div>
+      <div className={styles.transferTab} style={{ marginTop: '0px' }}>
+        <div
+          className={styles.tfBtn}
+          onClick={() => convertToken(convertAmount, token)}
+        >
+          Convert To <strong style={{ marginLeft: 5 }}>{name}</strong>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const TokenItem: React.FC<TokenItemProps> = ({
   token,
   amountDetail,
   active,
   className,
-  onClick
+  onClick,
+  convertToken
 }) => {
+  // get token name
+  const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   return (
     <div
       className={classNames(
@@ -54,29 +169,42 @@ const TokenItem: React.FC<TokenItemProps> = ({
       )}
       onClick={() => onClick?.(token)}
     >
-      <div className={styles.token}>
-        {token.Icon && <token.Icon className={styles.tokenIcon} />}
-        <div className={styles.tokenInfo}>
-          <div className={styles.tokenName}>{token.name}</div>
-          <div className={styles.tokenOrg}>
-            <span className={styles.tokenOrgTxt}>{token.org}</span>
+      <div className={styles.balanceAmountInfo}>
+        <div className={styles.token}>
+          {token.Icon && <token.Icon className={styles.tokenIcon} />}
+          <div className={styles.tokenInfo}>
+            <div className={styles.tokenName}>{token.name}</div>
+            <div className={styles.tokenOrg}>
+              <span className={styles.tokenOrgTxt}>{token.org}</span>
+            </div>
           </div>
         </div>
+        <div className={styles.tokenBalance}>
+          <TokenBalance
+            balance={{
+              amount: amountDetail ? amountDetail.amount.toString() : '0',
+              denom: '',
+              decimals: token.decimals
+            }}
+            className={styles.tokenAmount}
+            decimalScale={Math.min(6, token.decimals)}
+          />
+          <TokenBalance
+            balance={amountDetail ? amountDetail.usd : 0}
+            className={styles.subLabel}
+            decimalScale={2}
+          />
+        </div>
       </div>
-      <div className={styles.tokenBalance}>
-        <TokenBalance
-          balance={{
-            amount: amountDetail ? amountDetail.amount.toString() : '0',
-            denom: ''
-          }}
-          className={styles.tokenAmount}
-          decimalScale={token.decimals}
-        />
-        <TokenBalance
-          balance={amountDetail ? amountDetail.usd : 0}
-          className={styles.subLabel}
-          decimalScale={2}
-        />
+      <div>
+        {active && evmName && token.cosmosBased && (
+          <ConvertToNative
+            name={evmName}
+            token={token}
+            amountDetail={amountDetail}
+            convertToken={convertToken}
+          />
+        )}
       </div>
     </div>
   );
@@ -86,6 +214,7 @@ type AmountDetails = { [key: string]: AmountDetail };
 
 const Balance: React.FC<BalanceProps> = () => {
   const [keplrAddress] = useGlobalState('address');
+  const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
@@ -135,10 +264,32 @@ const Balance: React.FC<BalanceProps> = () => {
 
       return [token.denom, amountDetail];
     } catch (ex) {
-      console.log(ex);
       pendingList.push(token);
       return [token.denom, { amount: 0, usd: 0 }];
     }
+  };
+
+  const loadEvmOraiAmounts = async () => {
+    const entries = await Promise.all(
+      evmTokens.map(async (token) => {
+        const amount = await window.Metamask.getOraiBalance(
+          metamaskAddress,
+          token
+        );
+
+        return [
+          token.denom,
+          {
+            amount,
+            usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+          }
+        ];
+      })
+    );
+
+    const amountDetails = Object.fromEntries(entries);
+    // update amounts
+    setAmounts((old) => ({ ...old, ...amountDetails }));
   };
 
   const loadTokenAmounts = async () => {
@@ -166,8 +317,6 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
-
-      // update amounts
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
@@ -183,8 +332,14 @@ const Balance: React.FC<BalanceProps> = () => {
     loadTokenAmounts();
   }, [prices, txHash, pendingTokens]);
 
+  useEffect(() => {
+    if (!!metamaskAddress) {
+      loadEvmOraiAmounts();
+    }
+  }, [metamaskAddress, prices]);
+
   const onClickToken = useCallback((type: string, token: TokenItemType) => {
-    if (!token.cosmosBased) {
+    if (token.denom === ERC20_ORAI) {
       displayToast(TToastType.TX_INFO, {
         message: `Token ${token.name} on ${token.org} is currently not supported`
       });
@@ -214,34 +369,20 @@ const Balance: React.FC<BalanceProps> = () => {
   );
 
   const transferIBC = async () => {
-    // disable send amount < 0
-    if (fromAmount <= 0) {
-      return;
-    }
-
-    if (!from || !to) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Please choose both from and to tokens'
-      });
-      return;
-    }
-
-    setIBCLoading(true);
-    displayToast(TToastType.TX_BROADCASTING);
     try {
       const keplr = await window.Keplr.getKeplr();
       if (keplr) {
-        await window.Keplr.suggestChain(from.chainId);
-        const fromAddress = await window.Keplr.getKeplrAddr(from.chainId);
-        const toAddress = await window.Keplr.getKeplrAddr(to.chainId);
+        await window.Keplr.suggestChain(from!.chainId);
+        const fromAddress = await window.Keplr.getKeplrAddr(from!.chainId);
+        const toAddress = await window.Keplr.getKeplrAddr(to!.chainId);
         const amount = coin(
-          Math.round(fromAmount * 10 ** from.decimals),
-          from.denom
+          Math.round(fromAmount * 10 ** from!.decimals),
+          from!.denom
         );
-        const ibcInfo: IBCInfo = ibcInfos[from.chainId][to.chainId];
+        const ibcInfo: IBCInfo = ibcInfos[from!.chainId][to!.chainId];
 
         // using app protocol to sign transaction
-        if (isMobile() && from.chainId === network.chainId) {
+        if (isMobile() && from!.chainId === network.chainId) {
           // check if is blacklisted like orai, using orai wallet
           const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
             sourceChannel: ibcInfo.channel,
@@ -262,10 +403,10 @@ const Balance: React.FC<BalanceProps> = () => {
           const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&value=${value}`;
           window.open(url);
         } else {
-          const offlineSigner = window.keplr.getOfflineSigner(from.chainId);
+          const offlineSigner = window.keplr.getOfflineSigner(from!.chainId);
           // Initialize the gaia api with the offline signer that is injected by Keplr extension.
           const client = await SigningStargateClient.connectWithSigner(
-            from.rpc,
+            from!.rpc,
             offlineSigner
           );
 
@@ -283,9 +424,10 @@ const Balance: React.FC<BalanceProps> = () => {
             }
           );
 
-          console.log(result);
           displayToast(TToastType.TX_SUCCESSFUL, {
-            customLink: `${from.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash}`
+            customLink: `${from!.lcd}/cosmos/tx/v1beta1/txs/${
+              result?.transactionHash
+            }`
           });
           // set tx hash to trigger refetching amount values
           setTxHash(result?.transactionHash);
@@ -301,7 +443,131 @@ const Balance: React.FC<BalanceProps> = () => {
         message: ex.message
       });
     }
+  };
+
+  const transferEvmToIBC = async () => {
+    if (!metamaskAddress || !keplrAddress) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Please login both metamask and keplr!'
+      });
+      return;
+    }
+    try {
+      const gravityContractAddr = gravityContracts[from!.chainId!] as string;
+      if (!gravityContractAddr || !from) {
+        return;
+      }
+
+      await window.Metamask.checkOrIncreaseAllowance(
+        from!.chainId,
+        from!.contractAddress!,
+        metamaskAddress,
+        gravityContractAddr,
+        fromAmount.toString()
+      );
+      const result = await window.Metamask.transferToGravity(
+        from!.chainId,
+        fromAmount.toString(),
+        from!.contractAddress!,
+        metamaskAddress,
+        keplrAddress
+      );
+      console.log(result);
+
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `
+        https://bscscan.com/tx/${result?.transactionHash}`
+      });
+      setTxHash(result?.transactionHash);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message
+      });
+    }
+  };
+
+  const onClickTransfer = async () => {
+    // disable send amount < 0
+
+    if (!from || !to) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Please choose both from and to tokens'
+      });
+      return;
+    }
+    const fromBalance =
+      from && amounts[from.denom] ? amounts[from.denom].amount : 0;
+    if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
+      return;
+    }
+    displayToast(TToastType.TX_BROADCASTING);
+    setIBCLoading(true);
+    if (from.cosmosBased) {
+      await transferIBC();
+    } else {
+      await transferEvmToIBC();
+    }
     setIBCLoading(false);
+  };
+
+  const convertToken = async (amount: number, token: TokenItemType) => {
+    if (amount <= 0)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'From amount should be higher than 0!'
+      });
+
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      let walletAddr;
+      if (await window.Keplr.getKeplr())
+        walletAddr = await window.Keplr.getKeplrAddr();
+      else throw 'You have to install Keplr wallet to swap';
+
+      const _fromAmount = parseAmountTo(amount, token.decimals).toString();
+
+      const msgs = await generateConvertMsgs({
+        type: Type.CONVERT_TOKEN,
+        sender: `${walletAddr}`,
+        fromAmount: _fromAmount,
+        // @ts-ignore
+        fromToken: token
+      });
+
+      const msg = msgs[0];
+      console.log(
+        'msgs: ',
+        msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
+      );
+      const result = await CosmJs.execute({
+        prefix: ORAI,
+        address: msg.contract,
+        walletAddr,
+        // @ts-ignore
+        handleMsg: Buffer.from(msg.msg.toString()),
+        gasAmount: { denom: ORAI, amount: '0' },
+        // @ts-ignore
+        handleOptions: { funds: msg.sent_funds }
+      });
+      console.log('result swap tx hash: ', result);
+
+      if (result) {
+        console.log('in correct result');
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+        setTxHash(result.transactionHash);
+        return;
+      }
+    } catch (error) {
+      console.log('error in swap form: ', error);
+      let finalError = '';
+      if (typeof error === 'string' || error instanceof String) {
+        finalError = `${error}`;
+      } else finalError = String(error);
+      displayToast(TToastType.TX_FAILED, {
+        message: finalError
+      });
+    }
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
@@ -332,11 +598,12 @@ const Balance: React.FC<BalanceProps> = () => {
                           from && amounts[from.denom]
                             ? amounts[from.denom].amount
                             : 0,
-                        denom: from?.name ?? ''
+                        denom: from?.name ?? '',
+                        decimals: from?.decimals
                       }}
                       className={styles.balanceDescription}
                       prefix="Balance: "
-                      decimalScale={from?.decimals}
+                      decimalScale={Math.min(6, from?.decimals || 0)}
                     />
 
                     <button
@@ -393,7 +660,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
                     <NumberFormat
                       thousandSeparator
-                      decimalScale={from.decimals}
+                      decimalScale={Math.min(6, from.decimals)}
                       customInput={Input}
                       value={fromAmount}
                       onValueChange={({ floatValue }) => {
@@ -449,7 +716,7 @@ const Balance: React.FC<BalanceProps> = () => {
             </button>
             <button
               className={styles.tfBtn}
-              onClick={transferIBC}
+              onClick={onClickTransfer}
               disabled={ibcLoading}
             >
               {ibcLoading && <Loader width={40} height={40} />}
@@ -467,11 +734,12 @@ const Balance: React.FC<BalanceProps> = () => {
                   balance={{
                     amount:
                       to && amounts[to.denom] ? amounts[to.denom].amount : 0,
-                    denom: to?.name ?? ''
+                    denom: to?.name ?? '',
+                    decimals: to?.decimals
                   }}
                   className={styles.balanceDescription}
                   prefix="Balance: "
-                  decimalScale={to?.decimals}
+                  decimalScale={Math.min(6, to?.decimals || 0)}
                 />
 
                 {to ? (
@@ -502,6 +770,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           active={to?.name === t.name}
                           token={t}
                           onClick={onClickTokenTo}
+                          convertToken={convertToken}
                         />
                       );
                     })}

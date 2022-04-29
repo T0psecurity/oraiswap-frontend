@@ -5,7 +5,7 @@ export enum NetworkKey {
   TESTNET = 'testnet'
 }
 
-const networks: { [key: string]: NetworkConfig } = {
+const networks: Record<NetworkKey, NetworkConfig> = {
   [NetworkKey.MAINNET]: {
     chainId: 'Oraichain',
     prefix: 'orai',
@@ -20,6 +20,7 @@ const networks: { [key: string]: NetworkConfig } = {
     oracle: process.env.REACT_APP_ORACLE_CONTRACT,
     staking: process.env.REACT_APP_STAKING_CONTRACT,
     rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
+    converter: process.env.REACT_APP_CONVERTER_CONTRACT,
     explorer: 'https://scan.orai.io'
   },
   [NetworkKey.TESTNET]: {
@@ -36,7 +37,8 @@ const networks: { [key: string]: NetworkConfig } = {
     oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn',
     staking: process.env.REACT_APP_STAKING_CONTRACT,
     explorer: 'https://testnet.scan.orai.io',
-    rewarder: process.env.REACT_APP_REWARDER_CONTRACT
+    rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
+    converter: process.env.REACT_APP_CONVERTER_CONTRACT
   }
 };
 

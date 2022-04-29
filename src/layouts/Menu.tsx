@@ -5,7 +5,11 @@ import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as Dark } from 'assets/icons/dark.svg';
 import { ReactComponent as Light } from 'assets/icons/light.svg';
-import { ReactComponent as Logout } from 'assets/icons/logout.svg';
+import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
+import { ReactComponent as ETHIcon } from 'assets/icons/eth.svg';
+import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+
 import { ThemeContext, Themes } from 'context/theme-context';
 
 import React, {
@@ -18,18 +22,16 @@ import React, {
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
 import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
-// import { isLoggedIn } from 'providers/AuthProvider';
-import { network } from 'constants/networks';
 import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
 import { ORAI } from 'constants/constants';
-import Loader from 'components/Loader';
 import { isMobile } from '@walletconnect/browser-utils';
-import Icon from 'components/Icon';
+
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
+import { fetchNativeTokenBalance } from 'rest/api';
 
 const { Text } = Typography;
 
@@ -38,6 +40,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
+  const [metamaskAddress, setMetamaskAddress] =
+    useGlobalState('metamaskAddress');
+  const [metamaskBalance, setMetamaskBalance] = useState('0');
+
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -46,19 +52,19 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balanceData
-  } = useQuery(
-    'balance',
-    () =>
-      fetch(`${network.lcd}/cosmos/bank/v1beta1/balances/${address}`).then(
-        (res) => res.json()
-      ),
-    { enabled: address ? address.length > 0 : false }
-  );
+    data: balance
+  } = useQuery('balance', () => fetchNativeTokenBalance(address), {
+    enabled: address?.length > 0
+  });
 
   useEffect(() => {
     setLink(location.pathname);
   }, []);
+
+  useEffect(() => {
+    // we use default Orai token
+    window.Metamask.getOraiBalance(metamaskAddress!).then(setMetamaskBalance);
+  });
 
   const renderLink = (
     to: string,
@@ -87,11 +93,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <Link to={'/'} onClick={() => setLink('/')}>
             <LogoFull />
           </Link>
-          <Icon
-            size={44}
-            name={open ? 'menu_open' : 'menu'}
-            onClick={handleToggle}
-          />
+          <CloseIcon onClick={handleToggle} />
         </div>
       )}
       <div className={classNames(styles.menu, { [styles.open]: open })}>
@@ -105,49 +107,74 @@ const Menu: React.FC<{}> = React.memo((props) => {
             <RequireAuthButton
               address={address}
               setAddress={setAddress}
-              className={styles.connect_btn}
+              metamaskAddress={metamaskAddress}
+              setMetamaskAddress={setMetamaskAddress}
             >
-              {address ? (
+              {address && (
                 <div className={styles.token_info}>
                   <AvatarPlaceholder
                     address={address}
                     className={styles.token_avatar}
                   />
+                  <ORAIIcon className={styles.network_icon} />
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
                       size={6}
                       text={address}
                       className={styles.token_address}
                     />
-                    {(() => {
-                      let balance = balanceData?.balances?.find(
-                        (balance: { denom: string; amount: string }) =>
-                          balance.denom === ORAI
-                      );
-
-                      if (!!balance)
-                        return (
-                          <TokenBalance
-                            balance={balance}
-                            className={styles.token_balance}
-                            decimalScale={2}
-                          />
-                        );
-                    })()}
+                    {!!balance && (
+                      <TokenBalance
+                        balance={{
+                          amount: balance,
+                          decimals: 6,
+                          denom: ORAI
+                        }}
+                        className={styles.token_balance}
+                        decimalScale={6}
+                      />
+                    )}
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {metamaskAddress && (
+                <div className={styles.token_info}>
+                  <AvatarPlaceholder
+                    address={metamaskAddress}
+                    className={styles.token_avatar}
+                  />
+                  {window.Metamask.isBsc() ? (
+                    <BNBIcon className={styles.network_icon} />
+                  ) : (
+                    <ETHIcon className={styles.network_icon} />
+                  )}
+                  <div className={styles.token_info_balance}>
+                    <CenterEllipsis
+                      size={6}
+                      text={metamaskAddress}
+                      className={styles.token_address}
+                    />
+                    {!!metamaskBalance && (
+                      <TokenBalance
+                        balance={{
+                          amount: metamaskBalance,
+                          decimals: 18,
+                          denom: ORAI
+                        }}
+                        className={styles.token_balance}
+                        decimalScale={6}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {!address && !metamaskAddress && (
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
-              {!!address && (
-                <Logout
-                  onClick={(e) => {
-                    setAddress('');
-                  }}
-                  style={{ width: 35, height: 35 }}
-                />
-              )}
             </RequireAuthButton>
+
             {renderLink(
               '/swap',
               'Swap',
@@ -170,12 +197,11 @@ const Menu: React.FC<{}> = React.memo((props) => {
         </div>
 
         <div>
-          {/* <div className={styles.menu_themes}>
+          <div className={styles.menu_themes}>
             <Button
-              className={
-                styles.menu_theme +
-                (theme === Themes.dark ? ` ${styles.active}` : '')
-              }
+              className={classNames(styles.menu_theme, {
+                [styles.active]: theme === Themes.dark
+              })}
               onClick={() => {
                 setTheme(Themes.dark);
               }}
@@ -184,10 +210,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
               <Text className={styles.menu_theme_text}>Dark</Text>
             </Button>
             <Button
-              className={
-                styles.menu_theme +
-                (theme === Themes.light ? ` ${styles.active}` : '')
-              }
+              className={classNames(styles.menu_theme, {
+                [styles.active]: theme === Themes.light
+              })}
               onClick={() => {
                 setTheme(Themes.light);
               }}
@@ -195,7 +220,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               <Light style={{ width: 15, height: 15 }} />
               <Text className={styles.menu_theme_text}>Light</Text>
             </Button>
-          </div> */}
+          </div>
 
           <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
         </div>

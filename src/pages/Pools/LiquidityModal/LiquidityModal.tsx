@@ -3,7 +3,7 @@ import Modal from 'components/Modal';
 import style from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
-import { pairsMap, mockToken, Pair, PairKey } from 'constants/pools';
+import { pairs, getPair } from 'constants/pools';
 import { useQuery } from 'react-query';
 import {
   fetchBalance,
@@ -58,13 +58,6 @@ const LiquidityModal: FC<ModalProps> = ({
   setLiquidityHash: setTxHash,
   liquidityHash: txHash
 }) => {
-  const allToken = Object.values(mockToken).map((token) => {
-    return {
-      ...token,
-      title: token.name
-    };
-  });
-
   const token1 = token1InfoData;
   const token2 = token2InfoData;
   const [address] = useGlobalState('address');
@@ -287,17 +280,8 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const getPairInfo = async () => {
-    const pairKey = Object.keys(PairKey).find(
-      (k) =>
-        k.includes(token1InfoData.name.toUpperCase()) &&
-        k.includes(token2InfoData.name.toUpperCase())
-    );
-    const t = PairKey[pairKey! as keyof typeof PairKey];
-
-    const pair = pairsMap[t];
-
+    const pair = getPair(token1InfoData.denom, token2InfoData.denom);
     const pairData = await fetchPairInfo([token1InfoData!, token2InfoData!]);
-
     return { pair, ...pairData };
   };
 
@@ -360,8 +344,10 @@ const LiquidityModal: FC<ModalProps> = ({
         message: 'Token2 amount invalid!'
       });
 
+    if (!pairInfoData?.pair) return;
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
+
     try {
       let walletAddr;
       if (await window.Keplr.getKeplr())
@@ -388,7 +374,7 @@ const LiquidityModal: FC<ModalProps> = ({
         toInfo: token2InfoData!,
         fromAmount: `${amount1}`,
         toAmount: `${amount2}`,
-        pair: pairInfoData!.pair.contract_addr
+        pair: pairInfoData.pair.contract_addr
       });
 
       const msg = msgs[0];
@@ -440,7 +426,7 @@ const LiquidityModal: FC<ModalProps> = ({
       return displayToast(TToastType.TX_FAILED, {
         message: 'LP amount invalid!'
       });
-
+    if (!pairInfoData?.pair) return;
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {

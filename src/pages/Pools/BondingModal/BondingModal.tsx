@@ -192,7 +192,7 @@ const BondingModal: FC<ModalProps> = ({
               placeholder={'0'}
               // type="input"
               value={bondAmount ?? ''}
-              onChange={(e: any) => {
+              onChange={(e: { target: { value: string } }) => {
                 onChangeAmount(e.target.value.replaceAll(',', ''));
               }}
             />

@@ -4,19 +4,9 @@ import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'constants/constants';
-import { pairsMap } from 'constants/pools';
+import { getPair, Pair, pairs } from 'constants/pools';
 import axios from './request';
-
-interface TokenInfo {
-  name: string;
-  symbol: string;
-  denom: string;
-  decimals: number;
-  total_supply: string;
-  contract_addr?: string;
-  icon?: string;
-  verified?: boolean;
-}
+import { TokenInfo } from 'types/token';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -26,7 +16,8 @@ export enum Type {
   'INCREASE_ALLOWANCE' = 'Increase allowance',
   'BOND_LIQUIDITY' = 'Bond liquidity',
   'WITHDRAW_LIQUIDITY_MINING' = 'Withdraw Liquidity Mining Rewards',
-  'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens'
+  'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens',
+  'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens'
 }
 
 const oraiInfo = { native_token: { denom: ORAI } };
@@ -62,14 +53,6 @@ async function fetchPairs() {
   return data;
 }
 
-function findPair(pair: string) {
-  let invertedPair = pair.split('-').reverse().join('-');
-  for (let supportedPair of Object.keys(pairsMap)) {
-    if (pair === supportedPair || invertedPair === supportedPair) return true;
-  }
-  return false;
-}
-
 async function fetchTaxRate() {
   const data = await querySmart(network.oracle, { treasury: { tax_rate: {} } });
   return data;
@@ -93,18 +76,18 @@ function fetchRewardMiningInfo(address: string, asset_info: AssetInfo) {
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   let tokenInfo: TokenInfo = {
+    ...tokenSwap,
     symbol: '',
     name: tokenSwap.name,
-    contract_addr: tokenSwap.contractAddress,
+    contractAddress: tokenSwap.contractAddress,
     decimals: 6,
-    denom: tokenSwap.denom,
     icon: '',
+    denom: tokenSwap.denom,
     verified: false,
     total_supply: ''
   };
   if (!tokenSwap.contractAddress) {
     tokenInfo.symbol = tokenSwap.name;
-    tokenInfo.icon = tokenSwap.name;
     tokenInfo.verified = true;
   } else {
     const data = await querySmart(tokenSwap.contractAddress, {
@@ -114,7 +97,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
       ...tokenInfo,
       symbol: data.symbol,
       name: data.name,
-      contract_addr: tokenSwap.contractAddress,
+      contractAddress: tokenSwap.contractAddress,
       decimals: data.decimals,
       icon: data.icon,
       verified: data.verified,
@@ -136,28 +119,61 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   );
 }
 
+// async function fetchPoolInfoAmount(
+//   fromTokenInfo: TokenInfo,
+//   toTokenInfo: TokenInfo
+// ) {
+//   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
+//   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
+
+//   let offerPoolAmount = 0,
+//     askPoolAmount = 0;
+
+//   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
+
+//   if (pair) {
+//     const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
+//     const poolInfo = await fetchPool(pairInfo.contract_addr);
+//     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
+//     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
+//   } else if (fromTokenInfo.denom !== ORAI && toTokenInfo.denom !== ORAI) {
+//     // handle multi-swap case
+//     const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
+//     const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
+//     const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
+//     const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
+//     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
+//     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
+//   }
+//   return { offerPoolAmount, askPoolAmount };
+// }
+
 async function fetchPoolInfoAmount(
-  fromTokenInfo: TokenInfo,
-  toTokenInfo: TokenInfo
-) {
+  fromTokenInfo: TokenItemType,
+  toTokenInfo: TokenItemType
+): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
-  let offerPoolAmount,
+
+  let offerPoolAmount = 0,
     askPoolAmount = 0;
-  if (findPair(`${fromTokenInfo.denom}-${toTokenInfo.denom}`)) {
-    const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
-    const poolInfo = await fetchPool(pairInfo.contract_addr);
+
+  const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
+
+  if (pair) {
+    const poolInfo = await fetchPool(pair.contract_addr);
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
-    const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
-    const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
+    const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
+    const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
     const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
     const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
+
   return { offerPoolAmount, askPoolAmount };
 }
 
@@ -166,6 +182,7 @@ async function fetchPairInfo(
 ): Promise<PairInfo> {
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+
   const data = await fetchPairInfoRaw([firstAsset, secondAsset]);
   return data;
 }
@@ -278,7 +295,7 @@ async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
 
 async function fetchNativeTokenBalance(
   walletAddr: string,
-  denom: string,
+  denom: string = ORAI,
   lcd?: string
 ) {
   const url = `${
@@ -301,8 +318,8 @@ async function fetchBalance(
   else return fetchTokenBalance(tokenAddr, walletAddr, lcd);
 }
 
-const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string | number) => {
-  if (!tokenInfo?.contract_addr) {
+const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
+  if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
         fund: { denom: tokenInfo.denom, amount },
@@ -310,7 +327,7 @@ const parseTokenInfo = (tokenInfo: TokenInfo, amount?: string | number) => {
       };
     return { info: { native_token: { denom: tokenInfo.denom } } };
   }
-  return { info: { token: { contract_addr: tokenInfo?.contract_addr } } };
+  return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
 };
 
 const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
@@ -330,13 +347,13 @@ async function fetchExchangeRate(base_denom: string, quote_denom: string) {
   return data?.item?.exchange_rate;
 }
 
-const generateSwapOperationMsgs = (data: {
-  denom: string;
-  offerInfo: any;
-  askInfo: any;
-}) => {
-  const { denom, offerInfo, askInfo } = data;
-  return findPair(denom)
+const generateSwapOperationMsgs = (
+  denoms: [string, string],
+  offerInfo: any,
+  askInfo: any
+) => {
+  const pair = getPair(denoms);
+  return pair
     ? [
         {
           orai_swap: {
@@ -372,11 +389,11 @@ async function simulateSwap(query: {
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo, undefined);
 
-  let operations = generateSwapOperationMsgs({
-    denom: `${fromInfo.denom}-${toInfo.denom}`,
+  let operations = generateSwapOperationMsgs(
+    [fromInfo.denom, toInfo.denom],
     offerInfo,
     askInfo
-  });
+  );
 
   let msg = {
     simulate_swap_operations: {
@@ -384,6 +401,7 @@ async function simulateSwap(query: {
       offer_amount: amount.toString()
     }
   };
+
   const data = await querySmart(network.router, msg);
   return data;
 }
@@ -450,15 +468,15 @@ async function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund as Fund, askSentFund as Fund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs({
-            denom: `${swapQuery.fromInfo.denom}-${swapQuery.toInfo.denom}`,
+          operations: generateSwapOperationMsgs(
+            [swapQuery.fromInfo.name, swapQuery.toInfo.name],
             offerInfo,
             askInfo
-          })
+          )
         }
       };
       // if cw20 => has to send through cw20 contract
-      if (!swapQuery.fromInfo.contract_addr) {
+      if (!swapQuery.fromInfo.contractAddress) {
         input = inputTemp;
       } else {
         input = {
@@ -468,7 +486,7 @@ async function generateContractMessages(
             msg: btoa(JSON.stringify(inputTemp))
           }
         };
-        contractAddr = swapQuery.fromInfo.contract_addr;
+        contractAddr = swapQuery.fromInfo.contractAddress;
       }
       break;
     // TODO: provide liquidity and withdraw liquidity
@@ -623,6 +641,63 @@ async function generateMiningMsgs(
   return msgs;
 }
 
+export type Convert = {
+  type: Type.CONVERT_TOKEN;
+  sender: string;
+  fromToken: TokenInfo;
+  fromAmount: string;
+};
+
+async function generateConvertMsgs(msg: Convert) {
+  // @ts-ignore
+  const { type, sender, fromToken, fromAmount } = msg;
+  let sent_funds;
+  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
+  let contractAddr = network.converter;
+  let input;
+  switch (type) {
+    case Type.CONVERT_TOKEN: {
+      // currently only support cw20 token pool
+      let { info: assetInfo, fund } = parseTokenInfo(fromToken, fromAmount);
+      // native case
+      if (assetInfo.native_token) {
+        input = {
+          convert: {}
+        };
+        sent_funds = handleSentFunds(fund as Fund);
+      } else {
+        // cw20 case
+        input = {
+          send: {
+            contract: network.converter,
+            amount: fromAmount,
+            msg: btoa(
+              JSON.stringify({
+                convert: {}
+              })
+            )
+          }
+        };
+        contractAddr = assetInfo.token.contract_addr;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  const msgs = [
+    {
+      contract: contractAddr,
+      msg: Buffer.from(JSON.stringify(input)),
+      sender,
+      sent_funds
+    }
+  ];
+
+  return msgs;
+}
+
 export {
   querySmart,
   fetchTaxRate,
@@ -641,6 +716,7 @@ export {
   fetchPoolMiningInfo,
   fetchRewardMiningInfo,
   generateMiningMsgs,
+  generateConvertMsgs,
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,

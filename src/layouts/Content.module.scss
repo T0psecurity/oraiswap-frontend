@@ -15,3 +15,11 @@
     padding: 90px 15px 20px 15px;
   }
 }
+
+.light {
+  filter: invert(100%);  
+}
+
+.dark {
+  filter: invert(0%);  
+}
