@@ -1,6 +1,7 @@
 //@ts-nocheck
 import { is } from 'ramda';
 import bech32 from 'bech32';
+import Big from 'big.js';
 import { Fraction } from '@saberhq/token-utils';
 
 /* object */
@@ -118,12 +119,11 @@ export const getUsd = (
   price: Fraction | null,
   decimals: number
 ) => {
-  if (!amount) return 0;
-  if (!price) return 0;
+  if (!amount || !price) return 0;
 
   return price
     .multiply(numberToFraction(amount.toString()))
-    .divide(10 ** decimals).asNumber;
+    .divide(new Big(10).pow(decimals)).asNumber;
 };
 
 export const parseBalanceNumber = (balance: number) => {
