@@ -6,6 +6,9 @@
     margin: auto;
     border-radius: 24px;
     padding: 24px;
+    max-height: 100vh;
+    overflow-y: auto;
+
     .title {
       width: 100%;
       font-family: 'IBM Plex Sans';
