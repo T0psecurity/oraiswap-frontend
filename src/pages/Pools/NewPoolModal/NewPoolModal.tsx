@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './NewPoolModal.module.scss';
@@ -14,15 +13,9 @@ import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import Pie from 'components/Pie';
 import NumberFormat from 'react-number-format';
 import { poolTokens } from 'constants/pools';
+import { TokenItemType } from 'constants/bridgeTokens';
 
 const cx = cn.bind(style);
-
-interface ValidToken {
-  title: string;
-  contractAddress: string | undefined;
-  Icon: string | FC;
-  denom: string;
-}
 
 interface ModalProps {
   className?: string;
@@ -50,23 +43,25 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [token1, setToken1] = useState<string | null>(null);
   const [token2, setToken2] = useState<string | null>(null);
   const [listToken1Option, setListToken1Option] =
-    useState<ValidToken[]>(poolTokens);
+    useState<TokenItemType[]>(poolTokens);
   const [listToken2Option, setListToken2Option] =
-    useState<ValidToken[]>(poolTokens);
+    useState<TokenItemType[]>(poolTokens);
   const [supplyToken1, setSupplyToken1] = useState(0);
   const [supplyToken2, setSupplyToken2] = useState(0);
-  const [amountToken1, setAmountToken1] = useState(0);
-  const [amountToken2, setAmountToken2] = useState(0);
+  const [amountToken1, setAmountToken1] = useState('0');
+  const [amountToken2, setAmountToken2] = useState('0');
   const [address] = useGlobalState('address');
+
+  const tokenObj1 = poolTokens.find((token) => token.denom === token1);
+  const tokenObj2 = poolTokens.find((token) => token.denom === token2);
 
   const {
     data: token1InfoData,
     error: token1InfoError,
     isError: isToken1InfoError,
     isLoading: isToken1InfoLoading
-  } = useQuery(['token-info', token1], () => {
-    if (!!token1)
-      return fetchTokenInfo(poolTokens.find((token) => token.denom === token1));
+  } = useQuery(['token-info', token1], () => fetchTokenInfo(tokenObj1!), {
+    enabled: !!tokenObj1
   });
 
   const {
@@ -74,16 +69,12 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     error: token2InfoError,
     isError: isToken2InfoError,
     isLoading: isToken2InfoLoading
-  } = useQuery(['token-info', token2], () => {
-    if (!!token2)
-      return fetchTokenInfo(poolTokens.find((token) => token.denom === token2));
+  } = useQuery(['token-info', token2], () => fetchTokenInfo(tokenObj2!), {
+    enabled: !!tokenObj2
   });
 
-  const tokenObj1 = poolTokens.find((token) => token.denom === token1);
-  const tokenObj2 = poolTokens.find((token) => token.denom === token2);
-
   const {
-    data: token1Balance,
+    data: token1Balance = 0,
     error: token1BalanceError,
     isError: isToken1BalanceError,
     isLoading: isToken1BalanceLoading
@@ -92,15 +83,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     () =>
       fetchBalance(
         address,
-        tokenObj1.denom,
-        tokenObj1.contractAddress,
-        tokenObj1.lcd
+        tokenObj1!.denom,
+        tokenObj1!.contractAddress,
+        tokenObj1!.lcd
       ),
-    { enabled: !!address && !!token1 }
+    { enabled: !!address && !!tokenObj1 }
   );
 
   const {
-    data: token2Balance,
+    data: token2Balance = 0,
     error: token2BalanceError,
     isError: isToken2BalanceError,
     isLoading: isLoadingToken2Balance
@@ -109,23 +100,27 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     () =>
       fetchBalance(
         address,
-        tokenObj2.denom,
-        tokenObj2.contractAddress,
-        tokenObj2.lcd
+        tokenObj2!.denom,
+        tokenObj2!.contractAddress,
+        tokenObj2!.lcd
       ),
-    { enabled: !!address && !!token2 }
+    { enabled: !!address && !!tokenObj2 }
   );
 
   const Token1Icon = tokenObj1?.Icon;
   const Token2Icon = tokenObj2?.Icon;
 
-  const getBalanceValue = (tokenSymbol: string, amount: number) => {
+  const getBalanceValue = (
+    tokenSymbol: string | undefined,
+    amount: number | string
+  ) => {
+    if (!tokenSymbol) return 0;
     const coingeckoId = poolTokens.find(
       (token) => token.name === tokenSymbol
     )?.coingeckoId;
-    const pricePer = prices[coingeckoId]?.price?.asNumber ?? 0;
+    const pricePer = prices[coingeckoId!]?.price?.asNumber ?? 0;
 
-    return pricePer * amount;
+    return pricePer * +amount;
   };
 
   const step1Component = (
@@ -165,10 +160,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               placeholder="0"
               thousandSeparator
               decimalScale={6}
-              type="input"
+              type="text"
               value={supplyToken1 ? supplyToken1 : ''}
               onValueChange={({ floatValue }) => {
-                setSupplyToken1(floatValue);
+                setSupplyToken1(floatValue ?? 0);
               }}
             />
             <span>%</span>
@@ -210,10 +205,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               placeholder="0"
               thousandSeparator
               decimalScale={6}
-              type="input"
+              type="text"
               value={supplyToken2 ? supplyToken2 : ''}
               onValueChange={({ floatValue }) => {
-                setSupplyToken2(floatValue);
+                setSupplyToken2(floatValue ?? 0);
               }}
             />
             <span>%</span>
@@ -264,7 +259,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <TokenBalance
             balance={getBalanceValue(
-              token1InfoData?.symbol,
+              token1InfoData?.symbol ?? '',
               parseDisplayAmount(token1Balance, token1InfoData?.decimals)
             )}
             style={{ flexGrow: 1, textAlign: 'right' }}
@@ -284,10 +279,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('amount')}
             thousandSeparator
             decimalScale={6}
-            type="input"
+            type="text"
             value={!!amountToken1 ? amountToken1 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken1(floatValue);
+              setAmountToken1(floatValue?.toString() ?? '0');
             }}
           />
         </div>
@@ -329,7 +324,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <TokenBalance
             balance={getBalanceValue(
-              token2InfoData?.symbol,
+              token2InfoData?.symbol ?? '',
               parseDisplayAmount(token2Balance, token2InfoData?.decimals)
             )}
             style={{ flexGrow: 1, textAlign: 'right' }}
@@ -349,10 +344,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('amount')}
             thousandSeparator
             decimalScale={6}
-            type="input"
+            type="text"
             value={!!amountToken2 ? amountToken2 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken2(floatValue);
+              setAmountToken2(floatValue?.toString() ?? '0');
             }}
           />
         </div>
@@ -394,7 +389,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <div className={cx('stats_info_row')}>
             <TokenBalance
-              balance={getBalanceValue(token1InfoData?.symbol, +amountToken1)}
+              balance={getBalanceValue(
+                token1InfoData?.symbol ?? '',
+                +amountToken1
+              )}
               className={cx('stats_info_value_usd')}
               decimalScale={2}
             />
@@ -413,7 +411,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <div className={cx('stats_info_row')}>
             <TokenBalance
-              balance={getBalanceValue(token2InfoData?.symbol, +amountToken2)}
+              balance={getBalanceValue(
+                token2InfoData?.symbol ?? '',
+                +amountToken2
+              )}
               className={cx('stats_info_value_usd')}
               decimalScale={2}
             />
@@ -430,7 +431,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               placeholder="0"
               thousandSeparator
               decimalScale={6}
-              type="input"
+              type="text"
               // value={supplyToken2 ? supplyToken2 : ''}
               // onValueChange={({ floatValue }) => {
               //   setSupplyToken2(floatValue);
@@ -444,7 +445,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Pool Creation Fee</span>
-            <TooltipIcon />
+            {/* <TooltipIcon /> */}
           </div>
           <span>50 ORAI</span>
         </div>
@@ -523,7 +524,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         close={() => setIsSelectingToken(null)}
         setToken={(token1: string) => {
           setToken1(token1);
-          setListToken2Option(allToken.filter((t) => t.denom !== token1));
+          setListToken2Option(poolTokens.filter((t) => t.denom !== token1));
         }}
         listToken={listToken1Option}
       />
@@ -533,7 +534,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         close={() => setIsSelectingToken(null)}
         setToken={(token2: string) => {
           setToken2(token2);
-          setListToken1Option(allToken.filter((t) => t.denom !== token2));
+          setListToken1Option(poolTokens.filter((t) => t.denom !== token2));
         }}
         listToken={listToken2Option}
       />
@@ -547,49 +548,7 @@ const DemoPie = (
     value: number;
   }[]
 ) => {
-  const config = {
-    legend: false,
-    autoFit: false,
-    appendPadding: 10,
-    data,
-    height: 150,
-    width: 150,
-    angleField: 'value',
-    colorField: 'type',
-    radius: 1,
-    innerRadius: 0.85,
-    label: {
-      type: 'inner',
-      offset: '-50%',
-      content: undefined,
-      style: {
-        fontSize: 0
-      }
-    },
-    interactions: [
-      {
-        type: 'element-selected'
-      },
-      {
-        type: 'element-active'
-      }
-    ],
-    color: ['#612FCA', '#FFD5AE'],
-    statistic: {
-      title: false,
-      content: {
-        style: {
-          whiteSpace: 'pre-wrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          color: '#ffffff',
-          fontSize: '14px'
-        },
-        content: `${data[0].type}/${data[1].type}`
-      }
-    }
-  };
-  return <Pie {...config} />;
+  return <Pie width={150} />;
 };
 
 export default NewPoolModal;

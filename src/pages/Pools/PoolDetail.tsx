@@ -41,7 +41,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useGlobalState('address');
-  const [assetToken, setAssetToken] = useState<any>();
+  const [assetToken, setAssetToken] = useState<TokenItemType>();
   const [bondingTxHash, setBondingTxHash] = useState('');
   const [liquidityTxHash, setLiquidityTxHash] = useState('');
   const [withdrawTxHash, setWithdrawTxHash] = useState('');
@@ -205,19 +205,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       assetToken,
       withdrawTxHash
     ],
-    async () => {
-      let t = await fetchRewardInfo(address, assetToken);
-
-      return t;
-    },
+    () => fetchRewardInfo(address, assetToken!),
     { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
   );
 
   const { data: rewardPerSecInfoData } = useQuery(
     ['reward-per-sec-info', address, pairInfoData, assetToken],
     async () => {
-      let t = await fetchRewardPerSecInfo(assetToken);
-
+      let t = await fetchRewardPerSecInfo(assetToken!);
       return t.assets;
     },
     { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
@@ -225,11 +220,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   const { data: stakingPoolInfoData } = useQuery(
     ['staking-pool-info', address, pairInfoData, assetToken],
-    async () => {
-      let t = await fetchStakingPoolInfo(assetToken);
-
-      return t;
-    },
+    () => fetchStakingPoolInfo(assetToken!),
     { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
   );
 
@@ -245,14 +236,18 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     Token2Icon = pairInfoData?.token2?.Icon;
 
   const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
-  const liquidity1 =
-    (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) / lpTotalSupply;
-  const liquidity2 =
-    (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) / lpTotalSupply;
-  const liquidity1Usd =
-    (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply;
-  const liquidity2Usd =
-    (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply;
+  const liquidity1 = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) / lpTotalSupply
+    : 0;
+  const liquidity2 = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) / lpTotalSupply
+    : 0;
+  const liquidity1Usd = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply
+    : 0;
+  const liquidity2Usd = lpTokenBalance
+    ? (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply
+    : 0;
 
   const rewardInfoFirst = !!totalRewardInfoData?.reward_infos.length
     ? totalRewardInfoData?.reward_infos[0]
@@ -437,34 +432,39 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
               )}
 
-              <LiquidityMining
-                setIsOpenBondingModal={setIsOpenBondingModal}
-                rewardInfoFirst={rewardInfoFirst}
-                lpTokenInfoData={lpTokenInfoData}
-                setIsOpenUnbondModal={setIsOpenUnbondModal}
-                pairAmountInfoData={pairAmountInfoData}
-                assetToken={assetToken}
-                setWithdrawTxHash={setWithdrawTxHash}
-                totalRewardInfoData={totalRewardInfoData}
-                rewardPerSecInfoData={rewardPerSecInfoData}
-                stakingPoolInfoData={stakingPoolInfoData}
-              />
+              {lpTokenInfoData && assetToken && (
+                <LiquidityMining
+                  setIsOpenBondingModal={setIsOpenBondingModal}
+                  rewardInfoFirst={rewardInfoFirst}
+                  lpTokenInfoData={lpTokenInfoData}
+                  setIsOpenUnbondModal={setIsOpenUnbondModal}
+                  pairAmountInfoData={pairAmountInfoData}
+                  assetToken={assetToken}
+                  setWithdrawTxHash={setWithdrawTxHash}
+                  totalRewardInfoData={totalRewardInfoData}
+                  rewardPerSecInfoData={rewardPerSecInfoData}
+                  stakingPoolInfoData={stakingPoolInfoData}
+                />
+              )}
             </div>
           </div>
-          {isOpenLiquidityModal && (
-            <LiquidityModal
-              isOpen={isOpenLiquidityModal}
-              open={() => setIsOpenLiquidityModal(true)}
-              close={() => setIsOpenLiquidityModal(false)}
-              token1InfoData={pairInfoData.token1}
-              token2InfoData={pairInfoData.token2}
-              lpTokenInfoData={lpTokenInfoData}
-              lpTokenBalance={lpTokenBalance}
-              setLiquidityHash={setLiquidityTxHash}
-              liquidityHash={liquidityTxHash}
-            />
-          )}
-          {isOpenBondingModal && (
+          {isOpenLiquidityModal &&
+            lpTokenInfoData &&
+            pairInfoData.token1 &&
+            pairInfoData.token2 && (
+              <LiquidityModal
+                isOpen={isOpenLiquidityModal}
+                open={() => setIsOpenLiquidityModal(true)}
+                close={() => setIsOpenLiquidityModal(false)}
+                token1InfoData={pairInfoData.token1}
+                token2InfoData={pairInfoData.token2}
+                lpTokenInfoData={lpTokenInfoData}
+                lpTokenBalance={lpTokenBalance}
+                setLiquidityHash={setLiquidityTxHash}
+                liquidityHash={liquidityTxHash}
+              />
+            )}
+          {isOpenBondingModal && lpTokenInfoData && lpTokenBalance && (
             <BondingModal
               isOpen={isOpenBondingModal}
               open={() => setIsOpenBondingModal(true)}

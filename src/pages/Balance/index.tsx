@@ -543,7 +543,7 @@ const Balance: React.FC<BalanceProps> = () => {
         address: msg.contract,
         walletAddr,
         // @ts-ignore
-        handleMsg: Buffer.from(msg.msg.toString()),
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
@@ -556,7 +556,6 @@ const Balance: React.FC<BalanceProps> = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);

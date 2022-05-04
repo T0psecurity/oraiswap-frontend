@@ -119,35 +119,6 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   );
 }
 
-// async function fetchPoolInfoAmount(
-//   fromTokenInfo: TokenInfo,
-//   toTokenInfo: TokenInfo
-// ) {
-//   const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
-//   const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
-
-//   let offerPoolAmount = 0,
-//     askPoolAmount = 0;
-
-//   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
-
-//   if (pair) {
-//     const pairInfo = await fetchPairInfoRaw([fromInfo, toInfo]);
-//     const poolInfo = await fetchPool(pairInfo.contract_addr);
-//     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
-//     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
-//   } else if (fromTokenInfo.denom !== ORAI && toTokenInfo.denom !== ORAI) {
-//     // handle multi-swap case
-//     const fromPairInfo = await fetchPairInfoRaw([fromInfo, oraiInfo]);
-//     const toPairInfo = await fetchPairInfoRaw([oraiInfo, toInfo]);
-//     const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
-//     const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
-//     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
-//     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
-//   }
-//   return { offerPoolAmount, askPoolAmount };
-// }
-
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType
@@ -178,7 +149,7 @@ async function fetchPoolInfoAmount(
 }
 
 async function fetchPairInfo(
-  assetInfos: [TokenInfo, TokenInfo]
+  assetInfos: [TokenItemType, TokenItemType]
 ): Promise<PairInfo> {
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
@@ -198,7 +169,7 @@ async function fetchTokenBalance(
   tokenAddr: string,
   walletAddr: string,
   lcd?: string
-) {
+): Promise<number> {
   const data = await querySmart(
     tokenAddr,
     {
@@ -206,7 +177,7 @@ async function fetchTokenBalance(
     },
     lcd
   );
-  return data.balance;
+  return parseInt(data.balance);
 }
 
 async function fetchTokenAllowance(
@@ -230,7 +201,7 @@ async function fetchTokenAllowance(
 
 async function fetchRewardInfo(
   staker_addr: string,
-  asset_token: TokenInfo,
+  asset_token: TokenItemType,
   lcd?: string
 ) {
   let { info: asset_info } = parseTokenInfo(asset_token);
@@ -248,7 +219,7 @@ async function fetchRewardInfo(
   return data;
 }
 
-async function fetchRewardPerSecInfo(assetToken: TokenInfo, lcd?: string) {
+async function fetchRewardPerSecInfo(assetToken: TokenItemType, lcd?: string) {
   let { info: asset_info } = parseTokenInfo(assetToken);
   const data = await querySmart(
     network.staking,
@@ -263,7 +234,7 @@ async function fetchRewardPerSecInfo(assetToken: TokenInfo, lcd?: string) {
   return data;
 }
 
-async function fetchStakingPoolInfo(assetToken: TokenInfo, lcd?: string) {
+async function fetchStakingPoolInfo(assetToken: TokenItemType, lcd?: string) {
   let { info: asset_info } = parseTokenInfo(assetToken);
   const data = await querySmart(
     network.staking,
@@ -313,7 +284,7 @@ async function fetchBalance(
   denom: string,
   tokenAddr?: string,
   lcd?: string
-) {
+): Promise<number> {
   if (!tokenAddr) return fetchNativeTokenBalance(walletAddr, denom, lcd);
   else return fetchTokenBalance(tokenAddr, walletAddr, lcd);
 }
@@ -322,7 +293,7 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
-        fund: { denom: tokenInfo.denom, amount },
+        fund: { denom: tokenInfo.denom, amount: amount.toString() },
         info: { native_token: { denom: tokenInfo.denom } }
       };
     return { info: { native_token: { denom: tokenInfo.denom } } };
@@ -353,6 +324,7 @@ const generateSwapOperationMsgs = (
   askInfo: any
 ) => {
   const pair = getPair(denoms);
+
   return pair
     ? [
         {
@@ -462,14 +434,13 @@ async function generateContractMessages(
         swapQuery.amount.toString()
       );
       const { fund: askSentFund, info: askInfo } = parseTokenInfo(
-        swapQuery.toInfo,
-        undefined
+        swapQuery.toInfo
       );
       sent_funds = handleSentFunds(offerSentFund as Fund, askSentFund as Fund);
       let inputTemp = {
         execute_swap_operations: {
           operations: generateSwapOperationMsgs(
-            [swapQuery.fromInfo.name, swapQuery.toInfo.name],
+            [swapQuery.fromInfo.denom, swapQuery.toInfo.denom],
             offerInfo,
             askInfo
           )
@@ -506,9 +477,9 @@ async function generateContractMessages(
           assets: [
             {
               info: toInfoData,
-              amount: provideQuery.toAmount
+              amount: provideQuery.toAmount.toString()
             },
-            { info: fromInfoData, amount: provideQuery.fromAmount }
+            { info: fromInfoData, amount: provideQuery.fromAmount.toString() }
           ]
         }
       };
@@ -521,7 +492,7 @@ async function generateContractMessages(
         send: {
           owner: sender,
           contract: withdrawQuery.pair,
-          amount: withdrawQuery.amount,
+          amount: withdrawQuery.amount.toString(),
           msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
         }
       };
@@ -531,7 +502,7 @@ async function generateContractMessages(
       const increaseAllowanceQuery = params as IncreaseAllowanceQuery;
       input = {
         increase_allowance: {
-          amount: increaseAllowanceQuery.amount,
+          amount: increaseAllowanceQuery.amount.toString(),
           spender: increaseAllowanceQuery.spender
         }
       };
@@ -540,8 +511,6 @@ async function generateContractMessages(
     default:
       break;
   }
-
-  console.log('input: ', input);
 
   const msgs = [
     {
@@ -574,7 +543,7 @@ export type WithdrawMining = {
 export type UnbondLiquidity = {
   type: Type.UNBOND_LIQUIDITY;
   sender: string;
-  amount: string;
+  amount: number | string;
   assetToken: TokenInfo;
 };
 
@@ -619,15 +588,16 @@ async function generateMiningMsgs(
       const unbondMsg = params as UnbondLiquidity;
       let { info: unbond_asset } = parseTokenInfo(unbondMsg.assetToken);
       input = {
-        unbond: { asset_info: unbond_asset, amount: unbondMsg.amount }
+        unbond: {
+          asset_info: unbond_asset,
+          amount: unbondMsg.amount.toString()
+        }
       };
       contractAddr = network.staking;
       break;
     default:
       break;
   }
-
-  console.log('input: ', input);
 
   const msgs = [
     {

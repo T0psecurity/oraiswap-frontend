@@ -80,7 +80,7 @@ const UnbondModal: FC<ModalProps> = ({
       const result = await CosmJs.execute({
         address: msg.contract,
         walletAddr: walletAddr! as string,
-        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
@@ -92,9 +92,7 @@ const UnbondModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in unbond form: ', error);
@@ -105,8 +103,9 @@ const UnbondModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   return (

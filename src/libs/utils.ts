@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { is } from 'ramda';
 import bech32 from 'bech32';
 import Big from 'big.js';
@@ -92,38 +91,48 @@ export const checkPrefixAndLength = (
 
 export const parseAmount = (value: string | number, decimal: number = 6) => {
   if (!value) return '0';
-  return `${(parseFloat(value) * Math.pow(10, decimal)).toFixed(0)}`;
+  return `${(
+    (typeof value === 'string' ? parseFloat(value) : value) *
+    Math.pow(10, decimal)
+  ).toFixed(0)}`;
 };
 
-export const parseDisplayAmount = (value: string | number, decimal: number) => {
-  if (value) return `${(parseFloat(value) / Math.pow(10, decimal)).toFixed(6)}`;
-  return 0;
+export const parseDisplayAmount = (
+  value: string | number,
+  decimal: number = 6
+) => {
+  if (value)
+    return `${(
+      (typeof value === 'string' ? parseFloat(value) : value) /
+      Math.pow(10, decimal)
+    ).toFixed(6)}`;
+  return '0';
 };
 
-const gcd = (a, b) => {
+const gcd = (a: any, b: any): any => {
   return b ? gcd(b, a % b) : a;
 };
 
-export const numberToFraction = function (_decimal) {
-  var top = _decimal.toString().replace(/\d+[.]/, '');
-  var bottom = Math.pow(10, top.length);
+export const numberToFraction = function (_decimal: number) {
+  const top = _decimal.toString().replace(/\d+[.]/, '');
+  const bottom = Math.pow(10, top.length);
+  let topNumber = parseInt(top);
   if (_decimal > 1) {
-    top = +top + Math.floor(_decimal) * bottom;
+    topNumber += Math.floor(_decimal) * bottom;
   }
   var x = gcd(top, bottom);
-  return new Fraction(top / x, bottom / x);
+  return new Fraction(topNumber / x, bottom / x);
 };
 
 export const getUsd = (
-  amount: number | Big,
+  amount: number,
   price: Fraction | null,
   decimals: number
 ) => {
   if (!amount || !price) return 0;
 
-  return price
-    .multiply(numberToFraction(amount.toString()))
-    .divide(new Big(10).pow(decimals)).asNumber;
+  return price.multiply(numberToFraction(amount)).divide(10 ** decimals)
+    .asNumber;
 };
 
 export const parseBalanceNumber = (balance: number) => {

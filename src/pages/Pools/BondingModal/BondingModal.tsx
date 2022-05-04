@@ -5,8 +5,6 @@ import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
 import TokenBalance from 'components/TokenBalance';
 import { getUsd, parseAmount } from 'libs/utils';
-import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { filteredTokens } from 'constants/bridgeTokens';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
@@ -14,6 +12,8 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
+import useGlobalState from 'hooks/useGlobalState';
+import { TokenInfo } from 'types/token';
 
 const cx = cn.bind(style);
 
@@ -23,8 +23,8 @@ interface ModalProps {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
-  lpTokenInfoData: any;
-  lpTokenBalance: any;
+  lpTokenInfoData: TokenInfo;
+  lpTokenBalance: number;
   liquidityValue: number;
   assetToken: any;
   setTxHash: any;
@@ -42,6 +42,7 @@ const BondingModal: FC<ModalProps> = ({
 }) => {
   const [bondAmount, setBondAmount] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [address] = useGlobalState('address');
 
   const onChangeAmount = (value: string) => {
     setBondAmount(value);
@@ -58,16 +59,11 @@ const BondingModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       const msgs = await generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
-        sender: `${walletAddr}`,
-        amount: `${parsedAmount}`,
-        lpToken: lpTokenInfoData.contract_addr,
+        sender: address,
+        amount: parsedAmount,
+        lpToken: lpTokenInfoData.contractAddress!,
         assetToken
       });
 
@@ -85,8 +81,8 @@ const BondingModal: FC<ModalProps> = ({
 
       const result = await CosmJs.execute({
         address: msg.contract,
-        walletAddr: walletAddr! as string,
-        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        walletAddr: address,
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
@@ -98,9 +94,7 @@ const BondingModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in bond form: ', error);
@@ -111,8 +105,9 @@ const BondingModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   return (
@@ -130,7 +125,7 @@ const BondingModal: FC<ModalProps> = ({
           <div className={cx('row')}>
             <div className={cx('row-title')}>
               <span>Current APR</span>
-              <TooltipIcon />
+              {/* <TooltipIcon /> */}
             </div>
             <span className={cx('row-des', 'highlight')}>
               150% + ORAIX Bonus

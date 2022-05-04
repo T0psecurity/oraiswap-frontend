@@ -1,8 +1,6 @@
-//@ts-nocheck
 import React, { useEffect, useState } from 'react';
 import style from './index.module.scss';
 import cn from 'classnames/bind';
-import { TooltipIcon } from 'components/Tooltip';
 import SettingModal from './Modals/SettingModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
 import { useQuery } from 'react-query';
@@ -13,15 +11,11 @@ import {
   fetchTaxRate,
   fetchTokenInfo,
   generateContractMessages,
-  simulateSwap
+  simulateSwap,
+  SwapQuery
 } from 'rest/api';
-import CosmJs from 'libs/cosmjs';
-import {
-  BEP20_ORAI,
-  DECIMAL_FRACTION,
-  ERC20_ORAI,
-  ORAI
-} from 'constants/constants';
+import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import { ORAI } from 'constants/constants';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
@@ -57,34 +51,29 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [isSelectFee, setIsSelectFee] = useState(false);
-  const [fromTokenDenom, setFromToken] = useState<string>('orai');
-  const [toTokenDenom, setToToken] = useState<string>('airi');
-  const [feeToken, setFeeToken] = useState<string>('airi');
-  const [fromAmount, setFromAmount] = useState(0);
-  const [toAmount, setToAmount] = useState(0);
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
+    [string, string]
+  >(['orai', 'airi']);
+  // const [feeToken, setFeeToken] = useState<string>('airi');
+  const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
-  const [averageRatio, setAverageRatio] = useState(0);
+  const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
-  const [address, setAddress] = useGlobalState('address');
+  const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [txHash, setTxHash] = useState<String>();
   const [refresh, setRefresh] = useState(false);
 
   const onChangeFromAmount = (amount: number) => {
-    setFromAmount(amount);
+    setSwapAmount([amount, toAmount]);
   };
 
   const onMaxFromAmount = (amount: number) => {
     let finalAmount = parseFloat(
       parseDisplayAmount(amount, fromTokenInfoData?.decimals) as string
     );
-    setFromAmount(finalAmount);
+    setSwapAmount([finalAmount, toAmount]);
   };
-
-  // const onChangeToAmount = (amount: number) => {
-  //   setToAmount(amount);
-  //   setFromAmount(amount / fromToRatio);
-  // };
 
   const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(
     ['tax-rate'],
@@ -121,7 +110,7 @@ const Swap: React.FC<SwapProps> = () => {
   }, [fromToken, toToken]);
 
   const {
-    data: fromTokenBalance,
+    data: fromTokenBalance = 0,
     error: fromTokenBalanceError,
     isError: isFromTokenBalanceError,
     isLoading: isFromTokenBalanceLoading
@@ -206,11 +195,12 @@ const Swap: React.FC<SwapProps> = () => {
   }, [simulateAverageData]);
 
   useEffect(() => {
-    setToAmount(
+    setSwapAmount([
+      fromAmount,
       parseFloat(
         parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
-      ).toFixed(6)
-    );
+      )
+    ]);
   }, [simulateData]);
 
   const handleSubmit = async () => {
@@ -222,33 +212,28 @@ const Swap: React.FC<SwapProps> = () => {
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       const msgs = await generateContractMessages({
         type: Type.SWAP,
-        sender: `${walletAddr}`,
+        sender: address,
         amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!
-      });
+      } as SwapQuery);
 
       // const msgs = await generateConvertMsgs({ type: Type.CONVERT_TOKEN, fromToken: fromTokenInfoData, fromAmount: "1", sender: `${walletAddr}` })
-
       const msg = msgs[0];
       console.log(
         'msgs: ',
         msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
       );
+
       const result = await CosmJs.execute({
         prefix: ORAI,
         address: msg.contract,
-        walletAddr,
-        handleMsg: Buffer.from(msg.msg.toString()),
+        walletAddr: address,
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
       console.log('result swap tx hash: ', result);
 
@@ -258,20 +243,19 @@ const Swap: React.FC<SwapProps> = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setSwapLoading(false);
-        setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
       let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
-        finalError = error;
+        finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setSwapLoading(false);
     }
-    setSwapLoading(false);
   };
 
   const FromIcon = fromToken?.Icon;
@@ -306,7 +290,7 @@ const Swap: React.FC<SwapProps> = () => {
             <div className={cx('balance')}>
               <TokenBalance
                 balance={{
-                  amount: fromTokenBalance ? fromTokenBalance : 0,
+                  amount: fromTokenBalance,
                   denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
@@ -348,10 +332,10 @@ const Swap: React.FC<SwapProps> = () => {
                 className={cx('amount')}
                 thousandSeparator
                 decimalScale={6}
-                type="input"
+                type="text"
                 value={fromAmount}
                 onValueChange={({ floatValue }) => {
-                  onChangeFromAmount(floatValue);
+                  onChangeFromAmount(floatValue ?? 0);
                 }}
               />
 
@@ -379,12 +363,8 @@ const Swap: React.FC<SwapProps> = () => {
             <img
               src={require('assets/icons/ant_swap.svg').default}
               onClick={() => {
-                const t = fromToken,
-                  k = fromAmount;
-                setFromToken(toToken);
-                setToToken(t);
-                setFromAmount(toAmount);
-                setToAmount(fromAmount);
+                setSwapTokens([toTokenDenom, fromTokenDenom]);
+                setSwapAmount([toAmount, fromAmount]);
               }}
             />
           </div>
@@ -417,7 +397,7 @@ const Swap: React.FC<SwapProps> = () => {
                 className={cx('amount')}
                 thousandSeparator
                 decimalScale={6}
-                type="input"
+                type="text"
                 value={toAmount}
                 // onValueChange={({ floatValue }) => {
                 //   onChangeToAmount(floatValue);
@@ -496,7 +476,7 @@ const Swap: React.FC<SwapProps> = () => {
               listToken={poolTokens.filter(
                 (token) => token.denom !== toTokenDenom
               )}
-              setToken={setFromToken}
+              setToken={(denom) => setSwapTokens([denom, toTokenDenom])}
             />
           ) : (
             <SelectTokenModal
@@ -506,7 +486,7 @@ const Swap: React.FC<SwapProps> = () => {
               listToken={poolTokens.filter(
                 (token) => token.denom !== fromTokenDenom
               )}
-              setToken={setToToken}
+              setToken={(denom) => setSwapTokens([fromTokenDenom, denom])}
             />
           )}
         </div>

@@ -7,29 +7,26 @@ import { pairs, getPair } from 'constants/pools';
 import { useQuery } from 'react-query';
 import {
   fetchBalance,
-  fetchExchangeRate,
   fetchPairInfo,
-  fetchPool,
   fetchPoolInfoAmount,
-  fetchTaxRate,
-  fetchTokenInfo,
   generateContractMessages,
-  simulateSwap,
-  fetchTokenAllowance
+  fetchTokenAllowance,
+  ProvideQuery
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { filteredTokens } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
-import CosmJs from 'libs/cosmjs';
+import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { DECIMAL_FRACTION, ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
+import { TokenInfo } from 'types/token';
 
 const cx = cn.bind(style);
 
@@ -39,9 +36,9 @@ interface ModalProps {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
-  token1InfoData: any;
-  token2InfoData: any;
-  lpTokenInfoData: any;
+  token1InfoData: TokenItemType;
+  token2InfoData: TokenItemType;
+  lpTokenInfoData: TokenInfo;
   lpTokenBalance: any;
   setLiquidityHash: any;
   liquidityHash: any;
@@ -113,7 +110,7 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   const {
-    data: token1Balance,
+    data: token1Balance = 0,
     error: token1BalanceError,
     isError: isToken1BalanceError,
     isLoading: isToken1BalanceLoading
@@ -133,7 +130,7 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   const {
-    data: token2Balance,
+    data: token2Balance = 0,
     error: token2BalanceError,
     isError: isToken2BalanceError,
     isLoading: isLoadingToken2Balance
@@ -161,13 +158,13 @@ const LiquidityModal: FC<ModalProps> = ({
     ['token-allowance', JSON.stringify(pairInfoData), token1InfoData, txHash],
     () => {
       return fetchTokenAllowance(
-        token1InfoData.contract_addr,
+        token1InfoData.contractAddress!,
         address,
         pairInfoData!.contract_addr
       );
     },
     {
-      enabled: !!address && !!token1InfoData.contract_addr && !!pairInfoData,
+      enabled: !!address && !!token1InfoData.contractAddress && !!pairInfoData,
       refetchOnWindowFocus: false
     }
   );
@@ -181,13 +178,13 @@ const LiquidityModal: FC<ModalProps> = ({
     ['token-allowance', JSON.stringify(pairInfoData), token2InfoData, txHash],
     () => {
       return fetchTokenAllowance(
-        token2InfoData.contract_addr,
+        token2InfoData.contractAddress!,
         address,
         pairInfoData!.contract_addr
       );
     },
     {
-      enabled: !!address && !!token2InfoData.contract_addr && !!pairInfoData,
+      enabled: !!address && !!token2InfoData.contractAddress && !!pairInfoData,
       refetchOnWindowFocus: false
     }
   );
@@ -293,8 +290,8 @@ const LiquidityModal: FC<ModalProps> = ({
     const msgs = await generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
-      sender: `${walletAddr}`,
-      spender: `${pairInfoData?.contract_addr}`,
+      sender: walletAddr,
+      spender: pairInfoData!.contract_addr,
       token
     });
 
@@ -307,8 +304,8 @@ const LiquidityModal: FC<ModalProps> = ({
 
     const result = await CosmJs.execute({
       address: msg.contract,
-      walletAddr: walletAddr! as string,
-      handleMsg: Buffer.from(msg.msg.toString()).toString(),
+      walletAddr,
+      handleMsg: msg.msg.toString(),
       gasAmount: { denom: ORAI, amount: '0' },
       // @ts-ignore
       handleOptions: { funds: msg.sent_funds }
@@ -321,7 +318,6 @@ const LiquidityModal: FC<ModalProps> = ({
         customLink: `${network.explorer}/txs/${result.transactionHash}`
       });
       setTxHash(result.transactionHash);
-      return;
     }
   };
 
@@ -349,33 +345,28 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       if (!!token1AllowanceToPair && +token1AllowanceToPair < amount1)
         await increaseAllowance(
           '9'.repeat(30),
-          token1InfoData!.contract_addr,
-          `${walletAddr}`
+          token1InfoData!.contractAddress!,
+          address
         );
       if (!!token2AllowanceToPair && +token2AllowanceToPair < amount2)
         await increaseAllowance(
           '9'.repeat(30),
-          token2InfoData!.contract_addr,
-          `${walletAddr}`
+          token2InfoData!.contractAddress!,
+          address
         );
 
       const msgs = await generateContractMessages({
         type: Type.PROVIDE,
-        sender: `${walletAddr}`,
+        sender: address,
         fromInfo: token1InfoData!,
         toInfo: token2InfoData!,
-        fromAmount: `${amount1}`,
-        toAmount: `${amount2}`,
+        fromAmount: amount1,
+        toAmount: amount2,
         pair: pairInfoData.pair.contract_addr
-      });
+      } as ProvideQuery);
 
       const msg = msgs[0];
 
@@ -386,8 +377,8 @@ const LiquidityModal: FC<ModalProps> = ({
 
       const result = await CosmJs.execute({
         address: msg.contract,
-        walletAddr: walletAddr! as string,
-        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        walletAddr: address,
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
@@ -399,9 +390,8 @@ const LiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
+
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -412,8 +402,9 @@ const LiquidityModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   const handleWithdrawLiquidity = async () => {
@@ -430,15 +421,10 @@ const LiquidityModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       const msgs = await generateContractMessages({
         type: Type.WITHDRAW,
-        sender: `${walletAddr}`,
-        lpAddr: `${lpTokenInfoData?.contract_addr}`,
+        sender: address,
+        lpAddr: lpTokenInfoData!.contractAddress!,
         amount,
         pair: pairInfoData!.pair.contract_addr
       });
@@ -452,11 +438,11 @@ const LiquidityModal: FC<ModalProps> = ({
 
       const result = await CosmJs.execute({
         address: msg.contract,
-        walletAddr: `${walletAddr}`,
-        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        walletAddr: address,
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        // @ts-ignore
-        handleOptions: { funds: msg.sent_funds }
+
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
 
       console.log('result provide tx hash: ', result);
@@ -466,9 +452,7 @@ const LiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
         setTxHash(result.transactionHash);
-        return;
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -479,8 +463,9 @@ const LiquidityModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_FAILED, {
         message: finalError
       });
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   const onChangeWithdrawPercent = (option: number) => {
@@ -641,7 +626,7 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Total supply</span>
-            <TooltipIcon />
+            {/* <TooltipIcon /> */}
           </div>
 
           <TokenBalance
@@ -655,7 +640,7 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Received LP asset</span>
-            <TooltipIcon />
+            {/* <TooltipIcon /> */}
           </div>
           <TokenBalance
             balance={{

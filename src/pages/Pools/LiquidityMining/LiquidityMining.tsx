@@ -2,7 +2,7 @@ import React, { FC, memo, useEffect, useState } from 'react';
 import { Button, Divider, Input } from 'antd';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
-import { Type, generateMiningMsgs } from 'rest/api';
+import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
 import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
 import TokenBalance from 'components/TokenBalance';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -11,16 +11,18 @@ import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
 import _ from 'lodash';
+import { TokenInfo } from 'types/token';
+import useGlobalState from 'hooks/useGlobalState';
 
 const cx = cn.bind(styles);
 
 interface LiquidityMiningProps {
   setIsOpenBondingModal: any;
   rewardInfoFirst: any;
-  lpTokenInfoData: any;
+  lpTokenInfoData: TokenInfo;
   setIsOpenUnbondModal: any;
   pairAmountInfoData: any;
-  assetToken: any;
+  assetToken: TokenItemType;
   setWithdrawTxHash: any;
   totalRewardInfoData: any;
   rewardPerSecInfoData: any;
@@ -41,6 +43,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<[any]>();
+  const [address] = useGlobalState('address');
 
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
@@ -114,11 +117,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       // const msgs = await generateMiningMsgs({
       //   type: Type.BOND_LIQUIDITY,
       //   sender: `${walletAddr}`,
@@ -129,9 +127,9 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
       const msgs = await generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
-        sender: `${walletAddr}`,
+        sender: address,
         assetToken: assetToken
-      });
+      } as WithdrawMining);
 
       const msg = msgs[0];
 
@@ -142,8 +140,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
       const result = await CosmJs.execute({
         address: msg.contract,
-        walletAddr: walletAddr! as string,
-        handleMsg: Buffer.from(msg.msg.toString()).toString(),
+        walletAddr: address,
+        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         // @ts-ignore
         handleOptions: { funds: msg.sent_funds }
