@@ -41,7 +41,7 @@ export type TokenItemType = {
   | 'bnb'
   | 'airight'
   | 'terrausd'
-  | 'terra-luna';
+  | 'terra-luna' | 'oraix';
   cosmosBased: Boolean;
 };
 
@@ -427,7 +427,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         denom: 'oraix',
         contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
-        coingeckoId: 'oraichain-token',
+        coingeckoId: 'oraix',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
