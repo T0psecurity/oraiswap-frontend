@@ -24,14 +24,11 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     {
       contract_addr: 'orai14lpk5gnmj688f957xvd6c42w9dygl9c2dlxjzw',
       asset_denoms: [ORAI, process.env.REACT_APP_UST_ORAICHAIN_DENOM]
+    },
+    {
+      contract_addr: 'orai1d2h9phsu6rau87d2l8adlxfhrdun2wrgdhsqxt',
+      asset_denoms: [ORAI, process.env.REACT_APP_LUNA_ORAICHAIN_DENOM]
     }
-    // {
-    //   contract_addr: 'orai1d2h9phsu6rau87d2l8adlxfhrdun2wrgdhsqxt',
-    //   asset_denoms: [
-    //     ORAI,
-    //     process.env.REACT_APP_LUNA_ORAICHAIN_DENOM
-    //   ]
-    // },
     // {
     //   contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
     //   asset_denoms: [
