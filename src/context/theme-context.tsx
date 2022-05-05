@@ -1,4 +1,4 @@
-import useLocalStorage from 'libs/useLocalStorage';
+import useLocalStorage from 'hooks/useLocalStorage';
 import React, {
   useState,
   createContext,

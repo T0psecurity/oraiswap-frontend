@@ -1,4 +1,3 @@
-import { ChainInfo } from '@keplr-wallet/types';
 import { isAndroid, isMobile } from '@walletconnect/browser-utils';
 import { blacklistNetworks, network } from 'constants/networks';
 import { embedChainInfos } from 'networks';
