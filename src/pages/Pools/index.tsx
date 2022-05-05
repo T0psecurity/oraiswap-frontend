@@ -79,12 +79,14 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
           <div className={styles.pairbox_pair_rate}>
             {token1.name} (50%)/{token2.name} (50%)
           </div>
-          <span className={styles.pairbox_pair_apr}>
-            APR: 150% + ORAIX Bonus
-          </span>
+          <span className={styles.pairbox_pair_apr}>ORAIX Bonus</span>
         </div>
       </div>
       <div className={styles.pairbox_content}>
+        <div className={styles.pairbox_data}>
+          <span className={styles.pairbox_data_name}>APR</span>
+          <span className={styles.pairbox_data_value}>150%</span>
+        </div>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>
           <span className={styles.pairbox_data_value}>
@@ -146,7 +148,7 @@ const ListPools = memo<{
       <div className={styles.listpools_title}>All pools</div>
       <div className={styles.listpools_search}>
         <Search
-          placeholder="Search by pools or tokens name"
+          placeholder='Search by pools or tokens name'
           onSearch={filterPairs}
           style={{
             width: 420,
