@@ -216,11 +216,11 @@ export default class Keplr {
   }
 
   private async getKeplrKey(chainId?: string): Promise<Key | undefined> {
-    if (!chainId) chainId = network.chainId;
+    chainId = chainId ?? network.chainId;
     if (!chainId) return undefined;
     const keplr = await this.getKeplr();
     if (keplr) {
-      return await keplr.getKey(chainId);
+      return keplr.getKey(chainId);
     }
     return undefined;
   }
@@ -231,6 +231,7 @@ export default class Keplr {
       const address = await this.getKeplrBech32Address('osmosis-1');
       return address?.toBech32(network.prefix);
     }
+
     const key = await this.getKeplrKey(chainId);
     return key?.bech32Address;
   }
@@ -244,6 +245,7 @@ export default class Keplr {
     chainId?: string
   ): Promise<Bech32Address | undefined> {
     const pubkey = await this.getKeplrPubKey(chainId);
+
     if (!pubkey) return undefined;
     const address = hash160(pubkey);
     return new Bech32Address(address);

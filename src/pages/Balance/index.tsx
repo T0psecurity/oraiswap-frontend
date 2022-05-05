@@ -250,6 +250,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (!addr) throw new Error('Addr is undefined');
       // using this way we no need to enable other network
+
       const amount = await fetchBalance(
         addr,
         token.denom,
@@ -304,19 +305,16 @@ const Balance: React.FC<BalanceProps> = () => {
         });
       }
       const pendingList: TokenItemType[] = [];
+
       const amountDetails = Object.fromEntries(
         await Promise.all(
           pendingTokens.map(async (token) => {
-            const address = await window.Keplr.getKeplrBech32Address(
-              token.coinType === network.coinType
-                ? network.chainId
-                : token.chainId
-            );
-
+            const address = await window.Keplr.getKeplrAddr(token.chainId);
             return loadAmountDetail(address, token, pendingList);
           })
         )
       );
+
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
@@ -472,7 +470,6 @@ const Balance: React.FC<BalanceProps> = () => {
         metamaskAddress,
         keplrAddress
       );
-      console.log(result);
 
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: `
@@ -540,7 +537,6 @@ const Balance: React.FC<BalanceProps> = () => {
         gasAmount: { denom: ORAI, amount: '0' },
         handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
-      console.log('result swap tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
