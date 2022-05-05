@@ -26,7 +26,7 @@ export default class Metamask {
   ) {
     const balance = Web3.utils.toWei(amountVal);
 
-    await window.ethereum.request({
+    await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId }]
     });
@@ -65,7 +65,7 @@ export default class Metamask {
 
     if (+currentAllowance >= +weiAmount) return;
 
-    await window.ethereum.request({
+    await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId }]
     });
@@ -93,11 +93,11 @@ export default class Metamask {
     const token = inputToken || this.getOraiToken();
     if (!token || !token.contractAddress) return '0';
 
-    const provider =
-      token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
-
-    const web3 = new Web3(provider);
     try {
+      const provider =
+        token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
+
+      const web3 = new Web3(provider);
       const tokenInst = new web3.eth.Contract(
         tokenABI as AbiItem[],
         token.contractAddress

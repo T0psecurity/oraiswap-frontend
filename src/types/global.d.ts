@@ -1,12 +1,37 @@
 import { Network } from 'bip32';
 import { Buffer } from 'buffer';
+import { KVStore } from '@keplr-wallet/common';
 import Keplr from '../libs/kelpr';
 import { Keplr as keplr } from './kelpr/wallet';
 import Wasm from '../libs/wasm';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
+import { AbstractProvider } from 'web3-core';
 
 declare global {
+  type MetaMaskEthereumProvider = AbstractProvider & {
+    chainId: string;
+    isMetaMask?: boolean;
+    once(eventName: string | symbol, listener: (...args: any[]) => void): this;
+    on(eventName: string | symbol, listener: (...args: any[]) => void): this;
+    off(eventName: string | symbol, listener: (...args: any[]) => void): this;
+    addListener(
+      eventName: string | symbol,
+      listener: (...args: any[]) => void
+    ): this;
+    removeListener(
+      eventName: string | symbol,
+      listener: (...args: any[]) => void
+    ): this;
+    removeAllListeners(event?: string | symbol): this;
+  };
+
+  type Browser = {
+    storage: {
+      local: KVStore;
+    };
+  };
+
   type Fund = {
     denom: string;
     amount: string;
@@ -75,9 +100,10 @@ declare global {
     Wasm: Wasm;
     Keplr: Keplr;
     web3: Web3;
-    ethereum: provider;
+    ethereum: MetaMaskEthereumProvider;
     Metamask: Metamask;
     keplr: keplr;
+    browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
   }
 

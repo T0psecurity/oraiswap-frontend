@@ -215,36 +215,35 @@ export default class Keplr {
     });
   }
 
-  private async getKeplrKey(chain_id?: string): Promise<Key | undefined> {
-    let chainId = network.chainId;
-    if (chain_id) chainId = chain_id;
+  private async getKeplrKey(chainId?: string): Promise<Key | undefined> {
+    if (!chainId) chainId = network.chainId;
     if (!chainId) return undefined;
     const keplr = await this.getKeplr();
     if (keplr) {
-      return keplr.getKey(chainId);
+      return await keplr.getKey(chainId);
     }
     return undefined;
   }
 
-  async getKeplrAddr(chain_id?: string): Promise<String | undefined> {
+  async getKeplrAddr(chainId?: string): Promise<String | undefined> {
     // not support network.chainId (Oraichain)
-    if (isMobile() && blacklistNetworks.includes(chain_id ?? network.chainId)) {
+    if (isMobile() && blacklistNetworks.includes(chainId ?? network.chainId)) {
       const address = await this.getKeplrBech32Address('osmosis-1');
       return address?.toBech32(network.prefix);
     }
-    const key = await this.getKeplrKey(chain_id);
+    const key = await this.getKeplrKey(chainId);
     return key?.bech32Address;
   }
 
-  async getKeplrPubKey(chain_id?: string): Promise<Uint8Array | undefined> {
-    const key = await this.getKeplrKey(chain_id);
+  async getKeplrPubKey(chainId?: string): Promise<Uint8Array | undefined> {
+    const key = await this.getKeplrKey(chainId);
     return key?.pubKey;
   }
 
   async getKeplrBech32Address(
-    chain_id?: string
+    chainId?: string
   ): Promise<Bech32Address | undefined> {
-    const pubkey = await this.getKeplrPubKey(chain_id);
+    const pubkey = await this.getKeplrPubKey(chainId);
     if (!pubkey) return undefined;
     const address = hash160(pubkey);
     return new Bech32Address(address);

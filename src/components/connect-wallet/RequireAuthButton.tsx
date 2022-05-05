@@ -6,7 +6,7 @@ import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 3, 4, 5, 15]
+  supportedChainIds: [1, 56]
 });
 
 const RequireAuthButton: React.FC<any> = ({

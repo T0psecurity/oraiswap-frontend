@@ -1,5 +1,6 @@
 import { Button, Typography } from 'antd';
 import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg';
+import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
@@ -86,6 +87,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   const mobileMode = isMobile();
 
+  const ToggleIcon = open ? CloseIcon : MenuIcon;
+
   return (
     <>
       {mobileMode && (
@@ -93,7 +96,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <Link to={'/'} onClick={() => setLink('/')}>
             <LogoFull />
           </Link>
-          <CloseIcon onClick={handleToggle} />
+          <ToggleIcon onClick={handleToggle} />
         </div>
       )}
       <div className={classNames(styles.menu, { [styles.open]: open })}>
