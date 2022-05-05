@@ -227,9 +227,13 @@ export default class Keplr {
 
   async getKeplrAddr(chainId?: string): Promise<String | undefined> {
     // not support network.chainId (Oraichain)
-    if (isMobile() && blacklistNetworks.includes(chainId ?? network.chainId)) {
+    const token = filteredTokens.find(
+      (token) => token.chainId === chainId ?? network.chainId
+    );
+    if (!token) return;
+    if (isMobile() && blacklistNetworks.includes(token.chainId)) {
       const address = await this.getKeplrBech32Address('osmosis-1');
-      return address?.toBech32(network.prefix);
+      return address?.toBech32(token.prefix!);
     }
 
     const key = await this.getKeplrKey(chainId);
