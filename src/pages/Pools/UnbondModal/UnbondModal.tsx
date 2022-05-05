@@ -16,6 +16,7 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'constants/constants';
 import { network } from 'constants/networks';
 import Loader from 'components/Loader';
+import useGlobalState from 'hooks/useGlobalState';
 
 const cx = cn.bind(style);
 
@@ -43,6 +44,7 @@ const UnbondModal: FC<ModalProps> = ({
   const [chosenOption, setChosenOption] = useState(-1);
   const [unbondAmount, setUnbondAmount] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
+  const [address] = useGlobalState('address');
 
   const handleUnbond = async (amount: number) => {
     const parsedAmount = +parseAmount(
@@ -58,15 +60,10 @@ const UnbondModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let walletAddr;
-      if (await window.Keplr.getKeplr())
-        walletAddr = await window.Keplr.getKeplrAddr();
-      else throw 'You have to install Keplr wallet to swap';
-
       const msgs = await generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
-        sender: `${walletAddr}`,
-        amount: `${parsedAmount}`,
+        sender: address,
+        amount: parsedAmount,
         assetToken
       });
 
@@ -79,10 +76,10 @@ const UnbondModal: FC<ModalProps> = ({
 
       const result = await CosmJs.execute({
         address: msg.contract,
-        walletAddr: walletAddr! as string,
+        walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        // @ts-ignore
+
         handleOptions: { funds: msg.sent_funds }
       });
       console.log('result provide tx hash: ', result);

@@ -34,14 +34,14 @@ export type TokenItemType = {
   lcd?: string;
   decimals: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna' | 'oraix';
   cosmosBased: Boolean;
 };
 
@@ -324,20 +324,20 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         cosmosBased: true,
         Icon: ATOMCOSMOS
       },
-      // {
-      //   name: 'LUNA',
-      //   org: 'Oraichain',
-      //   prefix: 'orai',
-      //   coingeckoId: 'terra-luna',
-      //   coinType: 118,
-      //   denom: process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
-      //   decimals: 6,
-      //   chainId: 'Oraichain',
-      //   rpc: 'https://rpc.orai.io',
-      //   lcd: 'https://lcd.orai.io',
-      //   cosmosBased: true,
-      //   Icon: LUNA
-      // },
+      {
+        name: 'LUNA',
+        org: 'Oraichain',
+        prefix: 'orai',
+        coingeckoId: 'terra-luna',
+        coinType: 118,
+        denom: process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
+        decimals: 6,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: LUNA
+      },
       {
         name: 'UST',
         org: 'Oraichain',
@@ -427,7 +427,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         denom: 'oraix',
         contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
-        coingeckoId: 'oraichain-token',
+        coingeckoId: 'oraix',
         decimals: 6,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
