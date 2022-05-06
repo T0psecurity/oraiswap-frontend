@@ -64,18 +64,7 @@ const sendTx = async (
 };
 export default class Keplr {
   private walletConnector: WalletConnect | undefined;
-  constructor() {
-    window.onload = async () => {
-      if (window.keplr) {
-        // window.keplr.defaultOptions = {
-        //     sign: {
-        //         preferNoSetFee: true,
-        //         preferNoSetMemo: true,
-        //     },
-        // };
-      }
-    };
-  }
+  constructor() {}
 
   suggestChain = async (chainId: string) => {
     if (!window.keplr) return;
@@ -225,7 +214,7 @@ export default class Keplr {
     return undefined;
   }
 
-  async getKeplrAddr(chainId?: string): Promise<String | undefined> {
+  async getKeplrAddr(chainId?: string): Promise<string | undefined> {
     // not support network.chainId (Oraichain)
     chainId = chainId ?? network.chainId;
     const token = filteredTokens.find((token) => token.chainId === chainId);

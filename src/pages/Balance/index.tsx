@@ -373,6 +373,9 @@ const Balance: React.FC<BalanceProps> = () => {
         await window.Keplr.suggestChain(from!.chainId);
         const fromAddress = await window.Keplr.getKeplrAddr(from!.chainId);
         const toAddress = await window.Keplr.getKeplrAddr(to!.chainId);
+        if (!fromAddress || !toAddress) {
+          return;
+        }
         const amount = coin(
           Math.round(fromAmount * 10 ** from!.decimals),
           from!.denom
@@ -385,8 +388,8 @@ const Balance: React.FC<BalanceProps> = () => {
           const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
             sourceChannel: ibcInfo.channel,
             sourcePort: ibcInfo.source,
-            sender: fromAddress as string,
-            receiver: toAddress as string,
+            sender: fromAddress,
+            receiver: toAddress,
             token: amount,
             timeoutTimestamp: Long.fromNumber(
               (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
@@ -398,8 +401,9 @@ const Balance: React.FC<BalanceProps> = () => {
           ).toString('base64');
 
           // open app protocal
-          const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&value=${value}`;
-          window.open(url);
+          const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&sender=${fromAddress}&value=${value}`;
+          console.log(url);
+          window.location.href = url;
         } else {
           const offlineSigner = window.keplr.getOfflineSigner(from!.chainId);
           // Initialize the gaia api with the offline signer that is injected by Keplr extension.
@@ -409,8 +413,8 @@ const Balance: React.FC<BalanceProps> = () => {
           );
 
           const result = await client.sendIbcTokens(
-            fromAddress as string,
-            toAddress as string,
+            fromAddress,
+            toAddress,
             amount,
             ibcInfo.source,
             ibcInfo.channel,

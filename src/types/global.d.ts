@@ -1,9 +1,8 @@
 import { Network } from 'bip32';
 import { Buffer } from 'buffer';
 import { KVStore } from '@keplr-wallet/common';
-import Keplr from '../libs/kelpr';
+import Keplr from '../libs/keplr';
 import { Keplr as keplr } from './kelpr/wallet';
-import Wasm from '../libs/wasm';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
@@ -97,7 +96,6 @@ declare global {
     MSStream: String;
     Keystation: any;
     Wallet: Wallet;
-    Wasm: Wasm;
     Keplr: Keplr;
     web3: Web3;
     ethereum: MetaMaskEthereumProvider;
