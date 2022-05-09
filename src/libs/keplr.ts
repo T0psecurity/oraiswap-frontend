@@ -1,5 +1,5 @@
 import { isAndroid, isMobile } from '@walletconnect/browser-utils';
-import { blacklistNetworks, network } from 'config/networks';
+import { mobileBlacklistNetworks, network } from 'config/networks';
 import { embedChainInfos } from 'config/chainInfos';
 import WalletConnect from '@walletconnect/client';
 import { KeplrWalletConnectV1 } from '@keplr-wallet/wc-client';
@@ -77,7 +77,7 @@ export default class Keplr {
         await window.keplr.experimentalSuggestChain(chainInfo);
       }
       await window.keplr.enable(chainId);
-    } else if (!blacklistNetworks.includes(chainId)) {
+    } else if (!mobileBlacklistNetworks.includes(chainId)) {
       await window.keplr.enable(chainId);
     }
   };
@@ -219,7 +219,7 @@ export default class Keplr {
     chainId = chainId ?? network.chainId;
     const token = filteredTokens.find((token) => token.chainId === chainId);
     if (!token) return;
-    if (isMobile() && blacklistNetworks.includes(token.chainId)) {
+    if (isMobile() && mobileBlacklistNetworks.includes(token.chainId)) {
       const address = await this.getKeplrBech32Address('osmosis-1');
       return address?.toBech32(token.prefix!);
     }

@@ -1,5 +1,5 @@
 import React, { StrictMode } from 'react';
-import 'polyfill';
+import { initEthereum } from 'polyfill';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './index.scss';
@@ -20,6 +20,7 @@ const queryClient = new QueryClient();
 
 const startApp = async () => {
   try {
+    await initEthereum();
     const keplr = await window.Keplr.getKeplr();
     // suggest our chain
     if (keplr) {

@@ -1,64 +1,27 @@
 import { LocalKVStore } from '@keplr-wallet/common/build/kv-store/local';
-import { ORAI } from 'config/constants';
+import { BSC_RPC, ORAI } from 'config/constants';
+import { WalletConnect } from '@web3-react/walletconnect';
+import { BSC_CHAIN_ID } from 'config/constants';
+import WalletConnectProvider from '@walletconnect/ethereum-provider';
+import EthereumProvider from 'components/connect-wallet/EthereumProvider';
 
 // fix for mobile
 window.browser = { storage: { local: new LocalKVStore(ORAI) } };
 
-const initEthereum = async () => {
-  const ethereumProvider = await detectEthereumProvider();
+export const initEthereum = async () => {
+  if (!window.ethereum) {
+    const chainId = parseInt(BSC_CHAIN_ID, 16);
 
-  if (ethereumProvider) {
-    window.ethereum = ethereumProvider;
-    console.log('Ethereum successfully detected!');
-  } else {
-    // if the provider is not detected, detectEthereumProvider resolves to null
-    console.log('Please connect MetaMask!');
+    const provider = new EthereumProvider({
+      chainId,
+      qrcode: true,
+      rpc: { [chainId]: BSC_RPC },
+      qrcodeModalOptions: {
+        mobileLinks: ['metamask']
+      }
+    });
+
+    await provider.enable();
+    (window.ethereum as any) = provider;
   }
 };
-
-function detectEthereumProvider<T = MetaMaskEthereumProvider>({
-  mustBeMetaMask = false,
-  silent = false,
-  timeout = 3000
-} = {}): Promise<T | null> {
-  let handled = false;
-
-  return new Promise((resolve) => {
-    if ((window as Window).ethereum) {
-      handleEthereum();
-    } else {
-      window.addEventListener('ethereum#initialized', handleEthereum, {
-        once: true
-      });
-
-      setTimeout(() => {
-        handleEthereum();
-      }, timeout);
-    }
-
-    function handleEthereum() {
-      if (handled) {
-        return;
-      }
-      handled = true;
-
-      window.removeEventListener('ethereum#initialized', handleEthereum);
-
-      const { ethereum } = window as Window;
-
-      if (ethereum && (!mustBeMetaMask || ethereum.isMetaMask)) {
-        resolve(ethereum as unknown as T);
-      } else {
-        const message =
-          mustBeMetaMask && ethereum
-            ? 'Non-MetaMask window.ethereum detected.'
-            : 'Unable to detect window.ethereum.';
-
-        !silent && console.error('@metamask/detect-provider:', message);
-        resolve(null);
-      }
-    }
-  });
-}
-
-initEthereum();
