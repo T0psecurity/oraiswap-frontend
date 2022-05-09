@@ -2,7 +2,7 @@ import { Network } from 'bip32';
 import { Buffer } from 'buffer';
 import { KVStore } from '@keplr-wallet/common';
 import Keplr from '../libs/keplr';
-import { Keplr as keplr } from './kelpr/wallet';
+import { Keplr as keplr } from '@keplr-wallet/types';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';

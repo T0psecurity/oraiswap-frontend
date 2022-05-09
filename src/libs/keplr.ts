@@ -106,6 +106,7 @@ export default class Keplr {
     if (!this.walletConnector) {
       this.walletConnector = new WalletConnect({
         bridge: 'https://bridge.walletconnect.org',
+        storageId: 'keplr',
         signingMethods: [],
         qrcodeModal: new KeplrQRCodeModalV1()
       });
@@ -116,14 +117,13 @@ export default class Keplr {
         name: 'Oraichain',
         description: 'Oraichain is the first IBC-native Cosmos interchain AMM',
         url: 'https://oraidex.io',
-        icons: [
-          window.location.origin + '/public/assets/osmosis-wallet-connect.png'
-        ]
+        icons: ['https://dhj8dql1kzq2v.cloudfront.net/keplr-256x256.png']
       };
 
       this.walletConnector!.on('disconnect', this.onWalletConnectDisconnected);
     }
 
+    // console.log(this.walletConnector);
     if (!this.walletConnector.connected) {
       try {
         await this.walletConnector!.connect();
