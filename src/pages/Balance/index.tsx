@@ -134,7 +134,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
         <TokenBalance
           balance={convertUsd}
           className={styles.balanceDescription}
-          prefix='~$'
+          prefix="~$"
           decimalScale={2}
         />
       </div>
@@ -594,7 +594,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         decimals: from?.decimals
                       }}
                       className={styles.balanceDescription}
-                      prefix='Balance: '
+                      prefix="Balance: "
                       decimalScale={Math.min(6, from?.decimals || 0)}
                     />
 
@@ -634,7 +634,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   <TokenBalance
                     balance={fromUsd}
                     className={styles.balanceDescription}
-                    prefix='~$'
+                    prefix="~$"
                     decimalScale={2}
                   />
                 </div>
@@ -730,7 +730,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     decimals: to?.decimals
                   }}
                   className={styles.balanceDescription}
-                  prefix='Balance: '
+                  prefix="Balance: "
                   decimalScale={Math.min(6, to?.decimals || 0)}
                 />
 
