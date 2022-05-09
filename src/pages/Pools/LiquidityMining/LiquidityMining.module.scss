@@ -23,6 +23,7 @@
       z-index: 1;
     }
   }
+
   .title {
     display: flex;
     flex-direction: column;
@@ -57,6 +58,7 @@
       color: #ffffff;
     }
   }
+
   .des {
     font-family: 'IBM Plex Sans';
     font-style: normal;
@@ -72,6 +74,7 @@
 
     color: #777e90;
   }
+
   .btn {
     padding: 16px 24px;
     text-align: center;
@@ -90,6 +93,7 @@
     color: #ffffff;
     // cursor: pointer;
     opacity: 1;
+
     &:disabled {
       opacity: 0.7;
     }
@@ -111,6 +115,7 @@
   display: flex;
   justify-content: space-between;
   gap: 30px;
+
   &:first-child {
     padding-bottom: 40px;
     border-bottom: 1px solid #2d2938;
@@ -316,15 +321,16 @@
     border: none;
     box-shadow: none;
   }
+
   opacity: 1;
+
   &:disabled {
     opacity: 0.7;
   }
 }
 
 .mining {
-  // margin-top: 50px;
-  width: 70%;
+  min-width: 70%;
 
   .container_mining {
     display: flex;
@@ -334,7 +340,7 @@
 
     .icon {
       width: 30%;
-      object-fit:contain;
+      object-fit: contain;
     }
 
     .bonded {
@@ -342,6 +348,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+
       &-apr,
       &-unbouding {
         display: flex;
@@ -352,6 +359,8 @@
       &-apr {
         display: flex;
         align-items: center;
+        gap: 10px;
+
         .bonded-value {
           background: #612fca;
           border-radius: 8px;
@@ -392,7 +401,7 @@
 
 .earning {
   // margin-top: 50px;
-  width: 27%;
+  min-width: calc(30% - 30px);
 
   .container_earning {
     display: flex;

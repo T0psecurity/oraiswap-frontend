@@ -256,21 +256,24 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
         <>
           <div className={cx('pool-detail')}>
             <div className={cx('header')}>
-              <div className={cx('logo')}>
-                {Token1Icon! && <Token1Icon className={cx('token1')} />}
-                {Token2Icon! && <Token2Icon className={cx('token2')} />}
-              </div>
-              <div className={cx('title')}>
-                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
-                  pairInfoData.token2!.name
-                }`}</div>
-                <TokenBalance
-                  balance={
-                    pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
-                  }
-                  className={cx('value')}
-                  decimalScale={2}
-                />
+              <div className={cx('token-info')}>
+                <div className={cx('logo')}>
+                  {Token1Icon! && <Token1Icon className={cx('token1')} />}
+                  {Token2Icon! && <Token2Icon className={cx('token2')} />}
+                </div>
+
+                <div className={cx('title')}>
+                  <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
+                    pairInfoData.token2!.name
+                  }`}</div>
+                  <TokenBalance
+                    balance={
+                      pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
+                    }
+                    className={cx('value')}
+                    decimalScale={2}
+                  />
+                </div>
               </div>
               {!!pairAmountInfoData && (
                 <div className={cx('des')}>
@@ -457,7 +460,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 liquidityHash={liquidityTxHash}
               />
             )}
-          {isOpenBondingModal && lpTokenInfoData && lpTokenBalance && (
+          {isOpenBondingModal && !!lpTokenInfoData && !!lpTokenBalance && (
             <BondingModal
               isOpen={isOpenBondingModal}
               open={() => setIsOpenBondingModal(true)}

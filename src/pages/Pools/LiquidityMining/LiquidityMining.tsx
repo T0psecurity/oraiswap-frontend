@@ -192,7 +192,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           </div>
         </>
       </div>
-      <div className={cx('row')}>
+      <div className={cx('row')} style={{flexWrap: "wrap"}}>
         <>
           <div className={cx('mining')}>
             <div className={cx('container', 'container_mining')}>
