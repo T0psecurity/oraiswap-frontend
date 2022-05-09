@@ -18,15 +18,15 @@ import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import { ibcInfos } from 'constants/ibcInfos';
+import { ibcInfos } from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
   gravityContracts,
   TokenItemType,
   tokens
-} from 'constants/bridgeTokens';
-import { network } from 'constants/networks';
+} from 'config/bridgeTokens';
+import { network } from 'config/networks';
 import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
 import Content from 'layouts/Content';
 import {
@@ -40,7 +40,7 @@ import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 import Big from 'big.js';
-import { ERC20_ORAI, ORAI } from 'constants/constants';
+import { ERC20_ORAI, ORAI } from 'config/constants';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 
 interface BalanceProps {}

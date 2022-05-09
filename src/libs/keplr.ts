@@ -1,16 +1,16 @@
 import { isAndroid, isMobile } from '@walletconnect/browser-utils';
-import { blacklistNetworks, network } from 'constants/networks';
-import { embedChainInfos } from 'networks';
+import { blacklistNetworks, network } from 'config/networks';
+import { embedChainInfos } from 'config/chainInfos';
 import WalletConnect from '@walletconnect/client';
 import { KeplrWalletConnectV1 } from '@keplr-wallet/wc-client';
 import { IJsonRpcRequest, IRequestOptions } from '@walletconnect/types';
 import { BroadcastMode, StdTx } from '@cosmjs/launchpad';
 import Axios from 'axios';
 import { KeplrQRCodeModalV1 } from '@keplr-wallet/wc-qrcode-modal';
-import { filteredTokens } from 'constants/bridgeTokens';
+import { filteredTokens } from 'config/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
-import { Key } from 'types/kelpr';
+import { Key } from '@keplr-wallet/types';
 
 const hash160 = (buffer: Uint8Array) => {
   var t = createHash('sha256').update(buffer).digest();

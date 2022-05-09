@@ -6,7 +6,7 @@ import './index.scss';
 import ScrollToTop from './layouts/ScrollToTop';
 import App from './layouts/App';
 import Keplr from 'libs/keplr';
-import { network } from 'constants/networks';
+import { network } from 'config/networks';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';

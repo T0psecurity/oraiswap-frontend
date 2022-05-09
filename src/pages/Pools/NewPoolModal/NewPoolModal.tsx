@@ -12,8 +12,8 @@ import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import Pie from 'components/Pie';
 import NumberFormat from 'react-number-format';
-import { poolTokens } from 'constants/pools';
-import { TokenItemType } from 'constants/bridgeTokens';
+import { poolTokens } from 'config/pools';
+import { TokenItemType } from 'config/bridgeTokens';
 
 const cx = cn.bind(style);
 

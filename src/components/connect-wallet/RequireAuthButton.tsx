@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import React, { useState, useEffect } from 'react';
-import { network } from 'constants/networks';
+import { network } from 'config/networks';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';

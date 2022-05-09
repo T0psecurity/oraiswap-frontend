@@ -1,5 +1,5 @@
 import { LocalKVStore } from '@keplr-wallet/common/build/kv-store/local';
-import { ORAI } from 'constants/constants';
+import { ORAI } from 'config/constants';
 
 // fix for mobile
 window.browser = { storage: { local: new LocalKVStore(ORAI) } };

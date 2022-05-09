@@ -27,7 +27,7 @@ import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
-import { ORAI } from 'constants/constants';
+import { ORAI } from 'config/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 
 import classNames from 'classnames';

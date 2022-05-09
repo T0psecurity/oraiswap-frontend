@@ -1,14 +1,14 @@
 import Web3 from 'web3';
-import tokenABI from 'constants/abi/erc20.json';
+import tokenABI from 'config/abi/erc20.json';
 import {
   evmTokens,
   gravityContracts,
   TokenItemType
-} from 'constants/bridgeTokens';
-import GravityABI from 'constants/abi/gravity.json';
-import erc20ABI from 'constants/abi/erc20.json';
+} from 'config/bridgeTokens';
+import GravityABI from 'config/abi/gravity.json';
+import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
-import { BEP20_ORAI, BSC_CHAIN_ID, ERC20_ORAI } from 'constants/constants';
+import { BEP20_ORAI, BSC_CHAIN_ID, ERC20_ORAI } from 'config/constants';
 
 export default class Metamask {
   constructor() {}

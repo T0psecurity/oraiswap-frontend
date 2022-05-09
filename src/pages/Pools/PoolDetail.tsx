@@ -7,7 +7,7 @@ import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
 import Pie from 'components/Pie';
-import { getPair, Pair, pairs, poolTokens } from 'constants/pools';
+import { getPair, Pair, pairs, poolTokens } from 'config/pools';
 import {
   fetchBalance,
   fetchPairInfo,
@@ -19,7 +19,7 @@ import {
   fetchDistributionInfo
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { TokenItemType } from 'constants/bridgeTokens';
+import { TokenItemType } from 'config/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
@@ -27,7 +27,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
 import { Fraction } from '@saberhq/token-utils';
-import { ORAI } from 'constants/constants';
+import { ORAI } from 'config/constants';
 
 const cx = cn.bind(styles);
 

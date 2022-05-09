@@ -1,6 +1,6 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
-import { network } from 'constants/networks';
+import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
 /**
  * The options of an .instantiate() call.

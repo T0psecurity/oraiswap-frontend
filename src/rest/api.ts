@@ -1,10 +1,10 @@
-import { network } from 'constants/networks';
-import { TokenItemType } from 'constants/bridgeTokens';
+import { network } from 'config/networks';
+import { TokenItemType } from 'config/bridgeTokens';
 import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
-import { ORAI } from 'constants/constants';
-import { getPair, Pair, pairs } from 'constants/pools';
+import { ORAI } from 'config/constants';
+import { getPair, Pair, pairs } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
 
