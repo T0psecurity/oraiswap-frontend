@@ -110,18 +110,18 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         maxGas: 20000 * 0.025,
         Icon: OSMO
       },
-      {
-        name: 'ERC20 ORAI',
-        org: 'Ethereum',
-        coingeckoId: 'oraichain-token',
-        denom: ERC20_ORAI,
-        contractAddress: ORAI_ETH_CONTRACT,
-        decimals: 18,
-        chainId: ETHEREUM_CHAIN_ID,
-        rpc: ETHEREUM_RPC,
-        cosmosBased: false,
-        Icon: ORAI
-      },
+      // {
+      //   name: 'ERC20 ORAI',
+      //   org: 'Ethereum',
+      //   coingeckoId: 'oraichain-token',
+      //   denom: ERC20_ORAI,
+      //   contractAddress: ORAI_ETH_CONTRACT,
+      //   decimals: 18,
+      //   chainId: ETHEREUM_CHAIN_ID,
+      //   rpc: ETHEREUM_RPC,
+      //   cosmosBased: false,
+      //   Icon: ORAI
+      // },
       {
         name: 'BEP20 ORAI',
         org: 'BNB Chain',
