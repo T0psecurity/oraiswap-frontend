@@ -54,7 +54,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     isLoading,
     error,
     data: balance
-  } = useQuery('balance', () => fetchNativeTokenBalance(address), {
+  } = useQuery(['balance', address], () => fetchNativeTokenBalance(address), {
     enabled: address?.length > 0
   });
 
