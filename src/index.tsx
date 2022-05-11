@@ -27,6 +27,7 @@ const startApp = async () => {
       // always trigger suggest chain when users enter the webpage
       await window.Keplr.suggestChain(network.chainId);
       await window.Keplr.suggestChain('columbus-5');
+      await window.Keplr.suggestChain('oraibridge-subnet');
     }
   } catch (ex) {
     console.log(ex);

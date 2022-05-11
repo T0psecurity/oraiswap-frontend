@@ -30,7 +30,7 @@ import { poolTokens } from 'config/pools';
 
 const cx = cn.bind(style);
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -53,7 +53,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFee, setIsSelectFee] = useState(false);
   const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
     [string, string]
-  >(['orai', 'airi']);
+  >(['orai', 'usdt']);
   // const [feeToken, setFeeToken] = useState<string>('airi');
   const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
@@ -401,9 +401,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input
