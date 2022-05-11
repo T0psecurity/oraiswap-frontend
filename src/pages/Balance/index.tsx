@@ -510,6 +510,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
       await window.Keplr.suggestChain(fromToken.chainId);
+      await window.Keplr.suggestChain(toToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
