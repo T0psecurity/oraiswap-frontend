@@ -7,6 +7,7 @@ import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as LUNA } from 'assets/icons/luna.svg';
 import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
+import { ReactComponent as USDT } from 'assets/icons/tether.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 import {
@@ -24,7 +25,8 @@ import {
   ORAI_BRIDGE_RPC,
   ORAI_BRIDGE_UDENOM,
   ORAI_BSC_CONTRACT,
-  ORAI_ETH_CONTRACT
+  ORAI_ETH_CONTRACT,
+  USDT_BSC_CONTRACT
 } from './constants';
 
 export type TokenItemType = {
@@ -41,15 +43,16 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna'
-    | 'oraix';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna'
+  | 'oraix'
+  | 'tether';
   cosmosBased: Boolean;
 };
 
@@ -165,6 +168,18 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'airight',
         cosmosBased: false,
         Icon: AIRI
+      },
+      {
+        name: 'BEP20 USDT',
+        org: 'BNB Chain',
+        chainId: BSC_CHAIN_ID,
+        denom: 'bep20_usdt',
+        contractAddress: USDT_BSC_CONTRACT,
+        rpc: BSC_RPC,
+        decimals: 18,
+        coingeckoId: 'tether',
+        cosmosBased: false,
+        Icon: USDT
       }
     ],
     [
@@ -239,6 +254,21 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         cosmosBased: true,
         Icon: AIRI
       },
+      {
+        name: 'USDT',
+        org: 'Oraichain',
+        prefix: 'orai',
+        coingeckoId: 'tether',
+        denom: 'usdt',
+        contractAddress: process.env.REACT_APP_USDT_CONTRACT,
+        decimals: 6,
+        coinType: 118,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: USDT
+      },
       // {
       //   name: 'OSMO',
       //   org: 'Oraichain',
@@ -291,6 +321,19 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
         Icon: AIRI
+      },
+      {
+        name: 'BEP20 USDT',
+        org: 'Oraichain',
+        prefix: 'orai',
+        coingeckoId: 'tether',
+        denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
+        decimals: 6,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: USDT
       },
       {
         name: 'ORAIX',

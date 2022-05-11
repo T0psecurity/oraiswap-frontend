@@ -127,10 +127,12 @@ declare global {
       REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
       REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
+      REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
       REACT_APP_ORAIX_CONTRACT: string;
+      REACT_APP_USDT_CONTRACT: string;
 
       // config for oraichain contract
       REACT_APP_FACTORY_CONTRACT: string;
@@ -147,4 +149,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export {};
+export { };
