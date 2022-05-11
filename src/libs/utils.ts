@@ -100,6 +100,8 @@ export const numberToFraction = function (_decimal: number) {
   return new Fraction(topNumber / x, bottom / x);
 };
 
+(window as any).numberToFraction = numberToFraction;
+
 export const getUsd = (
   amount: number,
   price: Fraction | null,
