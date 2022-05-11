@@ -57,4 +57,8 @@ export interface NetworkItem {
 }
 
 // sadly our Oraichain is not added into keplr yet
-export const blacklistNetworks: string[] = [network.chainId];
+export const mobileBlacklistNetworks: string[] = [
+  network.chainId
+  // 'cosmoshub-4',
+  // 'columbus-5'
+];

@@ -18,15 +18,15 @@ import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import { ibcInfos } from 'constants/ibcInfos';
+import { ibcInfos } from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
   gravityContracts,
   TokenItemType,
   tokens
-} from 'constants/bridgeTokens';
-import { network } from 'constants/networks';
+} from 'config/bridgeTokens';
+import { network } from 'config/networks';
 import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
 import Content from 'layouts/Content';
 import {
@@ -40,37 +40,49 @@ import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 import Big from 'big.js';
-import { ERC20_ORAI, ORAI } from 'constants/constants';
+import {
+  ERC20_ORAI,
+  ORAI,
+  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  ORAI_BRIDGE_EVM_FEE
+} from 'config/constants';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import gravityRegistry from 'libs/gravity-registry';
+import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
   usd: number;
 };
-interface TokenItemProps {
-  token: TokenItemType;
-  active: Boolean;
-  className?: string;
-  onClick?: Function;
-  amountDetail?: AmountDetail;
-  convertToken?: any;
-}
+
 interface ConvertToNativeProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
-  convertToken: any;
-  name: string;
+  convertToken?: any;
+  transferIBC?: any;
+  transferFromGravity?: any;
+  name?: string;
+}
+interface TokenItemProps extends ConvertToNativeProps {
+  active: Boolean;
+  className?: string;
+  onClick?: Function;
 }
 
 const ConvertToNative: FC<ConvertToNativeProps> = ({
   token,
   name,
   amountDetail,
-  convertToken
+  convertToken,
+  transferIBC,
+  transferFromGravity
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
+  const [convertLoading, setConvertLoading] = useState(false);
+  const [transferLoading, setTransferLoading] = useState(false);
   return (
     <div
       className={classNames(styles.tokenFromGroup, styles.small)}
@@ -138,13 +150,80 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
           decimalScale={2}
         />
       </div>
-      <div className={styles.transferTab} style={{ marginTop: '0px' }}>
-        <div
-          className={styles.tfBtn}
-          onClick={() => convertToken(convertAmount, token)}
-        >
-          Convert To <strong style={{ marginLeft: 5 }}>{name}</strong>
-        </div>
+      <div
+        className={styles.transferTab}
+        style={{ marginTop: '0px', justifyContent: 'space-between' }}
+      >
+        {token.chainId === ORAI_BRIDGE_CHAIN_ID && (
+          <button
+            className={styles.tfBtn}
+            disabled={transferLoading}
+            onClick={async () => {
+              try {
+                setTransferLoading(true);
+                await transferFromGravity(token, convertAmount);
+              } finally {
+                setTransferLoading(false);
+              }
+            }}
+          >
+            {transferLoading && <Loader width={20} height={20} />}
+            <span>
+              <span>
+                Transfer To{' '}
+                <strong>
+                  {token.name.match(/BEP20/)
+                    ? 'Binance Smart Chain'
+                    : 'Ethereum'}
+                </strong>
+              </span>
+            </span>
+          </button>
+        )}
+
+        {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+          <button
+            className={styles.tfBtn}
+            disabled={convertLoading}
+            onClick={async () => {
+              try {
+                setConvertLoading(true);
+                await convertToken(convertAmount, token);
+              } finally {
+                setConvertLoading(false);
+              }
+            }}
+          >
+            {convertLoading && <Loader width={20} height={20} />}
+            <span>
+              Convert To <strong style={{ marginLeft: 5 }}>{name}</strong>
+            </span>
+          </button>
+        )}
+
+        {/* {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+          <button
+            disabled={transferLoading}
+            className={styles.tfBtn}
+            onClick={async () => {
+              try {
+                setTransferLoading(true);
+                const to = filteredTokens.find(
+                  (t) =>
+                    t.chainId === ORAI_BRIDGE_CHAIN_ID && t.name === token.name
+                );
+                await transferIBC(token, to, convertAmount);
+              } finally {
+                setTransferLoading(false);
+              }
+            }}
+          >
+            {transferLoading && <Loader width={20} height={20} />}
+            <span>
+              Transfer To <strong>OraiBridge</strong>
+            </span>
+          </button>
+        )} */}
       </div>
     </div>
   );
@@ -156,7 +235,9 @@ const TokenItem: React.FC<TokenItemProps> = ({
   active,
   className,
   onClick,
-  convertToken
+  convertToken,
+  transferFromGravity,
+  transferIBC
 }) => {
   // get token name
   const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
@@ -203,6 +284,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
             token={token}
             amountDetail={amountDetail}
             convertToken={convertToken}
+            transferFromGravity={transferFromGravity}
+            transferIBC={transferIBC}
           />
         )}
       </div>
@@ -304,19 +387,16 @@ const Balance: React.FC<BalanceProps> = () => {
         });
       }
       const pendingList: TokenItemType[] = [];
+
       const amountDetails = Object.fromEntries(
         await Promise.all(
           pendingTokens.map(async (token) => {
-            const address = await window.Keplr.getKeplrBech32Address(
-              token.coinType === network.coinType
-                ? network.chainId
-                : token.chainId
-            );
-
+            const address = await window.Keplr.getKeplrAddr(token.chainId);
             return loadAmountDetail(address, token, pendingList);
           })
         )
       );
+
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
@@ -351,6 +431,7 @@ const Balance: React.FC<BalanceProps> = () => {
     } else {
       setFrom(token);
       setFromAmount([0, 0]);
+      setTo(undefined);
     }
   }, []);
 
@@ -368,75 +449,134 @@ const Balance: React.FC<BalanceProps> = () => {
     [onClickToken]
   );
 
-  const transferIBC = async () => {
+  const transferFromGravity = async (
+    fromToken: TokenItemType,
+    amount: number
+  ) => {
     try {
       const keplr = await window.Keplr.getKeplr();
-      if (keplr) {
-        await window.Keplr.suggestChain(from!.chainId);
-        const fromAddress = await window.Keplr.getKeplrAddr(from!.chainId);
-        const toAddress = await window.Keplr.getKeplrAddr(to!.chainId);
-        const amount = coin(
-          Math.round(fromAmount * 10 ** from!.decimals),
-          from!.denom
-        );
-        const ibcInfo: IBCInfo = ibcInfos[from!.chainId][to!.chainId];
+      if (!keplr) return;
 
-        // using app protocol to sign transaction
-        if (isMobile() && from!.chainId === network.chainId) {
-          // check if is blacklisted like orai, using orai wallet
-          const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
-            sourceChannel: ibcInfo.channel,
-            sourcePort: ibcInfo.source,
-            sender: fromAddress as string,
-            receiver: toAddress as string,
-            token: amount,
-            timeoutTimestamp: Long.fromNumber(
-              (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
-            )
-          });
+      await window.Keplr.suggestChain(fromToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      const rawAmount = new Big(amount)
+        .mul(new Big(10).pow(fromToken.decimals))
+        .toString();
 
-          const value = Buffer.from(
-            ibc.applications.transfer.v1.MsgTransfer.encode(msgSend).finish()
-          ).toString('base64');
+      console.log(rawAmount);
+      return;
+      const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner,
+        { registry: gravityRegistry }
+      );
 
-          // open app protocal
-          const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&value=${value}`;
-          window.open(url);
-        } else {
-          const offlineSigner = window.keplr.getOfflineSigner(from!.chainId);
-          // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-          const client = await SigningStargateClient.connectWithSigner(
-            from!.rpc,
-            offlineSigner
-          );
+      const message = {
+        typeUrl: '/gravity.v1.MsgSendToEth',
+        value: MsgSendToEth.fromPartial({
+          sender: fromAddress,
+          ethDest: metamaskAddress,
+          amount: {
+            denom: fromToken.denom,
+            amount: rawAmount
+          },
+          bridgeFee: {
+            denom: fromToken.denom,
+            // just a number to make sure there is a friction
+            amount: ORAI_BRIDGE_EVM_FEE
+          }
+        })
+      };
+      const fee = {
+        amount: [],
+        gas: '200000'
+      };
+      const result = await client.signAndBroadcast(fromAddress, [message], fee);
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
+      });
+      console.log(result);
+      setTxHash(result.transactionHash);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message
+      });
+    }
+  };
 
-          const result = await client.sendIbcTokens(
-            fromAddress as string,
-            toAddress as string,
-            amount,
-            ibcInfo.source,
-            ibcInfo.channel,
-            undefined,
-            Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-            {
-              gas: '200000',
-              amount: []
-            }
-          );
-
-          displayToast(TToastType.TX_SUCCESSFUL, {
-            customLink: `${from!.lcd}/cosmos/tx/v1beta1/txs/${
-              result?.transactionHash
-            }`
-          });
-          // set tx hash to trigger refetching amount values
-          setTxHash(result?.transactionHash);
-        }
-      } else {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'You must install Keplr to continue'
-        });
+  const transferIBC = async (
+    fromToken: TokenItemType,
+    toToken: TokenItemType,
+    transferAmount: number
+  ) => {
+    try {
+      if (transferAmount === 0) throw { message: "Transfer amount is empty" };
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) return;
+      await window.Keplr.suggestChain(fromToken.chainId);
+      await window.Keplr.suggestChain(toToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      if (!fromAddress || !toAddress) {
         return;
+      }
+      const amount = coin(
+        Math.round(transferAmount * 10 ** fromToken.decimals),
+        fromToken.denom
+      );
+      const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+
+      // using app protocol to sign transaction
+      if (isMobile() && fromToken.chainId === network.chainId) {
+        // check if is blacklisted like orai, using orai wallet
+        const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
+          sourceChannel: ibcInfo.channel,
+          sourcePort: ibcInfo.source,
+          sender: fromAddress,
+          receiver: toAddress,
+          token: amount,
+          timeoutTimestamp: Long.fromNumber(
+            (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
+          )
+        });
+
+        const value = Buffer.from(
+          ibc.applications.transfer.v1.MsgTransfer.encode(msgSend).finish()
+        ).toString('base64');
+
+        // open app protocal
+        const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&sender=${fromAddress}&value=${value}`;
+        console.log(url);
+        window.location.href = url;
+      } else {
+        const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
+        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+        const client = await SigningStargateClient.connectWithSigner(
+          fromToken.rpc,
+          offlineSigner
+        );
+
+        const result = await client.sendIbcTokens(
+          fromAddress,
+          toAddress,
+          amount,
+          ibcInfo.source,
+          ibcInfo.channel,
+          undefined,
+          Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+          {
+            gas: '200000',
+            amount: []
+          }
+        );
+
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
+        });
+        // set tx hash to trigger refetching amount values
+        setTxHash(result.transactionHash);
       }
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -472,7 +612,6 @@ const Balance: React.FC<BalanceProps> = () => {
         metamaskAddress,
         keplrAddress
       );
-      console.log(result);
 
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: `
@@ -503,7 +642,7 @@ const Balance: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_BROADCASTING);
     setIBCLoading(true);
     if (from.cosmosBased) {
-      await transferIBC();
+      await transferIBC(from, to, fromAmount);
     } else {
       await transferEvmToIBC();
     }
@@ -540,7 +679,6 @@ const Balance: React.FC<BalanceProps> = () => {
         gasAmount: { denom: ORAI, amount: '0' },
         handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
-      console.log('result swap tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
@@ -603,10 +741,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -619,10 +757,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -681,8 +819,9 @@ const Balance: React.FC<BalanceProps> = () => {
                         key={t.denom}
                         amountDetail={amounts[t.denom]}
                         className={styles.token_from}
-                        active={from?.name === t.name}
+                        active={from?.denom === t.denom}
                         token={t}
+                        transferFromGravity={transferFromGravity}
                         onClick={onClickTokenFrom}
                       />
                     );
@@ -752,7 +891,12 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
                 <div className={styles.tableContent}>
                   {toTokens
-                    .filter((t) => !from || t.name === from.name)
+                    .filter(
+                      (t) =>
+                        !from ||
+                        (from.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+                          t.name === from.name)
+                    )
                     .map((t: TokenItemType) => {
                       return (
                         <TokenItem
@@ -762,6 +906,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           token={t}
                           onClick={onClickTokenTo}
                           convertToken={convertToken}
+                          transferIBC={transferIBC}
                         />
                       );
                     })}

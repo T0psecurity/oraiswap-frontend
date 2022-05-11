@@ -15,18 +15,18 @@ import {
   SwapQuery
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { ORAI } from 'constants/constants';
+import { ORAI } from 'config/constants';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { network } from 'constants/networks';
+import { network } from 'config/networks';
 import NumberFormat from 'react-number-format';
-import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
 import { isMobile } from '@walletconnect/browser-utils';
-import { poolTokens } from 'constants/pools';
+import { poolTokens } from 'config/pools';
 
 const cx = cn.bind(style);
 
@@ -53,7 +53,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFee, setIsSelectFee] = useState(false);
   const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
     [string, string]
-  >(['orai', 'airi']);
+  >(['orai', 'usdt']);
   // const [feeToken, setFeeToken] = useState<string>('airi');
   const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
@@ -242,6 +242,7 @@ const Swap: React.FC<SwapProps> = () => {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        setTxHash(result.transactionHash);
         setSwapLoading(false);
       }
     } catch (error) {
@@ -299,7 +300,9 @@ const Swap: React.FC<SwapProps> = () => {
 
               <div
                 className={cx('btn')}
-                onClick={() => onMaxFromAmount(fromTokenBalance)}
+                onClick={() =>
+                  onMaxFromAmount(fromTokenBalance - (fromToken?.maxGas ?? 0))
+                }
               >
                 MAX
               </div>

@@ -7,7 +7,7 @@ import LiquidityModal from './LiquidityModal/LiquidityModal';
 import BondingModal from './BondingModal/BondingModal';
 import Content from 'layouts/Content';
 import Pie from 'components/Pie';
-import { getPair, Pair, pairs, poolTokens } from 'constants/pools';
+import { getPair, Pair, pairs, poolTokens } from 'config/pools';
 import {
   fetchBalance,
   fetchPairInfo,
@@ -19,7 +19,7 @@ import {
   fetchDistributionInfo
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { TokenItemType } from 'constants/bridgeTokens';
+import { TokenItemType } from 'config/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
@@ -27,7 +27,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
 import { Fraction } from '@saberhq/token-utils';
-import { ORAI } from 'constants/constants';
+import { ORAI, STABLE_DENOM } from 'config/constants';
 
 const cx = cn.bind(styles);
 
@@ -78,10 +78,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     const poolData = await fetchPoolInfoAmount(token1!, token2!);
 
-    if (
-      token1?.denom === ORAI &&
-      token2?.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
-    ) {
+    if (token1?.denom === ORAI && token2?.denom === STABLE_DENOM) {
       oraiPrice = new Fraction(
         poolData.askPoolAmount,
         poolData.offerPoolAmount
@@ -89,9 +86,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     } else {
       const _poolData = await fetchPoolInfoAmount(
         poolTokens.find((token) => token.denom === ORAI)!,
-        poolTokens.find(
-          (token) => token.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
-        )!
+        poolTokens.find((token) => token.denom === STABLE_DENOM)!
       );
       oraiPrice = new Fraction(
         _poolData.askPoolAmount,
@@ -256,21 +251,24 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
         <>
           <div className={cx('pool-detail')}>
             <div className={cx('header')}>
-              <div className={cx('logo')}>
-                {Token1Icon! && <Token1Icon className={cx('token1')} />}
-                {Token2Icon! && <Token2Icon className={cx('token2')} />}
-              </div>
-              <div className={cx('title')}>
-                <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
-                  pairInfoData.token2!.name
-                }`}</div>
-                <TokenBalance
-                  balance={
-                    pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
-                  }
-                  className={cx('value')}
-                  decimalScale={2}
-                />
+              <div className={cx('token-info')}>
+                <div className={cx('logo')}>
+                  {Token1Icon! && <Token1Icon className={cx('token1')} />}
+                  {Token2Icon! && <Token2Icon className={cx('token2')} />}
+                </div>
+
+                <div className={cx('title')}>
+                  <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
+                    pairInfoData.token2!.name
+                  }`}</div>
+                  <TokenBalance
+                    balance={
+                      pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
+                    }
+                    className={cx('value')}
+                    decimalScale={2}
+                  />
+                </div>
               </div>
               {!!pairAmountInfoData && (
                 <div className={cx('des')}>
@@ -457,7 +455,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 liquidityHash={liquidityTxHash}
               />
             )}
-          {isOpenBondingModal && lpTokenInfoData && lpTokenBalance && (
+          {isOpenBondingModal && !!lpTokenInfoData && !!lpTokenBalance && (
             <BondingModal
               isOpen={isOpenBondingModal}
               open={() => setIsOpenBondingModal(true)}

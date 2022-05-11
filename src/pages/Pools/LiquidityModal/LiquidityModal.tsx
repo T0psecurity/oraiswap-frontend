@@ -3,7 +3,7 @@ import Modal from 'components/Modal';
 import style from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
-import { pairs, getPair } from 'constants/pools';
+import { pairs, getPair } from 'config/pools';
 import { useQuery } from 'react-query';
 import {
   fetchBalance,
@@ -14,7 +14,7 @@ import {
   ProvideQuery
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
-import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
@@ -22,8 +22,8 @@ import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { DECIMAL_FRACTION, ORAI } from 'constants/constants';
-import { network } from 'constants/networks';
+import { DECIMAL_FRACTION, ORAI } from 'config/constants';
+import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
 import { TokenInfo } from 'types/token';

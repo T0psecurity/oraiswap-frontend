@@ -225,12 +225,16 @@
   background: #1e1e21;
   border-radius: 8px;
   height: 48px;
-  width: 215px;
+  width: 215px;  
   padding: 12px;
   box-sizing: border-box;
   color: #505665;
   font-weight: 600;
   font-size: 24px;
+  @include mobile {
+    width: 100%;
+    font-size: 20px;
+  }
 }
 .tokenFromGroup {
   display: flex;

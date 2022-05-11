@@ -1,5 +1,6 @@
 import { Button, Typography } from 'antd';
 import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg';
+import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
@@ -26,7 +27,7 @@ import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
-import { ORAI } from 'constants/constants';
+import { ORAI } from 'config/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 
 import classNames from 'classnames';
@@ -53,7 +54,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     isLoading,
     error,
     data: balance
-  } = useQuery('balance', () => fetchNativeTokenBalance(address), {
+  } = useQuery(['balance', address], () => fetchNativeTokenBalance(address), {
     enabled: address?.length > 0
   });
 
@@ -86,6 +87,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   const mobileMode = isMobile();
 
+  const ToggleIcon = open ? CloseIcon : MenuIcon;
+
   return (
     <>
       {mobileMode && (
@@ -93,7 +96,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <Link to={'/'} onClick={() => setLink('/')}>
             <LogoFull />
           </Link>
-          <CloseIcon onClick={handleToggle} />
+          <ToggleIcon onClick={handleToggle} />
         </div>
       )}
       <div className={classNames(styles.menu, { [styles.open]: open })}>
@@ -131,7 +134,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           denom: ORAI
                         }}
                         className={styles.token_balance}
-                        decimalScale={6}
+                        decimalScale={4}
                       />
                     )}
                   </div>
@@ -163,7 +166,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           denom: ORAI
                         }}
                         className={styles.token_balance}
-                        decimalScale={6}
+                        decimalScale={4}
                       />
                     )}
                   </div>

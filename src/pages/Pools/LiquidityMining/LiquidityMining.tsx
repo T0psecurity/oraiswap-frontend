@@ -3,12 +3,12 @@ import { Button, Divider, Input } from 'antd';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
-import { filteredTokens, TokenItemType, tokens } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import TokenBalance from 'components/TokenBalance';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import CosmJs from 'libs/cosmjs';
-import { ORAI } from 'constants/constants';
-import { network } from 'constants/networks';
+import { ORAI } from 'config/constants';
+import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import _ from 'lodash';
 import { TokenInfo } from 'types/token';
@@ -192,7 +192,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           </div>
         </>
       </div>
-      <div className={cx('row')}>
+      <div className={cx('row')} style={{flexWrap: "wrap"}}>
         <>
           <div className={cx('mining')}>
             <div className={cx('container', 'container_mining')}>

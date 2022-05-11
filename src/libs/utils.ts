@@ -32,30 +32,6 @@ export const getLength = (text: string) => new Blob([text]).size;
 export const capitalize = (text: string) =>
   text[0].toUpperCase() + text.slice(1);
 
-export function getMobileOperatingSystem() {
-  const userAgent = navigator.userAgent || navigator.vendor;
-
-  // Windows Phone must come first because its UA also contains "Android"
-  if (/windows phone/i.test(userAgent)) {
-    return 'Windows Phone';
-  }
-
-  if (/android/i.test(userAgent)) {
-    return 'Android';
-  }
-
-  // iOS detection from: http://stackoverflow.com/a/9039885/177710
-  if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-    return 'iOS';
-  }
-
-  return 'unknown';
-}
-
-export const isMobile =
-  getMobileOperatingSystem() === 'iOS' ||
-  getMobileOperatingSystem() === 'Android';
-
 const rules = [
   // if it says it's a webview, let's go with that
   'WebView',
@@ -123,6 +99,8 @@ export const numberToFraction = function (_decimal: number) {
   var x = gcd(top, bottom);
   return new Fraction(topNumber / x, bottom / x);
 };
+
+(window as any).numberToFraction = numberToFraction;
 
 export const getUsd = (
   amount: number,

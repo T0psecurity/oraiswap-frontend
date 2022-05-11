@@ -3,14 +3,15 @@ import styles from './index.module.scss';
 import { Button, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
-import { getPair, Pair, pairs } from 'constants/pools';
+import { getPair, Pair, pairs } from 'config/pools';
 import { fetchPairInfo, fetchPoolInfoAmount, fetchTokenInfo } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
-import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import { STABLE_DENOM } from 'config/constants';
 
 const { Search } = Input;
 
@@ -79,12 +80,14 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
           <div className={styles.pairbox_pair_rate}>
             {token1.name} (50%)/{token2.name} (50%)
           </div>
-          <span className={styles.pairbox_pair_apr}>
-            APR: 150% + ORAIX Bonus
-          </span>
+          <span className={styles.pairbox_pair_apr}>ORAIX Bonus</span>
         </div>
       </div>
       <div className={styles.pairbox_content}>
+        <div className={styles.pairbox_data}>
+          <span className={styles.pairbox_data_name}>APR</span>
+          <span className={styles.pairbox_data_value}>150%</span>
+        </div>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>
           <span className={styles.pairbox_data_value}>
@@ -189,31 +192,34 @@ const Pools: React.FC<PoolsProps> = () => {
       filteredTokens.find((token) => token.denom === denom)
     );
 
-    const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
-      fetchTokenInfo(fromToken!),
-      fetchTokenInfo(toToken!)
-    ]);
+    try {
+      const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
+        fetchTokenInfo(fromToken!),
+        fetchTokenInfo(toToken!)
+      ]);
 
-    const [poolData, infoData] = await Promise.all([
-      fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-      fetchPairInfo([fromTokenInfoData, toTokenInfoData])
-    ]);
+      const [poolData, infoData] = await Promise.all([
+        fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
+        fetchPairInfo([fromTokenInfoData, toTokenInfoData])
+      ]);
 
-    return {
-      ...poolData,
-      amount: 0,
-      pair,
-      commissionRate: infoData.commission_rate,
-      fromToken,
-      toToken
-    };
+      return {
+        ...poolData,
+        amount: 0,
+        pair,
+        commissionRate: infoData.commission_rate,
+        fromToken,
+        toToken
+      };
+    } catch (ex) {
+      console.log(ex);
+    }
   };
 
   const fetchPairInfoDataList = async () => {
-    const poolList = await Promise.all(pairs.map(fetchPairInfoData));
+    const poolList = _.compact(await Promise.all(pairs.map(fetchPairInfoData)));
     const oraiUstPool = poolList.find(
-      (pool) =>
-        pool.pair.asset_denoms[1] === process.env.REACT_APP_UST_ORAICHAIN_DENOM
+      (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     )!;
 
     const oraiPrice = new Fraction(

@@ -1,12 +1,36 @@
 import { Network } from 'bip32';
 import { Buffer } from 'buffer';
-import Keplr from '../libs/kelpr';
-import { Keplr as keplr } from './kelpr/wallet';
-import Wasm from '../libs/wasm';
+import { KVStore } from '@keplr-wallet/common';
+import Keplr from '../libs/keplr';
+import { Keplr as keplr } from '@keplr-wallet/types';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
+import { AbstractProvider } from 'web3-core';
 
 declare global {
+  type MetaMaskEthereumProvider = AbstractProvider & {
+    chainId: string;
+    isMetaMask?: boolean;
+    once(eventName: string | symbol, listener: (...args: any[]) => void): this;
+    on(eventName: string | symbol, listener: (...args: any[]) => void): this;
+    off(eventName: string | symbol, listener: (...args: any[]) => void): this;
+    addListener(
+      eventName: string | symbol,
+      listener: (...args: any[]) => void
+    ): this;
+    removeListener(
+      eventName: string | symbol,
+      listener: (...args: any[]) => void
+    ): this;
+    removeAllListeners(event?: string | symbol): this;
+  };
+
+  type Browser = {
+    storage: {
+      local: KVStore;
+    };
+  };
+
   type Fund = {
     denom: string;
     amount: string;
@@ -72,12 +96,12 @@ declare global {
     MSStream: String;
     Keystation: any;
     Wallet: Wallet;
-    Wasm: Wasm;
     Keplr: Keplr;
     web3: Web3;
-    ethereum: provider;
+    ethereum: MetaMaskEthereumProvider;
     Metamask: Metamask;
     keplr: keplr;
+    browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
   }
 
@@ -94,6 +118,7 @@ declare global {
       REACT_APP_ATOM_ORAICHAIN_CHANNELS: string;
       REACT_APP_TERRA_ORAICHAIN_CHANNELS: string;
       REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS: string;
+      REACT_APP_ORAIB_ORAICHAIN_CHANNELS: string;
 
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;
@@ -102,10 +127,12 @@ declare global {
       REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
       REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
+      REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
       REACT_APP_ORAIX_CONTRACT: string;
+      REACT_APP_USDT_CONTRACT: string;
 
       // config for oraichain contract
       REACT_APP_FACTORY_CONTRACT: string;
@@ -122,4 +149,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export {};
+export { };

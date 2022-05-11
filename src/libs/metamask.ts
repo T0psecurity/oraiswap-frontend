@@ -1,14 +1,14 @@
 import Web3 from 'web3';
-import tokenABI from 'constants/abi/erc20.json';
+import tokenABI from 'config/abi/erc20.json';
 import {
   evmTokens,
   gravityContracts,
   TokenItemType
-} from 'constants/bridgeTokens';
-import GravityABI from 'constants/abi/gravity.json';
-import erc20ABI from 'constants/abi/erc20.json';
+} from 'config/bridgeTokens';
+import GravityABI from 'config/abi/gravity.json';
+import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
-import { BEP20_ORAI, BSC_CHAIN_ID, ERC20_ORAI } from 'constants/constants';
+import { BEP20_ORAI, BSC_CHAIN_ID, ERC20_ORAI } from 'config/constants';
 
 export default class Metamask {
   constructor() {}
@@ -26,7 +26,7 @@ export default class Metamask {
   ) {
     const balance = Web3.utils.toWei(amountVal);
 
-    await window.ethereum.request({
+    await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId }]
     });
@@ -65,7 +65,7 @@ export default class Metamask {
 
     if (+currentAllowance >= +weiAmount) return;
 
-    await window.ethereum.request({
+    await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId }]
     });
@@ -93,11 +93,11 @@ export default class Metamask {
     const token = inputToken || this.getOraiToken();
     if (!token || !token.contractAddress) return '0';
 
-    const provider =
-      token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
-
-    const web3 = new Web3(provider);
     try {
+      const provider =
+        token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
+
+      const web3 = new Web3(provider);
       const tokenInst = new web3.eth.Contract(
         tokenABI as AbiItem[],
         token.contractAddress

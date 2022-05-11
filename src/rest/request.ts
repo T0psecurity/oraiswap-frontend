@@ -1,6 +1,6 @@
 import Axios from 'axios';
 import { throttleAdapterEnhancer } from 'axios-extensions';
-import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from 'constants/constants';
+import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from 'config/constants';
 
 const axios = Axios.create({
   timeout: AXIOS_TIMEOUT,

@@ -1,17 +1,16 @@
-import { ChainInfo } from '@keplr-wallet/types';
 import { isAndroid, isMobile } from '@walletconnect/browser-utils';
-import { blacklistNetworks, network } from 'constants/networks';
-import { embedChainInfos } from 'networks';
+import { mobileBlacklistNetworks, network } from 'config/networks';
+import { embedChainInfos } from 'config/chainInfos';
 import WalletConnect from '@walletconnect/client';
 import { KeplrWalletConnectV1 } from '@keplr-wallet/wc-client';
 import { IJsonRpcRequest, IRequestOptions } from '@walletconnect/types';
 import { BroadcastMode, StdTx } from '@cosmjs/launchpad';
 import Axios from 'axios';
 import { KeplrQRCodeModalV1 } from '@keplr-wallet/wc-qrcode-modal';
-import { filteredTokens } from 'constants/bridgeTokens';
+import { filteredTokens } from 'config/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
-import { Key } from 'types/kelpr';
+import { Key } from '@keplr-wallet/types';
 
 const hash160 = (buffer: Uint8Array) => {
   var t = createHash('sha256').update(buffer).digest();
@@ -31,24 +30,24 @@ const sendTx = async (
 
   const params = isProtoTx
     ? {
-        tx_bytes: Buffer.from(tx as any).toString('base64'),
-        mode: (() => {
-          switch (mode) {
-            case 'async':
-              return 'BROADCAST_MODE_ASYNC';
-            case 'block':
-              return 'BROADCAST_MODE_BLOCK';
-            case 'sync':
-              return 'BROADCAST_MODE_SYNC';
-            default:
-              return 'BROADCAST_MODE_UNSPECIFIED';
-          }
-        })()
-      }
+      tx_bytes: Buffer.from(tx as any).toString('base64'),
+      mode: (() => {
+        switch (mode) {
+          case 'async':
+            return 'BROADCAST_MODE_ASYNC';
+          case 'block':
+            return 'BROADCAST_MODE_BLOCK';
+          case 'sync':
+            return 'BROADCAST_MODE_SYNC';
+          default:
+            return 'BROADCAST_MODE_UNSPECIFIED';
+        }
+      })()
+    }
     : {
-        tx,
-        mode: mode
-      };
+      tx,
+      mode: mode
+    };
 
   const result = await restInstance.post(
     isProtoTx ? '/cosmos/tx/v1beta1/txs' : '/txs',
@@ -65,18 +64,7 @@ const sendTx = async (
 };
 export default class Keplr {
   private walletConnector: WalletConnect | undefined;
-  constructor() {
-    window.onload = async () => {
-      if (window.keplr) {
-        // window.keplr.defaultOptions = {
-        //     sign: {
-        //         preferNoSetFee: true,
-        //         preferNoSetMemo: true,
-        //     },
-        // };
-      }
-    };
-  }
+  constructor() { }
 
   suggestChain = async (chainId: string) => {
     if (!window.keplr) return;
@@ -89,7 +77,7 @@ export default class Keplr {
         await window.keplr.experimentalSuggestChain(chainInfo);
       }
       await window.keplr.enable(chainId);
-    } else if (!blacklistNetworks.includes(chainId)) {
+    } else if (!mobileBlacklistNetworks.includes(chainId)) {
       await window.keplr.enable(chainId);
     }
   };
@@ -118,6 +106,7 @@ export default class Keplr {
     if (!this.walletConnector) {
       this.walletConnector = new WalletConnect({
         bridge: 'https://bridge.walletconnect.org',
+        storageId: 'keplr',
         signingMethods: [],
         qrcodeModal: new KeplrQRCodeModalV1()
       });
@@ -128,14 +117,13 @@ export default class Keplr {
         name: 'Oraichain',
         description: 'Oraichain is the first IBC-native Cosmos interchain AMM',
         url: 'https://oraidex.io',
-        icons: [
-          window.location.origin + '/public/assets/osmosis-wallet-connect.png'
-        ]
+        icons: ['https://dhj8dql1kzq2v.cloudfront.net/keplr-256x256.png']
       };
 
       this.walletConnector!.on('disconnect', this.onWalletConnectDisconnected);
     }
 
+    // console.log(this.walletConnector);
     if (!this.walletConnector.connected) {
       try {
         await this.walletConnector!.connect();
@@ -216,9 +204,8 @@ export default class Keplr {
     });
   }
 
-  private async getKeplrKey(chain_id?: string): Promise<Key | undefined> {
-    let chainId = network.chainId;
-    if (chain_id) chainId = chain_id;
+  private async getKeplrKey(chainId?: string): Promise<Key | undefined> {
+    chainId = chainId ?? network.chainId;
     if (!chainId) return undefined;
     const keplr = await this.getKeplr();
     if (keplr) {
@@ -227,25 +214,30 @@ export default class Keplr {
     return undefined;
   }
 
-  async getKeplrAddr(chain_id?: string): Promise<String | undefined> {
+  async getKeplrAddr(chainId?: string): Promise<string | undefined> {
     // not support network.chainId (Oraichain)
-    if (isMobile() && blacklistNetworks.includes(chain_id ?? network.chainId)) {
+    chainId = chainId ?? network.chainId;
+    const token = filteredTokens.find((token) => token.chainId === chainId);
+    if (!token) return;
+    if (isMobile() && mobileBlacklistNetworks.includes(token.chainId)) {
       const address = await this.getKeplrBech32Address('osmosis-1');
-      return address?.toBech32(network.prefix);
+      return address?.toBech32(token.prefix!);
     }
-    const key = await this.getKeplrKey(chain_id);
+
+    const key = await this.getKeplrKey(chainId);
     return key?.bech32Address;
   }
 
-  async getKeplrPubKey(chain_id?: string): Promise<Uint8Array | undefined> {
-    const key = await this.getKeplrKey(chain_id);
+  async getKeplrPubKey(chainId?: string): Promise<Uint8Array | undefined> {
+    const key = await this.getKeplrKey(chainId);
     return key?.pubKey;
   }
 
   async getKeplrBech32Address(
-    chain_id?: string
+    chainId?: string
   ): Promise<Bech32Address | undefined> {
-    const pubkey = await this.getKeplrPubKey(chain_id);
+    const pubkey = await this.getKeplrPubKey(chainId);
+
     if (!pubkey) return undefined;
     const address = hash160(pubkey);
     return new Bech32Address(address);
