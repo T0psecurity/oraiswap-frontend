@@ -11,7 +11,9 @@ export const BEP20_ORAI = 'bep20_orai';
 export const ERC20_ORAI = 'erc20_orai';
 
 export const NATIVE_TOKENS = [ORAI];
-export const DECIMAL_FRACTION = Math.pow(10, 18);
+export const EVM_DECIMALS = 18;
+export const COSMOS_DECIMALS = 6;
+export const DECIMAL_FRACTION = Math.pow(10, EVM_DECIMALS);
 
 /* oraiswap:configs */
 export const DEFAULT_MAX_SPREAD = 0.5;
@@ -39,7 +41,7 @@ export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet';
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'gravity';
-export const ORAI_BRIDGE_EVM_FEE = '20000';
+export const ORAI_BRIDGE_EVM_FEE = '0';
 export const ORAI_BRIDGE_RPC = 'https://bridge.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge.lcd.orai.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';

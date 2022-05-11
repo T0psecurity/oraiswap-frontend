@@ -219,7 +219,9 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
             }}
           >
             {transferLoading && <Loader width={20} height={20} />}
-            <span>Transfer To OraiBridge</span>
+            <span>
+              Transfer To <strong>OraiBridge</strong>
+            </span>
           </button>
         )}
       </div>
@@ -457,10 +459,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
       await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const rawAmount = Math.round(
-        amount * 10 ** fromToken.decimals
-      ).toString();
+      const rawAmount = new Big(amount)
+        .mul(new Big(10).pow(fromToken.decimals))
+        .toString();
 
+      console.log(rawAmount);
+      return;
       const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
@@ -493,6 +497,7 @@ const Balance: React.FC<BalanceProps> = () => {
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
       });
+      console.log(result);
       setTxHash(result.transactionHash);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
