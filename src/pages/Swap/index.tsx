@@ -53,7 +53,7 @@ const Swap: React.FC<SwapProps> = () => {
   const [isSelectFee, setIsSelectFee] = useState(false);
   const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
     [string, string]
-  >(['orai', 'airi']);
+  >(['orai', 'usdt']);
   // const [feeToken, setFeeToken] = useState<string>('airi');
   const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
@@ -242,6 +242,7 @@ const Swap: React.FC<SwapProps> = () => {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        setTxHash(result.transactionHash);
         setSwapLoading(false);
       }
     } catch (error) {

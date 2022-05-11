@@ -30,24 +30,24 @@ const sendTx = async (
 
   const params = isProtoTx
     ? {
-        tx_bytes: Buffer.from(tx as any).toString('base64'),
-        mode: (() => {
-          switch (mode) {
-            case 'async':
-              return 'BROADCAST_MODE_ASYNC';
-            case 'block':
-              return 'BROADCAST_MODE_BLOCK';
-            case 'sync':
-              return 'BROADCAST_MODE_SYNC';
-            default:
-              return 'BROADCAST_MODE_UNSPECIFIED';
-          }
-        })()
-      }
+      tx_bytes: Buffer.from(tx as any).toString('base64'),
+      mode: (() => {
+        switch (mode) {
+          case 'async':
+            return 'BROADCAST_MODE_ASYNC';
+          case 'block':
+            return 'BROADCAST_MODE_BLOCK';
+          case 'sync':
+            return 'BROADCAST_MODE_SYNC';
+          default:
+            return 'BROADCAST_MODE_UNSPECIFIED';
+        }
+      })()
+    }
     : {
-        tx,
-        mode: mode
-      };
+      tx,
+      mode: mode
+    };
 
   const result = await restInstance.post(
     isProtoTx ? '/cosmos/tx/v1beta1/txs' : '/txs',
@@ -64,7 +64,7 @@ const sendTx = async (
 };
 export default class Keplr {
   private walletConnector: WalletConnect | undefined;
-  constructor() {}
+  constructor() { }
 
   suggestChain = async (chainId: string) => {
     if (!window.keplr) return;

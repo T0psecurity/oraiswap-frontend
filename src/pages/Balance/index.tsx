@@ -51,7 +51,7 @@ import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -201,7 +201,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
           </button>
         )}
 
-        {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+        {/* {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
           <button
             disabled={transferLoading}
             className={styles.tfBtn}
@@ -223,7 +223,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
               Transfer To <strong>OraiBridge</strong>
             </span>
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );
@@ -512,6 +512,7 @@ const Balance: React.FC<BalanceProps> = () => {
     transferAmount: number
   ) => {
     try {
+      if (transferAmount === 0) throw { message: "Transfer amount is empty" };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
       await window.Keplr.suggestChain(fromToken.chainId);
@@ -740,10 +741,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -756,10 +757,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}
