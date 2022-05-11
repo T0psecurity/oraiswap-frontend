@@ -1,12 +1,12 @@
 import React, { StrictMode } from 'react';
-import 'polyfill';
+import { initEthereum } from 'polyfill';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './index.scss';
 import ScrollToTop from './layouts/ScrollToTop';
 import App from './layouts/App';
 import Keplr from 'libs/keplr';
-import { network } from 'constants/networks';
+import { network } from 'config/networks';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
@@ -20,6 +20,7 @@ const queryClient = new QueryClient();
 
 const startApp = async () => {
   try {
+    await initEthereum();
     const keplr = await window.Keplr.getKeplr();
     // suggest our chain
     if (keplr) {

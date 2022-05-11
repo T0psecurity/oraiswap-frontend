@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import React, { useState, useEffect } from 'react';
-import { network } from 'constants/networks';
+import { network } from 'config/networks';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
@@ -18,7 +18,7 @@ const RequireAuthButton: React.FC<any> = ({
 }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
 
-  const { active, error, activate, deactivate } = useWeb3React();
+  const { active, connector, error, activate, deactivate } = useWeb3React();
 
   const onClick = () => {
     setOpenConnectWalletModal(true);
@@ -27,6 +27,7 @@ const RequireAuthButton: React.FC<any> = ({
   const connectMetamask = async () => {
     try {
       await activate(injected);
+      alert(await injected.getAccount());
       setMetamaskAddress(await injected.getAccount());
       // window.location.reload();
     } catch (ex) {
@@ -44,7 +45,6 @@ const RequireAuthButton: React.FC<any> = ({
   };
 
   const connectKeplr = async () => {
-    console.log('suggest');
     if (!(await window.Keplr.getKeplr())) {
       alert('You must install Keplr to continue');
       return;

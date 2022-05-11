@@ -18,15 +18,15 @@ import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import { ibcInfos } from 'constants/ibcInfos';
+import { ibcInfos } from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
   gravityContracts,
   TokenItemType,
   tokens
-} from 'constants/bridgeTokens';
-import { network } from 'constants/networks';
+} from 'config/bridgeTokens';
+import { network } from 'config/networks';
 import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
 import Content from 'layouts/Content';
 import {
@@ -40,10 +40,10 @@ import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
 import Big from 'big.js';
-import { ERC20_ORAI, ORAI } from 'constants/constants';
+import { ERC20_ORAI, ORAI } from 'config/constants';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -349,6 +349,7 @@ const Balance: React.FC<BalanceProps> = () => {
     } else {
       setFrom(token);
       setFromAmount([0, 0]);
+      setTo(undefined);
     }
   }, []);
 
@@ -427,9 +428,8 @@ const Balance: React.FC<BalanceProps> = () => {
           );
 
           displayToast(TToastType.TX_SUCCESSFUL, {
-            customLink: `${from!.lcd}/cosmos/tx/v1beta1/txs/${
-              result?.transactionHash
-            }`
+            customLink: `${from!.lcd}/cosmos/tx/v1beta1/txs/${result?.transactionHash
+              }`
           });
           // set tx hash to trigger refetching amount values
           setTxHash(result?.transactionHash);
@@ -603,10 +603,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
-                                amounts[from.denom].usd
-                              ]
+                              amounts[from.denom].amount /
+                              10 ** from.decimals,
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -619,10 +619,10 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           from
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
-                                amounts[from.denom].usd / 2
-                              ]
+                              amounts[from.denom].amount /
+                              (2 * 10 ** from.decimals),
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}

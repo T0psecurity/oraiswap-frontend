@@ -1,4 +1,4 @@
-import { TokenItemType } from 'constants/bridgeTokens';
+import { TokenItemType } from 'config/bridgeTokens';
 
 export type TokenInfo = TokenItemType & {
   symbol: string;

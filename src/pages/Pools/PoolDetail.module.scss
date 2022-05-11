@@ -1,65 +1,78 @@
 .pool-detail {
   padding: 40px;
 
+  @media (max-width: 500px) {
+    padding: 20px;
+  }
+
   .header {
     display: flex;
-    gap: 20px;
     align-items: center;
     margin-bottom: 40px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
 
-    .logo {
-      position: relative;
-      width: 75px;
-      height: 80px;
-
-      .token1 {
-        width: 48px;
-        height: 48px;
-      }
-
-      .token2 {
-        width: 48px;
-        height: 48px;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        z-index: 1;
-      }
-    }
-    .title {
+    .token-info {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex-grow: 1;
+      gap: 20px;
 
-      .name {
-        font-family: 'IBM Plex Sans';
-        font-style: normal;
-        font-weight: 600;
-        font-size: 22px;
-        line-height: 100%;
-        /* identical to box height, or 22px */
+      .logo {
+        position: relative;
+        width: 75px;
+        height: 80px;
 
-        font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+        .token1 {
+          width: 48px;
+          height: 48px;
+        }
 
-        /* aiRight/White */
-
-        color: #ffffff;
+        .token2 {
+          width: 48px;
+          height: 48px;
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          z-index: 1;
+        }
       }
 
-      .value {
-        font-family: 'IBM Plex Sans';
-        font-style: normal;
-        font-weight: 600;
-        font-size: 40px;
-        line-height: 100%;
-        /* identical to box height, or 40px */
-        margin-top: 10px;
-        font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+      .title {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
 
-        color: #ffffff;
+        .name {
+          font-family: 'IBM Plex Sans';
+          font-style: normal;
+          font-weight: 600;
+          font-size: 22px;
+          line-height: 100%;
+          /* identical to box height, or 22px */
+
+          font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+
+          /* aiRight/White */
+
+          color: #ffffff;
+        }
+
+        .value {
+          font-family: 'IBM Plex Sans';
+          font-style: normal;
+          font-weight: 600;
+          font-size: 40px;
+          line-height: 100%;
+          /* identical to box height, or 40px */
+          margin-top: 10px;
+          font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+
+          color: #ffffff;
+        }
       }
     }
+
     .des {
       font-family: 'IBM Plex Sans';
       font-style: normal;
@@ -75,6 +88,7 @@
 
       color: #777e90;
     }
+
     .btn {
       padding: 16px 24px;
       text-align: center;
@@ -92,7 +106,7 @@
 
       color: #ffffff;
       // cursor: pointer;
-      
+
     }
 
     .swap {
@@ -112,6 +126,8 @@
       display: flex;
       justify-content: space-between;
       gap: 30px;
+      flex-wrap: wrap;
+
       &:first-child {
         padding-bottom: 40px;
         border-bottom: 1px solid #2d2938;
@@ -144,7 +160,7 @@
 
     .container {
       padding: 25px;
-      background: #17181c;      
+      background: #17181c;
       border-radius: 16px;
 
       font-family: 'IBM Plex Sans';
@@ -164,7 +180,7 @@
       // margin-top: 25px;
 
       &.tokens {
-        width: 70%;
+        min-width: 70%;
         display: flex;
         flex-direction: row;
         gap: 30px;
@@ -242,7 +258,7 @@
       }
 
       &.pool-catalyst {
-        width: 27%;
+        min-width: calc(30% - 30px);
 
         .pool-catalyst_token {
           display: flex;
@@ -321,7 +337,7 @@
 
     .mining {
       // margin-top: 50px;
-      width: 70%;
+      min-width: 70%;
 
       .container_mining {
         display: flex;
@@ -338,6 +354,7 @@
           display: flex;
           flex-direction: column;
           justify-content: space-between;
+
           &-apr,
           &-unbouding {
             display: flex;

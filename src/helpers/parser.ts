@@ -1,5 +1,5 @@
 import { Dictionary } from 'ramda';
-import { LP, ORAI } from 'constants/constants';
+import { LP, ORAI } from 'config/constants';
 
 const parser: Dictionary<Dictionary<ResultParserItem>> = {
   trade: {

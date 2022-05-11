@@ -3,14 +3,14 @@ import styles from './index.module.scss';
 import { Button, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
-import { getPair, Pair, pairs } from 'constants/pools';
+import { getPair, Pair, pairs } from 'config/pools';
 import { fetchPairInfo, fetchPoolInfoAmount, fetchTokenInfo } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
-import { filteredTokens, TokenItemType } from 'constants/bridgeTokens';
+import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 
 const { Search } = Input;
 
@@ -148,7 +148,7 @@ const ListPools = memo<{
       <div className={styles.listpools_title}>All pools</div>
       <div className={styles.listpools_search}>
         <Search
-          placeholder='Search by pools or tokens name'
+          placeholder="Search by pools or tokens name"
           onSearch={filterPairs}
           style={{
             width: 420,

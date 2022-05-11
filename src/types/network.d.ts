@@ -1,4 +1,4 @@
-import { NetworkKey } from 'constants/networks';
+import { NetworkKey } from 'config/networks';
 
 interface ExtNetworkConfig {
   chainId: string;

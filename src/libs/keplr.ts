@@ -1,16 +1,16 @@
 import { isAndroid, isMobile } from '@walletconnect/browser-utils';
-import { blacklistNetworks, network } from 'constants/networks';
-import { embedChainInfos } from 'networks';
+import { mobileBlacklistNetworks, network } from 'config/networks';
+import { embedChainInfos } from 'config/chainInfos';
 import WalletConnect from '@walletconnect/client';
 import { KeplrWalletConnectV1 } from '@keplr-wallet/wc-client';
 import { IJsonRpcRequest, IRequestOptions } from '@walletconnect/types';
 import { BroadcastMode, StdTx } from '@cosmjs/launchpad';
 import Axios from 'axios';
 import { KeplrQRCodeModalV1 } from '@keplr-wallet/wc-qrcode-modal';
-import { filteredTokens } from 'constants/bridgeTokens';
+import { filteredTokens } from 'config/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
-import { Key } from 'types/kelpr';
+import { Key } from '@keplr-wallet/types';
 
 const hash160 = (buffer: Uint8Array) => {
   var t = createHash('sha256').update(buffer).digest();
@@ -77,7 +77,7 @@ export default class Keplr {
         await window.keplr.experimentalSuggestChain(chainInfo);
       }
       await window.keplr.enable(chainId);
-    } else if (!blacklistNetworks.includes(chainId)) {
+    } else if (!mobileBlacklistNetworks.includes(chainId)) {
       await window.keplr.enable(chainId);
     }
   };
@@ -106,6 +106,7 @@ export default class Keplr {
     if (!this.walletConnector) {
       this.walletConnector = new WalletConnect({
         bridge: 'https://bridge.walletconnect.org',
+        storageId: 'keplr',
         signingMethods: [],
         qrcodeModal: new KeplrQRCodeModalV1()
       });
@@ -116,14 +117,13 @@ export default class Keplr {
         name: 'Oraichain',
         description: 'Oraichain is the first IBC-native Cosmos interchain AMM',
         url: 'https://oraidex.io',
-        icons: [
-          window.location.origin + '/public/assets/osmosis-wallet-connect.png'
-        ]
+        icons: ['https://dhj8dql1kzq2v.cloudfront.net/keplr-256x256.png']
       };
 
       this.walletConnector!.on('disconnect', this.onWalletConnectDisconnected);
     }
 
+    // console.log(this.walletConnector);
     if (!this.walletConnector.connected) {
       try {
         await this.walletConnector!.connect();
@@ -219,7 +219,7 @@ export default class Keplr {
     chainId = chainId ?? network.chainId;
     const token = filteredTokens.find((token) => token.chainId === chainId);
     if (!token) return;
-    if (isMobile() && blacklistNetworks.includes(token.chainId)) {
+    if (isMobile() && mobileBlacklistNetworks.includes(token.chainId)) {
       const address = await this.getKeplrBech32Address('osmosis-1');
       return address?.toBech32(token.prefix!);
     }

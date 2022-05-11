@@ -35,6 +35,7 @@ export type TokenItemType = {
   rpc: string;
   lcd?: string;
   decimals: number;
+  maxGas?: number;
   coingeckoId:
   | 'oraichain-token'
   | 'osmosis'
@@ -43,165 +44,14 @@ export type TokenItemType = {
   | 'bnb'
   | 'airight'
   | 'terrausd'
-  | 'terra-luna' | 'oraix' | 'tether';
+  | 'terra-luna'
+  | 'oraix'
+  | 'tether';
   cosmosBased: Boolean;
 };
 
 const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
-  [NetworkKey.TESTNET]: [
-    [
-      {
-        name: 'ORAI',
-        org: 'Ethereum',
-        denom: '0x7e2a35c746f2f7c240b664f1da4dd100141ae71f',
-        prefix: 'orai',
-        contractAddress: 'ORAI',
-        coingeckoId: 'oraichain-token',
-        decimals: 6,
-        chainId: 'Oraichain-testnet',
-        rpc: 'https://testnet.rpc.orai.io',
-        lcd: 'https://testnet.lcd.orai.io',
-        cosmosBased: false,
-        Icon: ORAI
-      },
-      {
-        name: 'ATOM',
-        org: 'Cosmos Hub',
-        prefix: 'cosmos',
-        coingeckoId: 'cosmos',
-        denom: 'atom',
-        decimals: 6,
-        coinType: 118,
-        chainId: 'cosmoshub-4',
-        rpc: 'https://rpc-cosmoshub.blockapsis.com',
-        lcd: 'https://lcd-cosmoshub.blockapsis.com',
-        cosmosBased: false,
-        Icon: ATOMCOSMOS
-      },
-      {
-        name: 'OSMO',
-        org: 'Osmosis',
-        prefix: 'osmo',
-        coinType: 118,
-        denom: 'osmosis',
-        chainId: 'osmosis-1',
-        rpc: 'https://rpc-osmosis.blockapsis.com',
-        lcd: 'https://lcd-osmosis.blockapsis.com',
-        decimals: 6,
-        coingeckoId: 'osmosis',
-        cosmosBased: false,
-        Icon: OSMO
-      },
-      {
-        name: 'ETH',
-        org: 'Ethereum',
-        coingeckoId: 'ethereum',
-        denom: 'ethereum',
-        decimals: 6,
-        chainId: 'ethereum',
-        rpc: 'http://125.212.192.225:26657',
-        cosmosBased: false,
-        Icon: ETH
-      },
-      {
-        name: 'ORAI',
-        org: 'BNB Chain',
-        chainId: 'bsc',
-        prefix: 'orai',
-        denom: '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0',
-        rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-        decimals: 6,
-        coingeckoId: 'bnb',
-        cosmosBased: false,
-        Icon: BNB
-      }
-    ],
-    [
-      {
-        name: 'ORAI',
-        org: 'Oraichain',
-        prefix: 'orai',
-        denom: 'orai',
-        coinType: 118,
-        coingeckoId: 'oraichain-token',
-        decimals: 6,
-        chainId: 'Oraichain-testnet',
-        rpc: 'https://testnet.rpc.orai.io',
-        lcd: 'https://testnet.lcd.orai.io',
-        cosmosBased: true,
-        Icon: ORAI
-      },
-      {
-        name: 'ATOM',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coingeckoId: 'cosmos',
-        coinType: 118,
-        denom: 'ibc/atom',
-        decimals: 6,
-        chainId: 'Oraichain-testnet',
-        rpc: 'https://testnet.rpc.orai.io',
-        lcd: 'https://testnet.lcd.orai.io',
-        cosmosBased: false,
-        Icon: ATOMCOSMOS
-      },
-      {
-        name: 'OSMO',
-        org: 'Oraichain',
-        coinType: 118,
-        prefix: 'orai',
-        denom: 'ibc/osmosis',
-        chainId: 'Oraichain-testnet',
-        rpc: 'https://testnet.rpc.orai.io',
-        lcd: 'https://testnet.lcd.orai.io',
-        decimals: 6,
-        coingeckoId: 'osmosis',
-        cosmosBased: false,
-        Icon: OSMO
-      },
-      {
-        name: 'ERC20 ORAI',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coingeckoId: 'oraichain-token',
-        denom: 'ibc/ethereum',
-        decimals: 6,
-        chainId: 'Oraichain',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        cosmosBased: true,
-        Icon: ETH
-      },
-      {
-        name: 'Bep20 ORAI',
-        org: 'Oraichain',
-        prefix: 'orai',
-        chainId: 'Oraichain',
-        denom: 'ibc/bsc',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        decimals: 6,
-        coingeckoId: 'oraichain-token',
-        cosmosBased: true,
-        Icon: BNB
-      },
-      {
-        name: 'AIRI',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coinType: 118,
-        coingeckoId: 'airight',
-        denom: 'airi',
-        contractAddress: '',
-        decimals: 6,
-        chainId: 'Oraichain-testnet',
-        rpc: 'https://testnet-rpc.orai.io',
-        lcd: 'https://testnet-lcd.orai.io',
-        cosmosBased: true,
-        Icon: AIRI
-      }
-    ]
-  ],
+  [NetworkKey.TESTNET]: [[], []],
   [NetworkKey.MAINNET]: [
     [
       {
@@ -216,6 +66,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc-cosmos.oraidex.io',
         lcd: 'https://lcd-cosmoshub.keplr.app',
         cosmosBased: true,
+        maxGas: 20000 * 0.16,
         Icon: ATOMCOSMOS
       },
       {
@@ -230,6 +81,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc-terra.orai.io',
         lcd: 'https://lcd-columbus.keplr.app',
         cosmosBased: true,
+        maxGas: 20000 * 0.16,
         Icon: LUNA
       },
       {
@@ -258,20 +110,21 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: 6,
         coingeckoId: 'osmosis',
         cosmosBased: true,
+        maxGas: 20000 * 0.025,
         Icon: OSMO
       },
-      {
-        name: 'ERC20 ORAI',
-        org: 'Ethereum',
-        coingeckoId: 'oraichain-token',
-        denom: ERC20_ORAI,
-        contractAddress: ORAI_ETH_CONTRACT,
-        decimals: 18,
-        chainId: ETHEREUM_CHAIN_ID,
-        rpc: ETHEREUM_RPC,
-        cosmosBased: false,
-        Icon: ORAI
-      },
+      // {
+      //   name: 'ERC20 ORAI',
+      //   org: 'Ethereum',
+      //   coingeckoId: 'oraichain-token',
+      //   denom: ERC20_ORAI,
+      //   contractAddress: ORAI_ETH_CONTRACT,
+      //   decimals: 18,
+      //   chainId: ETHEREUM_CHAIN_ID,
+      //   rpc: ETHEREUM_RPC,
+      //   cosmosBased: false,
+      //   Icon: ORAI
+      // },
       {
         name: 'BEP20 ORAI',
         org: 'BNB Chain',
@@ -386,7 +239,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'tether',
-        denom: 'airi',
+        denom: 'usdt',
         contractAddress: process.env.REACT_APP_USDT_CONTRACT,
         decimals: 6,
         coinType: 118,
