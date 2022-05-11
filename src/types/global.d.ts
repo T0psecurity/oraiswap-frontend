@@ -118,6 +118,7 @@ declare global {
       REACT_APP_ATOM_ORAICHAIN_CHANNELS: string;
       REACT_APP_TERRA_ORAICHAIN_CHANNELS: string;
       REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS: string;
+      REACT_APP_ORAIB_ORAICHAIN_CHANNELS: string;
 
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;

@@ -17,6 +17,12 @@ import {
   ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
+  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  ORAI_BRIDGE_LCD,
+  ORAI_BRIDGE_PREFIX,
+  ORAI_BRIDGE_RPC,
+  ORAI_BRIDGE_UDENOM,
   ORAI_BSC_CONTRACT,
   ORAI_ETH_CONTRACT
 } from './constants';
@@ -109,6 +115,20 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         cosmosBased: true,
         maxGas: 20000 * 0.025,
         Icon: OSMO
+      },
+      {
+        name: 'BEP20 ORAI',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_CHAIN_ID,
+        coinType: 118,
+        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
+        rpc: ORAI_BRIDGE_RPC,
+        lcd: ORAI_BRIDGE_LCD,
+        decimals: 6,
+        coingeckoId: 'oraichain-token',
+        cosmosBased: true,
+        Icon: ORAI
       },
       // {
       //   name: 'ERC20 ORAI',
