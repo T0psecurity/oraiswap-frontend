@@ -27,7 +27,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
 import { Fraction } from '@saberhq/token-utils';
-import { ORAI } from 'config/constants';
+import { ORAI, STABLE_DENOM } from 'config/constants';
 
 const cx = cn.bind(styles);
 
@@ -78,10 +78,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     const poolData = await fetchPoolInfoAmount(token1!, token2!);
 
-    if (
-      token1?.denom === ORAI &&
-      token2?.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
-    ) {
+    if (token1?.denom === ORAI && token2?.denom === STABLE_DENOM) {
       oraiPrice = new Fraction(
         poolData.askPoolAmount,
         poolData.offerPoolAmount
@@ -89,9 +86,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     } else {
       const _poolData = await fetchPoolInfoAmount(
         poolTokens.find((token) => token.denom === ORAI)!,
-        poolTokens.find(
-          (token) => token.denom === process.env.REACT_APP_UST_ORAICHAIN_DENOM
-        )!
+        poolTokens.find((token) => token.denom === STABLE_DENOM)!
       );
       oraiPrice = new Fraction(
         _poolData.askPoolAmount,

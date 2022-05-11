@@ -11,6 +11,7 @@ import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import { STABLE_DENOM } from 'config/constants';
 
 const { Search } = Input;
 
@@ -191,31 +192,34 @@ const Pools: React.FC<PoolsProps> = () => {
       filteredTokens.find((token) => token.denom === denom)
     );
 
-    const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
-      fetchTokenInfo(fromToken!),
-      fetchTokenInfo(toToken!)
-    ]);
+    try {
+      const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
+        fetchTokenInfo(fromToken!),
+        fetchTokenInfo(toToken!)
+      ]);
 
-    const [poolData, infoData] = await Promise.all([
-      fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-      fetchPairInfo([fromTokenInfoData, toTokenInfoData])
-    ]);
+      const [poolData, infoData] = await Promise.all([
+        fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
+        fetchPairInfo([fromTokenInfoData, toTokenInfoData])
+      ]);
 
-    return {
-      ...poolData,
-      amount: 0,
-      pair,
-      commissionRate: infoData.commission_rate,
-      fromToken,
-      toToken
-    };
+      return {
+        ...poolData,
+        amount: 0,
+        pair,
+        commissionRate: infoData.commission_rate,
+        fromToken,
+        toToken
+      };
+    } catch (ex) {
+      console.log(ex);
+    }
   };
 
   const fetchPairInfoDataList = async () => {
-    const poolList = await Promise.all(pairs.map(fetchPairInfoData));
+    const poolList = _.compact(await Promise.all(pairs.map(fetchPairInfoData)));
     const oraiUstPool = poolList.find(
-      (pool) =>
-        pool.pair.asset_denoms[1] === process.env.REACT_APP_UST_ORAICHAIN_DENOM
+      (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     )!;
 
     const oraiPrice = new Fraction(

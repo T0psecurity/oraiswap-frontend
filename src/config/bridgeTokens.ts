@@ -26,6 +26,7 @@ import {
   ORAI_BRIDGE_UDENOM,
   ORAI_BSC_CONTRACT,
   ORAI_ETH_CONTRACT,
+  STABLE_DENOM,
   USDT_BSC_CONTRACT
 } from './constants';
 
@@ -43,16 +44,16 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna'
-  | 'oraix'
-  | 'tether';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna'
+    | 'oraix'
+    | 'tether';
   cosmosBased: Boolean;
 };
 
@@ -259,7 +260,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'tether',
-        denom: 'usdt',
+        denom: STABLE_DENOM,
         contractAddress: process.env.REACT_APP_USDT_CONTRACT,
         decimals: 6,
         coinType: 118,

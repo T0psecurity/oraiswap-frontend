@@ -1,5 +1,5 @@
 import { filteredTokens, TokenItemType, tokens } from './bridgeTokens';
-import { ORAI } from './constants';
+import { ORAI, STABLE_DENOM } from './constants';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 
@@ -31,7 +31,7 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     },
     {
       contract_addr: 'orai1c5s03c3l336dgesne7dylnmhszw8554tsyy9yt',
-      asset_denoms: [ORAI, 'usdt']
+      asset_denoms: [ORAI, STABLE_DENOM]
     }
     // {
     //   contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
