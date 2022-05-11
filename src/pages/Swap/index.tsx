@@ -30,7 +30,7 @@ import { poolTokens } from 'config/pools';
 
 const cx = cn.bind(style);
 
-interface SwapProps { }
+interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -242,6 +242,7 @@ const Swap: React.FC<SwapProps> = () => {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        setTxHash(result.transactionHash);
         setSwapLoading(false);
       }
     } catch (error) {
@@ -401,9 +402,9 @@ const Swap: React.FC<SwapProps> = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
