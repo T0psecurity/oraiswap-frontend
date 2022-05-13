@@ -157,23 +157,27 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
       </div>
       <div
         className={styles.transferTab}
-        style={{ marginTop: '0px', justifyContent: 'space-between' }}
+        style={{
+          marginTop: '0px',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
       >
         {token.chainId === ORAI_BRIDGE_CHAIN_ID && (
-          <button
-            className={styles.tfBtn}
-            disabled={transferLoading}
-            onClick={async () => {
-              try {
-                setTransferLoading(true);
-                await transferFromGravity(token, convertAmount);
-              } finally {
-                setTransferLoading(false);
-              }
-            }}
-          >
-            {transferLoading && <Loader width={20} height={20} />}
-            <span>
+          <>
+            <button
+              className={styles.tfBtn}
+              disabled={transferLoading}
+              onClick={async () => {
+                try {
+                  setTransferLoading(true);
+                  await transferFromGravity(token, convertAmount);
+                } finally {
+                  setTransferLoading(false);
+                }
+              }}
+            >
+              {transferLoading && <Loader width={20} height={20} />}
               <span>
                 Transfer To{' '}
                 <strong>
@@ -182,8 +186,18 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
                     : 'Ethereum'}
                 </strong>
               </span>
-            </span>
-          </button>
+            </button>
+            <small
+              style={{
+                backgroundColor: '#C69A24',
+                color: '#95452d',
+                padding: '0px 3px',
+                borderRadius: 3
+              }}
+            >
+              Congested
+            </small>
+          </>
         )}
 
         {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
