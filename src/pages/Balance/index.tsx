@@ -492,7 +492,7 @@ const Balance: React.FC<BalanceProps> = () => {
       await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const rawAmount = Math.round(
-        amount * 10 ** fromToken.decimals
+        amount * 10 ** fromToken.decimals - parseInt(ORAI_BRIDGE_EVM_FEE)
       ).toString();
 
       const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
