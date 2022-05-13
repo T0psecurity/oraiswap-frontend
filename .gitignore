@@ -16,6 +16,7 @@
 .env
 .env.*
 !.env.example
+!.env.deprecate
 
 npm-debug.log*
 yarn-debug.log*
