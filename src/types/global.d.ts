@@ -143,10 +143,11 @@ declare global {
       REACT_APP_STAKING_CONTRACT: string;
       REACT_APP_REWARDER_CONTRACT: string;
       REACT_APP_CONVERTER_CONTRACT: string;
+      REACT_APP_DEPRECATED: string;
     }
   }
 }
 
 declare module 'crypto-hashing';
 
-export { };
+export {};

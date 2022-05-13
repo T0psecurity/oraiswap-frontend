@@ -12,7 +12,11 @@ import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 import { ReactComponent as ToggleTransfer } from 'assets/icons/toggle_transfer.svg';
 
-import { SigningStargateClient } from '@cosmjs/stargate';
+import {
+  BroadcastTxResponse,
+  isBroadcastTxFailure,
+  SigningStargateClient
+} from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
@@ -50,6 +54,7 @@ import {
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
+import { initEthereum } from 'polyfill';
 
 interface BalanceProps { }
 
@@ -152,23 +157,27 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
       </div>
       <div
         className={styles.transferTab}
-        style={{ marginTop: '0px', justifyContent: 'space-between' }}
+        style={{
+          marginTop: '0px',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
       >
         {token.chainId === ORAI_BRIDGE_CHAIN_ID && (
-          <button
-            className={styles.tfBtn}
-            disabled={transferLoading}
-            onClick={async () => {
-              try {
-                setTransferLoading(true);
-                await transferFromGravity(token, convertAmount);
-              } finally {
-                setTransferLoading(false);
-              }
-            }}
-          >
-            {transferLoading && <Loader width={20} height={20} />}
-            <span>
+          <>
+            <button
+              className={styles.tfBtn}
+              disabled={transferLoading}
+              onClick={async () => {
+                try {
+                  setTransferLoading(true);
+                  await transferFromGravity(token, convertAmount);
+                } finally {
+                  setTransferLoading(false);
+                }
+              }}
+            >
+              {transferLoading && <Loader width={20} height={20} />}
               <span>
                 Transfer To{' '}
                 <strong>
@@ -177,8 +186,18 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
                     : 'Ethereum'}
                 </strong>
               </span>
-            </span>
-          </button>
+            </button>
+            <small
+              style={{
+                backgroundColor: '#C69A24',
+                color: '#95452d',
+                padding: '0px 3px',
+                borderRadius: 3
+              }}
+            >
+              Congested
+            </small>
+          </>
         )}
 
         {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
@@ -313,6 +332,17 @@ const Balance: React.FC<BalanceProps> = () => {
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
 
+  useEffect(() => {
+    const _initEthereum = async () => {
+      try {
+        await initEthereum();
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    _initEthereum();
+  }, []);
+
   const toggleTransfer = () => {
     setTokens([toTokens, fromTokens]);
     setFrom(to);
@@ -408,6 +438,22 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const processTxResult = (
+    token: TokenItemType,
+    result: BroadcastTxResponse
+  ) => {
+    if (isBroadcastTxFailure(result)) {
+      displayToast(TToastType.TX_FAILED, {
+        message: result.rawLog
+      });
+    } else {
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
+      });
+    }
+    setTxHash(result.transactionHash);
+  };
+
   useEffect(() => {
     loadTokenAmounts();
   }, [prices, txHash, pendingTokens]);
@@ -459,12 +505,10 @@ const Balance: React.FC<BalanceProps> = () => {
 
       await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const rawAmount = new Big(amount)
-        .mul(new Big(10).pow(fromToken.decimals))
-        .toString();
+      const rawAmount = Math.round(
+        amount * 10 ** fromToken.decimals - parseInt(ORAI_BRIDGE_EVM_FEE)
+      ).toString();
 
-      console.log(rawAmount);
-      return;
       const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
@@ -494,11 +538,8 @@ const Balance: React.FC<BalanceProps> = () => {
         gas: '200000'
       };
       const result = await client.signAndBroadcast(fromAddress, [message], fee);
-      displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
-      });
-      console.log(result);
-      setTxHash(result.transactionHash);
+
+      processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
@@ -512,7 +553,7 @@ const Balance: React.FC<BalanceProps> = () => {
     transferAmount: number
   ) => {
     try {
-      if (transferAmount === 0) throw { message: "Transfer amount is empty" };
+      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
       await window.Keplr.suggestChain(fromToken.chainId);
@@ -572,11 +613,7 @@ const Balance: React.FC<BalanceProps> = () => {
           }
         );
 
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
-        });
-        // set tx hash to trigger refetching amount values
-        setTxHash(result.transactionHash);
+        processTxResult(fromToken, result);
       }
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -739,10 +776,12 @@ const Balance: React.FC<BalanceProps> = () => {
                       className={styles.balanceBtn}
                       onClick={() => {
                         setFromAmount(
-                          from
+                          amounts[from?.denom]
                             ? [
-                              amounts[from.denom].amount /
-                              10 ** from.decimals,
+                              parseAmountFrom(
+                                amounts[from.denom].amount,
+                                from.decimals
+                              ).toNumber(),
                               amounts[from.denom].usd
                             ]
                             : [0, 0]
@@ -755,10 +794,12 @@ const Balance: React.FC<BalanceProps> = () => {
                       className={styles.balanceBtn}
                       onClick={() => {
                         setFromAmount(
-                          from
+                          amounts[from?.denom]
                             ? [
-                              amounts[from.denom].amount /
-                              (2 * 10 ** from.decimals),
+                              parseAmountFrom(
+                                amounts[from.denom].amount,
+                                from.decimals
+                              ).toNumber() / 2,
                               amounts[from.denom].usd / 2
                             ]
                             : [0, 0]

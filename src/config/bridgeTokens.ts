@@ -34,7 +34,14 @@ import {
 
 export type TokenItemType = {
   name: string;
-  org?: string;
+  org?:
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -122,20 +129,20 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         maxGas: 20000 * 0.025,
         Icon: OSMO
       },
-      {
-        name: 'BEP20 ORAI',
-        prefix: ORAI_BRIDGE_PREFIX,
-        org: 'OraiBridge',
-        chainId: ORAI_BRIDGE_CHAIN_ID,
-        coinType: 118,
-        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
-        rpc: ORAI_BRIDGE_RPC,
-        lcd: ORAI_BRIDGE_LCD,
-        decimals: COSMOS_DECIMALS,
-        coingeckoId: 'oraichain-token',
-        cosmosBased: true,
-        Icon: ORAI
-      },
+      // {
+      //   name: 'BEP20 ORAI',
+      //   prefix: ORAI_BRIDGE_PREFIX,
+      //   org: 'OraiBridge',
+      //   chainId: ORAI_BRIDGE_CHAIN_ID,
+      //   coinType: 118,
+      //   denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
+      //   rpc: ORAI_BRIDGE_RPC,
+      //   lcd: ORAI_BRIDGE_LCD,
+      //   decimals: COSMOS_DECIMALS,
+      //   coingeckoId: 'oraichain-token',
+      //   cosmosBased: true,
+      //   Icon: ORAI
+      // },
       // {
       //   name: 'ERC20 ORAI',
       //   org: 'Ethereum',
@@ -357,7 +364,16 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
   ]
 };
 
-export const tokens = tokensMap[network.id];
+// filter with deprecated
+export const tokens = tokensMap[network.id].map((tokens) =>
+  tokens.filter((token) =>
+    process.env.REACT_APP_DEPRECATED === 'true'
+      ? true
+      : token.org !== 'Terra' &&
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+  )
+);
 
 export const filteredTokens = _.uniqBy(
   _.flatten(tokens).filter(
