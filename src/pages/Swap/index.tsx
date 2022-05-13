@@ -26,7 +26,7 @@ import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
 import { isMobile } from '@walletconnect/browser-utils';
-import { allowedSwapTokens as poolTokens } from 'config/pools';
+import { poolTokens } from 'config/pools';
 
 const cx = cn.bind(style);
 
