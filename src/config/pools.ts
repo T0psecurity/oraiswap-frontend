@@ -53,12 +53,14 @@ export const poolTokens = filteredTokens.filter((token) =>
   pairDenoms.includes(token.denom)
 );
 
-export const allowedSwapTokens = filteredTokens.filter(
-  (token) =>
-    pairDenoms.includes(token.denom) &&
-    token.name !== 'LUNA' &&
-    token.name !== 'UST'
-);
+export const allowedSwapTokens = process.env.REACT_APP_DEPRECATED
+  ? filteredTokens.filter(
+      (token) =>
+        pairDenoms.includes(token.denom) &&
+        token.name !== 'LUNA' &&
+        token.name !== 'UST'
+    )
+  : poolTokens;
 
 export const getPair = (
   denom1: string | string[],
