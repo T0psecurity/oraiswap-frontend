@@ -44,9 +44,10 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
 };
 
 export const pairs =
-  process.env.REACT_APP_DEPRECATED == 'true'
+  process.env.REACT_APP_DEPRECATED === 'true'
     ? pairsMap[network.id]
-    : pairsMap[network.id].filter(    // filter out LUNA and UST pool
+    : pairsMap[network.id].filter(
+        // filter out LUNA and UST pool
         (p) =>
           !_.isEqual(p.asset_denoms, [
             ORAI,

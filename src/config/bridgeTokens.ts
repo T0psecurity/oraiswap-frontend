@@ -34,7 +34,14 @@ import {
 
 export type TokenItemType = {
   name: string;
-  org?: string;
+  org?:
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -357,7 +364,16 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
   ]
 };
 
-export const tokens = tokensMap[network.id];
+// filter with deprecated
+export const tokens = tokensMap[network.id].map((tokens) =>
+  tokens.filter((token) =>
+    process.env.REACT_APP_DEPRECATED === 'true'
+      ? true
+      : token.org !== 'Terra' &&
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+  )
+);
 
 export const filteredTokens = _.uniqBy(
   _.flatten(tokens).filter(
