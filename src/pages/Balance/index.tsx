@@ -54,6 +54,7 @@ import {
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
+import { initEthereum } from 'polyfill';
 
 interface BalanceProps {}
 
@@ -316,6 +317,17 @@ const Balance: React.FC<BalanceProps> = () => {
   );
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
+
+  useEffect(() => {
+    const _initEthereum = async () => {
+      try {
+        await initEthereum();
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    _initEthereum();
+  }, []);
 
   const toggleTransfer = () => {
     setTokens([toTokens, fromTokens]);
@@ -750,10 +762,12 @@ const Balance: React.FC<BalanceProps> = () => {
                       className={styles.balanceBtn}
                       onClick={() => {
                         setFromAmount(
-                          from
+                          amounts[from?.denom]
                             ? [
-                                amounts[from.denom].amount /
-                                  10 ** from.decimals,
+                                parseAmountFrom(
+                                  amounts[from.denom].amount,
+                                  from.decimals
+                                ).toNumber(),
                                 amounts[from.denom].usd
                               ]
                             : [0, 0]
@@ -766,10 +780,12 @@ const Balance: React.FC<BalanceProps> = () => {
                       className={styles.balanceBtn}
                       onClick={() => {
                         setFromAmount(
-                          from
+                          amounts[from?.denom]
                             ? [
-                                amounts[from.denom].amount /
-                                  (2 * 10 ** from.decimals),
+                                parseAmountFrom(
+                                  amounts[from.denom].amount,
+                                  from.decimals
+                                ).toNumber() / 2,
                                 amounts[from.denom].usd / 2
                               ]
                             : [0, 0]

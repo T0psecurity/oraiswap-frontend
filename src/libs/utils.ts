@@ -109,7 +109,7 @@ export const getUsd = (
 ) => {
   if (!amount || !price) return 0;
 
-  return price.multiply(numberToFraction(amount)).divide(10 ** decimals)
+  return price.multiply(Fraction.fromNumber(amount)).divide(10 ** decimals)
     .asNumber;
 };
 
