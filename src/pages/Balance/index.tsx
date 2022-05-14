@@ -56,7 +56,7 @@ import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -220,7 +220,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
           </button>
         )}
 
-        {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+        {/* {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
           <button
             disabled={transferLoading}
             className={styles.tfBtn}
@@ -242,7 +242,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
               Transfer To <strong>OraiBridge</strong>
             </span>
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );
@@ -778,12 +778,12 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           amounts[from?.denom]
                             ? [
-                                parseAmountFrom(
-                                  amounts[from.denom].amount,
-                                  from.decimals
-                                ).toNumber(),
-                                amounts[from.denom].usd
-                              ]
+                              parseAmountFrom(
+                                amounts[from.denom].amount,
+                                from.decimals
+                              ).toNumber(),
+                              amounts[from.denom].usd
+                            ]
                             : [0, 0]
                         );
                       }}
@@ -796,12 +796,12 @@ const Balance: React.FC<BalanceProps> = () => {
                         setFromAmount(
                           amounts[from?.denom]
                             ? [
-                                parseAmountFrom(
-                                  amounts[from.denom].amount,
-                                  from.decimals
-                                ).toNumber() / 2,
-                                amounts[from.denom].usd / 2
-                              ]
+                              parseAmountFrom(
+                                amounts[from.denom].amount,
+                                from.decimals
+                              ).toNumber() / 2,
+                              amounts[from.denom].usd / 2
+                            ]
                             : [0, 0]
                         );
                       }}
