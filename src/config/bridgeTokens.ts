@@ -129,20 +129,20 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         maxGas: 20000 * 0.025,
         Icon: OSMO
       },
-      // {
-      //   name: 'BEP20 ORAI',
-      //   prefix: ORAI_BRIDGE_PREFIX,
-      //   org: 'OraiBridge',
-      //   chainId: ORAI_BRIDGE_CHAIN_ID,
-      //   coinType: 118,
-      //   denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
-      //   rpc: ORAI_BRIDGE_RPC,
-      //   lcd: ORAI_BRIDGE_LCD,
-      //   decimals: COSMOS_DECIMALS,
-      //   coingeckoId: 'oraichain-token',
-      //   cosmosBased: true,
-      //   Icon: ORAI
-      // },
+      {
+        name: 'BEP20 ORAI',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_CHAIN_ID,
+        coinType: 118,
+        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
+        rpc: ORAI_BRIDGE_RPC,
+        lcd: ORAI_BRIDGE_LCD,
+        decimals: COSMOS_DECIMALS,
+        coingeckoId: 'oraichain-token',
+        cosmosBased: true,
+        Icon: ORAI
+      },
       // {
       //   name: 'ERC20 ORAI',
       //   org: 'Ethereum',
