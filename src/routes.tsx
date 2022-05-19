@@ -17,7 +17,7 @@ export default () => {
         <Route path="/" element={<Balance />} />
         <Route path="/swap" element={<Swap />} />
         <Route path="/pools" element={<Pools />} />
-        <Route path="/airdrop" element={<AirDrop />} />
+        <Route path="/airdrop/:chain" element={<AirDrop />} />
         <Route path="/bridge" element={<Balance />} />
         <Route path="/pool/:poolUrl" element={<PoolDetail />} />
         <Route path="*" element={<NotFound />} />

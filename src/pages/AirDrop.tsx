@@ -1,13 +1,14 @@
 import Big from 'big.js';
 import React, { FunctionComponent } from 'react';
 import { useQuery } from 'react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'rest/request';
 
 const AirDrop: FunctionComponent = () => {
 
   const [searchParams] = useSearchParams();
   const addr = searchParams.get("addr");
+  const { chain } = useParams();
 
   const parseAmount = (amount: number) => {
     return new Big(amount).div(Math.pow(10, 6)).toNumber();
@@ -19,7 +20,7 @@ const AirDrop: FunctionComponent = () => {
   );
 
   async function fetchAirDrop() {
-    let url = `https://airdrop-api.oraidex.io/delegator/${addr}`;
+    let url = `https://airdrop-api.oraidex.io/${chain}/delegator/${addr}`;
     const res: any = (await axios.get(url)).data;
     return { delegatedAmount: parseAmount(res.delegated), undelegatedAmount: parseAmount(res.undelegated), available: parseAmount(res.available) };
   }
@@ -36,10 +37,10 @@ const AirDrop: FunctionComponent = () => {
     >
       {!!airdropAmount && (
         <div>
-          <div >{`Cosmos address: ${addr}`}</div>
-          <div>{`Delegated amount: ${airdropAmount.delegatedAmount} ATOM`}</div>
-          <div>{`Undelegated amount: ${airdropAmount.undelegatedAmount} ATOM`}</div>
-          <div>{`Current ATOM balance: ${airdropAmount.available} ATOM`}</div>
+          <div >{`${chain.toUpperCase()} address: ${addr}`}</div>
+          <div>{`Delegated amount: ${airdropAmount.delegatedAmount} ${chain.toUpperCase()}`}</div>
+          <div>{`Undelegated amount: ${airdropAmount.undelegatedAmount} ${chain.toUpperCase()}`}</div>
+          <div>{`Current ${chain.toUpperCase()} balance: ${airdropAmount.available} ${chain.toUpperCase()}`}</div>
         </div>
       )
       }
