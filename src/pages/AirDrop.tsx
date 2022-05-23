@@ -8,21 +8,29 @@ const AirDrop: FunctionComponent = () => {
 
   const [searchParams] = useSearchParams();
   const addr = searchParams.get("addr");
+  const oraiAddr = searchParams.get("oraiAddr");
   const { chain } = useParams();
 
   const parseAmount = (amount: number) => {
     return new Big(amount).div(Math.pow(10, 6)).toNumber();
   }
 
-  const { data: airdropAmount, isLoading: isLoading } = useQuery(
+  const { data: airdropAmount } = useQuery(
     ['airdrop'],
     () => fetchAirDrop()
   );
 
   async function fetchAirDrop() {
     let url = `https://airdrop-api.oraidex.io/${chain}/delegator/${addr}`;
-    const res: any = (await axios.get(url)).data;
-    return { delegatedAmount: parseAmount(res.delegated), undelegatedAmount: parseAmount(res.undelegated), available: parseAmount(res.available) };
+    let res: any = (await axios.get(url)).data;
+
+    let response = { delegatedAmount: parseAmount(res.delegated), undelegatedAmount: parseAmount(res.undelegated), available: parseAmount(res.available), lp: 0 };
+
+    url = `https://airdrop-api.oraidex.io/lp/${chain}/account/${oraiAddr}`;
+    res = (await axios.get(url)).data;
+
+    response.lp = res.lp;
+    return response;
   }
 
   return (
@@ -41,6 +49,7 @@ const AirDrop: FunctionComponent = () => {
           <div>{`Delegated amount: ${airdropAmount.delegatedAmount} ${chain.toUpperCase()}`}</div>
           <div>{`Undelegated amount: ${airdropAmount.undelegatedAmount} ${chain.toUpperCase()}`}</div>
           <div>{`Current ${chain.toUpperCase()} balance: ${airdropAmount.available} ${chain.toUpperCase()}`}</div>
+          {airdropAmount.lp !== 0 && (<div>{`Total liquidity from address ${oraiAddr}: ${airdropAmount.lp}`}</div>)}
         </div>
       )
       }
