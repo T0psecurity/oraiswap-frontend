@@ -29,11 +29,11 @@ const AirDrop: FunctionComponent = () => {
     try {
       url = `https://airdrop-api.oraidex.io/lp/${chain}/account/${oraiAddr}`;
       res = (await axios.get(url)).data;
+      response.lp = res.lp;
     } catch (error) {
       console.log("no airdrop lp for this chain's account");
     }
 
-    response.lp = res.lp;
     return response;
   }
 
