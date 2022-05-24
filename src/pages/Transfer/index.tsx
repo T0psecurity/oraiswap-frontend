@@ -18,7 +18,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
 import NumberFormat from 'react-number-format';
-import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
+import { cw20Tokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
@@ -27,7 +27,7 @@ import { Input } from 'antd';
 
 const cx = cn.bind(style);
 
-interface SwapProps {}
+interface SwapProps { }
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
@@ -70,7 +70,7 @@ const Transfer: React.FC<SwapProps> = () => {
     setAmount(finalAmount);
   };
 
-  const fromToken = filteredTokens.find(
+  const fromToken = cw20Tokens.find(
     (token) => token.denom === fromTokenDenom
   );
 
@@ -107,7 +107,7 @@ const Transfer: React.FC<SwapProps> = () => {
       ),
     { enabled: !!address && !!fromToken }
   );
-  
+
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
@@ -222,8 +222,7 @@ const Transfer: React.FC<SwapProps> = () => {
             </div>
             <div className={cx('input')}>
               <Input
-                placeholder="Recipient wallet address!"
-                className={cx('recipient')}
+                placeholder="Oraichain recipient address"
                 type="text"
                 value={recipientAddress}
                 onChange={({ target }) => {
@@ -231,9 +230,8 @@ const Transfer: React.FC<SwapProps> = () => {
                 }}
                 style={{
                   width: '100%',
-                  fontSize: 18,
+                  fontSize: 16,
                   textAlign: 'right',
-                  color: "#505665"
                 }}
               />
             </div>
@@ -260,10 +258,8 @@ const Transfer: React.FC<SwapProps> = () => {
               isOpen={isSelectFrom}
               open={() => setIsSelectFrom(true)}
               close={() => setIsSelectFrom(false)}
-              listToken={filteredTokens.filter(
-                (e) => e.name === 'ORAIX' || e.name === 'USDT' || e.name === 'AIRI'
-              )}
-              setToken={(denom) => setDenomTokens(denom)}
+              listToken={cw20Tokens}
+              setToken={(denom) => { setAmount(0); setDenomTokens(denom) }}
             />
           )}
         </div>

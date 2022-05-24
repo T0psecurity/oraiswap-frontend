@@ -35,13 +35,13 @@ import {
 export type TokenItemType = {
   name: string;
   org?:
-    | 'Terra'
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum';
+  | 'Terra'
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -53,16 +53,16 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna'
-    | 'oraix'
-    | 'tether';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna'
+  | 'oraix'
+  | 'tether';
   cosmosBased: Boolean;
 };
 
@@ -370,8 +370,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 
@@ -381,6 +381,16 @@ export const filteredTokens = _.uniqBy(
     (token) =>
       // !token.contractAddress &&
       token.denom && token.cosmosBased && token.coingeckoId
+  ),
+  (c) => c.denom
+);
+
+export const cw20Tokens = _.uniqBy(
+  _.flatten(filteredTokens).filter( // filter cosmos based tokens to collect tokens that have contract addresses
+    // TODO: contractAddress for ethereum use different method
+    (token) =>
+      // !token.contractAddress &&
+      token.contractAddress
   ),
   (c) => c.denom
 );

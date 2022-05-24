@@ -187,7 +187,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             )}
             {renderLink(
               '/transfer',
-              'Transfer',
+              'Transfer CW20 Tokens',
               setLink,
               <Transfer style={{ width: 30, height: 30 }} />
             )}
