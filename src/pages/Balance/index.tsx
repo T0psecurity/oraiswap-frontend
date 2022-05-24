@@ -477,7 +477,8 @@ const Balance: React.FC<BalanceProps> = () => {
     } else {
       setFrom(token);
       setFromAmount([0, 0]);
-      setTo(undefined);
+      const toToken = findDefaultToToken(toTokens, token);
+      setTo(toToken);
     }
   }, []);
 
@@ -736,6 +737,16 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const findDefaultToToken = (
+    toTokens: TokenItemType[],
+    from: TokenItemType
+  ) => {
+    return toTokens.find(
+      (t) =>
+        !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
+    );
+  };
+
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   return (
@@ -943,7 +954,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         <TokenItem
                           key={t.denom}
                           amountDetail={amounts[t.denom]}
-                          active={to?.name === t.name}
+                          active={to?.denom === t.denom}
                           token={t}
                           onClick={onClickTokenTo}
                           convertToken={convertToken}
