@@ -70,6 +70,7 @@ interface ConvertToNativeProps {
   transferIBC?: any;
   transferFromGravity?: any;
   name?: string;
+  onClickTransfer?: any;
 }
 interface TokenItemProps extends ConvertToNativeProps {
   active: Boolean;
@@ -83,7 +84,8 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
   amountDetail,
   convertToken,
   transferIBC,
-  transferFromGravity
+  transferFromGravity,
+  onClickTransfer
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
   const [convertLoading, setConvertLoading] = useState(false);
@@ -163,85 +165,106 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
           alignItems: 'center'
         }}
       >
-        {token.chainId === ORAI_BRIDGE_CHAIN_ID && (
-          <>
-            <button
-              className={styles.tfBtn}
-              disabled={transferLoading}
-              onClick={async () => {
-                try {
-                  setTransferLoading(true);
-                  await transferFromGravity(token, convertAmount);
-                } finally {
-                  setTransferLoading(false);
-                }
-              }}
-            >
-              {transferLoading && <Loader width={20} height={20} />}
-              <span>
-                Transfer To{' '}
-                <strong>
-                  {token.name.match(/BEP20/)
-                    ? 'Binance Smart Chain'
-                    : 'Ethereum'}
-                </strong>
-              </span>
-            </button>
-            <small
-              style={{
-                backgroundColor: '#C69A24',
-                color: '#95452d',
-                padding: '0px 3px',
-                borderRadius: 3
-              }}
-            >
-              Congested
-            </small>
-          </>
-        )}
-
-        {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+        {!!onClickTransfer ? (
           <button
             className={styles.tfBtn}
             disabled={convertLoading}
             onClick={async () => {
               try {
                 setConvertLoading(true);
-                await convertToken(convertAmount, token);
+                await onClickTransfer(convertAmount);
               } finally {
                 setConvertLoading(false);
               }
             }}
           >
             {convertLoading && <Loader width={20} height={20} />}
-            <span>
-              Convert To <strong style={{ marginLeft: 5 }}>{name}</strong>
-            </span>
+            <span>Transfer</span>
           </button>
-        )}
+        ) : (
+          <>
+            {token.chainId === ORAI_BRIDGE_CHAIN_ID && (
+              <>
+                <button
+                  className={styles.tfBtn}
+                  disabled={transferLoading}
+                  onClick={async () => {
+                    try {
+                      setTransferLoading(true);
+                      await transferFromGravity(token, convertAmount);
+                    } finally {
+                      setTransferLoading(false);
+                    }
+                  }}
+                >
+                  {transferLoading && <Loader width={20} height={20} />}
+                  <span>
+                    Transfer To{' '}
+                    <strong>
+                      {token.name.match(/BEP20/)
+                        ? 'Binance Smart Chain'
+                        : 'Ethereum'}
+                    </strong>
+                  </span>
+                </button>
+                <small
+                  style={{
+                    backgroundColor: '#C69A24',
+                    color: '#95452d',
+                    padding: '0px 3px',
+                    borderRadius: 3
+                  }}
+                >
+                  Congested
+                </small>
+              </>
+            )}
 
-        {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
-          <button
-            disabled={transferLoading}
-            className={styles.tfBtn}
-            onClick={async () => {
-              try {
-                setTransferLoading(true);
-                const to = filteredTokens.find(
-                  (t) =>
-                    t.chainId === ORAI_BRIDGE_CHAIN_ID && t.name === token.name
-                );
-                await transferIBC(token, to, convertAmount);
-              } finally {
-                setTransferLoading(false);
-              }
-            }}
-          >
-            {transferLoading && <Loader width={20} height={20} />}
-            <span>
-              Transfer To <strong>OraiBridge</strong>
-            </span>
-          </button>
+            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+              <button
+                className={styles.tfBtn}
+                disabled={convertLoading}
+                onClick={async () => {
+                  try {
+                    setConvertLoading(true);
+                    await convertToken(convertAmount, token);
+                  } finally {
+                    setConvertLoading(false);
+                  }
+                }}
+              >
+                {convertLoading && <Loader width={20} height={20} />}
+                <span>
+                  Convert To <strong style={{ marginLeft: 5 }}>{name}</strong>
+                </span>
+              </button>
+            )}
+
+            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+              <button
+                disabled={transferLoading}
+                className={styles.tfBtn}
+                onClick={async () => {
+                  try {
+                    setTransferLoading(true);
+                    const to = filteredTokens.find(
+                      (t) =>
+                        t.chainId === ORAI_BRIDGE_CHAIN_ID &&
+                        t.name === token.name
+                    );
+                    await transferIBC(token, to, convertAmount);
+                  } finally {
+                    setTransferLoading(false);
+                  }
+                }}
+              >
+                {transferLoading && <Loader width={20} height={20} />}
+                <span>
+                  Transfer To <strong>OraiBridge</strong>
+                </span>
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -256,7 +279,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
   onClick,
   convertToken,
   transferFromGravity,
-  transferIBC
+  transferIBC,
+  onClickTransfer
 }) => {
   // get token name
   const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
@@ -297,6 +321,15 @@ const TokenItem: React.FC<TokenItemProps> = ({
         </div>
       </div>
       <div>
+        {active && onClickTransfer && (
+          <ConvertToNative
+            name={evmName}
+            token={token}
+            amountDetail={amountDetail}
+            convertToken={convertToken}
+            onClickTransfer={onClickTransfer}
+          />
+        )}
         {active && evmName && token.cosmosBased && (
           <ConvertToNative
             name={evmName}
@@ -464,23 +497,26 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   }, [metamaskAddress, prices]);
 
-  const onClickToken = useCallback((type: string, token: TokenItemType) => {
-    if (token.denom === ERC20_ORAI) {
-      displayToast(TToastType.TX_INFO, {
-        message: `Token ${token.name} on ${token.org} is currently not supported`
-      });
-      return;
-    }
+  const onClickToken = useCallback(
+    (type: string, token: TokenItemType) => {
+      if (token.denom === ERC20_ORAI) {
+        displayToast(TToastType.TX_INFO, {
+          message: `Token ${token.name} on ${token.org} is currently not supported`
+        });
+        return;
+      }
 
-    if (type === 'to') {
-      setTo(token);
-    } else {
-      setFrom(token);
-      setFromAmount([0, 0]);
-      const toToken = findDefaultToToken(toTokens, token);
-      setTo(toToken);
-    }
-  }, []);
+      if (type === 'to') {
+        setTo(token);
+      } else {
+        setFrom(token);
+        setFromAmount([0, 0]);
+        const toToken = findDefaultToToken(toTokens, token);
+        setTo(toToken);
+      }
+    },
+    [toTokens]
+  );
 
   const onClickTokenFrom = useCallback(
     (token: TokenItemType) => {
@@ -623,7 +659,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const transferEvmToIBC = async () => {
+  const transferEvmToIBC = async (fromAmount: number) => {
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Please login both metamask and keplr!'
@@ -663,7 +699,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const onClickTransfer = async () => {
+  const onClickTransfer = async (fromAmount: number) => {
     // disable send amount < 0
 
     if (!from || !to) {
@@ -682,7 +718,7 @@ const Balance: React.FC<BalanceProps> = () => {
     if (from.cosmosBased) {
       await transferIBC(from, to, fromAmount);
     } else {
-      await transferEvmToIBC();
+      await transferEvmToIBC(fromAmount);
     }
     setIBCLoading(false);
   };
@@ -782,43 +818,6 @@ const Balance: React.FC<BalanceProps> = () => {
                       prefix="Balance: "
                       decimalScale={Math.min(6, from?.decimals || 0)}
                     />
-
-                    <button
-                      className={styles.balanceBtn}
-                      onClick={() => {
-                        setFromAmount(
-                          amounts[from?.denom]
-                            ? [
-                                parseAmountFrom(
-                                  amounts[from.denom].amount,
-                                  from.decimals
-                                ).toNumber(),
-                                amounts[from.denom].usd
-                              ]
-                            : [0, 0]
-                        );
-                      }}
-                    >
-                      MAX
-                    </button>
-                    <button
-                      className={styles.balanceBtn}
-                      onClick={() => {
-                        setFromAmount(
-                          amounts[from?.denom]
-                            ? [
-                                parseAmountFrom(
-                                  amounts[from.denom].amount,
-                                  from.decimals
-                                ).toNumber() / 2,
-                                amounts[from.denom].usd / 2
-                              ]
-                            : [0, 0]
-                        );
-                      }}
-                    >
-                      HALF
-                    </button>
                   </div>
                   <TokenBalance
                     balance={fromUsd}
@@ -838,24 +837,6 @@ const Balance: React.FC<BalanceProps> = () => {
                         </div>
                       </div>
                     </div>
-
-                    <NumberFormat
-                      thousandSeparator
-                      decimalScale={Math.min(6, from.decimals)}
-                      customInput={Input}
-                      value={fromAmount}
-                      onValueChange={({ floatValue }) => {
-                        setFromAmount([
-                          floatValue ?? 0,
-                          getUsd(
-                            (floatValue ?? 0) * 10 ** from.decimals,
-                            prices[from.coingeckoId].price,
-                            from.decimals
-                          )
-                        ]);
-                      }}
-                      className={styles.amount}
-                    />
                   </div>
                 ) : null}
               </div>
@@ -875,6 +856,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         token={t}
                         transferFromGravity={transferFromGravity}
                         onClick={onClickTokenFrom}
+                        onClickTransfer={!!to ? onClickTransfer : undefined}
                       />
                     );
                   })}
@@ -895,14 +877,6 @@ const Balance: React.FC<BalanceProps> = () => {
                   cursor: 'pointer'
                 }}
               />
-            </button>
-            <button
-              className={styles.tfBtn}
-              onClick={onClickTransfer}
-              disabled={ibcLoading}
-            >
-              {ibcLoading && <Loader width={40} height={40} />}
-              <span className={styles.tfTxt}>Transfer</span>
             </button>
           </div>
           {/* End Transfer button */}
