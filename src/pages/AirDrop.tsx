@@ -26,8 +26,12 @@ const AirDrop: FunctionComponent = () => {
 
     let response = { delegatedAmount: parseAmount(res.delegated), undelegatedAmount: parseAmount(res.undelegated), available: parseAmount(res.available), lp: 0 };
 
-    url = `https://airdrop-api.oraidex.io/lp/${chain}/account/${oraiAddr}`;
-    res = (await axios.get(url)).data;
+    try {
+      url = `https://airdrop-api.oraidex.io/lp/${chain}/account/${oraiAddr}`;
+      res = (await axios.get(url)).data;
+    } catch (error) {
+      console.log("no airdrop lp for this chain's account");
+    }
 
     response.lp = res.lp;
     return response;
