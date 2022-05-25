@@ -12,7 +12,8 @@ const AirDrop: FunctionComponent = () => {
   const { chain } = useParams();
 
   const parseAmount = (amount: number) => {
-    return new Big(amount).div(Math.pow(10, 6)).toNumber();
+    if (typeof amount === 'number' && isFinite(amount) && !isNaN(amount)) return new Big(amount).div(Math.pow(10, 6)).toNumber();
+    return 0;
   }
 
   const { data: airdropAmount } = useQuery(
