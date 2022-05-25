@@ -69,7 +69,9 @@
     ]
   },
   "resolutions": {
-    "react-error-overlay": "6.0.9"
+    "react-error-overlay": "6.0.9",
+    "@types/react": "17.0.14",
+    "@types/react-dom": "17.0.14"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.4",
@@ -82,8 +84,8 @@
     "@types/lodash": "^4.14.182",
     "@types/node": "^14.11.10",
     "@types/ramda": "^0.27.29",
-    "@types/react": "^17.0.11",
-    "@types/react-dom": "^17.0.7",
+    "@types/react": "17.0.14",
+    "@types/react-dom": "17.0.14",
     "@types/react-modal": "^3.10.6",
     "@types/react-router-dom": "^5.1.7",
     "@types/styled-components": "^5.1.9",
