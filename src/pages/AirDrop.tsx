@@ -18,7 +18,7 @@ const AirDrop: FunctionComponent = () => {
 
   const { data: airdropAmount } = useQuery(
     ['airdrop'],
-    () => fetchAirDrop()
+    () => fetchAirDrop(), { retry: 1, retryDelay: 3000 }
   );
 
   const timeout = 20000;
