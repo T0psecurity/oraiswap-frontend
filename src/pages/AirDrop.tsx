@@ -20,15 +20,17 @@ const AirDrop: FunctionComponent = () => {
     () => fetchAirDrop()
   );
 
+  const timeout = 20000;
+
   async function fetchAirDrop() {
     let url = `https://airdrop-api.oraidex.io/${chain}/delegator/${addr}`;
-    let res: any = (await axios.get(url)).data;
+    let res: any = (await axios.get(url, { timeout })).data;
 
     let response = { delegatedAmount: parseAmount(res.delegated), undelegatedAmount: parseAmount(res.undelegated), available: parseAmount(res.available), lp: 0 };
 
     try {
       url = `https://airdrop-api.oraidex.io/lp/${chain}/account/${oraiAddr}`;
-      res = (await axios.get(url)).data;
+      res = (await axios.get(url, { timeout })).data;
       response.lp = res.lp;
     } catch (error) {
       console.log("no airdrop lp for this chain's account");
