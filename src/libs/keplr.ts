@@ -1,11 +1,11 @@
 import { network } from 'config/networks';
 import { embedChainInfos } from 'config/chainInfos';
-import WalletConnect from '@walletconnect/client';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
 import { Key } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const hash160 = (buffer: Uint8Array) => {
   var t = createHash('sha256').update(buffer).digest();
@@ -13,8 +13,11 @@ const hash160 = (buffer: Uint8Array) => {
 };
 
 export default class Keplr {
-  private walletConnector: WalletConnect | undefined;
   constructor() {}
+
+  disconnect() {
+    // clear data?
+  }
 
   async suggestChain(chainId: string) {
     if (!window.keplr) return;
@@ -23,7 +26,7 @@ export default class Keplr {
     );
 
     // if there is chainInfo try to suggest, otherwise enable it
-    if (chainInfo) {
+    if (!isMobile() && chainInfo) {
       await window.keplr.experimentalSuggestChain(chainInfo);
     }
     await window.keplr.enable(chainId);
