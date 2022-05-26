@@ -590,8 +590,9 @@ const Balance: React.FC<BalanceProps> = () => {
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
-      await window.Keplr.suggestChain(fromToken.chainId);
       await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
@@ -828,6 +829,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         active={from?.denom === t.denom}
                         token={t}
                         transferFromGravity={transferFromGravity}
+                        convertToken={convertToken}
                         onClick={onClickTokenFrom}
                         onClickTransfer={!!to ? onClickTransfer : undefined}
                       />
