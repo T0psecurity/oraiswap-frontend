@@ -25,28 +25,11 @@ import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
-import { isMobile } from '@walletconnect/browser-utils';
 import { poolTokens } from 'config/pools';
 
 const cx = cn.bind(style);
 
-interface SwapProps {}
-
-const suggestToken = async (token: TokenItemType) => {
-  if (token.contractAddress) {
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      return displayToast(TToastType.KEPLR_FAILED, {
-        message: 'You need to install Keplr to continue'
-      });
-    }
-
-    if (!isMobile())
-      await keplr.suggestToken(token.chainId, token.contractAddress);
-  }
-};
-
-const Swap: React.FC<SwapProps> = () => {
+const Swap: React.FC = () => {
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
@@ -104,8 +87,8 @@ const Swap: React.FC<SwapProps> = () => {
   // suggest tokens
   useEffect(() => {
     if (fromToken && toToken) {
-      suggestToken(fromToken);
-      suggestToken(toToken);
+      window.Keplr.suggestToken(fromToken);
+      window.Keplr.suggestToken(toToken);
     }
   }, [fromToken, toToken]);
 

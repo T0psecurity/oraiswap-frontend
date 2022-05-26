@@ -9,7 +9,7 @@ import {
   fetchBalance,
   fetchTokenInfo,
   generateContractMessages,
-  TransferQuery,
+  TransferQuery
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
@@ -22,28 +22,11 @@ import { cw20Tokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
-import { isMobile } from '@walletconnect/browser-utils';
 import { Input } from 'antd';
 
 const cx = cn.bind(style);
 
-interface SwapProps { }
-
-const suggestToken = async (token: TokenItemType) => {
-  if (token.contractAddress) {
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      return displayToast(TToastType.KEPLR_FAILED, {
-        message: 'You need to install Keplr to continue',
-      });
-    }
-
-    if (!isMobile())
-      await keplr.suggestToken(token.chainId, token.contractAddress);
-  }
-};
-
-const Transfer: React.FC<SwapProps> = () => {
+const Transfer: React.FC = () => {
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [fromTokenDenom, setDenomTokens] = useState<string>('airi');
@@ -70,16 +53,13 @@ const Transfer: React.FC<SwapProps> = () => {
     setAmount(finalAmount);
   };
 
-  const fromToken = cw20Tokens.find(
-    (token) => token.denom === fromTokenDenom
-  );
-
+  const fromToken = cw20Tokens.find((token) => token.denom === fromTokenDenom);
 
   const {
     data: fromTokenInfoData,
     error: fromTokenInfoError,
     isError: isFromTokenInfoError,
-    isLoading: isFromTokenInfoLoading,
+    isLoading: isFromTokenInfoLoading
   } = useQuery(['from-token-info', fromToken], () =>
     fetchTokenInfo(fromToken!)
   );
@@ -87,7 +67,7 @@ const Transfer: React.FC<SwapProps> = () => {
   // suggest tokens
   useEffect(() => {
     if (fromToken) {
-      suggestToken(fromToken);
+      window.Keplr.suggestToken(fromToken);
     }
   }, [fromToken]);
 
@@ -95,7 +75,7 @@ const Transfer: React.FC<SwapProps> = () => {
     data: fromTokenBalance = 0,
     error: fromTokenBalanceError,
     isError: isFromTokenBalanceError,
-    isLoading: isFromTokenBalanceLoading,
+    isLoading: isFromTokenBalanceLoading
   } = useQuery(
     ['from-token-balance', fromToken, txHash],
     () =>
@@ -111,7 +91,7 @@ const Transfer: React.FC<SwapProps> = () => {
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!',
+        message: 'From amount should be higher than 0!'
       });
 
     setTransferLoading(true);
@@ -122,7 +102,7 @@ const Transfer: React.FC<SwapProps> = () => {
         sender: address,
         amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
         token: fromTokenInfoData?.contractAddress,
-        recipientAddress,
+        recipientAddress
       } as TransferQuery);
 
       const msg = msgs[0];
@@ -132,12 +112,12 @@ const Transfer: React.FC<SwapProps> = () => {
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds } as HandleOptions,
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setTxHash(result.transactionHash);
         setTransferLoading(false);
@@ -149,7 +129,7 @@ const Transfer: React.FC<SwapProps> = () => {
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     } finally {
       setTransferLoading(false);
@@ -165,7 +145,7 @@ const Transfer: React.FC<SwapProps> = () => {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
         <div className={cx('container')}>
@@ -177,7 +157,7 @@ const Transfer: React.FC<SwapProps> = () => {
               <TokenBalance
                 balance={{
                   amount: fromTokenBalance,
-                  denom: fromTokenInfoData?.symbol ?? '',
+                  denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -231,7 +211,7 @@ const Transfer: React.FC<SwapProps> = () => {
                 style={{
                   width: '100%',
                   fontSize: 16,
-                  textAlign: 'right',
+                  textAlign: 'right'
                 }}
               />
             </div>
@@ -259,7 +239,10 @@ const Transfer: React.FC<SwapProps> = () => {
               open={() => setIsSelectFrom(true)}
               close={() => setIsSelectFrom(false)}
               listToken={cw20Tokens}
-              setToken={(denom) => { setAmount(0); setDenomTokens(denom) }}
+              setToken={(denom) => {
+                setAmount(0);
+                setDenomTokens(denom);
+              }}
             />
           )}
         </div>
