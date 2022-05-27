@@ -56,7 +56,7 @@ import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -600,8 +600,9 @@ const Balance: React.FC<BalanceProps> = () => {
       if (!fromAddress || !toAddress) {
         return;
       }
+
       const amount = coin(
-        Math.round(transferAmount * 10 ** fromToken.decimals),
+        Math.round(transferAmount * 10 ** fromToken.decimals).toString(),
         fromToken.denom
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
