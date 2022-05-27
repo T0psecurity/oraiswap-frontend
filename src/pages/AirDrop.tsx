@@ -50,7 +50,7 @@ const AirDrop: FunctionComponent = () => {
         fontSize: 20
       }}
     >
-      {!!airdropAmount && (
+      {!!airdropAmount && chain === 'cosmos' && (
         <div>
           <div >{`${chain.toUpperCase()} address: ${addr}`}</div>
           <div>{`Delegated amount: ${airdropAmount.delegatedAmount} ${chain.toUpperCase()}`}</div>
@@ -60,6 +60,13 @@ const AirDrop: FunctionComponent = () => {
         </div>
       )
       }
+      {chain !== 'cosmos' && (
+        <div>
+          <div >1. Due to our database configuration that doesn't contain enough holders' information, previous snapshot results will not be used for ORAIX Fairdrop Program.
+          </div>
+          <div>{`2. New snapshots for ${chain.toUpperCase()} will be taken randomly and announced before the ORAIX Listing Event.`}</div>
+        </div>
+      )}
     </div>
   );
 };
