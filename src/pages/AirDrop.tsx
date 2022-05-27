@@ -104,7 +104,7 @@ const AirDrop: FunctionComponent = () => {
         fontSize: 20
       }}
     >
-      <CustomInput chainName={chain} address={otherNetworkAddr} onChange={handleotherNetworkAddrChange} />
+      <CustomInput chainName={chainUpper} address={otherNetworkAddr} onChange={handleotherNetworkAddrChange} />
       <CustomInput chainName={"ORAI"} address={oraiAddress} onChange={handleOraiAddrChange} />
 
       {!!airdropAmount && (
