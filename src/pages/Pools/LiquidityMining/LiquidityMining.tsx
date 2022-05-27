@@ -192,7 +192,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           </div>
         </>
       </div>
-      <div className={cx('row')} style={{flexWrap: "wrap"}}>
+      <div className={cx('row')} style={{ flexWrap: "wrap" }}>
         <>
           <div className={cx('mining')}>
             <div className={cx('container', 'container_mining')}>
@@ -210,7 +210,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       amount: rewardInfoFirst
                         ? rewardInfoFirst.bond_amount ?? 0
                         : 0,
-                      denom: `${lpTokenInfoData?.symbol}`
+                      denom: `${lpTokenInfoData?.symbol.charAt(0) === 'u' ? lpTokenInfoData?.symbol.substring(1) : lpTokenInfoData?.symbol}` // symbol should not be minimal
                     }}
                     className={cx('amount')}
                     decimalScale={6}
@@ -221,7 +221,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={
                           (rewardInfoFirst
                             ? rewardInfoFirst.bond_amount *
-                              pairAmountInfoData.usdAmount
+                            pairAmountInfoData.usdAmount
                             : 0) / +lpTokenInfoData.total_supply
                         }
                         className={cx('amount-usd')}

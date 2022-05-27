@@ -29,6 +29,10 @@ const CustomInput: React.FC<{ chainName: string, address: string, onChange: any 
   )
 }
 
+const chainDenomMap = {
+  cosmos: 'atom',
+}
+
 const AirDrop: FunctionComponent = () => {
 
   const { chain } = useParams();
@@ -87,7 +91,8 @@ const AirDrop: FunctionComponent = () => {
     try {
       let url = `https://airdrop-api.oraidex.io/lp/${chain}/account/${oraiAddress}`;
       let res = (await axios.get(url, { timeout })).data;
-      return res;
+      const denom = Object.keys(res).find(key => key === chainDenomMap[`${chain}`]);
+      return { denom, ...res };
     } catch (error) {
       console.log("no airdrop lp for this chain's account");
       return null;
@@ -104,8 +109,8 @@ const AirDrop: FunctionComponent = () => {
         fontSize: 20
       }}
     >
-      <CustomInput chainName={chainUpper} address={otherNetworkAddr} onChange={handleotherNetworkAddrChange} />
-      <CustomInput chainName={"ORAI"} address={oraiAddress} onChange={handleOraiAddrChange} />
+      {chain !== 'cosmos' && (<CustomInput chainName={chainUpper} address={otherNetworkAddr} onChange={handleotherNetworkAddrChange} />)}
+      {chain === 'cosmos' && <CustomInput chainName={"ORAI"} address={oraiAddress} onChange={handleOraiAddrChange} />}
 
       {!!airdropAmount && (
         <div style={{ marginTop: 10 }}>
@@ -116,7 +121,13 @@ const AirDrop: FunctionComponent = () => {
         </div>
       )
       }
-      {!!airdropLp && (airdropLp.lp !== 0 && (<div>{`Total liquidity from address ${oraiAddress}: ${airdropLp.lp}`}</div>))}
+      {!!airdropLp && !isNaN(airdropLp.lp) && (
+        <div>
+          <div>{`Total liquidity from address ${oraiAddress}: ${airdropLp.lp} LP`}</div>
+          <div>{`Total ${airdropLp.denom.toUpperCase()} from address ${oraiAddress}: ${airdropLp[airdropLp.denom]} ${airdropLp.denom.toUpperCase()}`}</div>
+        </div>
+
+      )}
     </div>
   );
 };

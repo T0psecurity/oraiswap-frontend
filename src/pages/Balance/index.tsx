@@ -36,7 +36,8 @@ import Content from 'layouts/Content';
 import {
   getUsd,
   parseAmountFromWithDecimal as parseAmountFrom,
-  parseAmountToWithDecimal as parseAmountTo
+  parseAmountToWithDecimal as parseAmountTo,
+  parseAmountToWithDecimal
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
@@ -76,6 +77,7 @@ interface TokenItemProps extends ConvertToNativeProps {
   active: Boolean;
   className?: string;
   onClick?: Function;
+  onBlur?: Function;
 }
 
 const ConvertToNative: FC<ConvertToNativeProps> = ({
@@ -240,7 +242,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
               </button>
             )}
 
-            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && name && (
               <button
                 disabled={transferLoading}
                 className={styles.tfBtn}
@@ -284,6 +286,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
 }) => {
   // get token name
   const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
+
   return (
     <div
       className={classNames(
@@ -292,6 +295,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
         className
       )}
       onClick={() => onClick?.(token)}
+
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
@@ -340,6 +344,14 @@ const TokenItem: React.FC<TokenItemProps> = ({
             transferIBC={transferIBC}
           />
         )}
+        {/* // TODO: {active && token.contractAddress && token.cosmosBased && (
+          <ConvertToNative
+            name={evmName}
+            token={token}
+            amountDetail={amountDetail}
+            convertToken={convertToken}
+          />
+        )} */}
       </div>
     </div>
   );
@@ -602,7 +614,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       const amount = coin(
-        Math.round(transferAmount * 10 ** fromToken.decimals).toString(),
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
         fromToken.denom
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
@@ -803,7 +815,7 @@ const Balance: React.FC<BalanceProps> = () => {
           <div className={styles.border_gradient}>
             <div className={styles.balance_block}>
               <div className={styles.tableHeader}>
-                <span className={styles.label}>From</span>
+                <span className={styles.label}>Other chains</span>
                 <div className={styles.fromBalanceDes}>
                   <div className={styles.balanceFromGroup}>
                     <TokenBalance
@@ -869,7 +881,7 @@ const Balance: React.FC<BalanceProps> = () => {
           {/* Transfer button */}
 
           <div className={styles.transferBtn}>
-            <button onClick={toggleTransfer}>
+            {/* <button onClick={toggleTransfer}>
               <ToggleTransfer
                 style={{
                   width: 44,
@@ -878,14 +890,14 @@ const Balance: React.FC<BalanceProps> = () => {
                   cursor: 'pointer'
                 }}
               />
-            </button>
+            </button> */}
           </div>
           {/* End Transfer button */}
           {/* To Tab */}
           <div className={styles.border_gradient}>
             <div className={styles.balance_block}>
               <div className={styles.tableHeader}>
-                <span className={styles.label}>To</span>
+                <span className={styles.label}>Oraichain</span>
 
                 <TokenBalance
                   balance={{
