@@ -123,8 +123,8 @@ const AirDrop: FunctionComponent = () => {
       }
       {!!airdropLp && !isNaN(airdropLp.lp) && (
         <div>
-          <div>{`Total liquidity from address ${oraiAddress}: ${airdropLp.lp} LP`}</div>
-          <div>{`Total ${airdropLp.denom.toUpperCase()} from address ${oraiAddress}: ${airdropLp[airdropLp.denom]} ${airdropLp.denom.toUpperCase()}`}</div>
+          <div>{`Total liquidity in ${airdropLp.denom.toUpperCase()}-ORAI: ${airdropLp.lp} LP`}</div>
+          <div>{`Total IBC ${airdropLp.denom.toUpperCase()} on Oraichain: ${airdropLp[airdropLp.denom]} ${airdropLp.denom.toUpperCase()}`}</div>
         </div>
 
       )}
