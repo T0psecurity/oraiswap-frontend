@@ -19,7 +19,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement,
+  ReactElement
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
@@ -54,9 +54,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balance,
+    data: balance
   } = useQuery(['balance', address], () => fetchNativeTokenBalance(address), {
-    enabled: address?.length > 0,
+    enabled: address?.length > 0
   });
 
   useEffect(() => {
@@ -132,7 +132,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: balance,
                           decimals: 6,
-                          denom: ORAI,
+                          denom: ORAI
                         }}
                         className={styles.token_balance}
                         decimalScale={4}
@@ -164,7 +164,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: metamaskBalance,
                           decimals: 18,
-                          denom: ORAI,
+                          denom: ORAI
                         }}
                         className={styles.token_balance}
                         decimalScale={4}
@@ -210,7 +210,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_themes}>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.dark,
+                [styles.active]: theme === Themes.dark
               })}
               onClick={() => {
                 setTheme(Themes.dark);
@@ -221,7 +221,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.light,
+                [styles.active]: theme === Themes.light
               })}
               onClick={() => {
                 setTheme(Themes.light);

@@ -41,10 +41,7 @@ import {
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
-import Long from 'long';
-import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
-import Big from 'big.js';
 import {
   ERC20_ORAI,
   ORAI,
@@ -605,8 +602,9 @@ const Balance: React.FC<BalanceProps> = () => {
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
-      await window.Keplr.suggestChain(fromToken.chainId);
       await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
@@ -619,52 +617,28 @@ const Balance: React.FC<BalanceProps> = () => {
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
-      // using app protocol to sign transaction
-      if (isMobile() && fromToken.chainId === network.chainId) {
-        // check if is blacklisted like orai, using orai wallet
-        const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
-          sourceChannel: ibcInfo.channel,
-          sourcePort: ibcInfo.source,
-          sender: fromAddress,
-          receiver: toAddress,
-          token: amount,
-          timeoutTimestamp: Long.fromNumber(
-            (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
-          )
-        });
+      const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner
+      );
 
-        const value = Buffer.from(
-          ibc.applications.transfer.v1.MsgTransfer.encode(msgSend).finish()
-        ).toString('base64');
+      const result = await client.sendIbcTokens(
+        fromAddress,
+        toAddress,
+        amount,
+        ibcInfo.source,
+        ibcInfo.channel,
+        undefined,
+        Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        {
+          gas: '200000',
+          amount: []
+        }
+      );
 
-        // open app protocal
-        const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&sender=${fromAddress}&value=${value}`;
-        console.log(url);
-        window.location.href = url;
-      } else {
-        const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
-        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-        const client = await SigningStargateClient.connectWithSigner(
-          fromToken.rpc,
-          offlineSigner
-        );
-
-        const result = await client.sendIbcTokens(
-          fromAddress,
-          toAddress,
-          amount,
-          ibcInfo.source,
-          ibcInfo.channel,
-          undefined,
-          Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-          {
-            gas: '200000',
-            amount: []
-          }
-        );
-
-        processTxResult(fromToken, result);
-      }
+      processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
@@ -868,6 +842,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         active={from?.denom === t.denom}
                         token={t}
                         transferFromGravity={transferFromGravity}
+                        convertToken={convertToken}
                         onClick={onClickTokenFrom}
                         onClickTransfer={!!to ? onClickTransfer : undefined}
                       />
