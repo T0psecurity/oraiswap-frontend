@@ -5,12 +5,12 @@ import { parseBalanceNumber } from 'libs/utils';
 
 type Props = {
   balance:
-    | number
-    | {
-        amount: string | number;
-        decimals?: number;
-        denom: string;
-      };
+  | number
+  | {
+    amount: string | number;
+    decimals?: number;
+    denom: string;
+  };
 
   className?: string;
 } & NumberFormatProps;
@@ -20,10 +20,10 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
     balance:
       | number
       | {
-          amount: string | number;
-          decimals?: number;
-          denom: string;
-        }
+        amount: string | number;
+        decimals?: number;
+        denom: string;
+      }
   ) => {
     if (typeof balance === 'number') return parseBalanceNumber(balance);
     let bigBalance = balance.amount;
