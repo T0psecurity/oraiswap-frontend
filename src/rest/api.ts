@@ -18,6 +18,7 @@ export enum Type {
   'WITHDRAW_LIQUIDITY_MINING' = 'Withdraw Liquidity Mining Rewards',
   'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens',
   'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens',
+  'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens',
 }
 
 const oraiInfo = { native_token: { denom: ORAI } };
@@ -525,7 +526,7 @@ async function generateContractMessages(
       input = {
         transfer: {
           recipient: transferQuery.recipientAddress,
-          amount: transferQuery.amount
+          amount: transferQuery.amount,
         },
       };
       contractAddr = transferQuery.token;
@@ -635,12 +636,20 @@ async function generateMiningMsgs(
 export type Convert = {
   type: Type.CONVERT_TOKEN;
   sender: string;
-  fromToken: TokenItemType;
-  fromAmount: string;
+  inputToken: TokenItemType;
+  inputAmount: string;
 };
 
-async function generateConvertMsgs(msg: Convert) {
-  const { type, sender, fromToken, fromAmount } = msg;
+export type ConvertReverse = {
+  type: Type.CONVERT_TOKEN_REVERSE;
+  sender: string;
+  inputToken: TokenItemType;
+  inputAmount: string;
+  outputToken: TokenItemType;
+};
+
+async function generateConvertMsgs(msg: Convert | ConvertReverse) {
+  const { type, sender, inputToken, inputAmount } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.converter;
@@ -648,7 +657,7 @@ async function generateConvertMsgs(msg: Convert) {
   switch (type) {
     case Type.CONVERT_TOKEN: {
       // currently only support cw20 token pool
-      let { info: assetInfo, fund } = parseTokenInfo(fromToken, fromAmount);
+      let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
       // native case
       if (assetInfo.native_token) {
         input = {
@@ -660,10 +669,42 @@ async function generateConvertMsgs(msg: Convert) {
         input = {
           send: {
             contract: network.converter,
-            amount: fromAmount,
+            amount: inputAmount,
             msg: btoa(
               JSON.stringify({
                 convert: {},
+              })
+            ),
+          },
+        };
+        contractAddr = assetInfo.token.contract_addr;
+      }
+      break;
+    }
+    case Type.CONVERT_TOKEN_REVERSE: {
+      const { outputToken } = msg;
+      // currently only support cw20 token pool
+      let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
+      let { info: outputAssetInfo } = parseTokenInfo(outputToken, '0');
+      // native case
+      if (assetInfo.native_token) {
+        input = {
+          convert_reverse: {
+            from_asset: outputAssetInfo,
+          },
+        };
+        sent_funds = handleSentFunds(fund as Fund);
+      } else {
+        // cw20 case
+        input = {
+          send: {
+            contract: network.converter,
+            amount: inputAmount,
+            msg: btoa(
+              JSON.stringify({
+                convert_reverse: {
+                  from: outputAssetInfo,
+                },
               })
             ),
           },

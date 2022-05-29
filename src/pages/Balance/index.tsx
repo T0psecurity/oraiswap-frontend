@@ -723,8 +723,8 @@ const Balance: React.FC<BalanceProps> = () => {
       const msgs = await generateConvertMsgs({
         type: Type.CONVERT_TOKEN,
         sender: keplrAddress,
-        fromAmount: _fromAmount,
-        fromToken: token
+        inputAmount: _fromAmount,
+        inputToken: token
       });
 
       const msg = msgs[0];
