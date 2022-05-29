@@ -681,7 +681,8 @@ async function generateConvertMsgs(msg: Convert | ConvertReverse) {
       break;
     }
     case Type.CONVERT_TOKEN_REVERSE: {
-      const { outputToken } = msg;
+      const { outputToken } = msg as ConvertReverse;
+
       // currently only support cw20 token pool
       let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
       let { info: outputAssetInfo } = parseTokenInfo(outputToken, '0');
