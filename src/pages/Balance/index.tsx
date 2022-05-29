@@ -36,14 +36,12 @@ import Content from 'layouts/Content';
 import {
   getUsd,
   parseAmountFromWithDecimal as parseAmountFrom,
-  parseAmountToWithDecimal as parseAmountTo
+  parseAmountToWithDecimal as parseAmountTo,
+  parseAmountToWithDecimal
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
-import Long from 'long';
-import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
-import Big from 'big.js';
 import {
   ERC20_ORAI,
   ORAI,
@@ -56,7 +54,7 @@ import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -76,6 +74,7 @@ interface TokenItemProps extends ConvertToNativeProps {
   active: Boolean;
   className?: string;
   onClick?: Function;
+  onBlur?: Function;
 }
 
 const ConvertToNative: FC<ConvertToNativeProps> = ({
@@ -240,7 +239,7 @@ const ConvertToNative: FC<ConvertToNativeProps> = ({
               </button>
             )}
 
-            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
+            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && name && (
               <button
                 disabled={transferLoading}
                 className={styles.tfBtn}
@@ -284,6 +283,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
 }) => {
   // get token name
   const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
+
   return (
     <div
       className={classNames(
@@ -292,6 +292,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
         className
       )}
       onClick={() => onClick?.(token)}
+
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
@@ -340,6 +341,14 @@ const TokenItem: React.FC<TokenItemProps> = ({
             transferIBC={transferIBC}
           />
         )}
+        {/* // TODO: {active && token.contractAddress && token.cosmosBased && (
+          <ConvertToNative
+            name={evmName}
+            token={token}
+            amountDetail={amountDetail}
+            convertToken={convertToken}
+          />
+        )} */}
       </div>
     </div>
   );
@@ -593,65 +602,43 @@ const Balance: React.FC<BalanceProps> = () => {
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
-      await window.Keplr.suggestChain(fromToken.chainId);
       await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
         return;
       }
+
       const amount = coin(
-        Math.round(transferAmount * 10 ** fromToken.decimals),
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
         fromToken.denom
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
-      // using app protocol to sign transaction
-      if (isMobile() && fromToken.chainId === network.chainId) {
-        // check if is blacklisted like orai, using orai wallet
-        const msgSend = new ibc.applications.transfer.v1.MsgTransfer({
-          sourceChannel: ibcInfo.channel,
-          sourcePort: ibcInfo.source,
-          sender: fromAddress,
-          receiver: toAddress,
-          token: amount,
-          timeoutTimestamp: Long.fromNumber(
-            (Date.now() + ibcInfo.timeout * 1000) * 10 ** 6
-          )
-        });
+      const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner
+      );
 
-        const value = Buffer.from(
-          ibc.applications.transfer.v1.MsgTransfer.encode(msgSend).finish()
-        ).toString('base64');
+      const result = await client.sendIbcTokens(
+        fromAddress,
+        toAddress,
+        amount,
+        ibcInfo.source,
+        ibcInfo.channel,
+        undefined,
+        Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        {
+          gas: '200000',
+          amount: []
+        }
+      );
 
-        // open app protocal
-        const url = `oraiwallet://tx_sign?type_url=%2Fibc.applications.transfer.v1.MsgTransfer&sender=${fromAddress}&value=${value}`;
-        console.log(url);
-        window.location.href = url;
-      } else {
-        const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
-        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-        const client = await SigningStargateClient.connectWithSigner(
-          fromToken.rpc,
-          offlineSigner
-        );
-
-        const result = await client.sendIbcTokens(
-          fromAddress,
-          toAddress,
-          amount,
-          ibcInfo.source,
-          ibcInfo.channel,
-          undefined,
-          Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-          {
-            gas: '200000',
-            amount: []
-          }
-        );
-
-        processTxResult(fromToken, result);
-      }
+      processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
@@ -802,7 +789,7 @@ const Balance: React.FC<BalanceProps> = () => {
           <div className={styles.border_gradient}>
             <div className={styles.balance_block}>
               <div className={styles.tableHeader}>
-                <span className={styles.label}>From</span>
+                <span className={styles.label}>Other chains</span>
                 <div className={styles.fromBalanceDes}>
                   <div className={styles.balanceFromGroup}>
                     <TokenBalance
@@ -855,6 +842,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         active={from?.denom === t.denom}
                         token={t}
                         transferFromGravity={transferFromGravity}
+                        convertToken={convertToken}
                         onClick={onClickTokenFrom}
                         onClickTransfer={!!to ? onClickTransfer : undefined}
                       />
@@ -868,7 +856,7 @@ const Balance: React.FC<BalanceProps> = () => {
           {/* Transfer button */}
 
           <div className={styles.transferBtn}>
-            <button onClick={toggleTransfer}>
+            {/* <button onClick={toggleTransfer}>
               <ToggleTransfer
                 style={{
                   width: 44,
@@ -877,14 +865,14 @@ const Balance: React.FC<BalanceProps> = () => {
                   cursor: 'pointer'
                 }}
               />
-            </button>
+            </button> */}
           </div>
           {/* End Transfer button */}
           {/* To Tab */}
           <div className={styles.border_gradient}>
             <div className={styles.balance_block}>
               <div className={styles.tableHeader}>
-                <span className={styles.label}>To</span>
+                <span className={styles.label}>Oraichain</span>
 
                 <TokenBalance
                   balance={{
