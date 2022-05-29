@@ -129,6 +129,9 @@ export const parseAmountFromWithDecimal = (
   let t = new Big(amount)
     .div(new Big(10).pow(sourceDecimals))
     .round(desDecimals, 0);
-
   return t;
+};
+
+export const reduceString = (str: string, from: number, end: number) => {
+  return str ? str.substring(0, from) + " ... " + str.substring(str.length - end) : "-";
 };
