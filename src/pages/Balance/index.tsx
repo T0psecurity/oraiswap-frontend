@@ -1,21 +1,14 @@
 import { Input } from 'antd';
 import classNames from 'classnames';
-import React, {
-  FC,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useState
-} from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
-import { ReactComponent as ToggleTransfer } from 'assets/icons/toggle_transfer.svg';
 
 import {
   BroadcastTxResponse,
   isBroadcastTxFailure,
-  SigningStargateClient
+  SigningStargateClient,
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
@@ -28,7 +21,7 @@ import {
   filteredTokens,
   gravityContracts,
   TokenItemType,
-  tokens
+  tokens,
 } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
@@ -37,7 +30,7 @@ import {
   getUsd,
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
-  parseAmountToWithDecimal
+  parseAmountToWithDecimal,
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
@@ -47,14 +40,16 @@ import {
   ORAI,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
-  ORAI_BRIDGE_EVM_FEE
+  ORAI_BRIDGE_EVM_FEE,
 } from 'config/constants';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
+import TransferToken from './TransferToken';
+import ConvertToken from './ConvertToken';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetail = {
   amount: number;
@@ -77,199 +72,6 @@ interface TokenItemProps extends ConvertToNativeProps {
   onBlur?: Function;
 }
 
-const ConvertToNative: FC<ConvertToNativeProps> = ({
-  token,
-  name,
-  amountDetail,
-  convertToken,
-  transferIBC,
-  transferFromGravity,
-  onClickTransfer
-}) => {
-  const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
-  const [convertLoading, setConvertLoading] = useState(false);
-  const [transferLoading, setTransferLoading] = useState(false);
-  return (
-    <div
-      className={classNames(styles.tokenFromGroup, styles.small)}
-      style={{ flexWrap: 'wrap' }}
-    >
-      <div
-        className={styles.balanceDescription}
-        style={{ width: '100%', textAlign: 'left' }}
-      >
-        Convert Amount:
-      </div>
-      <NumberFormat
-        thousandSeparator
-        decimalScale={Math.min(6, token.decimals)}
-        customInput={Input}
-        value={convertAmount}
-        onValueChange={({ floatValue }) => {
-          if (!floatValue) return setConvertAmount([0, 0]);
-
-          const _floatValue = parseAmountTo(
-            floatValue!,
-            token.decimals
-          ).toNumber();
-          const usdValue =
-            (_floatValue / (amountDetail?.amount ?? 0)) *
-            (amountDetail?.usd ?? 0);
-
-          setConvertAmount([floatValue!, usdValue]);
-        }}
-        className={styles.amount}
-      />
-      <div className={styles.balanceFromGroup} style={{ flexGrow: 1 }}>
-        <button
-          className={styles.balanceBtn}
-          onClick={() => {
-            if (!amountDetail) return;
-            const _amount = parseAmountFrom(
-              amountDetail.amount,
-              token.decimals
-            ).toNumber();
-            setConvertAmount([_amount, amountDetail.usd]);
-          }}
-        >
-          MAX
-        </button>
-        <button
-          className={styles.balanceBtn}
-          onClick={() => {
-            if (!amountDetail) return;
-            const _amount = parseAmountFrom(
-              amountDetail.amount,
-              token.decimals
-            ).toNumber();
-            setConvertAmount([_amount / 2, amountDetail.usd / 2]);
-          }}
-        >
-          HALF
-        </button>
-      </div>
-      <div>
-        <TokenBalance
-          balance={convertUsd}
-          className={styles.balanceDescription}
-          prefix="~$"
-          decimalScale={2}
-        />
-      </div>
-      <div
-        className={styles.transferTab}
-        style={{
-          marginTop: '0px',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}
-      >
-        {!!onClickTransfer ? (
-          <button
-            className={styles.tfBtn}
-            disabled={convertLoading}
-            onClick={async () => {
-              try {
-                setConvertLoading(true);
-                await onClickTransfer(convertAmount);
-              } finally {
-                setConvertLoading(false);
-              }
-            }}
-          >
-            {convertLoading && <Loader width={20} height={20} />}
-            <span>Transfer</span>
-          </button>
-        ) : (
-          <>
-            {token.chainId === ORAI_BRIDGE_CHAIN_ID && (
-              <>
-                <button
-                  className={styles.tfBtn}
-                  disabled={transferLoading}
-                  onClick={async () => {
-                    try {
-                      setTransferLoading(true);
-                      await transferFromGravity(token, convertAmount);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer To{' '}
-                    <strong>
-                      {token.name.match(/BEP20/)
-                        ? 'Binance Smart Chain'
-                        : 'Ethereum'}
-                    </strong>
-                  </span>
-                </button>
-                <small
-                  style={{
-                    backgroundColor: '#C69A24',
-                    color: '#95452d',
-                    padding: '0px 3px',
-                    borderRadius: 3
-                  }}
-                >
-                  Congested
-                </small>
-              </>
-            )}
-
-            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && (
-              <button
-                className={styles.tfBtn}
-                disabled={convertLoading}
-                onClick={async () => {
-                  try {
-                    setConvertLoading(true);
-                    await convertToken(convertAmount, token);
-                  } finally {
-                    setConvertLoading(false);
-                  }
-                }}
-              >
-                {convertLoading && <Loader width={20} height={20} />}
-                <span>
-                  Convert To <strong style={{ marginLeft: 5 }}>{name}</strong>
-                </span>
-              </button>
-            )}
-
-            {token.chainId !== ORAI_BRIDGE_CHAIN_ID && name && (
-              <button
-                disabled={transferLoading}
-                className={styles.tfBtn}
-                onClick={async () => {
-                  try {
-                    setTransferLoading(true);
-                    const to = filteredTokens.find(
-                      (t) =>
-                        t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                        t.name === token.name
-                    );
-                    await transferIBC(token, to, convertAmount);
-                  } finally {
-                    setTransferLoading(false);
-                  }
-                }}
-              >
-                {transferLoading && <Loader width={20} height={20} />}
-                <span>
-                  Transfer To <strong>OraiBridge</strong>
-                </span>
-              </button>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
 const TokenItem: React.FC<TokenItemProps> = ({
   token,
   amountDetail,
@@ -279,7 +81,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   convertToken,
   transferFromGravity,
   transferIBC,
-  onClickTransfer
+  onClickTransfer,
 }) => {
   // get token name
   const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
@@ -291,8 +93,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
         { [styles.active]: active },
         className
       )}
-      onClick={() => onClick?.(token)}
-
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick?.(token);
+      }}
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
@@ -309,7 +113,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             balance={{
               amount: amountDetail ? amountDetail.amount.toString() : '0',
               denom: '',
-              decimals: token.decimals
+              decimals: token.decimals,
             }}
             className={styles.tokenAmount}
             decimalScale={Math.min(6, token.decimals)}
@@ -323,16 +127,14 @@ const TokenItem: React.FC<TokenItemProps> = ({
       </div>
       <div>
         {active && onClickTransfer && (
-          <ConvertToNative
-            name={evmName}
+          <TransferToken
             token={token}
             amountDetail={amountDetail}
-            convertToken={convertToken}
             onClickTransfer={onClickTransfer}
           />
         )}
-        {active && evmName && token.cosmosBased && (
-          <ConvertToNative
+        {active && token.cosmosBased && (
+          <ConvertToken
             name={evmName}
             token={token}
             amountDetail={amountDetail}
@@ -362,7 +164,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
-    0, 0
+    0, 0,
   ]);
   const [ibcLoading, setIBCLoading] = useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
@@ -384,13 +186,6 @@ const Balance: React.FC<BalanceProps> = () => {
     };
     _initEthereum();
   }, []);
-
-  const toggleTransfer = () => {
-    setTokens([toTokens, fromTokens]);
-    setFrom(to);
-    setTo(from);
-    setFromAmount([0, 0]);
-  };
 
   const loadAmountDetail = async (
     address: Bech32Address | string | undefined,
@@ -414,7 +209,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const amountDetail: AmountDetail = {
         amount,
-        usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+        usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals),
       };
 
       return [token.denom, amountDetail];
@@ -436,8 +231,12 @@ const Balance: React.FC<BalanceProps> = () => {
           token.denom,
           {
             amount,
-            usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
-          }
+            usd: getUsd(
+              amount,
+              prices[token.coingeckoId].price,
+              token.decimals
+            ),
+          },
         ];
       })
     );
@@ -455,7 +254,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.TX_FAILED, {
-          message: 'You must install Keplr to continue'
+          message: 'You must install Keplr to continue',
         });
       }
       const pendingList: TokenItemType[] = [];
@@ -468,6 +267,7 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
+      1000;
 
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
@@ -486,11 +286,11 @@ const Balance: React.FC<BalanceProps> = () => {
   ) => {
     if (isBroadcastTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
-        message: result.rawLog
+        message: result.rawLog,
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
+        customLink: `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
       });
     }
     setTxHash(result.transactionHash);
@@ -510,21 +310,28 @@ const Balance: React.FC<BalanceProps> = () => {
     (type: string, token: TokenItemType) => {
       if (token.denom === ERC20_ORAI) {
         displayToast(TToastType.TX_INFO, {
-          message: `Token ${token.name} on ${token.org} is currently not supported`
+          message: `Token ${token.name} on ${token.org} is currently not supported`,
         });
         return;
       }
 
       if (type === 'to') {
-        setTo(token);
+        if (_.isEqual(to, token)) {
+          setTo(undefined);
+        } else setTo(token);
       } else {
-        setFrom(token);
-        setFromAmount([0, 0]);
-        const toToken = findDefaultToToken(toTokens, token);
-        setTo(toToken);
+        if (_.isEqual(from, token)) {
+          setFrom(undefined);
+          setTo(undefined);
+        } else {
+          setFrom(token);
+          setFromAmount([0, 0]);
+          const toToken = findDefaultToToken(toTokens, token);
+          setTo(toToken);
+        }
       }
     },
-    [toTokens]
+    [toTokens, from, to]
   );
 
   const onClickTokenFrom = useCallback(
@@ -570,25 +377,25 @@ const Balance: React.FC<BalanceProps> = () => {
           ethDest: metamaskAddress,
           amount: {
             denom: fromToken.denom,
-            amount: rawAmount
+            amount: rawAmount,
           },
           bridgeFee: {
             denom: fromToken.denom,
             // just a number to make sure there is a friction
-            amount: ORAI_BRIDGE_EVM_FEE
-          }
-        })
+            amount: ORAI_BRIDGE_EVM_FEE,
+          },
+        }),
       };
       const fee = {
         amount: [],
-        gas: '200000'
+        gas: '200000',
       };
       const result = await client.signAndBroadcast(fromAddress, [message], fee);
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message
+        message: ex.message,
       });
     }
   };
@@ -634,14 +441,14 @@ const Balance: React.FC<BalanceProps> = () => {
         Math.floor(Date.now() / 1000) + ibcInfo.timeout,
         {
           gas: '200000',
-          amount: []
+          amount: [],
         }
       );
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message
+        message: ex.message,
       });
     }
   };
@@ -649,7 +456,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const transferEvmToIBC = async (fromAmount: number) => {
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Please login both metamask and keplr!'
+        message: 'Please login both metamask and keplr!',
       });
       return;
     }
@@ -676,12 +483,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: `
-        https://bscscan.com/tx/${result?.transactionHash}`
+        https://bscscan.com/tx/${result?.transactionHash}`,
       });
       setTxHash(result?.transactionHash);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message
+        message: ex.message,
       });
     }
   };
@@ -691,7 +498,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Please choose both from and to tokens'
+        message: 'Please choose both from and to tokens',
       });
       return;
     }
@@ -710,22 +517,37 @@ const Balance: React.FC<BalanceProps> = () => {
     setIBCLoading(false);
   };
 
-  const convertToken = async (amount: number, token: TokenItemType) => {
+  const convertToken = async (
+    amount: number,
+    token: TokenItemType,
+    type: 'cw20ToNative' | 'nativeToCw20',
+    outputToken?: TokenItemType
+  ) => {
     if (amount <= 0)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!'
+        message: 'From amount should be higher than 0!',
       });
 
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const _fromAmount = parseAmountTo(amount, token.decimals).toString();
-
-      const msgs = await generateConvertMsgs({
-        type: Type.CONVERT_TOKEN,
-        sender: keplrAddress,
-        inputAmount: _fromAmount,
-        inputToken: token
-      });
+      let msgs;
+      if (type === 'nativeToCw20') {
+        msgs = await generateConvertMsgs({
+          type: Type.CONVERT_TOKEN,
+          sender: keplrAddress,
+          inputAmount: _fromAmount,
+          inputToken: token,
+        });
+      } else if (type === 'cw20ToNative') {
+        msgs = await generateConvertMsgs({
+          type: Type.CONVERT_TOKEN_REVERSE,
+          sender: keplrAddress,
+          inputAmount: _fromAmount,
+          inputToken: token,
+          outputToken,
+        });
+      }
 
       const msg = msgs[0];
       console.log(
@@ -738,13 +560,13 @@ const Balance: React.FC<BalanceProps> = () => {
         walletAddr: keplrAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds } as HandleOptions
+        handleOptions: { funds: msg.sent_funds } as HandleOptions,
       });
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
+          customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setTxHash(result.transactionHash);
       }
@@ -755,7 +577,7 @@ const Balance: React.FC<BalanceProps> = () => {
         finalError = `${error}`;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError
+        message: finalError,
       });
     }
   };
@@ -799,7 +621,7 @@ const Balance: React.FC<BalanceProps> = () => {
                             ? amounts[from.denom].amount
                             : 0,
                         denom: from?.name ?? '',
-                        decimals: from?.decimals
+                        decimals: from?.decimals,
                       }}
                       className={styles.balanceDescription}
                       prefix="Balance: "
@@ -879,7 +701,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     amount:
                       to && amounts[to.denom] ? amounts[to.denom].amount : 0,
                     denom: to?.name ?? '',
-                    decimals: to?.decimals
+                    decimals: to?.decimals,
                   }}
                   className={styles.balanceDescription}
                   prefix="Balance: "
