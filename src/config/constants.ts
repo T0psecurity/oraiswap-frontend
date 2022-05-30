@@ -54,4 +54,4 @@ export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
 export const ORAIX_DENOM = 'ORAIX';
 
 // ORAIX claim
-export const ORAIX_CLAIM_CONTRACt = 'orai1gzc0vhqadf5pj8vtylgkwrmcuxp5mk8nsvpdfw';
+export const ORAIX_CLAIM_CONTRACT = 'orai1gzc0vhqadf5pj8vtylgkwrmcuxp5mk8nsvpdfw';

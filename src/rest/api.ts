@@ -3,7 +3,7 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
-import { ORAI, ORAIX_CLAIM_CONTRACt } from 'config/constants';
+import { ORAI, ORAIX_CLAIM_CONTRACT } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
@@ -741,7 +741,7 @@ function generateClaimMsg(msg: Claim) {
   const { type, sender, stage, amount, proofs } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
-  let contractAddr = ORAIX_CLAIM_CONTRACt;
+  let contractAddr = ORAIX_CLAIM_CONTRACT;
   let input;
   switch (type) {
     case Type.CLAIM_ORAIX:

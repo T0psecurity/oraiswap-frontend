@@ -7,7 +7,7 @@ import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import bech32 from 'bech32';
-import { ORAI, ORAIX_CLAIM_CONTRACt, ORAIX_CLAIM_URL, ORAIX_DENOM } from 'config/constants';
+import { ORAI, ORAIX_CLAIM_CONTRACT, ORAIX_CLAIM_URL, ORAIX_DENOM } from 'config/constants';
 import Content from 'layouts/Content';
 import { parseAmountFromWithDecimal, reduceString } from 'libs/utils';
 import { network } from 'config/networks';
@@ -91,7 +91,7 @@ const ClaimOraiX: FunctionComponent = () => {
         stage: objNetwork[userNetwork as keyof typeof objNetwork].stage
       }
     });
-    const { data } = (await axios.get(`${network.lcd}/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACt}/smart/${btoa(msg)}`)).data;
+    const { data } = (await axios.get(`${network.lcd}/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`)).data;
     console.log("data is claimed: ", data.is_claimed)
 
     return data.is_claimed;
