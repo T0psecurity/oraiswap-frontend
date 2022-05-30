@@ -304,7 +304,7 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!!metamaskAddress) {
       loadEvmOraiAmounts();
     }
-  }, [metamaskAddress, prices]);
+  }, [metamaskAddress, prices, txHash]);
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
@@ -493,7 +493,11 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const onClickTransfer = async (fromAmount: number) => {
+  const onClickTransfer = async (
+    fromAmount: number,
+    from: TokenItemType,
+    to: TokenItemType
+  ) => {
     // disable send amount < 0
 
     if (!from || !to) {
@@ -666,7 +670,12 @@ const Balance: React.FC<BalanceProps> = () => {
                         transferFromGravity={transferFromGravity}
                         convertToken={convertToken}
                         onClick={onClickTokenFrom}
-                        onClickTransfer={!!to ? onClickTransfer : undefined}
+                        onClickTransfer={
+                          !!to
+                            ? (fromAmount: number) =>
+                                onClickTransfer(fromAmount, from, to)
+                            : undefined
+                        }
                       />
                     );
                   })}
@@ -743,7 +752,12 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClick={onClickTokenTo}
                           convertToken={convertToken}
                           transferIBC={transferIBC}
-                          onClickTransfer={!!from?.cosmosBased ? onClickTransfer : undefined}
+                          onClickTransfer={
+                            !!from?.cosmosBased
+                              ? (fromAmount: number) =>
+                                  onClickTransfer(fromAmount, to, from)
+                              : undefined
+                          }
                         />
                       );
                     })}
