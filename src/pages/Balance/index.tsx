@@ -267,7 +267,6 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
-      1000;
 
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
