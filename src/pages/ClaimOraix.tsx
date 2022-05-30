@@ -26,7 +26,7 @@ const ClaimOraiX: FunctionComponent = () => {
   const [claimLoading, setClaimLoading] = useState(false);
   const [address] = useGlobalState('address');
   const { network: userNetwork } = useParams();
-  const networkConvert = objNetwork[userNetwork].network || ORAI;
+  const networkConvert = objNetwork[userNetwork as keyof typeof objNetwork].network || ORAI;
   const getAddressStrFromAnotherAddr = (address: string) => {
     const fullWords = bech32.decode(address);
     if (fullWords.words) {
@@ -42,7 +42,7 @@ const ClaimOraiX: FunctionComponent = () => {
 
       // get merkle proof
       const { data: proofs } = await fetchProof();
-      const msg = generateClaimMsg({ type: Type.CLAIM_ORAIX, sender: address, stage: objNetwork[userNetwork].stage, amount: oraiXAmount, proofs });
+      const msg = generateClaimMsg({ type: Type.CLAIM_ORAIX, sender: address, stage: objNetwork[userNetwork as keyof typeof objNetwork].stage, amount: oraiXAmount, proofs });
 
       const result = await CosmJs.execute({
         prefix: ORAI,
@@ -59,7 +59,7 @@ const ClaimOraiX: FunctionComponent = () => {
         });
         setClaimLoading(false);
       }, 5000);
-    } catch (error) {
+    } catch (error: any) {
       console.log('error message handle claim: ', error);
       return displayToast(TToastType.TX_FAILED, {
         message: error.message,
@@ -88,7 +88,7 @@ const ClaimOraiX: FunctionComponent = () => {
     const msg = JSON.stringify({
       is_claimed: {
         address,
-        stage: objNetwork[userNetwork].stage
+        stage: objNetwork[userNetwork as keyof typeof objNetwork].stage
       }
     });
     const { data } = (await axios.get(`${network.lcd}/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACt}/smart/${btoa(msg)}`)).data;
@@ -119,7 +119,7 @@ const ClaimOraiX: FunctionComponent = () => {
       >
         {address && !!networkConvert && (
           <>
-            <div style={{ wordWrap: 'break-word' }}>{`${userNetwork.toUpperCase()} address: ${address && reduceString(getAddressStrFromAnotherAddr(address), networkConvert.length + 5, 10)
+            <div style={{ wordWrap: 'break-word' }}>{`${userNetwork!.toUpperCase()} address: ${address && reduceString(getAddressStrFromAnotherAddr(address)!, networkConvert.length + 5, 10)
               }`}</div>
             {!isLoading && !!oraiXAmount && <div> {`Claim amount: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>}
             {!isClaimedLoading &&
