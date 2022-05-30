@@ -6,7 +6,7 @@ import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 56]
+  supportedChainIds: [1, 56],
 });
 
 const RequireAuthButton: React.FC<any> = ({
@@ -18,7 +18,7 @@ const RequireAuthButton: React.FC<any> = ({
 }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
 
-  const { active, connector, error, activate, deactivate } = useWeb3React();
+  const { active, error, activate, deactivate } = useWeb3React();
 
   const onClick = () => {
     setOpenConnectWalletModal(true);
@@ -26,7 +26,7 @@ const RequireAuthButton: React.FC<any> = ({
 
   const connectMetamask = async () => {
     try {
-      await activate(injected);      
+      await activate(injected);
       setMetamaskAddress(await injected.getAccount());
       // window.location.reload();
     } catch (ex) {
