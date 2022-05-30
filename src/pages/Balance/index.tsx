@@ -743,6 +743,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClick={onClickTokenTo}
                           convertToken={convertToken}
                           transferIBC={transferIBC}
+                          onClickTransfer={!!from?.cosmosBased ? onClickTransfer : undefined}
                         />
                       );
                     })}
