@@ -118,7 +118,7 @@ const AirDrop: FunctionComponent = () => {
           <div >{`${chainUpper} address: ${otherNetworkAddr}`}</div>
           <div>{`Delegated amount: ${airdropAmount.delegatedAmount} ${chainUpper}`}</div>
           <div>{`Undelegated amount: ${airdropAmount.undelegatedAmount} ${chainUpper}`}</div>
-          <div>{`Current ${chainUpper} balance: ${airdropAmount.available} ${chainUpper}`}</div>
+          {/* <div>{`Current ${chainUpper} balance: ${airdropAmount.available} ${chainUpper}`}</div> */}
         </div>
       )
       }
