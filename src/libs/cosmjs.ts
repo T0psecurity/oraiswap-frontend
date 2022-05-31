@@ -66,7 +66,7 @@ class CosmJs {
             gasAmount.denom
           ),
           prefix,
-          gasLimits: { exec: 200000000 }
+          gasLimits
         }
       );
       const input = JSON.parse(handleMsg);
