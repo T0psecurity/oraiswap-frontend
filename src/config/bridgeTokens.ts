@@ -235,6 +235,18 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'tether',
         cosmosBased: false,
         Icon: USDT
+      },
+      {
+        name: 'BEP20 KWT',
+        org: 'BNB Chain',
+        chainId: BSC_CHAIN_ID,
+        denom: 'bep20_kwt',
+        contractAddress: KWT_BSC_CONTRACT,
+        rpc: BSC_RPC,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'kawaii-islands',
+        cosmosBased: false,
+        Icon: KWT
       }
     ],
     [
