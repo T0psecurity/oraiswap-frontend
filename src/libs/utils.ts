@@ -123,7 +123,15 @@ export const parseAmountToWithDecimal = (amount: number, decimals: number) => {
 
 export const parseAmountFromWithDecimal = (
   amount: number,
-  decimals: number
+  sourceDecimals: number,
+  desDecimals = 6
 ) => {
-  return new Big(amount).div(new Big(10).pow(decimals));
+  let t = new Big(amount)
+    .div(new Big(10).pow(sourceDecimals))
+    .round(desDecimals, 0);
+  return t;
+};
+
+export const reduceString = (str: string, from: number, end: number) => {
+  return str ? str.substring(0, from) + " ... " + str.substring(str.length - end) : "-";
 };

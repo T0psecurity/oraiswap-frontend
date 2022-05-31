@@ -43,7 +43,7 @@ class CosmJs {
     handleMsg: string;
     handleOptions?: HandleOptions;
     gasAmount: { amount: string; denom: string };
-    gasLimits?: { exec: 20000000 };
+    gasLimits?: { exec: 200000000 };
   }) {
     try {
       const {
@@ -67,11 +67,10 @@ class CosmJs {
             gasAmount.denom
           ),
           prefix,
-          gasLimits: { exec: 200000000 }
+          gasLimits
         }
       );
       const input = JSON.parse(handleMsg);
-      console.log('rpc: ', network.rpc, 'input', input);
       const result = await client.execute(
         walletAddr,
         address,

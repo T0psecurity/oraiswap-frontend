@@ -3,7 +3,7 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
-import { ORAI } from 'config/constants';
+import { ORAI, ORAIX_CLAIM_CONTRACT } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
@@ -17,7 +17,9 @@ export enum Type {
   'BOND_LIQUIDITY' = 'Bond liquidity',
   'WITHDRAW_LIQUIDITY_MINING' = 'Withdraw Liquidity Mining Rewards',
   'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens',
-  'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens'
+  'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens',
+  'CLAIM_ORAIX' = 'Claim ORAIX tokens',
+  'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens',
 }
 
 const oraiInfo = { native_token: { denom: ORAI } };
@@ -61,7 +63,7 @@ function fetchPoolMiningInfo(tokenInfo: TokenInfo) {
   let { info: token_asset } = parseTokenInfo(tokenInfo);
   if (token_asset.token)
     return querySmart(network.staking, {
-      pool_info: { asset_token: token_asset.token.contract_addr }
+      pool_info: { asset_token: token_asset.token.contract_addr },
     });
   // currently ibc pool is not supported
   else throw 'IBC native pool is not supported';
@@ -69,7 +71,7 @@ function fetchPoolMiningInfo(tokenInfo: TokenInfo) {
 
 function fetchRewardMiningInfo(address: string, asset_info: AssetInfo) {
   return querySmart(network.staking, {
-    reward_info: { staker_addr: address, asset_info }
+    reward_info: { staker_addr: address, asset_info },
   });
 }
 
@@ -83,14 +85,14 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     icon: '',
     denom: tokenSwap.denom,
     verified: false,
-    total_supply: ''
+    total_supply: '',
   };
   if (!tokenSwap.contractAddress) {
     tokenInfo.symbol = tokenSwap.name;
     tokenInfo.verified = true;
   } else {
     const data = await querySmart(tokenSwap.contractAddress, {
-      token_info: {}
+      token_info: {},
     });
     tokenInfo = {
       ...tokenInfo,
@@ -100,7 +102,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
       decimals: data.decimals,
       icon: data.icon,
       verified: data.verified,
-      total_supply: data.total_supply
+      total_supply: data.total_supply,
     };
   }
   return tokenInfo;
@@ -159,7 +161,7 @@ async function fetchPairInfo(
 
 async function fetchPairInfoRaw(assetInfos: [any, any]): Promise<PairInfo> {
   const data = await querySmart(network.factory, {
-    pair: { asset_infos: assetInfos }
+    pair: { asset_infos: assetInfos },
   });
   return data;
 }
@@ -172,7 +174,7 @@ async function fetchTokenBalance(
   const data = await querySmart(
     tokenAddr,
     {
-      balance: { address: walletAddr }
+      balance: { address: walletAddr },
     },
     lcd
   );
@@ -190,8 +192,8 @@ async function fetchTokenAllowance(
     {
       allowance: {
         owner: walletAddr,
-        spender
-      }
+        spender,
+      },
     },
     lcd
   );
@@ -209,8 +211,8 @@ async function fetchRewardInfo(
     {
       reward_info: {
         staker_addr,
-        asset_info
-      }
+        asset_info,
+      },
     },
     lcd
   );
@@ -224,8 +226,8 @@ async function fetchRewardPerSecInfo(assetToken: TokenItemType, lcd?: string) {
     network.staking,
     {
       rewards_per_sec: {
-        asset_info
-      }
+        asset_info,
+      },
     },
     lcd
   );
@@ -239,8 +241,8 @@ async function fetchStakingPoolInfo(assetToken: TokenItemType, lcd?: string) {
     network.staking,
     {
       pool_info: {
-        asset_info
-      }
+        asset_info,
+      },
     },
     lcd
   );
@@ -254,8 +256,8 @@ async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
     network.rewarder,
     {
       distribution_info: {
-        asset_info
-      }
+        asset_info,
+      },
     },
     lcd
   );
@@ -292,7 +294,7 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
     if (amount)
       return {
         fund: { denom: tokenInfo.denom, amount: amount.toString() },
-        info: { native_token: { denom: tokenInfo.denom } }
+        info: { native_token: { denom: tokenInfo.denom } },
       };
     return { info: { native_token: { denom: tokenInfo.denom } } };
   }
@@ -311,7 +313,7 @@ const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
 
 async function fetchExchangeRate(base_denom: string, quote_denom: string) {
   const data = await querySmart(network.oracle, {
-    exchange: { exchange_rate: { base_denom, quote_denom } }
+    exchange: { exchange_rate: { base_denom, quote_denom } },
   });
   return data?.item?.exchange_rate;
 }
@@ -328,23 +330,23 @@ const generateSwapOperationMsgs = (
       {
         orai_swap: {
           offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
-        }
-      }
+          ask_asset_info: askInfo,
+        },
+      },
     ]
     : [
       {
         orai_swap: {
           offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
-        }
+          ask_asset_info: oraiInfo,
+        },
       },
       {
         orai_swap: {
           offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
+          ask_asset_info: askInfo,
+        },
+      },
     ];
 };
 
@@ -368,8 +370,8 @@ async function simulateSwap(query: {
   let msg = {
     simulate_swap_operations: {
       operations,
-      offer_amount: amount.toString()
-    }
+      offer_amount: amount.toString(),
+    },
   };
 
   const data = await querySmart(network.router, msg);
@@ -407,6 +409,14 @@ export type WithdrawQuery = {
   pair: string; // oraiswap pair contract addr, handle withdraw liquidity
 };
 
+export type TransferQuery = {
+  type: Type.TRANSFER;
+  amount: number | string;
+  sender: string;
+  token: string;
+  recipientAddress: string;
+};
+
 export type IncreaseAllowanceQuery = {
   type: Type.INCREASE_ALLOWANCE;
   amount: number | string;
@@ -416,7 +426,12 @@ export type IncreaseAllowanceQuery = {
 };
 
 async function generateContractMessages(
-  query: SwapQuery | ProvideQuery | WithdrawQuery | IncreaseAllowanceQuery
+  query:
+    | SwapQuery
+    | ProvideQuery
+    | WithdrawQuery
+    | IncreaseAllowanceQuery
+    | TransferQuery
 ) {
   const { type, sender, ...params } = query;
   let sent_funds;
@@ -440,8 +455,8 @@ async function generateContractMessages(
             [swapQuery.fromInfo.denom, swapQuery.toInfo.denom],
             offerInfo,
             askInfo
-          )
-        }
+          ),
+        },
       };
       // if cw20 => has to send through cw20 contract
       if (!swapQuery.fromInfo.contractAddress) {
@@ -451,8 +466,8 @@ async function generateContractMessages(
           send: {
             contract: contractAddr,
             amount: swapQuery.amount.toString(),
-            msg: btoa(JSON.stringify(inputTemp))
-          }
+            msg: btoa(JSON.stringify(inputTemp)),
+          },
         };
         contractAddr = swapQuery.fromInfo.contractAddress;
       }
@@ -474,11 +489,11 @@ async function generateContractMessages(
           assets: [
             {
               info: toInfoData,
-              amount: provideQuery.toAmount.toString()
+              amount: provideQuery.toAmount.toString(),
             },
-            { info: fromInfoData, amount: provideQuery.fromAmount.toString() }
-          ]
-        }
+            { info: fromInfoData, amount: provideQuery.fromAmount.toString() },
+          ],
+        },
       };
       contractAddr = provideQuery.pair;
       break;
@@ -490,8 +505,8 @@ async function generateContractMessages(
           owner: sender,
           contract: withdrawQuery.pair,
           amount: withdrawQuery.amount.toString(),
-          msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
-        }
+          msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==', // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+        },
       };
       contractAddr = withdrawQuery.lpAddr;
       break;
@@ -500,10 +515,20 @@ async function generateContractMessages(
       input = {
         increase_allowance: {
           amount: increaseAllowanceQuery.amount.toString(),
-          spender: increaseAllowanceQuery.spender
-        }
+          spender: increaseAllowanceQuery.spender,
+        },
       };
       contractAddr = increaseAllowanceQuery.token;
+      break;
+    case Type.TRANSFER:
+      const transferQuery = params as TransferQuery;
+      input = {
+        transfer: {
+          recipient: transferQuery.recipientAddress,
+          amount: transferQuery.amount,
+        },
+      };
+      contractAddr = transferQuery.token;
       break;
     default:
       break;
@@ -514,8 +539,8 @@ async function generateContractMessages(
       contract: contractAddr,
       msg: Buffer.from(JSON.stringify(input)),
       sender,
-      sent_funds
-    }
+      sent_funds,
+    },
   ];
 
   return msgs;
@@ -564,11 +589,11 @@ async function generateMiningMsgs(
           msg: btoa(
             JSON.stringify({
               bond: {
-                asset_info
-              }
+                asset_info,
+              },
             })
-          ) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
-        }
+          ), // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+        },
       };
       contractAddr = bondMsg.lpToken;
       break;
@@ -586,8 +611,8 @@ async function generateMiningMsgs(
       input = {
         unbond: {
           asset_info: unbond_asset,
-          amount: unbondMsg.amount.toString()
-        }
+          amount: unbondMsg.amount.toString(),
+        },
       };
       contractAddr = network.staking;
       break;
@@ -600,8 +625,8 @@ async function generateMiningMsgs(
       contract: contractAddr,
       msg: Buffer.from(JSON.stringify(input)),
       sender,
-      sent_funds
-    }
+      sent_funds,
+    },
   ];
 
   return msgs;
@@ -610,12 +635,20 @@ async function generateMiningMsgs(
 export type Convert = {
   type: Type.CONVERT_TOKEN;
   sender: string;
-  fromToken: TokenItemType;
-  fromAmount: string;
+  inputToken: TokenItemType;
+  inputAmount: string;
 };
 
-async function generateConvertMsgs(msg: Convert) {
-  const { type, sender, fromToken, fromAmount } = msg;
+export type ConvertReverse = {
+  type: Type.CONVERT_TOKEN_REVERSE;
+  sender: string;
+  inputToken: TokenItemType;
+  inputAmount: string;
+  outputToken: TokenItemType;
+};
+
+async function generateConvertMsgs(msg: Convert | ConvertReverse) {
+  const { type, sender, inputToken, inputAmount } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.converter;
@@ -623,11 +656,11 @@ async function generateConvertMsgs(msg: Convert) {
   switch (type) {
     case Type.CONVERT_TOKEN: {
       // currently only support cw20 token pool
-      let { info: assetInfo, fund } = parseTokenInfo(fromToken, fromAmount);
+      let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
       // native case
       if (assetInfo.native_token) {
         input = {
-          convert: {}
+          convert: {},
         };
         sent_funds = handleSentFunds(fund as Fund);
       } else {
@@ -635,13 +668,46 @@ async function generateConvertMsgs(msg: Convert) {
         input = {
           send: {
             contract: network.converter,
-            amount: fromAmount,
+            amount: inputAmount,
             msg: btoa(
               JSON.stringify({
-                convert: {}
+                convert: {},
               })
-            )
-          }
+            ),
+          },
+        };
+        contractAddr = assetInfo.token.contract_addr;
+      }
+      break;
+    }
+    case Type.CONVERT_TOKEN_REVERSE: {
+      const { outputToken } = msg as ConvertReverse;
+
+      // currently only support cw20 token pool
+      let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
+      let { info: outputAssetInfo } = parseTokenInfo(outputToken, '0');
+      // native case
+      if (assetInfo.native_token) {
+        input = {
+          convert_reverse: {
+            from_asset: outputAssetInfo,
+          },
+        };
+        sent_funds = handleSentFunds(fund as Fund);
+      } else {
+        // cw20 case
+        input = {
+          send: {
+            contract: network.converter,
+            amount: inputAmount,
+            msg: btoa(
+              JSON.stringify({
+                convert_reverse: {
+                  from: outputAssetInfo,
+                },
+              })
+            ),
+          },
         };
         contractAddr = assetInfo.token.contract_addr;
       }
@@ -656,11 +722,47 @@ async function generateConvertMsgs(msg: Convert) {
       contract: contractAddr,
       msg: Buffer.from(JSON.stringify(input)),
       sender,
-      sent_funds
-    }
+      sent_funds,
+    },
   ];
 
   return msgs;
+}
+
+export type Claim = {
+  type: Type.CLAIM_ORAIX;
+  sender: string;
+  stage: number;
+  amount: string;
+  proofs: string[];
+};
+
+function generateClaimMsg(msg: Claim) {
+  const { type, sender, stage, amount, proofs } = msg;
+  let sent_funds;
+  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
+  let contractAddr = ORAIX_CLAIM_CONTRACT;
+  let input;
+  switch (type) {
+    case Type.CLAIM_ORAIX:
+      input = {
+        claim: {
+          stage,
+          amount,
+          proof: proofs,
+        }
+      }
+      break;
+    default:
+      break;
+  }
+
+  return {
+    contract: contractAddr,
+    msg: Buffer.from(JSON.stringify(input)),
+    sender,
+    sent_funds,
+  };
 }
 
 export {
@@ -674,6 +776,7 @@ export {
   fetchPairs,
   fetchTokenInfo,
   generateContractMessages,
+  generateClaimMsg,
   fetchExchangeRate,
   simulateSwap,
   fetchPoolInfoAmount,
@@ -685,5 +788,5 @@ export {
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
-  fetchDistributionInfo
+  fetchDistributionInfo,
 };

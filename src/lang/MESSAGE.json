@@ -15,6 +15,7 @@
     },
     "Button": {
       "ConnectKeplr": "Keplr Wallet",
+      "ConnectOWallet": "Connect OWallet",
       "ConnectMetamask": "Connect Metamask",
       "ConnectTheWallet": "Connect the Wallet",
       "SelectAsset": "Select an asset",

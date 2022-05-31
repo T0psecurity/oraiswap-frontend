@@ -35,13 +35,13 @@ import {
 export type TokenItemType = {
   name: string;
   org?:
-    | 'Terra'
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum';
+  | 'Terra'
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -53,16 +53,16 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna'
-    | 'oraix'
-    | 'tether';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna'
+  | 'oraix'
+  | 'tether';
   cosmosBased: Boolean;
 };
 
@@ -129,20 +129,48 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         maxGas: 20000 * 0.025,
         Icon: OSMO
       },
-      // {
-      //   name: 'BEP20 ORAI',
-      //   prefix: ORAI_BRIDGE_PREFIX,
-      //   org: 'OraiBridge',
-      //   chainId: ORAI_BRIDGE_CHAIN_ID,
-      //   coinType: 118,
-      //   denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
-      //   rpc: ORAI_BRIDGE_RPC,
-      //   lcd: ORAI_BRIDGE_LCD,
-      //   decimals: COSMOS_DECIMALS,
-      //   coingeckoId: 'oraichain-token',
-      //   cosmosBased: true,
-      //   Icon: ORAI
-      // },
+      {
+        name: 'BEP20 ORAI',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_CHAIN_ID,
+        coinType: 118,
+        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
+        rpc: ORAI_BRIDGE_RPC,
+        lcd: ORAI_BRIDGE_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'oraichain-token',
+        cosmosBased: true,
+        Icon: ORAI
+      },
+      {
+        name: 'BEP20 AIRI',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_CHAIN_ID,
+        coinType: 118,
+        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + AIRI_BSC_CONTRACT,
+        rpc: ORAI_BRIDGE_RPC,
+        lcd: ORAI_BRIDGE_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'airight',
+        cosmosBased: true,
+        Icon: AIRI
+      },
+      {
+        name: 'BEP20 USDT',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_CHAIN_ID,
+        coinType: 118,
+        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + USDT_BSC_CONTRACT,
+        rpc: ORAI_BRIDGE_RPC,
+        lcd: ORAI_BRIDGE_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'tether',
+        cosmosBased: true,
+        Icon: USDT
+      },
       // {
       //   name: 'ERC20 ORAI',
       //   org: 'Ethereum',
@@ -312,7 +340,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         prefix: 'orai',
         coingeckoId: 'oraichain-token',
         denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM,
-        decimals: COSMOS_DECIMALS,
+        decimals: EVM_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
@@ -325,7 +353,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         prefix: 'orai',
         coingeckoId: 'airight',
         denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
-        decimals: COSMOS_DECIMALS,
+        decimals: EVM_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
@@ -338,7 +366,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         prefix: 'orai',
         coingeckoId: 'tether',
         denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
-        decimals: COSMOS_DECIMALS,
+        decimals: EVM_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
@@ -370,8 +398,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 
@@ -381,6 +409,16 @@ export const filteredTokens = _.uniqBy(
     (token) =>
       // !token.contractAddress &&
       token.denom && token.cosmosBased && token.coingeckoId
+  ),
+  (c) => c.denom
+);
+
+export const cw20Tokens = _.uniqBy(
+  _.flatten(filteredTokens).filter( // filter cosmos based tokens to collect tokens that have contract addresses
+    // TODO: contractAddress for ethereum use different method
+    (token) =>
+      // !token.contractAddress &&
+      token.contractAddress
   ),
   (c) => c.denom
 );

@@ -25,13 +25,6 @@ interface ModalProps {
   isCloseBtn?: boolean;
 }
 
-// const mapTokenToIdPrice = {
-//   ORAI: 'oraichain-token',
-//   LUNA: 'terra-luna',
-//   AIRI: 'airight',
-//   ATOM: 'cosmos',
-//   UST: 'terrausd',
-// };
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {

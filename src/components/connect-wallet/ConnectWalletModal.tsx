@@ -6,6 +6,8 @@ import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
 import MetamaskImage from 'assets/icons/metamask.svg';
 import KeplrImage from 'assets/images/keplr.png';
+import OWalletImage from 'assets/images/owallet.png';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(style);
 
@@ -30,8 +32,10 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
   metamaskAddress,
   disconnectMetamask,
   address,
-  open
+  open,
 }) => {
+  const mobileMode = isMobile();
+
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
       <div className={cx('select')}>
@@ -39,13 +43,24 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
           <div>Connect wallet</div>
         </div>
         <div className={cx('options')}>
-          <LoginWidget
-            text={MESSAGE.Form.Button.ConnectKeplr}
-            address={address}
-            logo={KeplrImage}
-            connect={connectKeplr}
-            disconnect={disconnectKeplr}
-          />
+          {mobileMode ? (
+            <LoginWidget
+              text={MESSAGE.Form.Button.ConnectOWallet}
+              address={address}
+              logo={OWalletImage}
+              connect={connectKeplr}
+              disconnect={disconnectKeplr}
+            />
+          ) : (
+            <LoginWidget
+              text={MESSAGE.Form.Button.ConnectKeplr}
+              address={address}
+              logo={KeplrImage}
+              connect={connectKeplr}
+              disconnect={disconnectKeplr}
+            />
+          )}
+
           <LoginWidget
             address={metamaskAddress}
             logo={MetamaskImage}

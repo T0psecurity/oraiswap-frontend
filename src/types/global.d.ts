@@ -100,6 +100,9 @@ declare global {
     web3: Web3;
     ethereum: MetaMaskEthereumProvider;
     Metamask: Metamask;
+    ReactNativeWebView?: {
+      postMessage(msg: string): void;
+    };
     keplr: keplr;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;

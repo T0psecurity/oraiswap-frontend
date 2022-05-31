@@ -42,38 +42,7 @@ export const embedChainInfos: ChainInfo[] = [
       average: 0.000025,
       high: 0.00004
     },
-    features: ['stargate', 'ibc-transfer', 'cosmwasm']
-  },
-  {
-    rpc: 'https://rpc.orai.io',
-    rest: 'https://lcd.orai.io',
-    chainId: 'Oraichain',
-    chainName: 'Oraichain',
-    stakeCurrency: {
-      coinDenom: 'ORAI',
-      coinMinimalDenom: 'orai',
-      coinDecimals: 6,
-      coinGeckoId: 'oraichain-token',
-      coinImageUrl:
-        'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
-    },
-    walletUrl: 'https://api.wallet.orai.io',
-    bip44: {
-      coinType: 118
-    },
-    bech32Config: Bech32Address.defaultBech32Config('orai'),
-    get currencies() {
-      return [this.stakeCurrency];
-    },
-    get feeCurrencies() {
-      return [this.stakeCurrency];
-    },
-    gasPriceStep: {
-      low: 0,
-      average: 0.000025,
-      high: 0.00004
-    },
-    features: ['stargate', 'ibc-transfer', 'cosmwasm']
+    features: ['stargate', 'no-legacy-stdTx', 'ibc-transfer', 'cosmwasm']
   },
   {
     rpc: ORAI_BRIDGE_RPC,

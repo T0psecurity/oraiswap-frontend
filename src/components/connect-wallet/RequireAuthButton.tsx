@@ -26,8 +26,7 @@ const RequireAuthButton: React.FC<any> = ({
 
   const connectMetamask = async () => {
     try {
-      await activate(injected);
-      alert(await injected.getAccount());
+      await activate(injected);      
       setMetamaskAddress(await injected.getAccount());
       // window.location.reload();
     } catch (ex) {
