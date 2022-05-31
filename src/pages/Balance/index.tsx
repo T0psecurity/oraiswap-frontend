@@ -533,7 +533,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const _fromAmount = parseAmountTo(amount, token.decimals).toString();
+      const _fromAmount = parseAmountTo(amount, token.decimals).toFixed(0);
+
       let msgs;
       if (type === 'nativeToCw20') {
         msgs = await generateConvertMsgs({
