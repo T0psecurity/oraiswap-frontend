@@ -36,25 +36,24 @@ class CosmJs {
    * @param args - an object containing essential parameters to execute contract
    * @returns - transaction hash after executing the contract
    */
-  static async execute(args: {
+  static async execute({
+    address,
+    handleMsg,
+    handleOptions,
+    gasAmount,
+    gasLimits = { exec: 2000000 },
+    prefix,
+    walletAddr
+  }: {
     prefix?: string;
     walletAddr: string;
     address: string;
     handleMsg: string;
     handleOptions?: HandleOptions;
     gasAmount: { amount: string; denom: string };
-    gasLimits?: { exec: 200000000 };
+    gasLimits?: { exec: number };
   }) {
     try {
-      const {
-        address,
-        handleMsg,
-        handleOptions,
-        gasAmount,
-        gasLimits,
-        prefix,
-        walletAddr
-      } = args;
       if (await window.Keplr.getKeplr())
         await window.Keplr.suggestChain(network.chainId);
       const wallet = await collectWallet();
