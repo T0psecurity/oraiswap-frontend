@@ -8,6 +8,7 @@ import { ReactComponent as LUNA } from 'assets/icons/luna.svg';
 import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
+import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 import {
@@ -20,6 +21,7 @@ import {
   ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
   EVM_DECIMALS,
+  KWT_BSC_CONTRACT,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_LCD,
@@ -62,7 +64,8 @@ export type TokenItemType = {
   | 'terrausd'
   | 'terra-luna'
   | 'oraix'
-  | 'tether';
+  | 'tether'
+  | 'kawaii-islands';
   cosmosBased: Boolean;
 };
 
@@ -170,6 +173,20 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'tether',
         cosmosBased: true,
         Icon: USDT
+      },
+      {
+        name: 'BEP20 KWT',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_CHAIN_ID,
+        coinType: 118,
+        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + KWT_BSC_CONTRACT,
+        rpc: ORAI_BRIDGE_RPC,
+        lcd: ORAI_BRIDGE_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'kawaii-islands',
+        cosmosBased: true,
+        Icon: KWT
       },
       // {
       //   name: 'ERC20 ORAI',
@@ -372,6 +389,19 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
         Icon: USDT
+      },
+      {
+        name: 'BEP20 KWT',
+        org: 'Oraichain',
+        prefix: 'orai',
+        coingeckoId: 'kawaii-islands',
+        denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
+        decimals: EVM_DECIMALS,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: KWT
       },
       {
         name: 'ORAIX',

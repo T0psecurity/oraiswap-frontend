@@ -131,6 +131,7 @@ declare global {
       REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
+      REACT_APP_KWTBSC_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
@@ -153,4 +154,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export {};
+export { };
