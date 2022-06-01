@@ -3,9 +3,10 @@ import { embedChainInfos } from 'config/chainInfos';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
-import { Key } from '@keplr-wallet/types';
+import { Key, Keplr as keplr } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
+import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
 
 const hash160 = (buffer: Uint8Array) => {
   var t = createHash('sha256').update(buffer).digest();
@@ -19,6 +20,15 @@ export default class Keplr {
     // clear data?
   }
 
+  // priority with owallet
+  private get keplr(): keplr {
+    return (window as any).owallet || window.keplr;
+  }
+
+  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
+    return this.keplr.getOfflineSigner(chainId);
+  }
+
   async suggestChain(chainId: string) {
     if (!window.keplr) return;
     const chainInfo = embedChainInfos.find(
@@ -27,14 +37,14 @@ export default class Keplr {
 
     // if there is chainInfo try to suggest, otherwise enable it
     if (!isMobile() && chainInfo) {
-      await window.keplr.experimentalSuggestChain(chainInfo);
+      await this.keplr.experimentalSuggestChain(chainInfo);
     }
-    await window.keplr.enable(chainId);
+    await this.keplr.enable(chainId);
   }
 
   async suggestToken(token: TokenItemType) {
     if (token.contractAddress) {
-      const keplr = await window.Keplr.getKeplr();
+      const keplr = await this.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.KEPLR_FAILED, {
           message: 'You need to install Keplr to continue'
@@ -47,7 +57,7 @@ export default class Keplr {
 
   async getKeplr(): Promise<keplrType | undefined> {
     if (document.readyState === 'complete') {
-      return window.keplr;
+      return this.keplr;
     }
 
     return new Promise((resolve) => {
@@ -56,7 +66,7 @@ export default class Keplr {
           event.target &&
           (event.target as Document).readyState === 'complete'
         ) {
-          resolve(window.keplr);
+          resolve(this.keplr);
           document.removeEventListener('readystatechange', documentStateChange);
         }
       };

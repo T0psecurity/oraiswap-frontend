@@ -18,7 +18,15 @@ const App = () => {
   const updateAddress = async () => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
-    if (!keplr) throw 'You must install Keplr to continue';
+    if (!keplr) {
+      return displayToast(
+        TToastType.TX_INFO,
+        {
+          message: 'You must install Keplr to continue'
+        },
+        { toastId: 'install_keplr' }
+      );
+    }
     const newAddress = await window.Keplr.getKeplrAddr();
     if (newAddress) {
       if (newAddress === address) {

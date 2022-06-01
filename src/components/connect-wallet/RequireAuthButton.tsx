@@ -4,6 +4,7 @@ import { network } from 'config/networks';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 56]
@@ -26,7 +27,7 @@ const RequireAuthButton: React.FC<any> = ({
 
   const connectMetamask = async () => {
     try {
-      await activate(injected);      
+      await activate(injected);
       setMetamaskAddress(await injected.getAccount());
       // window.location.reload();
     } catch (ex) {
@@ -45,8 +46,13 @@ const RequireAuthButton: React.FC<any> = ({
 
   const connectKeplr = async () => {
     if (!(await window.Keplr.getKeplr())) {
-      alert('You must install Keplr to continue');
-      return;
+      return displayToast(
+        TToastType.TX_INFO,
+        {
+          message: 'You must install Keplr to continue'
+        },
+        { toastId: 'install_keplr' }
+      );
     }
 
     await window.Keplr.suggestChain(network.chainId);
