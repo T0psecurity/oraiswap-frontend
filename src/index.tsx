@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import Metamask from 'libs/metamask';
+import { KWT_SUBNETWORK_CHAIN_ID } from 'config/constants';
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -26,6 +27,7 @@ const startApp = async () => {
       await window.Keplr.suggestChain(network.chainId);
       await window.Keplr.suggestChain('columbus-5');
       await window.Keplr.suggestChain('oraibridge-subnet');
+      await window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID);
     }
   } catch (ex) {
     console.log(ex);

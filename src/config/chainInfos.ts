@@ -73,7 +73,37 @@ export const embedChainInfos: ChainInfo[] = [
       high: 0
     },
     features: ['stargate', 'ibc-transfer', 'cosmwasm']
-  }
+  },
+  {
+    rpc: 'https://tendermint1.orai.io',
+    rest: 'https://cosmos1.orai.io',
+    chainId: 'kawaii_6886-1',
+    chainName: 'Kawaiiverse',
+    stakeCurrency: {
+      coinDenom: 'ORAIE',
+      coinMinimalDenom: 'oraie',
+      coinDecimals: 18,
+      coinGeckoId: 'oraichain-token',
+      coinImageUrl:
+        'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
+    },    
+    bip44: {
+      coinType: 118
+    },
+    bech32Config: Bech32Address.defaultBech32Config('oraie'),
+    get currencies() {
+      return [this.stakeCurrency];
+    },
+    get feeCurrencies() {
+      return [this.stakeCurrency];
+    },
+    gasPriceStep: {
+      low: 0,
+      average: 0.000025,
+      high: 0.00004
+    },
+    features: ['stargate', 'no-legacy-stdTx', 'ibc-transfer', 'cosmwasm']
+  },
 ];
 
 // console.log(embedChainInfos[2]);

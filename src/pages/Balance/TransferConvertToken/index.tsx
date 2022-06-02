@@ -21,22 +21,26 @@ type AmountDetail = {
   usd: number;
 };
 
-interface ConvertToNativeProps {
+interface TransferConvertProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
   convertToken?: any;
   transferIBC?: any;
   transferFromGravity?: any;
   convertKwt?: any;
+  onClickTransfer?: any;
+  toToken: TokenItemType;
 }
 
-const ConvertToken: FC<ConvertToNativeProps> = ({
+const TransferConvertToken: FC<TransferConvertProps> = ({
   token,
   amountDetail,
   convertToken,
   transferIBC,
   transferFromGravity,
   convertKwt,
+  onClickTransfer,
+  toToken,
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
   const [convertLoading, setConvertLoading] = useState(false);
@@ -50,7 +54,7 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
 
-  if (!name && !ibcConvertToken && token.chainId !== KWT_SUBNETWORK_CHAIN_ID)
+  if (!name && !ibcConvertToken && token.chainId !== KWT_SUBNETWORK_CHAIN_ID && !onClickTransfer)
     return <></>;
   return (
     <div
@@ -132,6 +136,26 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
           alignItems: 'center',
         }}
       >
+        {onClickTransfer && (
+          <button
+            className={styles.tfBtn}
+            disabled={transferLoading}
+            onClick={async (event) => {
+              event.stopPropagation();
+              try {
+                setTransferLoading(true);
+                await onClickTransfer(convertAmount);
+              } finally {
+                setTransferLoading(false);
+              }
+            }}
+          >
+            {transferLoading && <Loader width={20} height={20} />}
+            <span>
+              Transfer to <strong>{toToken.org}</strong>
+            </span>
+          </button>
+        )}
         {(() => {
           if (
             token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
@@ -140,23 +164,6 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
           ) {
             return (
               <>
-                <button
-                  disabled={transferLoading}
-                  className={styles.tfBtn}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      setTransferLoading(true);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer To <strong>Kawaii Sub-network</strong>
-                  </span>
-                </button>
                 <button
                   disabled={transferLoading}
                   className={styles.tfBtn}
@@ -247,7 +254,7 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
             );
           }
 
-          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && name) {
+          if (token.cosmosBased && token.chainId !== ORAI_BRIDGE_CHAIN_ID && name) {
             return (
               <>
                 <button
@@ -331,4 +338,4 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
     </div>
   );
 };
-export default ConvertToken;
+export default TransferConvertToken;

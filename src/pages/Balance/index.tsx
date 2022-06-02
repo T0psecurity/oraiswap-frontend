@@ -47,8 +47,7 @@ import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
-import TransferToken from './TransferToken';
-import ConvertToken from './ConvertToken';
+import TransferConvertToken from './TransferConvertToken';
 
 interface BalanceProps {}
 
@@ -126,28 +125,15 @@ const TokenItem: React.FC<TokenItemProps> = ({
         </div>
       </div>
       <div>
-        {active && onClickTransfer && (
-          <TransferToken
-            token={token}
-            amountDetail={amountDetail}
-            onClickTransfer={onClickTransfer}
-            toToken={toToken}
-          />
-        )}
-        {active && token.cosmosBased && (
-          <ConvertToken
+        {active && (
+          <TransferConvertToken
             token={token}
             amountDetail={amountDetail}
             convertToken={convertToken}
             transferFromGravity={transferFromGravity}
             transferIBC={transferIBC}
-          />
-        )}
-        {active && token.chainId === KWT_SUBNETWORK_CHAIN_ID && (
-          <ConvertToken
-            token={token}
-            amountDetail={amountDetail}
-            convertToken={convertToken}
+            onClickTransfer={onClickTransfer}
+            toToken={toToken}
             convertKwt={convertKwt}
           />
         )}
@@ -275,7 +261,12 @@ const Balance: React.FC<BalanceProps> = () => {
       const amountDetails = Object.fromEntries(
         await Promise.all(
           pendingTokens.map(async (token) => {
-            const address = await window.Keplr.getKeplrAddr(token.chainId);
+            const address = await window.Keplr.getKeplrAddr(
+              token.chainId
+            ).catch((error) => {
+              console.log(error);
+              return undefined;
+            });
             return loadAmountDetail(address, token, pendingList);
           })
         )
@@ -603,6 +594,9 @@ const Balance: React.FC<BalanceProps> = () => {
     toTokens: TokenItemType[],
     from: TokenItemType
   ) => {
+    if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID)
+      return toTokens.find((t) => t.name.includes(from.name));
+
     return toTokens.find(
       (t) =>
         !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
@@ -759,12 +753,15 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
                 <div className={styles.tableContent}>
                   {toTokens
-                    .filter(
-                      (t) =>
+                    .filter((t) => {
+                      if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID)
+                        return t.name.includes(from.name);
+                      return (
                         !from ||
                         (from.chainId !== ORAI_BRIDGE_CHAIN_ID &&
                           t.name === from.name)
-                    )
+                      );
+                    })
                     .map((t: TokenItemType) => {
                       return (
                         <TokenItem

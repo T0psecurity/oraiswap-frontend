@@ -1,5 +1,5 @@
 import { IBCInfo } from 'types/ibc';
-import { IBC_TRANSFER_TIMEOUT, ORAI_BRIDGE_CHAIN_ID } from './constants';
+import { IBC_TRANSFER_TIMEOUT, KWT_SUBNETWORK_CHAIN_ID, ORAI_BRIDGE_CHAIN_ID } from './constants';
 import { network, NetworkKey } from './networks';
 
 const [atom2oraichain, oraicbain2atom] =
@@ -11,6 +11,8 @@ const [osmosis2oraichain, oraicbain2osmosis] =
 
 const [oraib2oraichain, oraichain2oraib] =
   process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS.split(/\s+/);
+  const [kwt2oraichain, oraichain2kwt] =
+  process.env.REACT_APP_KWT_ORAICHAIN_CHANNELS.split(/\s+/);
 
 export interface IBCInfoMap {
   [key: string]: { [key: string]: IBCInfo };
@@ -40,6 +42,13 @@ const ibcInfosMap: Record<NetworkKey, IBCInfoMap> = {
         timeout: IBC_TRANSFER_TIMEOUT
       }
     },
+    [KWT_SUBNETWORK_CHAIN_ID]: {
+      Oraichain: {
+        source: 'transfer',
+        channel: kwt2oraichain,
+        timeout: IBC_TRANSFER_TIMEOUT
+      }
+    },
     Oraichain: {
       'cosmoshub-4': {
         source: 'transfer',
@@ -59,6 +68,11 @@ const ibcInfosMap: Record<NetworkKey, IBCInfoMap> = {
       [ORAI_BRIDGE_CHAIN_ID]: {
         source: 'transfer',
         channel: oraichain2oraib,
+        timeout: IBC_TRANSFER_TIMEOUT
+      },
+      [KWT_SUBNETWORK_CHAIN_ID]: {
+        source: 'transfer',
+        channel: oraichain2kwt,
         timeout: IBC_TRANSFER_TIMEOUT
       }
     },
