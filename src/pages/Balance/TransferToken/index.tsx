@@ -20,17 +20,15 @@ type AmountDetail = {
 interface TransferTokenProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
-  convertToken?: any;
-  transferIBC?: any;
-  transferFromGravity?: any;
-  name?: string;
   onClickTransfer?: any;
+  toToken: TokenItemType;
 }
 
 const TransferToken: FC<TransferTokenProps> = ({
   token,
   amountDetail,
   onClickTransfer,
+  toToken,
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
@@ -129,7 +127,9 @@ const TransferToken: FC<TransferTokenProps> = ({
           }}
         >
           {transferLoading && <Loader width={20} height={20} />}
-          <span>Transfer</span>
+          <span>
+            Transfer to <strong>{toToken.org}</strong>
+          </span>
         </button>
       </div>
     </div>

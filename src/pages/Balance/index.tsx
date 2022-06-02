@@ -131,6 +131,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             token={token}
             amountDetail={amountDetail}
             onClickTransfer={onClickTransfer}
+            toToken={toToken}
           />
         )}
         {active && token.cosmosBased && (
@@ -697,6 +698,7 @@ const Balance: React.FC<BalanceProps> = () => {
                             ? convertKwt
                             : undefined
                         }
+                        toToken={to}
                       />
                     );
                   })}
@@ -779,6 +781,7 @@ const Balance: React.FC<BalanceProps> = () => {
                                   onClickTransfer(fromAmount, to, from)
                               : undefined
                           }
+                          toToken={from}
                         />
                       );
                     })}
