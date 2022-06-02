@@ -27,13 +27,11 @@ interface ConvertToNativeProps {
   convertToken?: any;
   transferIBC?: any;
   transferFromGravity?: any;
-  name?: string;
   convertKwt?: any;
 }
 
 const ConvertToken: FC<ConvertToNativeProps> = ({
   token,
-  name,
   amountDetail,
   convertToken,
   transferIBC,
@@ -44,14 +42,15 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
   const [convertLoading, setConvertLoading] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
 
-  const evmTokenOnOrai = filteredTokens.find(
+  const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
+  const ibcConvertToken = filteredTokens.find(
     (t) =>
       t.cosmosBased &&
       (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) &&
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
 
-  if (!name && !evmTokenOnOrai && token.chainId !== KWT_SUBNETWORK_CHAIN_ID)
+  if (!name && !ibcConvertToken && token.chainId !== KWT_SUBNETWORK_CHAIN_ID)
     return <></>;
   return (
     <div
@@ -134,6 +133,57 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
         }}
       >
         {(() => {
+          if (
+            token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
+            token.cosmosBased &&
+            name
+          ) {
+            return (
+              <>
+                <button
+                  disabled={transferLoading}
+                  className={styles.tfBtn}
+                  onClick={async (event) => {
+                    event.stopPropagation();
+                    try {
+                      setTransferLoading(true);
+                    } finally {
+                      setTransferLoading(false);
+                    }
+                  }}
+                >
+                  {transferLoading && <Loader width={20} height={20} />}
+                  <span>
+                    Transfer To <strong>Kawaii Sub-network</strong>
+                  </span>
+                </button>
+                <button
+                  disabled={transferLoading}
+                  className={styles.tfBtn}
+                  onClick={async (event) => {
+                    event.stopPropagation();
+                    try {
+                      setTransferLoading(true);
+                      const to = filteredTokens.find(
+                        (t) =>
+                          t.chainId === ORAI_BRIDGE_CHAIN_ID &&
+                          t.name === token.name
+                      );
+                      await transferIBC(token, to, convertAmount);
+                    } finally {
+                      setTransferLoading(false);
+                    }
+                  }}
+                >
+                  {transferLoading && <Loader width={20} height={20} />}
+                  <span>
+                    Transfer To <strong>OraiBridge</strong>
+                  </span>
+                </button>
+              </>
+            );
+          }
+
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
             return (
               <>
@@ -197,46 +247,28 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
             );
           }
 
-          return (
-            <>
-              {token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
-                (name || !!evmTokenOnOrai) && (
-                  <button
-                    className={styles.tfBtn}
-                    disabled={convertLoading}
-                    onClick={async (event) => {
-                      event.stopPropagation();
-                      try {
-                        setConvertLoading(true);
-                        if (!name)
-                          await convertToken(
-                            convertAmount,
-                            token,
-                            'cw20ToNative',
-                            evmTokenOnOrai
-                          );
-                        else
-                          await convertToken(
-                            convertAmount,
-                            token,
-                            'nativeToCw20'
-                          );
-                      } finally {
-                        setConvertLoading(false);
-                      }
-                    }}
-                  >
-                    {convertLoading && <Loader width={20} height={20} />}
-                    <span>
-                      Convert To{' '}
-                      <strong style={{ marginLeft: 5 }}>
-                        {name ?? evmTokenOnOrai.name}
-                      </strong>
-                    </span>
-                  </button>
-                )}
-
-              {token.chainId !== ORAI_BRIDGE_CHAIN_ID && name && (
+          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && name) {
+            return (
+              <>
+                <button
+                  className={styles.tfBtn}
+                  disabled={convertLoading}
+                  onClick={async (event) => {
+                    event.stopPropagation();
+                    try {
+                      setConvertLoading(true);
+                      await convertToken(convertAmount, token, 'nativeToCw20');
+                    } finally {
+                      setConvertLoading(false);
+                    }
+                  }}
+                >
+                  {convertLoading && <Loader width={20} height={20} />}
+                  <span>
+                    Convert To
+                    <strong style={{ marginLeft: 5 }}>{name}</strong>
+                  </span>
+                </button>
                 <button
                   disabled={transferLoading}
                   className={styles.tfBtn}
@@ -260,9 +292,40 @@ const ConvertToken: FC<ConvertToNativeProps> = ({
                     Transfer To <strong>OraiBridge</strong>
                   </span>
                 </button>
-              )}
-            </>
-          );
+              </>
+            );
+          }
+
+          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken) {
+            return (
+              <button
+                className={styles.tfBtn}
+                disabled={convertLoading}
+                onClick={async (event) => {
+                  event.stopPropagation();
+                  try {
+                    setConvertLoading(true);
+                    await convertToken(
+                      convertAmount,
+                      token,
+                      'cw20ToNative',
+                      ibcConvertToken
+                    );
+                  } finally {
+                    setConvertLoading(false);
+                  }
+                }}
+              >
+                {convertLoading && <Loader width={20} height={20} />}
+                <span>
+                  Convert To
+                  <strong style={{ marginLeft: 5 }}>
+                    {ibcConvertToken.name}
+                  </strong>
+                </span>
+              </button>
+            );
+          }
         })()}
       </div>
     </div>

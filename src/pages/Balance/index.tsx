@@ -86,9 +86,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
   toToken,
   convertKwt,
 }) => {
-  // get token name
-  const evmName = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
-
   return (
     <div
       className={classNames(
@@ -138,7 +135,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
         )}
         {active && token.cosmosBased && (
           <ConvertToken
-            name={evmName}
             token={token}
             amountDetail={amountDetail}
             convertToken={convertToken}
@@ -148,7 +144,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
         )}
         {active && token.chainId === KWT_SUBNETWORK_CHAIN_ID && (
           <ConvertToken
-            name={evmName}
             token={token}
             amountDetail={amountDetail}
             convertToken={convertToken}
