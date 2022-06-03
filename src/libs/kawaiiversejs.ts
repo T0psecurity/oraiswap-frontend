@@ -59,7 +59,7 @@ export default class KawaiiverseJs {
   static async convertCoin({
     sender,
     gasAmount,
-    gasLimits = { exec: 2000000 },
+    gasLimits = { exec: 2400000 },
     coin,
   }: {
     sender: string;
@@ -145,8 +145,8 @@ export default class KawaiiverseJs {
         amount,
       }
 
-      const { signDirect } = createMessageConvertERC20({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, '', params);
-
+      const { signDirect } = createMessageConvertERC20({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, '', params);      
+      
       return submit({ wallet, signDirect, chainId: subnetwork.chainId, rpc: subnetwork.rpc, accountNumber: senderInfo.accountNumber, signer: senderInfo.accountAddress });
     } catch (error) {
       console.log('error in converting ERC20: ', error);

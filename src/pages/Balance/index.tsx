@@ -38,6 +38,7 @@ import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   ERC20_ORAI,
+  KAWAII_API_DEV,
   KWT,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
@@ -52,6 +53,7 @@ import { initEthereum } from 'polyfill';
 import TransferConvertToken from './TransferConvertToken';
 import { useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
+import axios from 'axios';
 
 interface BalanceProps {}
 
@@ -162,6 +164,7 @@ const Balance: React.FC<BalanceProps> = () => {
   let tokenUrl = searchParams.get('token');
   const [keplrAddress] = useGlobalState('address');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
+  const [kwtSubnetAddress, setKwtSubnetAddress] = useState<string>();
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
@@ -184,16 +187,33 @@ const Balance: React.FC<BalanceProps> = () => {
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
 
   useEffect(() => {
-    const _initEthereum = async () => {
-      try {
-        await initEthereum();
-      } catch (error) {
-        console.log(error);
-      }
-    };
     _initEthereum();
+    getKwtSubnetAddress();
   }, []);
 
+  const getKwtSubnetAddress = async () => {
+    try {
+      let address = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
+      const { address_eth } = (
+        await axios.get(
+          `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${address}`
+        )
+      ).data;
+      setKwtSubnetAddress(address_eth);
+    } catch (error) {
+      displayToast(TToastType.TX_FAILED, {
+        message: error.message,
+      });
+    }
+  };
+
+  const _initEthereum = async () => {
+    try {
+      await initEthereum();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const loadAmountDetail = async (
     address: Bech32Address | string | undefined,
     token: TokenItemType,
@@ -246,6 +266,35 @@ const Balance: React.FC<BalanceProps> = () => {
           },
         ];
       })
+    );
+
+    const amountDetails = Object.fromEntries(entries);
+    // update amounts
+    setAmounts((old) => ({ ...old, ...amountDetails }));
+  };
+
+  const loadKawaiiSubnetAmount = async () => {
+    const entries = await Promise.all(
+      kawaiiTokens
+        .filter((t) => !!t.contractAddress)
+        .map(async (token) => {
+          const amount = await window.Metamask.getOraiBalance(
+            kwtSubnetAddress,
+            token
+          );
+
+          return [
+            token.denom,
+            {
+              amount,
+              usd: getUsd(
+                amount,
+                prices[token.coingeckoId].price,
+                token.decimals
+              ),
+            },
+          ];
+        })
     );
 
     const amountDetails = Object.fromEntries(entries);
@@ -320,6 +369,12 @@ const Balance: React.FC<BalanceProps> = () => {
       loadEvmOraiAmounts();
     }
   }, [metamaskAddress, prices, txHash]);
+
+  useEffect(() => {
+    if (!!kwtSubnetAddress) {
+      loadKawaiiSubnetAmount();
+    }
+  }, [kwtSubnetAddress, prices, txHash]);
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
@@ -636,7 +691,6 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       let result;
-      console.log(fromAddress);
 
       if (!fromToken.contractAddress)
         result = await KawaiiverseJs.convertCoin({
@@ -654,7 +708,6 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(fromToken, result);
     } catch (ex: any) {
       console.log(ex);
-
       displayToast(TToastType.TX_FAILED, {
         message: ex.message,
       });
