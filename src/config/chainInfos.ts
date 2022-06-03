@@ -81,9 +81,9 @@ export const embedChainInfos: ChainInfo[] = [
     chainName: 'Kawaii Islands network',
     stakeCurrency: {
       coinDenom: 'ORAIE',
-      coinMinimalDenom: 'uoraie',
+      coinMinimalDenom: 'oraie',
       coinDecimals: 18,
-      coinGeckoId: 'uoraie',
+      coinGeckoId: 'oraie',
     },
     bip44: {
       coinType: 60,
