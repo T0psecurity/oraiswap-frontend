@@ -45,6 +45,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
   const [convertLoading, setConvertLoading] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
+  const [transferIbcLoading, setTransferIbcLoading] = useState(false)
 
   const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   const ibcConvertToken = filteredTokens.find(
@@ -139,18 +140,18 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         {onClickTransfer && (
           <button
             className={styles.tfBtn}
-            disabled={transferLoading}
+            disabled={transferIbcLoading}
             onClick={async (event) => {
               event.stopPropagation();
               try {
-                setTransferLoading(true);
+                setTransferIbcLoading(true);
                 await onClickTransfer(convertAmount);
               } finally {
-                setTransferLoading(false);
+                setTransferIbcLoading(false);
               }
             }}
           >
-            {transferLoading && <Loader width={20} height={20} />}
+            {transferIbcLoading && <Loader width={20} height={20} />}
             <span>
               Transfer to <strong>{toToken.org}</strong>
             </span>
