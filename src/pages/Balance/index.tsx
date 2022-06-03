@@ -346,7 +346,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const processTxResult = (
     token: TokenItemType,
-    result: BroadcastTxResponse
+    result: BroadcastTxResponse,
+    customLink?: string,
   ) => {
     if (isBroadcastTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
@@ -354,7 +355,7 @@ const Balance: React.FC<BalanceProps> = () => {
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
+        customLink: customLink ? customLink : `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
       });
     }
     setTxHash(result.transactionHash);
@@ -690,7 +691,7 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.denom
       );
 
-      let result;
+      let result: BroadcastTxResponse;
 
       if (!fromToken.contractAddress) {
         result = await KawaiiverseJs.convertCoin({
@@ -705,7 +706,7 @@ const Balance: React.FC<BalanceProps> = () => {
           amount: amount.amount,
         });
       }
-      processTxResult(fromToken, result);
+      processTxResult(fromToken, result, `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`);
     } catch (ex: any) {
       console.log(ex);
       displayToast(TToastType.TX_FAILED, {
