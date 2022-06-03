@@ -48,6 +48,7 @@ import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import TransferConvertToken from './TransferConvertToken';
+import { useSearchParams } from 'react-router-dom';
 
 interface BalanceProps {}
 
@@ -154,6 +155,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
 type AmountDetails = { [key: string]: AmountDetail };
 
 const Balance: React.FC<BalanceProps> = () => {
+  const [searchParams] = useSearchParams();
+  let tokenUrl = searchParams.get('token');
   const [keplrAddress] = useGlobalState('address');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [from, setFrom] = useState<TokenItemType>();
@@ -163,7 +166,13 @@ const Balance: React.FC<BalanceProps> = () => {
   ]);
   const [ibcLoading, setIBCLoading] = useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
-  const [[fromTokens, toTokens], setTokens] = useState(tokens);
+  const [[fromTokens, toTokens], setTokens] = useState(() => {
+    if (!tokenUrl) return tokens;
+    const _tokenUrl = tokenUrl.toUpperCase();
+    return tokens.map((childTokens) =>
+      childTokens.filter((t) => t.name.includes(_tokenUrl))
+    );
+  });
   const [txHash, setTxHash] = useState('');
   const { prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
