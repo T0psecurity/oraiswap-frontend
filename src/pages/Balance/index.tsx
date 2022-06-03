@@ -692,19 +692,23 @@ const Balance: React.FC<BalanceProps> = () => {
 
       let result;
 
-      if (!fromToken.contractAddress)
+      if (!fromToken.contractAddress) {
+        const memo = `sender: ${fromAddress} \n
+          receiver: ${kwtSubnetAddress}`;
         result = await KawaiiverseJs.convertCoin({
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           coin: amount,
         });
-      else
+      } else {
+        const memo = `sender: ${kwtSubnetAddress} \n
+        receiver: ${fromAddress}`;
         result = await KawaiiverseJs.convertERC20({
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           amount: amount.amount,
         });
-
+      }
       processTxResult(fromToken, result);
     } catch (ex: any) {
       console.log(ex);
