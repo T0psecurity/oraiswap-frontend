@@ -62,4 +62,5 @@ export const ORAIX_CLAIM_CONTRACT = 'orai1gzc0vhqadf5pj8vtylgkwrmcuxp5mk8nsvpdfw
 // Kawaiiverse subnetwork
 export const KAWAII_RPC = 'ttps://tendermint1.kawaii.global';
 export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
+export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';

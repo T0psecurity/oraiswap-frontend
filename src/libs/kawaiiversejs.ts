@@ -1,11 +1,12 @@
 import { collectWallet } from './cosmjs';
 import { StargateClient } from '@cosmjs/stargate';
 import { kawaiiTokens } from 'config/bridgeTokens';
-import { KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
+import { KAWAII_API_DEV, KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
 import { createMessageConvertCoin, createMessageConvertERC20 } from '@oraichain/kawaiiversejs';
 import Long from 'long';
 import { createTxRaw } from '@tharsis/proto';
 import { OfflineDirectSigner } from '@cosmjs/proto-signing';
+import axios from 'rest/request';
 
 async function getAccountInfo(accAddress: string) {
   return await fetch(
@@ -57,13 +58,11 @@ export default class KawaiiverseJs {
    */
   static async convertCoin({
     sender,
-    receiver,
     gasAmount,
     gasLimits = { exec: 2000000 },
     coin,
   }: {
     sender: string;
-    receiver: string;
     gasAmount: { amount: string; denom: string };
     gasLimits?: { exec: number };
     coin: { amount: string, denom: string }
@@ -86,9 +85,10 @@ export default class KawaiiverseJs {
       }
 
       const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
+      const { address_eth } = await (await axios.get(`${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`)).data;
 
       const params = {
-        destinationAddress: receiver,
+        destinationAddress: address_eth,
         amount: coin.amount.toString(),
         denom: coin.denom.toString(),
       }
@@ -109,13 +109,11 @@ export default class KawaiiverseJs {
    */
   static async convertERC20({
     sender,
-    receiver,
     gasAmount,
     gasLimits = { exec: 2000000 },
     amount
   }: {
     sender: string;
-    receiver: string;
     gasAmount: { amount: string; denom: string };
     gasLimits?: { exec: number };
     amount: string
@@ -137,11 +135,13 @@ export default class KawaiiverseJs {
         gas: gasLimits.exec.toString(),
       }
 
-      const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
+      let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
+      const { address_eth } = await (await axios.get(`${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`)).data;
+      senderInfo.accountAddress = address_eth;
 
       const params = {
         contractAddress: KAWAII_CONTRACT,
-        destinationAddress: receiver,
+        destinationAddress: senderInfo.accountAddress, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount,
       }
 
