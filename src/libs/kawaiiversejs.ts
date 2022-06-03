@@ -110,7 +110,7 @@ export default class KawaiiverseJs {
   static async convertERC20({
     sender,
     gasAmount,
-    gasLimits = { exec: 2000000 },
+    gasLimits = { exec: 2400000 },
     amount
   }: {
     sender: string;
