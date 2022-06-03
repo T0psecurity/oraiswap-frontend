@@ -93,7 +93,7 @@ export default class KawaiiverseJs {
         denom: coin.denom.toString(),
       }
 
-      const { signDirect } = createMessageConvertCoin({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, '', params);
+      const { signDirect } = createMessageConvertCoin({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, `sender - ${senderInfo.accountAddress}; receiver - ${params.destinationAddress}`, params);
 
       return submit({ wallet, signDirect, chainId: subnetwork.chainId, rpc: subnetwork.rpc, accountNumber: senderInfo.accountNumber, signer: senderInfo.accountAddress });
     } catch (error) {
@@ -146,7 +146,7 @@ export default class KawaiiverseJs {
       const { address_eth } = await (await axios.get(`${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`)).data;
       senderInfo.accountAddress = address_eth;
 
-      const { signDirect } = createMessageConvertERC20({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, '', params);
+      const { signDirect } = createMessageConvertERC20({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, `sender - ${senderInfo.accountAddress}; receiver - ${params.destinationAddress}`, params);
 
       return submit({ wallet, signDirect, chainId: subnetwork.chainId, rpc: subnetwork.rpc, accountNumber: senderInfo.accountNumber, signer: sender });
     } catch (error) {

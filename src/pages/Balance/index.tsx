@@ -55,7 +55,7 @@ import { useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -693,16 +693,12 @@ const Balance: React.FC<BalanceProps> = () => {
       let result;
 
       if (!fromToken.contractAddress) {
-        const memo = `sender: ${fromAddress} \n
-          receiver: ${kwtSubnetAddress}`;
         result = await KawaiiverseJs.convertCoin({
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           coin: amount,
         });
       } else {
-        const memo = `sender: ${kwtSubnetAddress} \n
-        receiver: ${fromAddress}`;
         result = await KawaiiverseJs.convertERC20({
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
@@ -795,7 +791,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, from, to)
+                              onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -886,7 +882,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!from?.cosmosBased
                               ? (fromAmount: number) =>
-                                  onClickTransfer(fromAmount, to, from)
+                                onClickTransfer(fromAmount, to, from)
                               : undefined
                           }
                           toToken={from}
