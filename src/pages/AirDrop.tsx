@@ -1,7 +1,7 @@
 import Big from 'big.js';
 import { FunctionComponent, useState } from 'react';
 import { useQuery } from 'react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'rest/request';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
@@ -36,6 +36,8 @@ const chainDenomMap = {
 const AirDrop: FunctionComponent = () => {
 
   const { chain } = useParams();
+  const [searchParams] = useSearchParams();
+  const isLp = searchParams.get("lp");
   const chainUpper = chain.toUpperCase();
   const [oraiAddress, setOraiAddress] = useState('');
   const [otherNetworkAddr, setOtherNetworkAddr] = useState('');
@@ -110,8 +112,8 @@ const AirDrop: FunctionComponent = () => {
         fontSize: 20
       }}
     >
-      {chain !== 'cosmos' && (<CustomInput chainName={chainUpper} address={otherNetworkAddr} onChange={handleotherNetworkAddrChange} />)}
-      {chain === 'cosmos' && <CustomInput chainName={"ORAI"} address={oraiAddress} onChange={handleOraiAddrChange} />}
+      {(chain !== 'cosmos' || (chain === 'cosmos' && !isLp)) && (<CustomInput chainName={chainUpper} address={otherNetworkAddr} onChange={handleotherNetworkAddrChange} />)}
+      {chain === 'cosmos' && isLp && <CustomInput chainName={"ORAI"} address={oraiAddress} onChange={handleOraiAddrChange} />}
 
       {!!airdropAmount && (
         <div style={{ marginTop: 10 }}>
@@ -122,9 +124,9 @@ const AirDrop: FunctionComponent = () => {
         </div>
       )
       }
-      {!!airdropLp && !isNaN(airdropLp.lp) && (
+      {!!airdropLp && !isNaN(airdropLp.total_lp) && (
         <div>
-          <div>{`Total liquidity in ${airdropLp.denom.toUpperCase()}-ORAI: ${airdropLp.lp} LP`}</div>
+          <div>{`Total liquidity in ${airdropLp.denom.toUpperCase()}-ORAI: ${airdropLp.total_lp} LP`}</div>
           <div>{`Total IBC ${airdropLp.denom.toUpperCase()} on Oraichain: ${airdropLp[airdropLp.denom]} ${airdropLp.denom.toUpperCase()}`}</div>
         </div>
 
