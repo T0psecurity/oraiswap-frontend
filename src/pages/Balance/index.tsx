@@ -357,9 +357,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
       await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const rawAmount = Math.round(
-        amount * 10 ** fromToken.decimals - parseInt(ORAI_BRIDGE_EVM_FEE)
-      ).toString();
+      const rawAmount = parseAmountToWithDecimal(amount, fromToken.decimals)
+        .minus(ORAI_BRIDGE_EVM_FEE)
+        .toFixed(0);
 
       const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
@@ -533,7 +533,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const _fromAmount = parseAmountTo(amount, token.decimals).toString();
+      const _fromAmount = parseAmountTo(amount, token.decimals).toFixed(0);
+
       let msgs;
       if (type === 'nativeToCw20') {
         msgs = await generateConvertMsgs({
