@@ -136,18 +136,19 @@ export default class KawaiiverseJs {
       }
 
       let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
-      const { address_eth } = await (await axios.get(`${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`)).data;
-      senderInfo.accountAddress = address_eth;
 
       const params = {
         contractAddress: KAWAII_CONTRACT,
-        destinationAddress: senderInfo.accountAddress, // we want to convert erc20 token from eth address to native token with native address => use native sender address
+        destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount,
       }
 
+      const { address_eth } = await (await axios.get(`${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`)).data;
+      senderInfo.accountAddress = address_eth;
+
       const { signDirect } = createMessageConvertERC20({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, '', params);
 
-      return submit({ wallet, signDirect, chainId: subnetwork.chainId, rpc: subnetwork.rpc, accountNumber: senderInfo.accountNumber, signer: senderInfo.accountAddress });
+      return submit({ wallet, signDirect, chainId: subnetwork.chainId, rpc: subnetwork.rpc, accountNumber: senderInfo.accountNumber, signer: sender });
     } catch (error) {
       console.log('error in converting ERC20: ', error);
       throw error;
