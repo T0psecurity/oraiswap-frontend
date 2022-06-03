@@ -42,10 +42,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   onClickTransfer,
   toToken,
 }) => {
-  const [[convertAmount, convertUsd], setConvertAmount] = useState([0, 0]);
+  const [[convertAmount, convertUsd], setConvertAmount] = useState([
+    undefined,
+    0,
+  ]);
   const [convertLoading, setConvertLoading] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
-  const [transferIbcLoading, setTransferIbcLoading] = useState(false)
+  const [transferIbcLoading, setTransferIbcLoading] = useState(false);
 
   const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   const ibcConvertToken = filteredTokens.find(
@@ -55,7 +58,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
 
-  if (!name && !ibcConvertToken && token.chainId !== KWT_SUBNETWORK_CHAIN_ID && !onClickTransfer)
+  if (
+    !name &&
+    !ibcConvertToken &&
+    token.chainId !== KWT_SUBNETWORK_CHAIN_ID &&
+    !onClickTransfer
+  )
     return <></>;
   return (
     <div
@@ -69,6 +77,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         Convert Amount:
       </div>
       <NumberFormat
+        placeholder="0"
         thousandSeparator
         decimalScale={Math.min(6, token.decimals)}
         customInput={Input}
@@ -77,8 +86,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           event.stopPropagation();
         }}
         onValueChange={({ floatValue }) => {
-          if (!floatValue) return setConvertAmount([0, 0]);
-
+          if (!floatValue) return setConvertAmount([undefined, 0]);
           const _floatValue = parseAmountTo(
             floatValue!,
             token.decimals
@@ -255,7 +263,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          if (token.cosmosBased && token.chainId !== ORAI_BRIDGE_CHAIN_ID && name) {
+          if (
+            token.cosmosBased &&
+            token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+            name
+          ) {
             return (
               <>
                 <button
