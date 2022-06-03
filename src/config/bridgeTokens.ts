@@ -255,7 +255,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         org: 'Kawaii Sub-Network',
         chainId: KWT_SUBNETWORK_CHAIN_ID,
         denom: process.env.REACT_APP_KWT_SUB_NETWORK_DENOM,
-        decimals: COSMOS_DECIMALS,
+        decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
         rpc: 'http://167.172.151.137:1317',
         lcd: 'http://167.172.151.137:1317',
