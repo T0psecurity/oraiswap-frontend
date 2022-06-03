@@ -75,8 +75,8 @@ export const embedChainInfos: ChainInfo[] = [
     features: ['stargate', 'ibc-transfer', 'cosmwasm'],
   },
   {
-    rpc: 'http://167.172.151.137:26657',
-    rest: 'http://167.172.151.137:1317',
+    rpc: 'https://tendermint1.kawaii.global',
+    rest: 'https://cosmos1.kawaii.global',
     chainId: 'kawaii_6886-1',
     chainName: 'Kawaii Islands network',
     stakeCurrency: {

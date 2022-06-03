@@ -85,4 +85,6 @@ class CosmJs {
   }
 }
 
+export { collectWallet };
+
 export default CosmJs;

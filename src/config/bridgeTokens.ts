@@ -1,6 +1,4 @@
 import React, { ReactElement } from 'react';
-import { ReactComponent as BNB } from 'assets/icons/bnb.svg';
-import { ReactComponent as ETH } from 'assets/icons/eth.svg';
 import { ReactComponent as ORAI } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
@@ -21,6 +19,9 @@ import {
   ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
   EVM_DECIMALS,
+  KAWAII_CONTRACT,
+  KAWAII_LCD,
+  KAWAII_RPC,
   KWT_BSC_CONTRACT,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
@@ -38,14 +39,14 @@ import {
 export type TokenItemType = {
   name: string;
   org?:
-    | 'Terra'
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaii Sub-Network';
+  | 'Terra'
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum'
+  | 'Kawaii Sub-Network';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -57,17 +58,17 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna'
-    | 'oraix'
-    | 'tether'
-    | 'kawaii-islands';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna'
+  | 'oraix'
+  | 'tether'
+  | 'kawaii-islands';
   cosmosBased: Boolean;
 };
 
@@ -255,12 +256,12 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         org: 'Kawaii Sub-Network',
         chainId: KWT_SUBNETWORK_CHAIN_ID,
         denom: process.env.REACT_APP_KWT_SUB_NETWORK_DENOM,
-        decimals: COSMOS_DECIMALS,
+        decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
-        rpc: 'http://167.172.151.137:1317',
-        lcd: 'http://167.172.151.137:1317',
+        rpc: KAWAII_RPC,
+        lcd: KAWAII_LCD,
         cosmosBased: true,
-        maxGas: 20000 * 0.16,
+        maxGas: 200000 * 2,
         Icon: KWT,
       },
       {
@@ -268,9 +269,9 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         org: 'Kawaii Sub-Network',
         chainId: KWT_SUBNETWORK_CHAIN_ID,
         denom: 'erc20_kwt',
-        contractAddress: '',
-        rpc: 'http://167.172.151.137:1317',
-        lcd: 'http://167.172.151.137:1317',
+        contractAddress: KAWAII_CONTRACT,
+        rpc: KAWAII_RPC,
+        lcd: KAWAII_LCD,
         decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
         cosmosBased: true,
@@ -468,8 +469,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 
@@ -500,6 +501,14 @@ export const evmTokens = _.uniqBy(
     (token) =>
       // !token.contractAddress &&
       token.denom && !token.cosmosBased && token.coingeckoId
+  ),
+  (c) => c.denom
+);
+
+export const kawaiiTokens = _.uniqBy(
+  _.flatten(tokens).filter(
+    (token) =>
+      token.chainId === KWT_SUBNETWORK_CHAIN_ID
   ),
   (c) => c.denom
 );
