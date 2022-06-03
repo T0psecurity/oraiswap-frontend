@@ -75,7 +75,7 @@ export default class KawaiiverseJs {
       if (await window.Keplr.getKeplr())
         await window.Keplr.suggestChain(subnetwork.chainId);
 
-      const wallet = await collectWallet();
+      const wallet = await collectWallet(subnetwork.chainId);
       const accounts = await wallet.getAccounts();
 
       const fee = {
@@ -126,7 +126,7 @@ export default class KawaiiverseJs {
       if (await window.Keplr.getKeplr())
         await window.Keplr.suggestChain(subnetwork.chainId);
 
-      const wallet = await collectWallet();
+      const wallet = await collectWallet(subnetwork.chainId);
       const accounts = await wallet.getAccounts();
 
       const fee = {
