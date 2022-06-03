@@ -202,7 +202,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     event.stopPropagation();
                     try {
                       setTransferLoading(true);
-                      await convertKwt();
+                      await convertKwt(convertAmount, token);
                     } finally {
                       setTransferLoading(false);
                     }

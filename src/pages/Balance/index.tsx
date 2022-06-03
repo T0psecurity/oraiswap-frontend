@@ -20,6 +20,7 @@ import {
   evmTokens,
   filteredTokens,
   gravityContracts,
+  kawaiiTokens,
   TokenItemType,
   tokens,
 } from 'config/bridgeTokens';
@@ -37,6 +38,7 @@ import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   ERC20_ORAI,
+  KWT,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
   ORAI_BRIDGE_CHAIN_ID,
@@ -49,6 +51,7 @@ import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import TransferConvertToken from './TransferConvertToken';
 import { useSearchParams } from 'react-router-dom';
+import KawaiiverseJs from 'libs/kawaiiversejs';
 
 interface BalanceProps {}
 
@@ -612,8 +615,50 @@ const Balance: React.FC<BalanceProps> = () => {
     );
   };
 
-  const convertKwt = () => {
-    console.log('convertKwt');
+  const convertKwt = async (
+    transferAmount: number,
+    fromToken: TokenItemType
+  ) => {
+    try {
+      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) return;
+      await window.Keplr.suggestChain(fromToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+
+      if (!fromAddress) {
+        return;
+      }
+
+      const amount = coin(
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        fromToken.denom
+      );
+
+      let result;
+      console.log(fromAddress);
+
+      if (!fromToken.contractAddress)
+        result = await KawaiiverseJs.convertCoin({
+          sender: fromAddress,
+          gasAmount: { amount: '0', denom: KWT },
+          coin: amount,
+        });
+      else
+        result = await KawaiiverseJs.convertERC20({
+          sender: fromAddress,
+          gasAmount: { amount: '0', denom: KWT },
+          amount: amount.amount,
+        });
+
+      processTxResult(fromToken, result);
+    } catch (ex: any) {
+      console.log(ex);
+
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
+    }
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
