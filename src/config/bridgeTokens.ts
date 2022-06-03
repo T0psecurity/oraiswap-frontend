@@ -40,14 +40,14 @@ import {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Terra'
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaii Sub-Network';
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaii Sub-Network';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -59,17 +59,17 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna'
-  | 'oraix'
-  | 'tether'
-  | 'kawaii-islands';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna'
+    | 'oraix'
+    | 'tether'
+    | 'kawaii-islands';
   cosmosBased: Boolean;
 };
 
@@ -470,8 +470,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 
@@ -501,15 +501,17 @@ export const evmTokens = _.uniqBy(
     // TODO: contractAddress for ethereum use different method
     (token) =>
       // !token.contractAddress &&
-      token.denom && !token.cosmosBased && token.coingeckoId
+      token.denom &&
+      !token.cosmosBased &&
+      token.coingeckoId &&
+      token.chainId !== KWT_SUBNETWORK_CHAIN_ID
   ),
   (c) => c.denom
 );
 
 export const kawaiiTokens = _.uniqBy(
   _.flatten(tokens).filter(
-    (token) =>
-      token.chainId === KWT_SUBNETWORK_CHAIN_ID
+    (token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID
   ),
   (c) => c.denom
 );

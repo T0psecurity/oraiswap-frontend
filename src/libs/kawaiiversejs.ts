@@ -59,7 +59,7 @@ export default class KawaiiverseJs {
   static async convertCoin({
     sender,
     gasAmount,
-    gasLimits = { exec: 2000000 },
+    gasLimits = { exec: 2400000 },
     coin,
   }: {
     sender: string;
