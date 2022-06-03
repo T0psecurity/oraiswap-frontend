@@ -5,7 +5,11 @@ import styles from './index.module.scss';
 import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import {
+  filteredTokens,
+  kawaiiTokens,
+  TokenItemType,
+} from 'config/bridgeTokens';
 import {
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
@@ -201,6 +205,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           }
 
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
+            const to = kawaiiTokens.find((t) => t.denom != token.denom);
+
             return (
               <>
                 <button
@@ -217,7 +223,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   }}
                 >
                   {transferLoading && <Loader width={20} height={20} />}
-                  <span>Convert KWT</span>
+                  <span>
+                    Convert to <strong>{to.name}</strong>
+                  </span>
                 </button>
               </>
             );
