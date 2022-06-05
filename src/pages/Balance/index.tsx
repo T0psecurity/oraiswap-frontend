@@ -54,8 +54,10 @@ import TransferConvertToken from './TransferConvertToken';
 import { useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
+import { useInactiveListener } from 'hooks/useMetamask';
+import { useWeb3React } from '@web3-react/core';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetail = {
   amount: number;
@@ -163,7 +165,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
   const [keplrAddress] = useGlobalState('address');
-  const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [kwtSubnetAddress, setKwtSubnetAddress] = useState<string>();
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
@@ -185,7 +186,8 @@ const Balance: React.FC<BalanceProps> = () => {
   );
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
-
+  const { account: metamaskAddress } = useWeb3React();
+  useInactiveListener();
   useEffect(() => {
     _initEthereum();
     getKwtSubnetAddress();
@@ -347,7 +349,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const processTxResult = (
     token: TokenItemType,
     result: BroadcastTxResponse,
-    customLink?: string,
+    customLink?: string
   ) => {
     if (isBroadcastTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
@@ -355,7 +357,9 @@ const Balance: React.FC<BalanceProps> = () => {
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: customLink ? customLink : `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
+        customLink: customLink
+          ? customLink
+          : `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
       });
     }
     setTxHash(result.transactionHash);
@@ -706,7 +710,11 @@ const Balance: React.FC<BalanceProps> = () => {
           amount: amount.amount,
         });
       }
-      processTxResult(fromToken, result, `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`);
+      processTxResult(
+        fromToken,
+        result,
+        `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
+      );
     } catch (ex: any) {
       console.log(ex);
       displayToast(TToastType.TX_FAILED, {
@@ -792,7 +800,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                              onClickTransfer(fromAmount, from, to)
+                                onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -883,7 +891,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!from?.cosmosBased
                               ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, to, from)
+                                  onClickTransfer(fromAmount, to, from)
                               : undefined
                           }
                           toToken={from}

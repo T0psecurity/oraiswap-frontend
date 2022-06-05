@@ -19,7 +19,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement
+  ReactElement,
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
@@ -34,6 +34,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
 import { fetchNativeTokenBalance } from 'rest/api';
+import { useWeb3React } from '@web3-react/core';
 
 const { Text } = Typography;
 
@@ -42,8 +43,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
-  const [metamaskAddress, setMetamaskAddress] =
-    useGlobalState('metamaskAddress');
+  const { account: metamaskAddress } = useWeb3React();
   const [metamaskBalance, setMetamaskBalance] = useState('0');
 
   const [open, setOpen] = useState(false);
@@ -54,9 +54,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balance
+    data: balance,
   } = useQuery(['balance', address], () => fetchNativeTokenBalance(address), {
-    enabled: address?.length > 0
+    enabled: address?.length > 0,
   });
 
   useEffect(() => {
@@ -112,7 +112,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
               address={address}
               setAddress={setAddress}
               metamaskAddress={metamaskAddress}
-              setMetamaskAddress={setMetamaskAddress}
             >
               {address && (
                 <div className={styles.token_info}>
@@ -132,7 +131,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: balance,
                           decimals: 6,
-                          denom: ORAI
+                          denom: ORAI,
                         }}
                         className={styles.token_balance}
                         decimalScale={4}
@@ -141,8 +140,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                   </div>
                 </div>
               )}
-
-              {metamaskAddress && (
+              {!!metamaskAddress && (
                 <div className={styles.token_info}>
                   <AvatarPlaceholder
                     address={metamaskAddress}
@@ -164,7 +162,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: metamaskBalance,
                           decimals: 18,
-                          denom: ORAI
+                          denom: ORAI,
                         }}
                         className={styles.token_balance}
                         decimalScale={4}
@@ -210,7 +208,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_themes}>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.dark
+                [styles.active]: theme === Themes.dark,
               })}
               onClick={() => {
                 setTheme(Themes.dark);
@@ -221,7 +219,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.light
+                [styles.active]: theme === Themes.light,
               })}
               onClick={() => {
                 setTheme(Themes.light);

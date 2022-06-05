@@ -5,21 +5,18 @@ import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-
-export const injected = new InjectedConnector({
-  supportedChainIds: [1, 56]
-});
+import { injected } from 'hooks/useMetamask';
 
 const RequireAuthButton: React.FC<any> = ({
   address,
   metamaskAddress,
-  setMetamaskAddress,
   setAddress,
   ...props
 }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
 
-  const { active, connector, error, activate, deactivate } = useWeb3React();
+  const { account, active, connector, error, activate, deactivate } =
+    useWeb3React();
 
   const onClick = () => {
     setOpenConnectWalletModal(true);
@@ -28,7 +25,6 @@ const RequireAuthButton: React.FC<any> = ({
   const connectMetamask = async () => {
     try {
       await activate(injected);
-      setMetamaskAddress(await injected.getAccount());
       // window.location.reload();
     } catch (ex) {
       console.log(ex);
@@ -38,7 +34,6 @@ const RequireAuthButton: React.FC<any> = ({
   const disconnectMetamask = async () => {
     try {
       deactivate();
-      setMetamaskAddress('');
     } catch (ex) {
       console.log(ex);
     }
@@ -49,7 +44,7 @@ const RequireAuthButton: React.FC<any> = ({
       return displayToast(
         TToastType.TX_INFO,
         {
-          message: 'You must install Keplr to continue'
+          message: 'You must install Keplr to continue',
         },
         { toastId: 'install_keplr' }
       );
@@ -73,10 +68,10 @@ const RequireAuthButton: React.FC<any> = ({
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
       try {
-        if (!active && !metamaskAddress && !error) {
+        const isAuthorized = await injected.isAuthorized();
+
+        if (!isAuthorized && !active && !metamaskAddress && !error) {
           await activate(injected);
-          // reset provider
-          setMetamaskAddress(await injected.getAccount());
         }
       } catch (err) {
         console.log(err);
