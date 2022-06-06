@@ -54,7 +54,7 @@ import TransferConvertToken from './TransferConvertToken';
 import { useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
-import { useInactiveListener } from 'hooks/useMetamask';
+import { useEagerConnect, useInactiveListener } from 'hooks/useMetamask';
 import { useWeb3React } from '@web3-react/core';
 
 interface BalanceProps {}
@@ -187,6 +187,7 @@ const Balance: React.FC<BalanceProps> = () => {
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
   const { account: metamaskAddress } = useWeb3React();
+  useEagerConnect();
   useInactiveListener();
   useEffect(() => {
     _initEthereum();

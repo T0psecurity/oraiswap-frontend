@@ -6,6 +6,18 @@ export const injected = new InjectedConnector({
   supportedChainIds: [1, 56],
 });
 
+export function useEagerConnect() {
+  const { activate, connector, active, deactivate } = useWeb3React();
+  const [onReload, setOnReload] = useState(true);
+
+  useEffect(() => {
+    if (active || onReload) {
+      activate(injected, undefined, true);
+      setOnReload(false);
+    }
+  }, [activate, connector]);
+}
+
 export function useInactiveListener(suppress = false) {
   const { active, error, activate, deactivate, library } = useWeb3React();
 

@@ -66,7 +66,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
             logo={MetamaskImage}
             text={MESSAGE.Form.Button.ConnectMetamask}
             connect={connectMetamask}
-            disconnect={undefined}
+            disconnect={disconnectMetamask}
           />
         </div>
       </div>

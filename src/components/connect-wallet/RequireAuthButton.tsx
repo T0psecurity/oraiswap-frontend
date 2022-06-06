@@ -65,21 +65,6 @@ const RequireAuthButton: React.FC<any> = ({
     }
   };
 
-  useEffect(() => {
-    const connectWalletOnPageLoad = async () => {
-      try {
-        const isAuthorized = await injected.isAuthorized();
-
-        if (!isAuthorized && !active && !metamaskAddress && !error) {
-          await activate(injected);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    connectWalletOnPageLoad();
-  }, []);
-
   return (
     <React.Fragment>
       <Button {...props} onClick={onClick}>
