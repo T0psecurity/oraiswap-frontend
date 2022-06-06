@@ -31,7 +31,7 @@ export const LoginWidget: FC<{
           </>
         )}
       </div>
-      {address ? (
+      {address && !!disconnect ? (
         <div>
           <Logout />
         </div>

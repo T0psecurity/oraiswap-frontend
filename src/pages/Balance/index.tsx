@@ -1,5 +1,3 @@
-import { Input } from 'antd';
-import classNames from 'classnames';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
@@ -14,7 +12,6 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
-import NumberFormat from 'react-number-format';
 import { ibcInfos } from 'config/ibcInfos';
 import {
   evmTokens,
@@ -50,111 +47,18 @@ import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
-import TransferConvertToken from './TransferConvertToken';
 import { useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
+import { useEagerConnect, useInactiveListener } from 'hooks/useMetamask';
+import { useWeb3React } from '@web3-react/core';
+import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetail = {
   amount: number;
   usd: number;
-};
-
-interface TokenItemProps {
-  token: TokenItemType;
-  amountDetail?: AmountDetail;
-  convertToken?: any;
-  transferIBC?: any;
-  transferFromGravity?: any;
-  name?: string;
-  onClickTransfer?: any;
-  toToken?: TokenItemType;
-  active: Boolean;
-  className?: string;
-  onClick?: Function;
-  onBlur?: Function;
-  convertKwt?: any;
-}
-
-const TokenItem: React.FC<TokenItemProps> = ({
-  token,
-  amountDetail,
-  active,
-  className,
-  onClick,
-  convertToken,
-  transferFromGravity,
-  transferIBC,
-  onClickTransfer,
-  toToken,
-  convertKwt,
-}) => {
-  return (
-    <div
-      className={classNames(
-        styles.tokenWrapper,
-        { [styles.active]: active },
-        className
-      )}
-      onClick={(event) => {
-        event.stopPropagation();
-        onClick?.(token);
-      }}
-    >
-      <div className={styles.balanceAmountInfo}>
-        <div className={styles.token}>
-          {token.Icon && <token.Icon className={styles.tokenIcon} />}
-          <div className={styles.tokenInfo}>
-            <div className={styles.tokenName}>{token.name}</div>
-            <div className={styles.tokenOrg}>
-              <span className={styles.tokenOrgTxt}>{token.org}</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tokenBalance}>
-          <TokenBalance
-            balance={{
-              amount: amountDetail ? amountDetail.amount.toString() : '0',
-              denom: '',
-              decimals: token.decimals,
-            }}
-            className={styles.tokenAmount}
-            decimalScale={Math.min(6, token.decimals)}
-          />
-          <TokenBalance
-            balance={amountDetail ? amountDetail.usd : 0}
-            className={styles.subLabel}
-            decimalScale={2}
-          />
-        </div>
-      </div>
-      <div>
-        {active && (
-          <TransferConvertToken
-            token={token}
-            amountDetail={amountDetail}
-            convertToken={convertToken}
-            transferFromGravity={transferFromGravity}
-            transferIBC={transferIBC}
-            onClickTransfer={onClickTransfer}
-            toToken={toToken}
-            convertKwt={convertKwt}
-          />
-        )}
-
-        {/* // TODO: {active && token.contractAddress && token.cosmosBased && (
-          <ConvertToNative
-            name={evmName}
-            token={token}
-            amountDetail={amountDetail}
-            convertToken={convertToken}
-          />
-        )} */}
-      </div>
-    </div>
-  );
 };
 
 type AmountDetails = { [key: string]: AmountDetail };
@@ -163,7 +67,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
   const [keplrAddress] = useGlobalState('address');
-  const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [kwtSubnetAddress, setKwtSubnetAddress] = useState<string>();
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
@@ -185,11 +88,29 @@ const Balance: React.FC<BalanceProps> = () => {
   );
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
-
+  const { account: metamaskAddress } = useWeb3React();
+  useEagerConnect();
+  useInactiveListener();
   useEffect(() => {
     _initEthereum();
     getKwtSubnetAddress();
   }, []);
+
+  useEffect(() => {
+    loadTokenAmounts();
+  }, [prices, txHash, pendingTokens, keplrAddress]);
+
+  useEffect(() => {
+    if (!!metamaskAddress) {
+      loadEvmOraiAmounts();
+    }
+  }, [metamaskAddress, prices, txHash]);
+
+  useEffect(() => {
+    if (!!kwtSubnetAddress) {
+      loadKawaiiSubnetAmount();
+    }
+  }, [kwtSubnetAddress, prices, txHash]);
 
   const getKwtSubnetAddress = async () => {
     try {
@@ -347,7 +268,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const processTxResult = (
     token: TokenItemType,
     result: BroadcastTxResponse,
-    customLink?: string,
+    customLink?: string
   ) => {
     if (isBroadcastTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
@@ -355,27 +276,13 @@ const Balance: React.FC<BalanceProps> = () => {
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: customLink ? customLink : `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
+        customLink: customLink
+          ? customLink
+          : `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
       });
     }
     setTxHash(result.transactionHash);
   };
-
-  useEffect(() => {
-    loadTokenAmounts();
-  }, [prices, txHash, pendingTokens]);
-
-  useEffect(() => {
-    if (!!metamaskAddress) {
-      loadEvmOraiAmounts();
-    }
-  }, [metamaskAddress, prices, txHash]);
-
-  useEffect(() => {
-    if (!!kwtSubnetAddress) {
-      loadKawaiiSubnetAmount();
-    }
-  }, [kwtSubnetAddress, prices, txHash]);
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
@@ -740,7 +647,11 @@ const Balance: React.FC<BalanceProps> = () => {
           amount: amount.amount,
         });
       }
-      processTxResult(fromToken, result, `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`);
+      processTxResult(
+        fromToken,
+        result,
+        `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
+      );
     } catch (ex: any) {
       console.log(ex);
       displayToast(TToastType.TX_FAILED, {
@@ -826,7 +737,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                              onClickTransfer(fromAmount, from, to)
+                                onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -917,7 +828,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!from?.cosmosBased
                               ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, to, from)
+                                  onClickTransfer(fromAmount, to, from)
                               : undefined
                           }
                           toToken={from}

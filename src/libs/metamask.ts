@@ -3,7 +3,7 @@ import tokenABI from 'config/abi/erc20.json';
 import {
   evmTokens,
   gravityContracts,
-  TokenItemType
+  TokenItemType,
 } from 'config/bridgeTokens';
 import GravityABI from 'config/abi/gravity.json';
 import erc20ABI from 'config/abi/erc20.json';
@@ -28,7 +28,7 @@ export default class Metamask {
 
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId }]
+      params: [{ chainId }],
     });
 
     const web3 = new Web3(window.ethereum);
@@ -41,7 +41,7 @@ export default class Metamask {
     const result = await gravityContract.methods
       .sendToCosmos(tokenContract, to, balance)
       .send({
-        from
+        from,
       });
     return result;
   }
@@ -53,6 +53,10 @@ export default class Metamask {
     spender: string,
     amount: string
   ) {
+    await window.ethereum.request!({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId }],
+    });
     const weiAmount = Web3.utils.toWei(amount);
     const web3 = new Web3(window.ethereum);
     const tokenContract = new web3.eth.Contract(
@@ -67,14 +71,14 @@ export default class Metamask {
 
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId }]
+      params: [{ chainId }],
     });
     const allowance = Web3.utils.toWei('99999999999999999');
 
     const result = await tokenContract.methods
       .approve(spender, allowance)
       .send({
-        from: owner
+        from: owner,
       });
     return result;
   }
