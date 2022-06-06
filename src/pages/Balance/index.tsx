@@ -524,6 +524,40 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const transferIBCKwt = async (
+    fromToken: TokenItemType,
+    toToken: TokenItemType,
+    transferAmount: number
+  ) => {
+    try {
+      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) return;
+      await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      if (!fromAddress || !toAddress) {
+        return;
+      }
+
+      const amount = coin(
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        fromToken.denom
+      );
+      const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+
+      const result = await KawaiiverseJs.transferIBC({ sender: fromAddress, gasAmount: { denom: '200000', amount: '0' }, ibcInfo: { sourcePort: ibcInfo.source, sourceChannel: ibcInfo.channel, amount: amount.amount, denom: amount.denom, sender: fromAddress, receiver: toAddress, timeoutTimestamp: (Math.floor(Date.now() / 1000) + ibcInfo.timeout) } });
+
+      processTxResult(fromToken, result);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
+    }
+  };
+
   const transferEvmToIBC = async (fromAmount: number) => {
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
