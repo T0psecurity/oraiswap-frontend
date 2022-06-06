@@ -40,6 +40,8 @@ export const BSC_CHAIN_ID = '0x38';
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
+export const ORAICHAIN_ID = 'Oraichain';
+
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';

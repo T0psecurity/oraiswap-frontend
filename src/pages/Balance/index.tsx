@@ -39,6 +39,7 @@ import {
   KWT,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
+  ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
@@ -455,7 +456,19 @@ const Balance: React.FC<BalanceProps> = () => {
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
-      const result = await KawaiiverseJs.transferIBC({ sender: fromAddress, gasAmount: { denom: '200000', amount: '0' }, ibcInfo: { sourcePort: ibcInfo.source, sourceChannel: ibcInfo.channel, amount: amount.amount, denom: amount.denom, sender: fromAddress, receiver: toAddress, timeoutTimestamp: (Math.floor(Date.now() / 1000) + ibcInfo.timeout) } });
+      const result = await KawaiiverseJs.transferIBC({
+        sender: fromAddress,
+        gasAmount: { denom: '200000', amount: '0' },
+        ibcInfo: {
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          amount: amount.amount,
+          denom: amount.denom,
+          sender: fromAddress,
+          receiver: toAddress,
+          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        },
+      });
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
@@ -525,7 +538,9 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     setIBCLoading(true);
-    if (from.cosmosBased) {
+    if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
+      await transferIBCKwt(from, to, fromAmount);
+    } else if (from.cosmosBased) {
       await transferIBC(from, to, fromAmount);
     } else {
       await transferEvmToIBC(fromAmount);
