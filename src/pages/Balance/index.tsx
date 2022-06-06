@@ -96,6 +96,22 @@ const Balance: React.FC<BalanceProps> = () => {
     getKwtSubnetAddress();
   }, []);
 
+  useEffect(() => {
+    loadTokenAmounts();
+  }, [prices, txHash, pendingTokens, keplrAddress]);
+
+  useEffect(() => {
+    if (!!metamaskAddress) {
+      loadEvmOraiAmounts();
+    }
+  }, [metamaskAddress, prices, txHash]);
+
+  useEffect(() => {
+    if (!!kwtSubnetAddress) {
+      loadKawaiiSubnetAmount();
+    }
+  }, [kwtSubnetAddress, prices, txHash]);
+
   const getKwtSubnetAddress = async () => {
     try {
       let address = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
@@ -267,22 +283,6 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     setTxHash(result.transactionHash);
   };
-
-  useEffect(() => {
-    loadTokenAmounts();
-  }, [prices, txHash, pendingTokens]);
-
-  useEffect(() => {
-    if (!!metamaskAddress) {
-      loadEvmOraiAmounts();
-    }
-  }, [metamaskAddress, prices, txHash]);
-
-  useEffect(() => {
-    if (!!kwtSubnetAddress) {
-      loadKawaiiSubnetAmount();
-    }
-  }, [kwtSubnetAddress, prices, txHash]);
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
