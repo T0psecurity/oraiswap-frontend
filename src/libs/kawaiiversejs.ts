@@ -31,6 +31,16 @@ async function getSenderInfo(sender: string, pubkey: Uint8Array) {
   }
 }
 
+async function getWallet(chainId: string) {
+  if (await window.Keplr.getKeplr())
+    await window.Keplr.suggestChain(chainId);
+  else throw "Cannot get Keplr to get account";
+
+  const wallet = await collectWallet(chainId);
+  const accounts = await wallet.getAccounts();
+  return { accounts, wallet };
+}
+
 async function submit({
   wallet,
   signDirect,
@@ -72,17 +82,9 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId);
 
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(subnetwork.chainId);
+      const { wallet, accounts } = await getWallet(subnetwork.chainId);
 
-      const wallet = await collectWallet(subnetwork.chainId);
-      const accounts = await wallet.getAccounts();
-
-      const fee = {
-        amount: gasAmount.amount.toString(),
-        denom: gasAmount.denom.toString(),
-        gas: gasLimits.exec.toString(),
-      }
+      const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
       const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
       const { address_eth } = await (await axios.get(`${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`)).data;
@@ -123,17 +125,9 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId);
 
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(subnetwork.chainId);
+      const { wallet, accounts } = await getWallet(subnetwork.chainId);
 
-      const wallet = await collectWallet(subnetwork.chainId);
-      const accounts = await wallet.getAccounts();
-
-      const fee = {
-        amount: gasAmount.amount.toString(),
-        denom: gasAmount.denom.toString(),
-        gas: gasLimits.exec.toString(),
-      }
+      const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
       let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
@@ -170,17 +164,9 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId);
 
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(subnetwork.chainId);
+      const { wallet, accounts } = await getWallet(subnetwork.chainId);
 
-      const wallet = await collectWallet(subnetwork.chainId);
-      const accounts = await wallet.getAccounts();
-
-      const fee = {
-        amount: gasAmount.amount.toString(),
-        denom: gasAmount.denom.toString(),
-        gas: gasLimits.exec.toString(),
-      }
+      const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
       const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
