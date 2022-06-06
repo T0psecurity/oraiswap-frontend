@@ -1,6 +1,4 @@
 import React, { useEffect } from 'react';
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-
 import routes from 'routes';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
@@ -9,8 +7,6 @@ import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
-
-const queryClient = new QueryClient();
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
@@ -22,7 +18,7 @@ const App = () => {
       return displayToast(
         TToastType.TX_INFO,
         {
-          message: 'You must install Keplr to continue'
+          message: 'You must install Keplr to continue',
         },
         { toastId: 'install_keplr' }
       );
@@ -57,7 +53,7 @@ const App = () => {
     } catch (error) {
       console.log('Error: ', error);
       displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with Keplr wallet. Please try again!`
+        message: `There is an unexpected error with Keplr wallet. Please try again!`,
       });
     }
   };
@@ -66,10 +62,8 @@ const App = () => {
   return (
     <ThemeProvider>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <QueryClientProvider client={queryClient}>
-          <Menu />
-          {routes()}
-        </QueryClientProvider>
+        <Menu />
+        {routes()}
       </Web3ReactProvider>
     </ThemeProvider>
   );
