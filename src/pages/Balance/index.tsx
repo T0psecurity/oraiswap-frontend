@@ -478,6 +478,55 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const convertTransferIBCErc20Kwt = async (
+    fromToken: TokenItemType,
+    toToken: TokenItemType,
+    transferAmount: number
+  ) => {
+    try {
+      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) return;
+      await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      if (!fromAddress || !toAddress) {
+        return;
+      }
+
+      const amount = coin(
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
+      );
+      const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+
+      const result = await KawaiiverseJs.convertIbcTransferERC20({
+        sender: fromAddress,
+        gasAmount: { denom: '200000', amount: '0' },
+        ibcInfo: {
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          amount: amount.amount,
+          denom: amount.denom,
+          sender: fromAddress,
+          receiver: toAddress,
+          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        },
+        amount: amount.amount,
+      });
+
+      processTxResult(fromToken, result);
+    } catch (ex: any) {
+      console.log(ex);
+
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
+    }
+  };
+
   const transferEvmToIBC = async (fromAmount: number) => {
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
@@ -538,7 +587,16 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     setIBCLoading(true);
-    if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
+    if (
+      from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
+      to.chainId === ORAICHAIN_ID &&
+      !!from.contractAddress
+    ) {      
+      await convertTransferIBCErc20Kwt(from, to, fromAmount);
+    } else if (
+      from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
+      to.chainId === ORAICHAIN_ID
+    ) {
       await transferIBCKwt(from, to, fromAmount);
     } else if (from.cosmosBased) {
       await transferIBC(from, to, fromAmount);
@@ -618,8 +676,10 @@ const Balance: React.FC<BalanceProps> = () => {
     toTokens: TokenItemType[],
     from: TokenItemType
   ) => {
-    if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID)
-      return toTokens.find((t) => t.name.includes(from.name));
+    if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
+      const name = from.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
+      return toTokens.find((t) => t.name.includes(name));
+    }
 
     return toTokens.find(
       (t) =>
@@ -822,8 +882,12 @@ const Balance: React.FC<BalanceProps> = () => {
                 <div className={styles.tableContent}>
                   {toTokens
                     .filter((t) => {
-                      if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID)
-                        return t.name.includes(from.name);
+                      if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
+                        const name =
+                          from.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1] ??
+                          from.name;
+                        return t.name.includes(name);
+                      }
                       return (
                         !from ||
                         (from.chainId !== ORAI_BRIDGE_CHAIN_ID &&

@@ -2425,10 +2425,10 @@
     protobufjs "^6.10.2"
     secp256k1 "^4.0.2"
 
-"@oraichain/kawaiiversejs@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@oraichain/kawaiiversejs/-/kawaiiversejs-0.0.2.tgz#b1f54b5141e24f5ed8cd4f9f291035ad2dfd6b2b"
-  integrity sha512-ja+Ggb8P+WfAjjAqJ+MShALc1F8oDwa+HLLKVC4rhQf+KYhx2PstGtWD//lsZKVgGL10/wXR35mrbx6q/9D8XA==
+"@oraichain/kawaiiverse-txs@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@oraichain/kawaiiverse-txs/-/kawaiiverse-txs-0.0.1.tgz#b648455a8f8e0669e27060e237c40da8978354c7"
+  integrity sha512-9KLna0ixZix42OhPDVJGsv/oaufluTCm8Ehrgz287IDIYWFSbRWi0MrNo108JkJoc9vUcAIJtcxjdQwEOsTF8w==
   dependencies:
     "@cosmjs/crypto" "^0.28.4"
     "@cosmjs/encoding" "^0.28.4"
