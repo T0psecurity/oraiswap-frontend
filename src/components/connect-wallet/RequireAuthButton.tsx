@@ -5,7 +5,7 @@ import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { injected } from 'hooks/useMetamask';
+import { injected, useEagerConnect } from 'hooks/useMetamask';
 
 const RequireAuthButton: React.FC<any> = ({
   address,
@@ -14,10 +14,10 @@ const RequireAuthButton: React.FC<any> = ({
   ...props
 }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
-
-  const { account, active, connector, error, activate, deactivate } =
-    useWeb3React();
-
+  const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
+  const { activate, deactivate } = useWeb3React();
+  
+  useEagerConnect(isInactiveMetamask);
   const onClick = () => {
     setOpenConnectWalletModal(true);
   };
@@ -34,6 +34,7 @@ const RequireAuthButton: React.FC<any> = ({
   const disconnectMetamask = async () => {
     try {
       deactivate();
+      setIsInactiveMetamask(true);
     } catch (ex) {
       console.log(ex);
     }

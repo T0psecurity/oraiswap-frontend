@@ -1,21 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
+import { useLocation } from 'react-router-dom';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 56],
 });
 
-export function useEagerConnect() {
-  const { activate, connector, active, deactivate } = useWeb3React();
-  const [onReload, setOnReload] = useState(true);
+export function useEagerConnect(isInactive) {
+  const web3React = useWeb3React();
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    if (active || onReload) {
-      activate(injected, undefined, true);
-      setOnReload(false);
+    console.log(web3React.account);
+
+    if (
+      !web3React.account &&
+      !isInactive &&
+      (pathname === '/' || pathname === '/bridge')
+    ) {
+      web3React.activate(injected, undefined, true);
     }
-  }, [activate, connector]);
+  }, [web3React, pathname]);
 }
 
 export function useInactiveListener(suppress = false) {
@@ -25,21 +31,17 @@ export function useInactiveListener(suppress = false) {
     const { ethereum } = window;
     if (ethereum && ethereum.on && !active && !error && !suppress) {
       const handleConnect = () => {
-        console.log("Handling 'connect' event");
         activate(injected);
       };
       const handleChainChanged = (chainId) => {
-        console.log("Handling 'chainChanged' event with payload", chainId);
         activate(injected);
       };
       const handleAccountsChanged = (accounts) => {
-        console.log("Handling 'accountsChanged' event with payload", accounts);
         if (accounts.length > 0) {
           activate(injected);
         }
       };
       const handleNetworkChanged = (networkId) => {
-        console.log("Handling 'networkChanged' event with payload", networkId);
         activate(injected);
       };
 

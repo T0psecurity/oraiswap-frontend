@@ -89,7 +89,7 @@ const Balance: React.FC<BalanceProps> = () => {
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
   const { account: metamaskAddress } = useWeb3React();
-  useEagerConnect();
+
   useInactiveListener();
   useEffect(() => {
     _initEthereum();
@@ -586,7 +586,7 @@ const Balance: React.FC<BalanceProps> = () => {
       from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
       to.chainId === ORAICHAIN_ID &&
       !!from.contractAddress
-    ) {      
+    ) {
       await convertTransferIBCErc20Kwt(from, to, fromAmount);
     } else if (
       from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
