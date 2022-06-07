@@ -8,9 +8,9 @@ import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as Dark } from 'assets/icons/dark.svg';
 import { ReactComponent as Light } from 'assets/icons/light.svg';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
-import { ReactComponent as ETHIcon } from 'assets/icons/eth.svg';
 import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import ethIcon from 'assets/icons/eth.svg';
 
 import { ThemeContext, Themes } from 'context/theme-context';
 
@@ -149,7 +149,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                   {window.Metamask.isBsc() ? (
                     <BNBIcon className={styles.network_icon} />
                   ) : (
-                    <ETHIcon className={styles.network_icon} />
+                    <img src={ethIcon} className={styles.network_icon} />
                   )}
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis

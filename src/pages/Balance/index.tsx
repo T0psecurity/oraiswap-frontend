@@ -39,6 +39,7 @@ import {
   KWT,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
+  ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
@@ -95,6 +96,22 @@ const Balance: React.FC<BalanceProps> = () => {
     _initEthereum();
     getKwtSubnetAddress();
   }, []);
+
+  useEffect(() => {
+    loadTokenAmounts();
+  }, [prices, txHash, pendingTokens, keplrAddress]);
+
+  useEffect(() => {
+    if (!!metamaskAddress) {
+      loadEvmOraiAmounts();
+    }
+  }, [metamaskAddress, prices, txHash]);
+
+  useEffect(() => {
+    if (!!kwtSubnetAddress) {
+      loadKawaiiSubnetAmount();
+    }
+  }, [kwtSubnetAddress, prices, txHash]);
 
   const getKwtSubnetAddress = async () => {
     try {
@@ -268,22 +285,6 @@ const Balance: React.FC<BalanceProps> = () => {
     setTxHash(result.transactionHash);
   };
 
-  useEffect(() => {
-    loadTokenAmounts();
-  }, [prices, txHash, pendingTokens]);
-
-  useEffect(() => {
-    if (!!metamaskAddress) {
-      loadEvmOraiAmounts();
-    }
-  }, [metamaskAddress, prices, txHash]);
-
-  useEffect(() => {
-    if (!!kwtSubnetAddress) {
-      loadKawaiiSubnetAmount();
-    }
-  }, [kwtSubnetAddress, prices, txHash]);
-
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
       if (token.denom === ERC20_ORAI) {
@@ -431,6 +432,52 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const transferIBCKwt = async (
+    fromToken: TokenItemType,
+    toToken: TokenItemType,
+    transferAmount: number
+  ) => {
+    try {
+      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) return;
+      await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      if (!fromAddress || !toAddress) {
+        return;
+      }
+
+      const amount = coin(
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        fromToken.denom
+      );
+      const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+
+      const result = await KawaiiverseJs.transferIBC({
+        sender: fromAddress,
+        gasAmount: { denom: '200000', amount: '0' },
+        ibcInfo: {
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          amount: amount.amount,
+          denom: amount.denom,
+          sender: fromAddress,
+          receiver: toAddress,
+          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        },
+      });
+
+      processTxResult(fromToken, result);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
+    }
+  };
+
   const transferEvmToIBC = async (fromAmount: number) => {
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
@@ -491,7 +538,9 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     setIBCLoading(true);
-    if (from.cosmosBased) {
+    if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
+      await transferIBCKwt(from, to, fromAmount);
+    } else if (from.cosmosBased) {
       await transferIBC(from, to, fromAmount);
     } else {
       await transferEvmToIBC(fromAmount);

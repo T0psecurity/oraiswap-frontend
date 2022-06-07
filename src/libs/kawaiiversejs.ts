@@ -2,7 +2,7 @@ import { collectWallet } from './cosmjs';
 import { StargateClient } from '@cosmjs/stargate';
 import { kawaiiTokens } from 'config/bridgeTokens';
 import { KAWAII_API_DEV, KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
-import { createMessageConvertCoin, createMessageConvertERC20 } from '@oraichain/kawaiiversejs';
+import { createMessageConvertCoin, createMessageConvertERC20, createTxIBCMsgTransfer } from '@oraichain/kawaiiversejs';
 import Long from 'long';
 import { createTxRaw } from '@tharsis/proto';
 import { OfflineDirectSigner } from '@cosmjs/proto-signing';
@@ -29,6 +29,16 @@ async function getSenderInfo(sender: string, pubkey: Uint8Array) {
     accountNumber: parseInt(accountInfo.account.base_account.account_number),
     pubkey: Buffer.from(pubkey).toString('base64'),
   }
+}
+
+async function getWallet(chainId: string) {
+  if (await window.Keplr.getKeplr())
+    await window.Keplr.suggestChain(chainId);
+  else throw "Cannot get Keplr to get account";
+
+  const wallet = await collectWallet(chainId);
+  const accounts = await wallet.getAccounts();
+  return { accounts, wallet };
 }
 
 async function submit({
@@ -72,17 +82,9 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId);
 
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(subnetwork.chainId);
+      const { wallet, accounts } = await getWallet(subnetwork.chainId);
 
-      const wallet = await collectWallet(subnetwork.chainId);
-      const accounts = await wallet.getAccounts();
-
-      const fee = {
-        amount: gasAmount.amount.toString(),
-        denom: gasAmount.denom.toString(),
-        gas: gasLimits.exec.toString(),
-      }
+      const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
       const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
       const { address_eth } = await (await axios.get(`${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`)).data;
@@ -123,17 +125,9 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId);
 
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(subnetwork.chainId);
+      const { wallet, accounts } = await getWallet(subnetwork.chainId);
 
-      const wallet = await collectWallet(subnetwork.chainId);
-      const accounts = await wallet.getAccounts();
-
-      const fee = {
-        amount: gasAmount.amount.toString(),
-        denom: gasAmount.denom.toString(),
-        gas: gasLimits.exec.toString(),
-      }
+      const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
       let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
@@ -151,6 +145,40 @@ export default class KawaiiverseJs {
       return submit({ wallet, signDirect, chainId: subnetwork.chainId, rpc: subnetwork.rpc, accountNumber: senderInfo.accountNumber, signer: sender });
     } catch (error) {
       console.log('error in converting ERC20: ', error);
+      throw error;
+    }
+  }
+
+  static async transferIBC({
+    sender,
+    gasAmount,
+    gasLimits = { exec: 2400000 },
+    ibcInfo
+  }: {
+    sender: string;
+    gasAmount: { amount: string; denom: string };
+    gasLimits?: { exec: number };
+    ibcInfo: { sourcePort: string, sourceChannel: string, amount: string, denom: string, sender: string, receiver: string, timeoutTimestamp: number }
+  }) {
+    try {
+      const subnetwork = kawaiiTokens[0];
+      const chainIdNumber = parseChainIdNumber(subnetwork.chainId);
+
+      const { wallet, accounts } = await getWallet(subnetwork.chainId);
+
+      const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
+
+      const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
+
+      const params = {
+        ...ibcInfo, timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp).multiply(1000000000).toString(), revisionNumber: 0, revisionHeight: 0,
+      };
+
+      const { signDirect } = createTxIBCMsgTransfer({ chainId: chainIdNumber, cosmosChainId: subnetwork.chainId }, senderInfo, fee, `sender - ${senderInfo.accountAddress}; receiver - ${params.receiver}`, params);
+
+      return submit({ wallet, signDirect, chainId: subnetwork.chainId, rpc: subnetwork.rpc, accountNumber: senderInfo.accountNumber, signer: senderInfo.accountAddress });
+    } catch (error) {
+      console.log('error in transferring ibc: ', error);
       throw error;
     }
   }
