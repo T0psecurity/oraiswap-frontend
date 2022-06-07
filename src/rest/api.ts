@@ -748,7 +748,7 @@ function generateClaimMsg(msg: Claim) {
       input = {
         claim: {
           stage,
-          amount,
+          amount: amount.toString(),
           proof: proofs,
         }
       }
