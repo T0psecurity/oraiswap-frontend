@@ -3,7 +3,7 @@ import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 56],
+  supportedChainIds: [1, 56]
 });
 
 export function useEagerConnect() {
@@ -11,6 +11,9 @@ export function useEagerConnect() {
   const [onReload, setOnReload] = useState(true);
 
   useEffect(() => {
+    if (!window.ethereum) {
+      return;
+    }
     if (active || onReload) {
       activate(injected, undefined, true);
       setOnReload(false);
