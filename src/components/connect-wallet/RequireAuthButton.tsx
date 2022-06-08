@@ -5,7 +5,7 @@ import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { injected } from 'hooks/useMetamask';
+import { injected, useEagerConnect } from 'hooks/useMetamask';
 
 const RequireAuthButton: React.FC<any> = ({
   address,
@@ -14,18 +14,19 @@ const RequireAuthButton: React.FC<any> = ({
   ...props
 }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
+  const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
+  const { activate, deactivate } = useWeb3React();
 
-  const { account, active, connector, error, activate, deactivate } =
-    useWeb3React();
-
+  useEagerConnect(isInactiveMetamask);
   const onClick = () => {
     setOpenConnectWalletModal(true);
   };
 
   const connectMetamask = async () => {
     try {
-      await activate(injected);
-      // window.location.reload();
+      await activate(injected, (ex) => {
+        displayToast(TToastType.METAMASK_FAILED, {message: ex.message});
+      });
     } catch (ex) {
       console.log(ex);
     }
@@ -34,6 +35,7 @@ const RequireAuthButton: React.FC<any> = ({
   const disconnectMetamask = async () => {
     try {
       deactivate();
+      setIsInactiveMetamask(true);
     } catch (ex) {
       console.log(ex);
     }
@@ -52,7 +54,6 @@ const RequireAuthButton: React.FC<any> = ({
 
     await window.Keplr.suggestChain(network.chainId);
     const address = await window.Keplr.getKeplrAddr();
-    console.log(address);
     setAddress(address as string);
   };
 

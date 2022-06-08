@@ -13,6 +13,7 @@
     "@tharsis/proto": "^0.1.17",
     "@tharsis/provider": "^0.2.4",    
     "@oraichain/kawaiiverse-txs": "0.0.1",
+    "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/cosmos": "^0.9.12",
     "@keplr-wallet/types": "^0.9.12",
     "@saberhq/token-utils": "^1.12.69",

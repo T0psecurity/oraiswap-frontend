@@ -1,5 +1,9 @@
 import { IBCInfo } from 'types/ibc';
-import { IBC_TRANSFER_TIMEOUT, KWT_SUBNETWORK_CHAIN_ID, ORAI_BRIDGE_CHAIN_ID } from './constants';
+import {
+  IBC_TRANSFER_TIMEOUT,
+  KWT_SUBNETWORK_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
+} from './constants';
 import { network, NetworkKey } from './networks';
 
 const [atom2oraichain, oraicbain2atom] =
@@ -8,10 +12,9 @@ const [terra2oraichain, oraicbain2terra] =
   process.env.REACT_APP_TERRA_ORAICHAIN_CHANNELS.split(/\s+/);
 const [osmosis2oraichain, oraicbain2osmosis] =
   process.env.REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS.split(/\s+/);
-
 const [oraib2oraichain, oraichain2oraib] =
   process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS.split(/\s+/);
-  const [kwt2oraichain, oraichain2kwt] =
+const [kwt2oraichain, oraichain2kwt] =
   process.env.REACT_APP_KWT_ORAICHAIN_CHANNELS.split(/\s+/);
 
 export interface IBCInfoMap {

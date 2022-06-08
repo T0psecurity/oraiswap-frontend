@@ -2312,6 +2312,15 @@
     "@json-rpc-tools/types" "^1.7.6"
     "@pedrouid/environment" "^1.0.1"
 
+"@keplr-wallet/common@^0.10.5":
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/common/-/common-0.10.5.tgz#49888372dcd288b78813a47f60a2e74dbdf04f02"
+  integrity sha512-L1d98xXTxF2MZtiSqnuFbfE0ZmO31wd+eJutCOXnvd8l0nUyqJA3/8o6hVWGO0xCKJoZegD9XzTLFVnQpQueHg==
+  dependencies:
+    "@keplr-wallet/crypto" "0.10.5"
+    buffer "^6.0.3"
+    delay "^4.4.0"
+
 "@keplr-wallet/cosmos@^0.9.12":
   version "0.9.16"
   resolved "https://registry.yarnpkg.com/@keplr-wallet/cosmos/-/cosmos-0.9.16.tgz#bfd1968e32bf7108b213c82c7c36e650f9963ce9"
@@ -2326,6 +2335,19 @@
     buffer "^6.0.3"
     long "^4.0.0"
     protobufjs "^6.10.2"
+
+"@keplr-wallet/crypto@0.10.5":
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/crypto/-/crypto-0.10.5.tgz#bdf8eb79dda7e2321c3457e59d6ceb6ed76cbae2"
+  integrity sha512-Qjs0QBsmf69BmEYdKOng4YLTkmTNmnyc1sx5D+AdqiKEHsUlwmiucueBpVtJjsyBMJg47cZfVdy2CwReGAtmZw==
+  dependencies:
+    bip32 "^2.0.6"
+    bip39 "^3.0.3"
+    bs58check "^2.1.2"
+    buffer "^6.0.3"
+    crypto-js "^4.0.0"
+    elliptic "^6.5.3"
+    sha.js "^2.4.11"
 
 "@keplr-wallet/crypto@^0.9.10":
   version "0.9.10"
@@ -6721,6 +6743,11 @@ del@^4.1.1:
     p-map "^2.0.0"
     pify "^4.0.1"
     rimraf "^2.6.3"
+
+delay@^4.4.0:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/delay/-/delay-4.4.1.tgz#6e02d02946a1b6ab98b39262ced965acba2ac4d1"
+  integrity sha512-aL3AhqtfhOlT/3ai6sWXeqwnw63ATNpnUiN4HL7x9q+My5QtHlO3OIkasmug9LKzpheLdmUKGRKnYXYAS7FQkQ==
 
 delay@^5.0.0:
   version "5.0.0"

@@ -43,7 +43,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
-  const { account: metamaskAddress } = useWeb3React();
+  const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
 
   const [open, setOpen] = useState(false);
@@ -146,9 +146,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={metamaskAddress}
                     className={styles.token_avatar}
                   />
-                  {window.Metamask.isBsc() ? (
+                  {window.Metamask.isBsc() && (
                     <BNBIcon className={styles.network_icon} />
-                  ) : (
+                  )}
+                  {window.Metamask.isEth() && (
                     <img src={ethIcon} className={styles.network_icon} />
                   )}
                   <div className={styles.token_info_balance}>
