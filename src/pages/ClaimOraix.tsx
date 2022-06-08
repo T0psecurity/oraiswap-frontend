@@ -21,7 +21,7 @@ const objNetwork = {
   // juno: { network: 'juno', stage: 3 },
   cosmos: { network: 'cosmos', stage: 3 },
   juno: { network: 'juno', stage: 5 },
-  'atom-oraidex': { network: 'orai', stage: 6 },
+  'atom-oraidex': { network: 'orai', stage: 8 },
   'kwt-milky': { network: 'orai', stage: 7 }
 };
 
