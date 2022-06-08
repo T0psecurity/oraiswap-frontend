@@ -834,23 +834,7 @@ const Balance: React.FC<BalanceProps> = () => {
               </div>
             </div>
           </div>
-          {/* End from tab */}
-          {/* Transfer button */}
 
-          <div className={styles.transferBtn}>
-            {/* <button onClick={toggleTransfer}>
-              <ToggleTransfer
-                style={{
-                  width: 44,
-                  height: 44,
-                  alignSelf: 'center',
-                  cursor: 'pointer'
-                }}
-              />
-            </button> */}
-          </div>
-          {/* End Transfer button */}
-          {/* To Tab */}
           <div className={styles.border_gradient}>
             <div className={styles.balance_block}>
               <div className={styles.tableHeader}>
@@ -899,6 +883,14 @@ const Balance: React.FC<BalanceProps> = () => {
                       );
                     })
                     .map((t: TokenItemType) => {
+                      const name = t.name.replace(/(BEP20|ERC20)\s+/, '');
+                      const transferToToken = fromTokens.find(
+                        (t) =>
+                          t.cosmosBased &&
+                          t.name.includes(name) &&
+                          t.chainId !== ORAI_BRIDGE_CHAIN_ID
+                      );
+
                       return (
                         <TokenItem
                           key={t.denom}
@@ -909,12 +901,16 @@ const Balance: React.FC<BalanceProps> = () => {
                           convertToken={convertToken}
                           transferIBC={transferIBC}
                           onClickTransfer={
-                            !!from?.cosmosBased
+                            !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(fromAmount, to, from)
+                                  onClickTransfer(
+                                    fromAmount,
+                                    to,
+                                    transferToToken
+                                  )
                               : undefined
                           }
-                          toToken={from}
+                          toToken={transferToToken}
                         />
                       );
                     })}
