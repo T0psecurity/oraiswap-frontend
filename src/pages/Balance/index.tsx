@@ -363,7 +363,12 @@ const Balance: React.FC<BalanceProps> = () => {
         amount: [],
         gas: '200000'
       };
-      const result = await client.signAndBroadcast(fromAddress, [message], fee);
+      const result = await client.signAndBroadcast(
+        fromAddress,
+        [message],
+        fee,
+        `sender - ${fromAddress}; receiver - ${metamaskAddress}`
+      );
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
