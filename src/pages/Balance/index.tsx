@@ -50,8 +50,7 @@ import { initEthereum } from 'polyfill';
 import { useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
-import { useEagerConnect, useInactiveListener } from 'hooks/useMetamask';
-import { useWeb3React } from '@web3-react/core';
+import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem from './TokenItem';
 
 interface BalanceProps {}
@@ -88,7 +87,7 @@ const Balance: React.FC<BalanceProps> = () => {
   );
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
-  const { account: metamaskAddress } = useWeb3React();
+  const [metamaskAddress] = useGlobalState('metamaskAddress');
 
   useInactiveListener();
   useEffect(() => {
@@ -514,8 +513,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
-      console.log(ex);
-
       displayToast(TToastType.TX_FAILED, {
         message: ex.message,
       });
@@ -523,6 +520,11 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async (fromAmount: number) => {
+    await window.ethereum.request!({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: from!.chainId }],
+    });
+
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Please login both metamask and keplr!'
