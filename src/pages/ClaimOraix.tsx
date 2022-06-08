@@ -16,13 +16,13 @@ import CosmJs from 'libs/cosmjs';
 
 const objNetwork = {
   osmo: { network: 'osmo', stage: 4 },
-  orai: { network: 'orai', stage: 4 },
-  airi: { network: 'orai', stage: 3 },
+  orai: { network: 'orai', stage: 2 },
+  airi: { network: 'orai', stage: 1 },
   // juno: { network: 'juno', stage: 3 },
-  cosmos: { network: 'cosmos', stage: 5 },
-  juno: { network: 'juno', stage: 7 },
+  cosmos: { network: 'cosmos', stage: 3 },
+  juno: { network: 'juno', stage: 5 },
   'atom-oraidex': { network: 'orai', stage: 6 },
-  'kwt-milky': { network: 'orai', stage: 6 }
+  'kwt-milky': { network: 'orai', stage: 7 }
 };
 
 const ClaimOraiX: FunctionComponent = () => {
