@@ -1,4 +1,5 @@
 import React, { StrictMode } from 'react';
+import 'polyfill';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './index.scss';
