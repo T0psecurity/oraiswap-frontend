@@ -68,7 +68,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   ).toNumber();
 
   const checkValidAmount = () => {
-    if (convertAmount <= 0 || convertAmount > maxAmount) {
+    if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Invalid ammount!',
       });
