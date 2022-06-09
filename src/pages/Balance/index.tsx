@@ -560,12 +560,13 @@ const Balance: React.FC<BalanceProps> = () => {
         metamaskAddress,
         keplrAddress
       );
-
-      displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `
-        https://bscscan.com/tx/${result?.transactionHash}`,
-      });
-      setTxHash(result?.transactionHash);
+      console.log(result);
+      processTxResult(
+        from,
+        result,
+        `
+      https://bscscan.com/tx/${result?.transactionHash}`
+      );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message,
@@ -661,10 +662,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
       if (result) {
         console.log('in correct result');
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
-        });
-        setTxHash(result.transactionHash);
+        console.log(result);
+        processTxResult(
+          token,
+          result as any,
+          `${network.explorer}/txs/${result.transactionHash}`
+        );
       }
     } catch (error) {
       console.log('error in swap form: ', error);
