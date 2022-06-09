@@ -473,7 +473,11 @@ const Balance: React.FC<BalanceProps> = () => {
         },
       });
 
-      processTxResult(fromToken, result);
+      processTxResult(
+        fromToken,
+        result,
+        `https://scan.kawaii.global/tx/${result.transactionHash}`
+      );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message,
@@ -520,7 +524,11 @@ const Balance: React.FC<BalanceProps> = () => {
         amount: amount.amount,
       });
 
-      processTxResult(fromToken, result);
+      processTxResult(
+        fromToken,
+        result,
+        `https://scan.kawaii.global/tx/${result.transactionHash}`
+      );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message,
@@ -734,7 +742,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         fromToken,
         result,
-        `${fromToken.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
+        `https://scan.kawaii.global/tx/${result.transactionHash}`
       );
     } catch (ex: any) {
       console.log(ex);
