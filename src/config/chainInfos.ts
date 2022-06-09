@@ -78,7 +78,7 @@ export const embedChainInfos: ChainInfo[] = [
     rpc: 'https://tendermint1.kawaii.global',
     rest: 'https://cosmos1.kawaii.global',
     chainId: 'kawaii_6886-1',
-    chainName: 'Kawaii Islands network',
+    chainName: 'Kawaiiverse',
     stakeCurrency: {
       coinDenom: 'ORAIE',
       coinMinimalDenom: 'oraie',
