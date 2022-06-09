@@ -19,6 +19,7 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
 } from 'config/constants';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 
 type AmountDetail = {
   amount: number;
@@ -61,6 +62,20 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) &&
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
+  const maxAmount = parseAmountFrom(
+    amountDetail?.amount ?? 0,
+    token?.decimals
+  ).toNumber();
+
+  const checkValidAmount = () => {
+    if (convertAmount <= 0 || convertAmount > maxAmount) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Invalid ammount!',
+      });
+      return false;
+    }
+    return true;
+  };
 
   if (
     !name &&
@@ -109,11 +124,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           onClick={(event) => {
             event.stopPropagation();
             if (!amountDetail) return;
-            const _amount = parseAmountFrom(
-              amountDetail.amount,
-              token.decimals
-            ).toNumber();
-            setConvertAmount([_amount, amountDetail.usd]);
+            setConvertAmount([maxAmount, amountDetail.usd]);
           }}
         >
           MAX
@@ -123,11 +134,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           onClick={(event) => {
             event.stopPropagation();
             if (!amountDetail) return;
-            const _amount = parseAmountFrom(
-              amountDetail.amount,
-              token.decimals
-            ).toNumber();
-            setConvertAmount([_amount / 2, amountDetail.usd / 2]);
+            setConvertAmount([maxAmount / 2, amountDetail.usd / 2]);
           }}
         >
           HALF
@@ -156,6 +163,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             onClick={async (event) => {
               event.stopPropagation();
               try {
+                const isValid = checkValidAmount();
+                if (!isValid) return;
                 setTransferIbcLoading(true);
                 await onClickTransfer(convertAmount);
               } finally {
@@ -183,6 +192,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   onClick={async (event) => {
                     event.stopPropagation();
                     try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
                       setTransferLoading(true);
                       const to = filteredTokens.find(
                         (t) =>
@@ -215,6 +226,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   onClick={async (event) => {
                     event.stopPropagation();
                     try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
                       setTransferLoading(true);
                       await convertKwt(convertAmount, token);
                     } finally {
@@ -240,6 +253,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   onClick={async (event) => {
                     event.stopPropagation();
                     try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
                       setTransferLoading(true);
                       await transferFromGravity(token, convertAmount);
                     } finally {
@@ -284,6 +299,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   onClick={async (event) => {
                     event.stopPropagation();
                     try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
                       setConvertLoading(true);
                       await convertToken(convertAmount, token, 'nativeToCw20');
                     } finally {
@@ -303,6 +320,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   onClick={async (event) => {
                     event.stopPropagation();
                     try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
                       setTransferLoading(true);
                       const to = filteredTokens.find(
                         (t) =>
@@ -332,6 +351,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 onClick={async (event) => {
                   event.stopPropagation();
                   try {
+                    const isValid = checkValidAmount();
+                    if (!isValid) return;
                     setConvertLoading(true);
                     await convertToken(
                       convertAmount,
