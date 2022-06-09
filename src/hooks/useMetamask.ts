@@ -30,10 +30,10 @@ export function useEagerConnect(isInactive) {
   }, [pathname]);
 
   useEffect(() => {
-    const _ = async () => {
+    if (!window.ethereum) return;
+    (async function () {
       setMetamaskAddress(web3React.account || (await injected.getAccount()));
-    };
-    _();
+    })();
   }, [web3React.account]);
 }
 
