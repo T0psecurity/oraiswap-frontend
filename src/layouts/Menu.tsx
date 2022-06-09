@@ -11,7 +11,7 @@ import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ETHIcon } from 'assets/icons/eth.svg';
 import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-
+import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
 import { ThemeContext, Themes } from 'context/theme-context';
 
 import React, {
@@ -19,7 +19,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement
+  ReactElement,
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
@@ -54,9 +54,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balance
+    data: balance,
   } = useQuery(['balance', address], () => fetchNativeTokenBalance(address), {
-    enabled: address?.length > 0
+    enabled: address?.length > 0,
   });
 
   useEffect(() => {
@@ -72,8 +72,24 @@ const Menu: React.FC<{}> = React.memo((props) => {
     to: string,
     title: string,
     onClick: any,
-    icon: ReactElement
+    icon: ReactElement,
+    externalLink = false
   ) => {
+    if (externalLink)
+      return (
+        <a
+          target="_blank"
+          href={to}
+          className={
+            styles.menu_item + (link === to ? ` ${styles.active}` : '')
+          }
+          onClick={() => onClick(to)}
+        >
+          {icon}
+          <Text className={styles.menu_item_text}>{title}</Text>
+        </a>
+      );
+
     return (
       <Link
         to={to}
@@ -132,7 +148,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: balance,
                           decimals: 6,
-                          denom: ORAI
+                          denom: ORAI,
                         }}
                         className={styles.token_balance}
                         decimalScale={4}
@@ -164,7 +180,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: metamaskBalance,
                           decimals: 18,
-                          denom: ORAI
+                          denom: ORAI,
                         }}
                         className={styles.token_balance}
                         decimalScale={4}
@@ -203,6 +219,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
               setLink,
               <Wallet style={{ width: 30, height: 30 }} />
             )}
+            {renderLink(
+              'https://info.oraidex.io/',
+              'Info',
+              () => {},
+              <InfoIcon style={{ width: 30, height: 30 }} />,
+              true
+            )}
           </div>
         </div>
 
@@ -210,7 +233,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_themes}>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.dark
+                [styles.active]: theme === Themes.dark,
               })}
               onClick={() => {
                 setTheme(Themes.dark);
@@ -221,7 +244,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.light
+                [styles.active]: theme === Themes.light,
               })}
               onClick={() => {
                 setTheme(Themes.light);
