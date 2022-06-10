@@ -127,8 +127,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_items}>
             <RequireAuthButton
               address={address}
-              setAddress={setAddress}
-              metamaskAddress={metamaskAddress}
+              setAddress={setAddress}              
             >
               {address && (
                 <div className={styles.token_info}>

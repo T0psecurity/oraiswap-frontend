@@ -6,15 +6,17 @@ import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
+import useGlobalState from 'hooks/useGlobalState';
 
 const RequireAuthButton: React.FC<any> = ({
   address,
-  metamaskAddress,
   setAddress,
   ...props
 }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
+  const [metamaskAddress, setMetamaskAddress] =
+    useGlobalState('metamaskAddress');
   const { activate, deactivate } = useWeb3React();
 
   useEagerConnect(isInactiveMetamask);
@@ -24,6 +26,7 @@ const RequireAuthButton: React.FC<any> = ({
 
   const connectMetamask = async () => {
     try {
+      setIsInactiveMetamask(false);
       await activate(injected, (ex) => {
         displayToast(TToastType.METAMASK_FAILED, { message: ex.message });
       });
@@ -36,6 +39,7 @@ const RequireAuthButton: React.FC<any> = ({
     try {
       deactivate();
       setIsInactiveMetamask(true);
+      setMetamaskAddress(undefined);
     } catch (ex) {
       console.log(ex);
     }
