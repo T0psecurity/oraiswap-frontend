@@ -34,6 +34,7 @@ const startApp = async () => {
     console.log(ex);
   }
 
+  // window.ReactNativeWebView?.postMessage('hello')
   render(
     <StrictMode>
       <ToastProvider>
