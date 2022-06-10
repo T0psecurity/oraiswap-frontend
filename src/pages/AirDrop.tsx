@@ -136,4 +136,3 @@ const AirDrop: FunctionComponent = () => {
 };
 
 export default AirDrop;
-

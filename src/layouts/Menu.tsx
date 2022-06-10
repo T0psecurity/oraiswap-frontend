@@ -8,10 +8,11 @@ import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as Dark } from 'assets/icons/dark.svg';
 import { ReactComponent as Light } from 'assets/icons/light.svg';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
-import { ReactComponent as ETHIcon } from 'assets/icons/eth.svg';
 import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
+import ethIcon from 'assets/icons/eth.svg';
+
 import { ThemeContext, Themes } from 'context/theme-context';
 
 import React, {
@@ -34,6 +35,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
 import { fetchNativeTokenBalance } from 'rest/api';
+import { useWeb3React } from '@web3-react/core';
 
 const { Text } = Typography;
 
@@ -42,8 +44,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
-  const [metamaskAddress, setMetamaskAddress] =
-    useGlobalState('metamaskAddress');
+  const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
 
   const [open, setOpen] = useState(false);
@@ -128,7 +129,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
               address={address}
               setAddress={setAddress}
               metamaskAddress={metamaskAddress}
-              setMetamaskAddress={setMetamaskAddress}
             >
               {address && (
                 <div className={styles.token_info}>
@@ -157,17 +157,17 @@ const Menu: React.FC<{}> = React.memo((props) => {
                   </div>
                 </div>
               )}
-
-              {metamaskAddress && (
+              {!!metamaskAddress && (
                 <div className={styles.token_info}>
                   <AvatarPlaceholder
                     address={metamaskAddress}
                     className={styles.token_avatar}
                   />
-                  {window.Metamask.isBsc() ? (
+                  {window.Metamask.isBsc() && (
                     <BNBIcon className={styles.network_icon} />
-                  ) : (
-                    <ETHIcon className={styles.network_icon} />
+                  )}
+                  {window.Metamask.isEth() && (
+                    <img src={ethIcon} className={styles.network_icon} />
                   )}
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
@@ -222,7 +222,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => {},
+              () => { },
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}

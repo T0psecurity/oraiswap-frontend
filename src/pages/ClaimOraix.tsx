@@ -18,15 +18,20 @@ const objNetwork = {
   osmo: { network: 'osmo', stage: 4 },
   orai: { network: 'orai', stage: 2 },
   airi: { network: 'orai', stage: 1 },
-  juno: { network: 'juno', stage: 3 },
-  cosmos: { network: 'cosmos', stage: 5 },
+  // juno: { network: 'juno', stage: 3 },
+  cosmos: { network: 'cosmos', stage: 3 },
+  juno: { network: 'juno', stage: 5 },
+  'atom-oraidex': { network: 'orai', stage: 8 },
+  'kwt-milky': { network: 'orai', stage: 7 }
 };
 
 const ClaimOraiX: FunctionComponent = () => {
   const [claimLoading, setClaimLoading] = useState(false);
   const [address] = useGlobalState('address');
+  const [claimed, setIsClaimed] = useState(false);
   const { network: userNetwork } = useParams();
-  const networkConvert = objNetwork[userNetwork as keyof typeof objNetwork].network || ORAI;
+  const networkMapping = objNetwork[userNetwork as keyof typeof objNetwork] ? objNetwork[userNetwork as keyof typeof objNetwork] : { network: 'orai', stage: 1 };
+  const networkConvert = networkMapping.network || ORAI;
   const getAddressStrFromAnotherAddr = (address: string) => {
     const fullWords = bech32.decode(address);
     if (fullWords.words) {
@@ -42,7 +47,7 @@ const ClaimOraiX: FunctionComponent = () => {
 
       // get merkle proof
       const { data: proofs } = await fetchProof();
-      const msg = generateClaimMsg({ type: Type.CLAIM_ORAIX, sender: address, stage: objNetwork[userNetwork as keyof typeof objNetwork].stage, amount: oraiXAmount, proofs });
+      const msg = generateClaimMsg({ type: Type.CLAIM_ORAIX, sender: address, stage: networkMapping.stage, amount: oraiXAmount, proofs });
 
       const result = await CosmJs.execute({
         prefix: ORAI,
@@ -58,9 +63,11 @@ const ClaimOraiX: FunctionComponent = () => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setClaimLoading(false);
+        setIsClaimed(true);
       }, 5000);
     } catch (error: any) {
       console.log('error message handle claim: ', error);
+      setClaimLoading(false);
       return displayToast(TToastType.TX_FAILED, {
         message: error.message,
       });
@@ -68,20 +75,25 @@ const ClaimOraiX: FunctionComponent = () => {
   };
 
   const { data: oraiXAmount, isLoading: isLoading } = useQuery(
-    ['claim-oraix'],
+    ['claim-oraix', address, claimed],
     () => fetchClaimOraiX(), useQueryConfig
   );
 
   const { data: isClaimed, isLoading: isClaimedLoading } = useQuery(
-    ['is-claimed'],
+    ['is-claimed', address, claimed],
     () => fetchIsClaimed(), useQueryConfig
   );
 
   async function fetchClaimOraiX() {
-    const { data: amount } = (await axios.get(`${ORAIX_CLAIM_URL}/proof/amount/${userNetwork}?address=${address}`)).data;
-    console.log("res: ", amount)
-
-    return amount;
+    try {
+      const result = await axios.get(`${ORAIX_CLAIM_URL}/proof/amount/${userNetwork}?address=${address}`);
+      if (result.status === 404) return undefined;
+      const { data: amount } = result.data;
+      return amount;
+    } catch (error) {
+      console.log("error fetch claim oraix: ", error);
+      return undefined;
+    }
   }
 
   async function fetchIsClaimed() {
@@ -119,13 +131,18 @@ const ClaimOraiX: FunctionComponent = () => {
       >
         {address && !!networkConvert && (
           <>
-            <div style={{ wordWrap: 'break-word' }}>{`${userNetwork!.toUpperCase()} address: ${address && reduceString(getAddressStrFromAnotherAddr(address)!, networkConvert.length + 5, 10)
+            <div style={{ wordWrap: 'break-word' }}>{`${userNetwork!.toUpperCase()} airdrop address: ${address && reduceString(getAddressStrFromAnotherAddr(address)!, networkConvert.length + 5, 10)
               }`}</div>
-            {!isLoading && !!oraiXAmount && <div> {`Claim amount: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>}
+            {!isLoading && !!oraiXAmount &&
+              <div>
+                <div> {`Claim amount: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
+                <div> {`Is claimed: ${isClaimed}`}</div>
+              </div>
+            }
             {!isClaimedLoading &&
               <div>
-                <div> {`Is claimed: ${isClaimed}`}</div>
-                {!isClaimed &&
+                <div> {`Is in airdrop whitelist: ${oraiXAmount ? true : false}`}</div>
+                {!isClaimed && !!oraiXAmount &&
                   <button
                     style={{
                       background: '#612fca',

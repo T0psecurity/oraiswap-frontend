@@ -3,7 +3,7 @@ import React, {
   FunctionComponent,
   ReactComponentElement,
   ReactElement,
-  ReactNode
+  ReactNode,
 } from 'react';
 import styles from './Toast.module.scss';
 import classNames from 'classnames';
@@ -33,7 +33,7 @@ const defaultOptions: ToastOptions = {
   draggable: false,
   progress: undefined,
   pauseOnFocusLoss: false,
-  closeButton: CloseButton
+  closeButton: CloseButton,
 };
 
 const defaultExtraData = { message: '', customLink: '' };
@@ -43,7 +43,8 @@ export enum TToastType {
   TX_SUCCESSFUL,
   TX_FAILED,
   TX_INFO,
-  KEPLR_FAILED
+  KEPLR_FAILED,
+  METAMASK_FAILED,
 }
 
 interface IToastExtra {
@@ -74,6 +75,11 @@ export type DisplayToastFn = ((
     type: TToastType.KEPLR_FAILED,
     extraData?: Partial<Pick<IToastExtra, 'message'>>,
     options?: Partial<ToastOptions>
+  ) => void) &
+  ((
+    type: TToastType.METAMASK_FAILED,
+    extraData?: Partial<Pick<IToastExtra, 'message'>>,
+    options?: Partial<ToastOptions>
   ) => void);
 
 export interface DisplayToast {
@@ -90,11 +96,11 @@ export const displayToast: DisplayToastFn = (
   const refinedExtraData = extraData ? extraData : {};
   const inputExtraData = {
     ...defaultExtraData,
-    ...refinedExtraData
+    ...refinedExtraData,
   } as IToastExtra;
   const inputOptions = {
     ...defaultOptions,
-    ...refinedOptions
+    ...refinedOptions,
   } as ToastOptions;
 
   switch (type) {
@@ -118,6 +124,11 @@ export const displayToast: DisplayToastFn = (
     case TToastType.KEPLR_FAILED:
       return toast(
         <ToastKeplrFailed message={inputExtraData.message} />,
+        inputOptions
+      );
+    case TToastType.METAMASK_FAILED:
+      return toast(
+        <ToastMetamaksFailed message={inputExtraData.message} />,
         inputOptions
       );
     default:
@@ -155,12 +166,24 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
 );
 
 const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({
-  message
+  message,
 }) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Keplr failed</h6>
+      <p>{message}</p>
+    </section>
+  </div>
+);
+
+const ToastMetamaksFailed: FunctionComponent<{ message: string }> = ({
+  message,
+}) => (
+  <div className={classNames(styles.toast_content, styles.toast_failed)}>
+    <FailedIcon />
+    <section className={styles.toast_section}>
+      <h6>Metamask failed</h6>
       <p>{message}</p>
     </section>
   </div>

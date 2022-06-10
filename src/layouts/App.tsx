@@ -1,6 +1,4 @@
 import React, { useEffect } from 'react';
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
-
 import routes from 'routes';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
@@ -10,15 +8,21 @@ import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
 
-const queryClient = new QueryClient();
-
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
 
   const updateAddress = async () => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
-    if (!keplr) throw 'You must install Keplr to continue';
+    if (!keplr) {
+      return displayToast(
+        TToastType.TX_INFO,
+        {
+          message: 'You must install Keplr to continue'
+        },
+        { toastId: 'install_keplr' }
+      );
+    }
     const newAddress = await window.Keplr.getKeplrAddr();
     if (newAddress) {
       if (newAddress === address) {
@@ -34,7 +38,7 @@ const App = () => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     if (!address) {
-      updateAddress();
+      keplrHandler();
     }
     window.addEventListener('keplr_keystorechange', keplrHandler);
   }, []);
@@ -58,10 +62,8 @@ const App = () => {
   return (
     <ThemeProvider>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <QueryClientProvider client={queryClient}>
-          <Menu />
-          {routes()}
-        </QueryClientProvider>
+        <Menu />
+        {routes()}
       </Web3ReactProvider>
     </ThemeProvider>
   );

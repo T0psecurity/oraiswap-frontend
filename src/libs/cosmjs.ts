@@ -20,14 +20,14 @@ export interface HandleOptions {
   readonly funds?: readonly Coin[];
 }
 
-const collectWallet = async () => {
+const collectWallet = async (chainId?: string) => {
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) {
     throw 'You have to install Keplr first if you do not use a mnemonic to sign transactions';
   }
   // use keplr instead
-  const wallet = keplr.getOfflineSigner(network.chainId);
-  return wallet;
+  if (chainId) return keplr.getOfflineSigner(chainId);
+  return keplr.getOfflineSigner(network.chainId);
 };
 
 class CosmJs {
@@ -84,5 +84,7 @@ class CosmJs {
     }
   }
 }
+
+export { collectWallet };
 
 export default CosmJs;

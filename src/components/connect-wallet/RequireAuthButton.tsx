@@ -4,31 +4,29 @@ import { network } from 'config/networks';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
-
-export const injected = new InjectedConnector({
-  supportedChainIds: [1, 56]
-});
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { injected, useEagerConnect } from 'hooks/useMetamask';
 
 const RequireAuthButton: React.FC<any> = ({
   address,
   metamaskAddress,
-  setMetamaskAddress,
   setAddress,
   ...props
 }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
+  const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
+  const { activate, deactivate } = useWeb3React();
 
-  const { active, connector, error, activate, deactivate } = useWeb3React();
-
+  useEagerConnect(isInactiveMetamask);
   const onClick = () => {
     setOpenConnectWalletModal(true);
   };
 
   const connectMetamask = async () => {
     try {
-      await activate(injected);      
-      setMetamaskAddress(await injected.getAccount());
-      // window.location.reload();
+      await activate(injected, (ex) => {
+        displayToast(TToastType.METAMASK_FAILED, { message: ex.message });
+      });
     } catch (ex) {
       console.log(ex);
     }
@@ -37,7 +35,7 @@ const RequireAuthButton: React.FC<any> = ({
   const disconnectMetamask = async () => {
     try {
       deactivate();
-      setMetamaskAddress('');
+      setIsInactiveMetamask(true);
     } catch (ex) {
       console.log(ex);
     }
@@ -45,13 +43,17 @@ const RequireAuthButton: React.FC<any> = ({
 
   const connectKeplr = async () => {
     if (!(await window.Keplr.getKeplr())) {
-      alert('You must install Keplr to continue');
-      return;
+      return displayToast(
+        TToastType.TX_INFO,
+        {
+          message: 'You must install Keplr to continue',
+        },
+        { toastId: 'install_keplr' }
+      );
     }
 
     await window.Keplr.suggestChain(network.chainId);
     const address = await window.Keplr.getKeplrAddr();
-    console.log(address);
     setAddress(address as string);
   };
 
@@ -63,21 +65,6 @@ const RequireAuthButton: React.FC<any> = ({
       console.log(ex);
     }
   };
-
-  useEffect(() => {
-    const connectWalletOnPageLoad = async () => {
-      try {
-        if (!active && !metamaskAddress && !error) {
-          await activate(injected);
-          // reset provider
-          setMetamaskAddress(await injected.getAccount());
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    connectWalletOnPageLoad();
-  }, []);
 
   return (
     <React.Fragment>
