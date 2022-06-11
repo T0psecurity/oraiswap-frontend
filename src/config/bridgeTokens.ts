@@ -47,7 +47,7 @@ export type TokenItemType = {
     | 'OraiBridge'
     | 'BNB Chain'
     | 'Ethereum'
-    | 'Kawaii Sub-Network';
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -254,7 +254,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       },
       {
         name: 'KWT',
-        org: 'Kawaii Sub-Network',
+        org: 'Kawaiiverse',
         chainId: KWT_SUBNETWORK_CHAIN_ID,
         denom: process.env.REACT_APP_KWT_SUB_NETWORK_DENOM,
         decimals: EVM_DECIMALS,
@@ -267,7 +267,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       },
       {
         name: 'ERC20 KWT',
-        org: 'Kawaii Sub-Network',
+        org: 'Kawaiiverse',
         chainId: KWT_SUBNETWORK_CHAIN_ID,
         denom: 'erc20_kwt',
         contractAddress: KAWAII_CONTRACT,

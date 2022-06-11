@@ -10,6 +10,7 @@ import { ReactComponent as Light } from 'assets/icons/light.svg';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
 import ethIcon from 'assets/icons/eth.svg';
 
 import { ThemeContext, Themes } from 'context/theme-context';
@@ -72,8 +73,24 @@ const Menu: React.FC<{}> = React.memo((props) => {
     to: string,
     title: string,
     onClick: any,
-    icon: ReactElement
+    icon: ReactElement,
+    externalLink = false
   ) => {
+    if (externalLink)
+      return (
+        <a
+          target="_blank"
+          href={to}
+          className={
+            styles.menu_item + (link === to ? ` ${styles.active}` : '')
+          }
+          onClick={() => onClick(to)}
+        >
+          {icon}
+          <Text className={styles.menu_item_text}>{title}</Text>
+        </a>
+      );
+
     return (
       <Link
         to={to}
@@ -110,8 +127,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_items}>
             <RequireAuthButton
               address={address}
-              setAddress={setAddress}
-              metamaskAddress={metamaskAddress}
+              setAddress={setAddress}              
             >
               {address && (
                 <div className={styles.token_info}>
@@ -201,6 +217,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
               'Bridge',
               setLink,
               <Wallet style={{ width: 30, height: 30 }} />
+            )}
+            {renderLink(
+              'https://info.oraidex.io/',
+              'Info',
+              () => { },
+              <InfoIcon style={{ width: 30, height: 30 }} />,
+              true
             )}
           </div>
         </div>
