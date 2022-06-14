@@ -150,7 +150,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           denom: ORAI,
                         }}
                         className={styles.token_balance}
-                        decimalScale={4}
+                        decimalScale={6}                        
                       />
                     )}
                   </div>
@@ -182,7 +182,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           denom: ORAI,
                         }}
                         className={styles.token_balance}
-                        decimalScale={4}
+                        decimalScale={6}
                       />
                     )}
                   </div>
