@@ -43,10 +43,8 @@ const App = () => {
       keplrHandler();
     }
     window.addEventListener('keplr_keystorechange', keplrHandler);
-    window.addEventListener('owallet_keystorechange', keplrHandler);
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
-      window.removeEventListener('owallet_keystorechange', keplrHandler);
     };
   }, []);
 
