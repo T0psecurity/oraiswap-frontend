@@ -10,14 +10,14 @@
     "@cosmjs/crypto": "^0.26.5",
     "@cosmjs/proto-signing": "^0.26.5",
     "@cosmjs/stargate": "^0.26.5",
-    "@tharsis/proto": "^0.1.17",
-    "@tharsis/provider": "^0.2.4",
-    "@oraichain/kawaiiverse-txs": "0.0.1",
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/cosmos": "^0.9.12",
     "@keplr-wallet/types": "^0.9.12",
+    "@oraichain/kawaiiverse-txs": "0.0.1",
     "@saberhq/token-utils": "^1.12.69",
     "@sunnyag/react-coingecko": "^2.1.0",
+    "@tharsis/proto": "^0.1.17",
+    "@tharsis/provider": "^0.2.4",
     "@tippyjs/react": "^4.2.0",
     "@walletconnect/browser-utils": "^1.7.5",
     "@walletconnect/client": "^1.7.5",
@@ -47,7 +47,7 @@
     "react-router-dom": "^6.2.2",
     "react-toastify": "^8.2.0",
     "styled-components": "^5.2.3",
-    "web3": "^1.7.0"
+    "web3": "^1.7.3"
   },
   "scripts": {
     "start": "react-scripts start",

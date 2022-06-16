@@ -30,12 +30,11 @@ export function useEagerConnect(isInactive) {
   }, [pathname]);
 
   useEffect(() => {
-    window.ReactNativeWebView?.postMessage(`window ethereum: ${String(window.ethereum)}`)
     if (!window.ethereum || isInactive) return;
     (async function () {
       console.log('setMetamask');
 
-      // setMetamaskAddress(web3React.account || (await injected.getAccount()));
+      setMetamaskAddress(web3React.account || (await injected.getAccount()));
     })();
   }, [web3React.account]);
 }

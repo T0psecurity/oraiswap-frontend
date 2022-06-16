@@ -2,6 +2,7 @@ import { FunctionComponent, useEffect, useState } from 'react';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Content from 'layouts/Content';
+import Web3 from 'web3';
 
 const EthereumTest: FunctionComponent = () => {
   const [claimLoading, setClaimLoading] = useState(false);
@@ -14,28 +15,35 @@ const EthereumTest: FunctionComponent = () => {
     try {
       setClaimLoading(true);
 
-      console.log("window ethereum: ", window.ethereum)
+      console.log("window ethereum: ", parseInt('100', 16))
       window.ReactNativeWebView?.postMessage(String(window.ethereum))
 
+      const web3 = new Web3(window.ethereum);
+
       // const nonce = (await window.ethereum.request({ method: 'eth_getTransactionCount', params: ['0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222', 'latest'] })).data.result;
-      await window.ethereum.request({
+      const result = await window.ethereum.request({
         method: 'eth_sendTransaction',
         params: [{
-          gasPrice: 100,
-          gasLimit: 1000000000,
-          value: 1,
+          from: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
+          to: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
+          value: web3.utils.toHex(1),
         }],
         chainId: 'kawaii_6886-1',
         signer: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222'
       })
 
+      console.log("result: ", result);
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `https://scan.kawaii.global/tx/${result}`,
+      });
+
     } catch (error: any) {
       console.log('error message handle claim: ', error);
-      setClaimLoading(false);
       return displayToast(TToastType.TX_FAILED, {
         message: error.message,
       });
     }
+    setClaimLoading(false);
   };
 
   return (
