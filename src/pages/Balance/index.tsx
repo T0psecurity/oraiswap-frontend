@@ -336,6 +336,14 @@ const Balance: React.FC<BalanceProps> = () => {
 
       await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+
+      if (!metamaskAddress || !fromAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login both metamask and keplr!',
+        });
+        return;
+      }
+
       const rawAmount = parseAmountToWithDecimal(amount, fromToken.decimals)
         .minus(ORAI_BRIDGE_EVM_FEE)
         .toFixed(0);
@@ -398,6 +406,9 @@ const Balance: React.FC<BalanceProps> = () => {
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login keplr!',
+        });
         return;
       }
 
@@ -451,6 +462,9 @@ const Balance: React.FC<BalanceProps> = () => {
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login keplr!',
+        });
         return;
       }
 
@@ -501,6 +515,9 @@ const Balance: React.FC<BalanceProps> = () => {
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login keplr!',
+        });
         return;
       }
 
