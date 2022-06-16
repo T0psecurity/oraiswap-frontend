@@ -99,6 +99,7 @@ declare global {
     Keplr: Keplr;
     web3: Web3;
     ethereum: MetaMaskEthereumProvider;
+    ethereumX: MetaMaskEthereumProvider;
     Metamask: Metamask;
     ReactNativeWebView?: {
       postMessage(msg: string): void;
@@ -155,4 +156,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export {};
+export { };

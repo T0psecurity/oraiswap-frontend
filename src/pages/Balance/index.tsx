@@ -54,7 +54,7 @@ import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -372,8 +372,8 @@ const Balance: React.FC<BalanceProps> = () => {
         fromAddress,
         [message],
         fee,
-        `sender - ${fromAddress}; receiver - ${metamaskAddress}`
       );
+
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
@@ -830,7 +830,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, from, to)
+                              onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -915,11 +915,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}
