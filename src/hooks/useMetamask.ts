@@ -34,7 +34,7 @@ export function useEagerConnect(isInactive) {
     (async function () {
       console.log('setMetamask');
 
-      setMetamaskAddress(web3React.account || (await injected.getAccount()));
+      // setMetamaskAddress(web3React.account || (await injected.getAccount()));
     })();
   }, [web3React.account]);
 }
