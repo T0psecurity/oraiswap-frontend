@@ -7,7 +7,6 @@ import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
-import { network } from 'config/networks';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
