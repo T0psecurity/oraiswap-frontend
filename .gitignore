@@ -27,3 +27,5 @@ yarn-error.log*
 
 # ide
 .idea
+
+public/injected-provider.bundle.js
