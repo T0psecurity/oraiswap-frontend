@@ -12,7 +12,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import Metamask from 'libs/metamask';
-import { KWT_SUBNETWORK_CHAIN_ID } from 'config/constants';
+import {
+  KWT_SUBNETWORK_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
+} from 'config/constants';
 
 // enable Keplr
 window.Keplr = new Keplr();
