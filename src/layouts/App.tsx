@@ -24,6 +24,7 @@ const App = () => {
       );
     }
     const newAddress = await window.Keplr.getKeplrAddr();
+
     if (newAddress) {
       if (newAddress === address) {
         // same address, trigger update by clear address then re-update
@@ -41,6 +42,9 @@ const App = () => {
       keplrHandler();
     }
     window.addEventListener('keplr_keystorechange', keplrHandler);
+    return () => {
+      window.removeEventListener('keplr_keystorechange', keplrHandler);
+    };
   }, []);
 
   const keplrHandler = async () => {
@@ -51,7 +55,7 @@ const App = () => {
       await updateAddress();
       // window.location.reload();
     } catch (error) {
-      console.log('Error: ', error);
+      console.log('Error: ', error.message);
       displayToast(TToastType.TX_INFO, {
         message: `There is an unexpected error with Keplr wallet. Please try again!`
       });
