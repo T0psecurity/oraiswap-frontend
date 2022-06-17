@@ -556,7 +556,7 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async (fromAmount: number) => {
-    if (isMobile) {
+    if (isMobile()) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Metamask mobile app is not supported yet!',
       });
