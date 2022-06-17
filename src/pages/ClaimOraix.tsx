@@ -135,14 +135,17 @@ const ClaimOraiX: FunctionComponent = () => {
               }`}</div>
             {!isLoading && !!oraiXAmount &&
               <div>
-                <div> {`Claim amount: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
-                <div> {`Is claimed: ${isClaimed}`}</div>
+                <div> {`Total ORAIX: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
+                {/* <div> {`Claimmable: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
+                {/* <div> {`Claimed: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
+                <div> {`Claimmable: 0 ${ORAIX_DENOM}`}</div>
+                <div> {`Claimed: 0 ${ORAIX_DENOM}`}</div>
               </div>
             }
             {!isClaimedLoading &&
               <div>
-                <div> {`Is in airdrop whitelist: ${oraiXAmount ? true : false}`}</div>
-                {!isClaimed && !!oraiXAmount &&
+                <div> {`Whitelisted: ${oraiXAmount ? true : false}`}</div>
+                {/* {!isClaimed && !!oraiXAmount &&
                   <button
                     style={{
                       background: '#612fca',
@@ -172,7 +175,7 @@ const ClaimOraiX: FunctionComponent = () => {
                       {claimLoading && <div style={{ marginRight: 5 }}><Loader width={25} height={25} /></div>}
                       <div>Claim {ORAIX_DENOM}</div>
                     </div>
-                  </button>}
+                  </button>} */}
               </div>
             }
           </>
