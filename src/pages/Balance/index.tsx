@@ -53,6 +53,7 @@ import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
+import { isMobile } from '@walletconnect/browser-utils';
 
 interface BalanceProps {}
 
@@ -555,6 +556,13 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async (fromAmount: number) => {
+    if (isMobile) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Metamask mobile app is not supported yet!',
+      });
+      return;
+    }
+
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: from!.chainId }],
