@@ -20,22 +20,28 @@ const EthereumTest: FunctionComponent = () => {
 
       const web3 = new Web3(window.ethereum);
 
-      // const nonce = (await window.ethereum.request({ method: 'eth_getTransactionCount', params: ['0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222', 'latest'] })).data.result;
-      const result = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          from: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
-          to: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
-          value: web3.utils.toHex(1),
-        }],
-        chainId: 'kawaii_6886-1',
-        signer: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222'
-      })
+      // const nonce = await window.ethereum.request({ method: 'eth_getTransactionCount', params: ['0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222', 'latest'], rpc: 'https://endpoint1.kawaii.global' });
+      // alert(`nonce: ${nonce}`)
 
-      console.log("result: ", result);
-      displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `https://scan.kawaii.global/tx/${result}`,
-      });
+      const accounts = await window.ethereum.request({ method: 'eth_accounts', params: [], chainId: 'kawaii_6886-1' });
+      alert(`accounts: ${accounts}`)
+
+
+      // const result = await window.ethereum.request({
+      //   method: 'eth_sendTransaction',
+      //   params: [{
+      //     from: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
+      //     to: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
+      //     value: web3.utils.toHex(1),
+      //   }],
+      //   chainId: 'kawaii_6886-1',
+      //   signer: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222'
+      // })
+
+      // console.log("result: ", result);
+      // displayToast(TToastType.TX_SUCCESSFUL, {
+      //   customLink: `https://scan.kawaii.global/tx/${result}`,
+      // });
 
     } catch (error: any) {
       console.log('error message handle claim: ', error);

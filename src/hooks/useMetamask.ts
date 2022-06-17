@@ -32,9 +32,9 @@ export function useEagerConnect(isInactive) {
   useEffect(() => {
     if (!window.ethereum || isInactive) return;
     (async function () {
-      console.log('setMetamask');
-
-      // setMetamaskAddress(web3React.account || (await injected.getAccount()));
+      const chainId = await window.ethereum.request({ method: 'eth_chainId', params: [] });
+      const accounts = await window.ethereum.request({ method: 'eth_accounts', params: [], chainId });
+      setMetamaskAddress(web3React.account || accounts[0]);
     })();
   }, [web3React.account]);
 }
