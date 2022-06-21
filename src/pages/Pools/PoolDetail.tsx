@@ -31,7 +31,7 @@ import { ORAI, STABLE_DENOM } from 'config/constants';
 
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -242,7 +242,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     : 0;
   const bondAmountUsd = rewardInfoFirst
     ? (rewardInfoFirst.bond_amount * (pairAmountInfoData?.usdAmount ?? 0)) /
-      +(lpTokenInfoData?.total_supply ?? 0)
+    +(lpTokenInfoData?.total_supply ?? 0)
     : 0;
 
   return (
@@ -258,9 +258,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
 
                 <div className={cx('title')}>
-                  <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
-                    pairInfoData.token2!.name
-                  }`}</div>
+                  <div className={cx('name')}>{`${pairInfoData.token1!.name}/${pairInfoData.token2!.name
+                    }`}</div>
                   <TokenBalance
                     balance={
                       pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
@@ -273,9 +272,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               {!!pairAmountInfoData && (
                 <div className={cx('des')}>
                   <span>{`1 ${pairInfoData.token2!.name} ≈ `}</span>
-                  <span>{`${+pairAmountInfoData?.ratio.toFixed(6)} ${
-                    pairInfoData.token1!.name
-                  }`}</span>
+                  <span>{`${+pairAmountInfoData?.ratio.toFixed(6)} ${pairInfoData.token1!.name
+                    }`}</span>
                 </div>
               )}
             </div>
@@ -292,7 +290,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                               amount: lpTokenBalance ?? 0,
                               denom: `${lpTokenInfoData?.symbol}`
                             }}
-                            decimalScale={2}
+                            decimalScale={6}
                             className={cx('amount')}
                           />
                         </div>
@@ -323,7 +321,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                               denom: ''
                             }}
                             className={cx('amount')}
-                            decimalScale={2}
+                            decimalScale={6}
                           />
                           <TokenBalance
                             balance={liquidity1Usd ?? 0}
@@ -350,7 +348,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                               denom: ''
                             }}
                             className={cx('amount')}
-                            decimalScale={2}
+                            decimalScale={6}
                           />
                           <TokenBalance
                             balance={liquidity2Usd ?? 0}
@@ -386,7 +384,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                               denom: ''
                             }}
                             className={cx('amount')}
-                            decimalScale={2}
+                            decimalScale={6}
                           />
                           <TokenBalance
                             balance={pairAmountInfoData?.token1Usd}
@@ -409,7 +407,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                               denom: ''
                             }}
                             className={cx('amount')}
-                            decimalScale={2}
+                            decimalScale={6}
                           />
                           <TokenBalance
                             balance={pairAmountInfoData?.token2Usd}

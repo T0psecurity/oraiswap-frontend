@@ -55,7 +55,7 @@ import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
 import { isMobile } from '@walletconnect/browser-utils';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -381,8 +381,8 @@ const Balance: React.FC<BalanceProps> = () => {
         fromAddress,
         [message],
         fee,
-        `sender - ${fromAddress}; receiver - ${metamaskAddress}`
       );
+
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
@@ -556,12 +556,12 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async (fromAmount: number) => {
-    if (isMobile()) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Metamask mobile app is not supported yet!',
-      });
-      return;
-    }
+    // if (isMobile()) {
+    //   displayToast(TToastType.TX_FAILED, {
+    //     message: 'Metamask mobile app is not supported yet!',
+    //   });
+    //   return;
+    // }
 
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
@@ -855,7 +855,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, from, to)
+                              onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -940,11 +940,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}

@@ -29,14 +29,14 @@ const startApp = async () => {
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
       await window.Keplr.suggestChain(network.chainId);
-      await window.Keplr.suggestChain('oraibridge-subnet');
+      await window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID);
       await window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID);
     }
   } catch (ex) {
     console.log(ex);
   }
 
-  // window.ReactNativeWebView?.postMessage('hello')
+  window.ReactNativeWebView?.postMessage('foo bar hello hello')
   render(
     <StrictMode>
       <ToastProvider>

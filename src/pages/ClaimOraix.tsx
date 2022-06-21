@@ -7,30 +7,37 @@ import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import bech32 from 'bech32';
-import { ORAI, ORAIX_CLAIM_CONTRACT, ORAIX_CLAIM_URL, ORAIX_DENOM } from 'config/constants';
+import { ORAI, ORAIX_DENOM } from 'config/constants';
 import Content from 'layouts/Content';
 import { parseAmountFromWithDecimal, reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import { generateClaimMsg, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
+import { isMobile } from '@walletconnect/browser-utils';
+
+const ORAIX_CLAIM_URL = process.env.REACT_APP_ORAIX_CLAIM_URL;
+const ORAIX_CLAIM_CONTRACT = process.env.REACT_APP_ORAIX_CLAIM_CONTRACT;
 
 const objNetwork = {
   osmo: { network: 'osmo', stage: 4 },
   orai: { network: 'orai', stage: 2 },
   airi: { network: 'orai', stage: 1 },
-  // juno: { network: 'juno', stage: 3 },
   cosmos: { network: 'cosmos', stage: 3 },
   juno: { network: 'juno', stage: 5 },
   'atom-oraidex': { network: 'orai', stage: 8 },
-  'kwt-milky': { network: 'orai', stage: 7 }
+  'kwt-milky': { network: 'orai', stage: 7 },
 };
+
+type objNetworkKey = keyof typeof objNetwork;
 
 const ClaimOraiX: FunctionComponent = () => {
   const [claimLoading, setClaimLoading] = useState(false);
   const [address] = useGlobalState('address');
   const [claimed, setIsClaimed] = useState(false);
   const { network: userNetwork } = useParams();
-  const networkMapping = objNetwork[userNetwork as keyof typeof objNetwork] ? objNetwork[userNetwork as keyof typeof objNetwork] : { network: 'orai', stage: 1 };
+  const networkMapping = objNetwork[userNetwork as objNetworkKey]
+    ? objNetwork[userNetwork as objNetworkKey]
+    : { network: 'orai', stage: 1 };
   const networkConvert = networkMapping.network || ORAI;
   const getAddressStrFromAnotherAddr = (address: string) => {
     const fullWords = bech32.decode(address);
@@ -39,7 +46,14 @@ const ClaimOraiX: FunctionComponent = () => {
     }
   };
 
-  const useQueryConfig = { enabled: !!address, retry: 1, retryDelay: 3000, refetchOnMount: false, refetchOnWindowFocus: false, refetchOnReconnect: false };
+  const useQueryConfig = {
+    enabled: !!address,
+    retry: 1,
+    retryDelay: 3000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  };
 
   const handleClaim = async () => {
     try {
@@ -47,7 +61,13 @@ const ClaimOraiX: FunctionComponent = () => {
 
       // get merkle proof
       const { data: proofs } = await fetchProof();
-      const msg = generateClaimMsg({ type: Type.CLAIM_ORAIX, sender: address, stage: networkMapping.stage, amount: oraiXAmount, proofs });
+      const msg = generateClaimMsg({
+        type: Type.CLAIM_ORAIX,
+        sender: address,
+        stage: networkMapping.stage,
+        amount: oraiXAmount,
+        proofs,
+      });
 
       const result = await CosmJs.execute({
         prefix: ORAI,
@@ -76,22 +96,26 @@ const ClaimOraiX: FunctionComponent = () => {
 
   const { data: oraiXAmount, isLoading: isLoading } = useQuery(
     ['claim-oraix', address, claimed],
-    () => fetchClaimOraiX(), useQueryConfig
+    () => fetchClaimOraiX(),
+    useQueryConfig
   );
 
   const { data: isClaimed, isLoading: isClaimedLoading } = useQuery(
     ['is-claimed', address, claimed],
-    () => fetchIsClaimed(), useQueryConfig
+    () => fetchIsClaimed(),
+    useQueryConfig
   );
 
   async function fetchClaimOraiX() {
     try {
-      const result = await axios.get(`${ORAIX_CLAIM_URL}/proof/amount/${userNetwork}?address=${address}`);
+      const result = await axios.get(
+        `${ORAIX_CLAIM_URL}/proof/amount/${userNetwork}?address=${address}`
+      );
       if (result.status === 404) return undefined;
       const { data: amount } = result.data;
       return amount;
     } catch (error) {
-      console.log("error fetch claim oraix: ", error);
+      console.log('error fetch claim oraix: ', error);
       return undefined;
     }
   }
@@ -100,17 +124,27 @@ const ClaimOraiX: FunctionComponent = () => {
     const msg = JSON.stringify({
       is_claimed: {
         address,
-        stage: objNetwork[userNetwork as keyof typeof objNetwork].stage
-      }
+        stage: objNetwork[userNetwork as objNetworkKey].stage,
+      },
     });
-    const { data } = (await axios.get(`${network.lcd}/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`)).data;
-    console.log("data is claimed: ", data.is_claimed)
+    const { data } = (
+      await axios.get(
+        `${
+          network.lcd
+        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`
+      )
+    ).data;
+    console.log('data is claimed: ', data.is_claimed);
 
     return data.is_claimed;
   }
 
   async function fetchProof() {
-    const res: any = (await axios.get(`${ORAIX_CLAIM_URL}/proof/${userNetwork}?address=${address}&amount=${oraiXAmount}`)).data;
+    const res: any = (
+      await axios.get(
+        `${ORAIX_CLAIM_URL}/proof/${userNetwork}?address=${address}&amount=${oraiXAmount}`
+      )
+    ).data;
     return res;
   }
 
@@ -131,18 +165,29 @@ const ClaimOraiX: FunctionComponent = () => {
       >
         {address && !!networkConvert && (
           <>
-            <div style={{ wordWrap: 'break-word' }}>{`${userNetwork!.toUpperCase()} airdrop address: ${address && reduceString(getAddressStrFromAnotherAddr(address)!, networkConvert.length + 5, 10)
-              }`}</div>
-            {!isLoading && !!oraiXAmount &&
+            <div
+              style={{ wordWrap: 'break-word' }}
+            >{`${userNetwork!.toUpperCase()} airdrop address: ${
+              address &&
+              reduceString(
+                getAddressStrFromAnotherAddr(address)!,
+                networkConvert.length + 5,
+                10
+              )
+            }`}</div>
+            {!isLoading && !!oraiXAmount && (
               <div>
-                <div> {`Claim amount: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
-                <div> {`Is claimed: ${isClaimed}`}</div>
+                <div> {`Total ORAIX: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
+                {/* <div> {`Claimmable: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
+                {/* <div> {`Claimed: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
+                <div> {`Claimmable: 0 ${ORAIX_DENOM}`}</div>
+                <div> {`Claimed: 0 ${ORAIX_DENOM}`}</div>
               </div>
-            }
-            {!isClaimedLoading &&
+            )}
+            {!isClaimedLoading && (
               <div>
-                <div> {`Is in airdrop whitelist: ${oraiXAmount ? true : false}`}</div>
-                {!isClaimed && !!oraiXAmount &&
+                <div> {`Whitelisted: ${oraiXAmount ? true : false}`}</div>
+                {!isClaimed && !!oraiXAmount && isMobile() &&
                   <button
                     style={{
                       background: '#612fca',
@@ -169,16 +214,21 @@ const ClaimOraiX: FunctionComponent = () => {
                         alignItems: 'center',
                       }}
                     >
-                      {claimLoading && <div style={{ marginRight: 5 }}><Loader width={25} height={25} /></div>}
+                      {claimLoading && (
+                        <div style={{ marginRight: 5 }}>
+                          <Loader width={25} height={25} />
+                        </div>
+                      )}
                       <div>Claim {ORAIX_DENOM}</div>
                     </div>
-                  </button>}
+                  </button>
+                }
               </div>
-            }
+            )}
           </>
         )}
       </div>
-    </Content >
+    </Content>
   );
 };
 
