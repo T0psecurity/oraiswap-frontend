@@ -13,6 +13,7 @@ import { parseAmountFromWithDecimal, reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import { generateClaimMsg, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const objNetwork = {
   osmo: { network: 'osmo', stage: 4 },
@@ -135,14 +136,17 @@ const ClaimOraiX: FunctionComponent = () => {
               }`}</div>
             {!isLoading && !!oraiXAmount &&
               <div>
-                <div> {`Claim amount: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
-                <div> {`Is claimed: ${isClaimed}`}</div>
+                <div> {`Total ORAIX: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
+                {/* <div> {`Claimmable: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
+                {/* <div> {`Claimed: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
+                <div> {`Claimmable: 0 ${ORAIX_DENOM}`}</div>
+                <div> {`Claimed: 0 ${ORAIX_DENOM}`}</div>
               </div>
             }
             {!isClaimedLoading &&
               <div>
-                <div> {`Is in airdrop whitelist: ${oraiXAmount ? true : false}`}</div>
-                {!isClaimed && !!oraiXAmount &&
+                <div> {`Whitelisted: ${oraiXAmount ? true : false}`}</div>
+                {!isClaimed && !!oraiXAmount && isMobile() &&
                   <button
                     style={{
                       background: '#612fca',
