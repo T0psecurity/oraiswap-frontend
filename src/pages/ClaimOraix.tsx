@@ -135,7 +135,7 @@ const ClaimOraiX: FunctionComponent = () => {
               }`}</div>
             {!isLoading && !!oraiXAmount &&
               <div>
-                <div> {`Total ORAIX: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div>
+                <div> {`Total ORAIX: ${parseAmountFromWithDecimal(parseInt(parseInt(oraiXAmount) / 0.4), 6).toString()} ${ORAIX_DENOM}`}</div>
                 {/* <div> {`Claimmable: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
                 {/* <div> {`Claimed: ${parseAmountFromWithDecimal(parseInt(oraiXAmount), 6).toString()} ${ORAIX_DENOM}`}</div> */}
                 <div> {`Claimmable: 0 ${ORAIX_DENOM}`}</div>
