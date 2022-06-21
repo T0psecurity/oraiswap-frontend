@@ -556,12 +556,12 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async (fromAmount: number) => {
-    if (isMobile()) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Metamask mobile app is not supported yet!',
-      });
-      return;
-    }
+    // if (isMobile()) {
+    //   displayToast(TToastType.TX_FAILED, {
+    //     message: 'Metamask mobile app is not supported yet!',
+    //   });
+    //   return;
+    // }
 
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
