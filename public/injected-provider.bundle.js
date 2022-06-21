@@ -1,1 +1,0 @@
-/Users/user/Documents/WorkingFolder/mobile_wallet_v2/packages/mobile/build/injected/injected-provider.bundle.js
