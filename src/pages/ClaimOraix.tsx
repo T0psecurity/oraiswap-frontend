@@ -124,7 +124,7 @@ const ClaimOraiX: FunctionComponent = () => {
     const msg = JSON.stringify({
       is_claimed: {
         address,
-        stage: objNetwork[userNetwork as keyof typeof objNetwork].stage,
+        stage: objNetwork[userNetwork as objNetworkKey].stage,
       },
     });
     const { data } = (
