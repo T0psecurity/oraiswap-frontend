@@ -3,7 +3,7 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import { PoolResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
-import { ORAI, ORAIX_CLAIM_CONTRACT } from 'config/constants';
+import { ORAI } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
@@ -41,8 +41,9 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -116,7 +117,7 @@ async function fetchPool(pairAddr: string): Promise<PoolResponse> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-    '0'
+      '0'
   );
 }
 
@@ -270,8 +271,9 @@ async function fetchNativeTokenBalance(
   denom: string = ORAI,
   lcd?: string
 ) {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
   const res: any = (await axios.get(url)).data;
   const amount =
     res.balances.find((balance: { denom: string }) => balance.denom === denom)
@@ -327,27 +329,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo,
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo,
+          },
         },
-      },
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo,
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo,
+          },
         },
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo,
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo,
+          },
         },
-      },
-    ];
+      ];
 };
 
 async function simulateSwap(query: {
@@ -741,7 +743,7 @@ function generateClaimMsg(msg: Claim) {
   const { type, sender, stage, amount, proofs } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
-  let contractAddr = ORAIX_CLAIM_CONTRACT;
+  let contractAddr = process.env.REACT_APP_ORAIX_CLAIM_CONTRACT;
   let input;
   switch (type) {
     case Type.CLAIM_ORAIX:
@@ -750,8 +752,8 @@ function generateClaimMsg(msg: Claim) {
           stage,
           amount: amount.toString(),
           proof: proofs,
-        }
-      }
+        },
+      };
       break;
     default:
       break;

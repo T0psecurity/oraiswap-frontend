@@ -48,7 +48,6 @@ export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
 export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
-export const ORAIX_CLAIM_URL = 'https://oraix-airdrop.oraidex.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 
 export const ORAI_ETH_CONTRACT = '0x4c11249814f11b9346808179cf06e71ac328c1b5';
@@ -57,10 +56,6 @@ export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
 export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
 export const KWT_BSC_CONTRACT = '0x257a8d1E03D17B8535a182301f15290F11674b53';
 export const ORAIX_DENOM = 'ORAIX';
-
-// ORAIX claim
-export const ORAIX_CLAIM_CONTRACT =
-  'orai1z0ux6rjp5puectjhlmj96kzelax4nmf6zhsc23';
 
 // Kawaiiverse subnetwork
 export const KAWAII_RPC = 'https://tendermint1.kawaii.global';
