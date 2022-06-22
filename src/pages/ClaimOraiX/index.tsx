@@ -51,14 +51,14 @@ const arrayToken = [
 ];
 
 const objNetwork = {
-  osmo: { network: 'osmo', stage: 14 },
-  orai: { network: 'orai', stage: 13 },
-  airi: { network: 'orai', stage: 15 },
-  cosmos: { network: 'cosmos', stage: 10 },
-  juno: { network: 'juno', stage: 11 },
-  'atom-oraidex': { network: 'orai', stage: 16 },
+  osmo: { network: 'osmo', stage: 27 },
+  orai: { network: 'orai', stage: 26 },
+  airi: { network: 'orai', stage: 21 },
+  cosmos: { network: 'cosmos', stage: 23 },
+  juno: { network: 'juno', stage: 24 },
+  'atom-oraidex': { network: 'orai', stage: 22 },
   'atom-cosmos-hub': { network: 'orai', stage: 10 },
-  'kwt-milky': { network: 'orai', stage: 12 },
+  'kwt-milky': { network: 'orai', stage: 25 },
 };
 
 type objNetworkKey = keyof typeof objNetwork;
@@ -81,7 +81,7 @@ const ClaimOraiX: FunctionComponent = () => {
     }
   };
 
-  const ClaimOraiXBox = memo<Object>(({}) => {
+  const ClaimOraiXBox = memo<Object>(({ }) => {
     return (
       <>
         {address && !!networkConvert && (
@@ -92,14 +92,13 @@ const ClaimOraiX: FunctionComponent = () => {
               </div>
               <div className={styles.pairbox_pair}>
                 <div className={styles.pairbox_pair_name}>
-                  {`${
-                    address &&
+                  {`${address &&
                     reduceString(
                       getAddressStrFromAnotherAddr(address)!,
                       networkConvert.length + 5,
                       10
                     )
-                  }`}
+                    }`}
                 </div>
                 <div
                   className={styles.pairbox_modal}
@@ -133,9 +132,9 @@ const ClaimOraiX: FunctionComponent = () => {
                     <span className={styles.pairbox_data_value}>
                       {!isLoading && !isClaimed
                         ? parseAmountFromWithDecimal(
-                            parseInt(oraiXAmount),
-                            6
-                          ).toString()
+                          parseInt(oraiXAmount),
+                          6
+                        ).toString()
                         : 0}{' '}
                       {ORAIX_DENOM}
                     </span>
@@ -145,9 +144,9 @@ const ClaimOraiX: FunctionComponent = () => {
                     <span className={styles.pairbox_data_value}>
                       {!isLoading && isClaimed
                         ? parseAmountFromWithDecimal(
-                            parseInt(oraiXAmount),
-                            6
-                          ).toString()
+                          parseInt(oraiXAmount),
+                          6
+                        ).toString()
                         : 0}{' '}
                       {ORAIX_DENOM}
                     </span>
@@ -191,7 +190,7 @@ const ClaimOraiX: FunctionComponent = () => {
             )}
           </div>
         )}
-        <div style={{ marginTop: 50}}>
+        <div style={{ marginTop: 50 }}>
           To claim ORAIX from the Claimable section, please use the OWallet app
           ( {' '}
           <a
@@ -299,8 +298,7 @@ const ClaimOraiX: FunctionComponent = () => {
     });
     const { data } = (
       await axios.get(
-        `${
-          network.lcd
+        `${network.lcd
         }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`
       )
     ).data;
