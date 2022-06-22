@@ -162,7 +162,7 @@ const ClaimOraiX: FunctionComponent = () => {
             {/* && isMobile() */}
             {!isClaimedLoading && (
               <div>
-                {!isClaimed && !!oraiXAmount && (isIOS() || isAndroid()) && (
+                {!isClaimed && !!oraiXAmount && (
                   <button
                     className={styles.pairbox_btn}
                     onClick={handleClaim}
