@@ -129,7 +129,7 @@ const ClaimOraiX: FunctionComponent = () => {
                     </span>
                   </div>
                   <div className={styles.pairbox_data}>
-                    <span className={styles.pairbox_data_name}>Claimmable</span>
+                    <span className={styles.pairbox_data_name}>Claimable</span>
                     <span className={styles.pairbox_data_value}>
                       {!isLoading && !isClaimed
                         ? parseAmountFromWithDecimal(
@@ -191,6 +191,24 @@ const ClaimOraiX: FunctionComponent = () => {
             )}
           </div>
         )}
+        <div style={{ marginTop: 50}}>
+          To claim ORAIX from the Claimable section, please use the OWallet app
+          ( {' '}
+          <a
+            style={{ color: 'green' }}
+            href="https://apps.apple.com/app/owallet/id1626035069"
+          >
+            iOS
+          </a>
+          {' '} / {' '}
+          <a
+            style={{ color: 'green' }}
+            href="https://play.google.com/store/apps/details?id=com.io.owallet"
+          >
+            Android
+          </a>
+          {' '} )
+        </div>
       </>
     );
   });
