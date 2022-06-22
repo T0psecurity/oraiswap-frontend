@@ -190,7 +190,12 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
             </RequireAuthButton>
-
+            {renderLink(
+              '/claim-oraix',
+              'Claim OraiX',
+              setLink,
+              <Wallet style={{ width: 30, height: 30 }} />
+            )}
             {renderLink(
               '/swap',
               'Swap',
@@ -222,13 +227,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}
-            {
-              renderLink(
-                '/claim-oraix',
-                'Claim OraiX',
-                setLink,
-                <Wallet style={{ width: 30, height: 30 }} />
-              )}
           </div>
         </div>
 
