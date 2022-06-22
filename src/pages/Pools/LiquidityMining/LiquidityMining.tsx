@@ -27,6 +27,7 @@ interface LiquidityMiningProps {
   totalRewardInfoData: any;
   rewardPerSecInfoData: any;
   stakingPoolInfoData: any;
+  pairInfoData: any;
 }
 
 const LiquidityMining: React.FC<LiquidityMiningProps> = ({
@@ -39,7 +40,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   setWithdrawTxHash,
   totalRewardInfoData,
   rewardPerSecInfoData,
-  stakingPoolInfoData
+  stakingPoolInfoData,
+  pairInfoData,
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<[any]>();
@@ -241,7 +243,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 />
                 <div className={cx('bonded-apr')}>
                   <div className={cx('bonded-name')}>Current APR</div>
-                  <div className={cx('bonded-value')}>150% + ORAIX Bonus</div>
+                  {pairInfoData.contract_addr === 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <div className={cx('bonded-value')}>200% + ORAIX Bonus</div>}
+                  {pairInfoData.contract_addr !== 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <div className={cx('bonded-value')}>150% + ORAIX Bonus</div>}
                 </div>
                 {/* <div className={cx('bonded-unbouding')}>
                           <div className={cx('bonded-name')}>
