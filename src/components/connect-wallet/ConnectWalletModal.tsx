@@ -1,4 +1,5 @@
 import LoginWidget from './LoginWidget';
+import LoginWidgetDeepLink from './LoginDeepLinkMobile';
 import Modal from 'components/Modal';
 import React from 'react';
 import MESSAGE from 'lang/MESSAGE.json';
@@ -7,7 +8,7 @@ import cn from 'classnames/bind';
 import MetamaskImage from 'assets/icons/metamask.svg';
 import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/owallet.png';
-import { isMobile } from '@walletconnect/browser-utils';
+import { isMobile, isIOS, isAndroid } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(style);
 
@@ -44,13 +45,34 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
         </div>
         <div className={cx('options')}>
           {mobileMode ? (
-            <LoginWidget
-              text={MESSAGE.Form.Button.ConnectOWallet}
-              address={address}
-              logo={OWalletImage}
-              connect={connectKeplr}
-              disconnect={disconnectKeplr}
-            />
+            !address ? (
+              <a
+                target="__blank"
+                href={
+                  isAndroid()
+                    ? `app.owallet.oauth://google/open_url?url=${encodeURIComponent(
+                        'https://oraidex.io'
+                      )}`
+                    : `owallet://open_url?url=${encodeURIComponent(
+                        'https://oraidex.io'
+                      )}`
+                }
+              >
+                <LoginWidgetDeepLink
+                  text={MESSAGE.Form.Button.ConnectOWallet}
+                  address={address}
+                  logo={OWalletImage}
+                  disconnect={disconnectKeplr}
+                />
+              </a>
+            ) : (
+              <LoginWidgetDeepLink
+                text={MESSAGE.Form.Button.ConnectOWallet}
+                address={address}
+                logo={OWalletImage}
+                disconnect={disconnectKeplr}
+              />
+            )
           ) : (
             <LoginWidget
               text={MESSAGE.Form.Button.ConnectKeplr}

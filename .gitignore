@@ -17,6 +17,7 @@
 .env.*
 !.env.example
 !.env.deprecate
+!.env.oraix.test
 
 npm-debug.log*
 yarn-debug.log*

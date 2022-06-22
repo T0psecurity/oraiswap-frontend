@@ -84,17 +84,22 @@ const Menu: React.FC<{}> = React.memo((props) => {
           className={
             styles.menu_item + (link === to ? ` ${styles.active}` : '')
           }
-          onClick={() => onClick(to)}
+          onClick={() => {
+            setOpen(!open);
+            onClick(to);
+          }}
         >
           {icon}
           <Text className={styles.menu_item_text}>{title}</Text>
         </a>
       );
-
     return (
       <Link
         to={to}
-        onClick={() => onClick(to)}
+        onClick={() => {
+          setOpen(!open);
+          onClick(to);
+        }}
         className={styles.menu_item + (link === to ? ` ${styles.active}` : '')}
       >
         {icon}
@@ -125,10 +130,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Link>
           )}
           <div className={styles.menu_items}>
-            <RequireAuthButton
-              address={address}
-              setAddress={setAddress}              
-            >
+            <RequireAuthButton address={address} setAddress={setAddress}>
               {address && (
                 <div className={styles.token_info}>
                   <AvatarPlaceholder
@@ -150,7 +152,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           denom: ORAI,
                         }}
                         className={styles.token_balance}
-                        decimalScale={4}
+                        decimalScale={6}
                       />
                     )}
                   </div>
@@ -182,7 +184,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           denom: ORAI,
                         }}
                         className={styles.token_balance}
-                        decimalScale={4}
+                        decimalScale={6}
                       />
                     )}
                   </div>
@@ -193,7 +195,12 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
             </RequireAuthButton>
-
+            {new Date().getTime() > 1655908200000 && renderLink( // 21h30 22/6/22
+              '/claim-oraix',
+              'Claim ORAIX',
+              setLink,
+              <Wallet style={{ width: 30, height: 30 }} />
+            )}
             {renderLink(
               '/swap',
               'Swap',

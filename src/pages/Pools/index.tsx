@@ -15,7 +15,7 @@ import { STABLE_DENOM } from 'config/constants';
 
 const { Search } = Input;
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
@@ -86,7 +86,8 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
       <div className={styles.pairbox_content}>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>APR</span>
-          <span className={styles.pairbox_data_value}>150%</span>
+          {pair.contract_addr === 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <span className={styles.pairbox_data_value}>200%</span>}
+          {pair.contract_addr !== 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <span className={styles.pairbox_data_value}>150%</span>}
         </div>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>

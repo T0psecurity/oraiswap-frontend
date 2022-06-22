@@ -99,6 +99,7 @@ declare global {
     Keplr: Keplr;
     web3: Web3;
     ethereum: MetaMaskEthereumProvider;
+    ethereumX: MetaMaskEthereumProvider;
     Metamask: Metamask;
     ReactNativeWebView?: {
       postMessage(msg: string): void;
@@ -149,10 +150,12 @@ declare global {
       REACT_APP_REWARDER_CONTRACT: string;
       REACT_APP_CONVERTER_CONTRACT: string;
       REACT_APP_DEPRECATED: string;
+      REACT_APP_ORAIX_CLAIM_URL: string;
+      REACT_APP_ORAIX_CLAIM_CONTRACT: string;
     }
   }
 }
 
 declare module 'crypto-hashing';
 
-export {};
+export { };

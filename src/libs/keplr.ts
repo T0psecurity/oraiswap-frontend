@@ -22,7 +22,7 @@ export default class Keplr {
 
   // priority with owallet
   private get keplr(): keplr {
-    return (window as any).owallet || window.keplr;
+    return window.keplr;
   }
 
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
