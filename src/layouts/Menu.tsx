@@ -192,7 +192,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </RequireAuthButton>
             {renderLink(
               '/claim-oraix',
-              'Claim OraiX',
+              'Claim ORAIX',
               setLink,
               <Wallet style={{ width: 30, height: 30 }} />
             )}
