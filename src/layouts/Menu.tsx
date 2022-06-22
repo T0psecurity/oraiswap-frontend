@@ -226,7 +226,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               true
             )}
             {
-              !mobileMode && renderLink(
+              mobileMode && renderLink(
                 '/claim-oraix',
                 'Claim OraiX',
                 setLink,
