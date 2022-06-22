@@ -13,7 +13,7 @@ import { parseAmountFromWithDecimal, reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import { generateClaimMsg, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
-import { isMobile } from '@walletconnect/browser-utils';
+import { isMobile, isIOS, isAndroid } from '@walletconnect/browser-utils';
 import SelectTokenModal from '../Swap/Modals/SelectTokenModal';
 import styles from './index.module.scss';
 import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_light.svg';
@@ -81,7 +81,7 @@ const ClaimOraiX: FunctionComponent = () => {
     }
   };
 
-  const ClaimOraiXBox = memo<Object>(({ }) => {
+  const ClaimOraiXBox = memo<Object>(({}) => {
     return (
       <>
         {address && !!networkConvert && (
@@ -92,13 +92,14 @@ const ClaimOraiX: FunctionComponent = () => {
               </div>
               <div className={styles.pairbox_pair}>
                 <div className={styles.pairbox_pair_name}>
-                  {`${address &&
+                  {`${
+                    address &&
                     reduceString(
                       getAddressStrFromAnotherAddr(address)!,
                       networkConvert.length + 5,
                       10
                     )
-                    }`}
+                  }`}
                 </div>
                 <div
                   className={styles.pairbox_modal}
@@ -111,42 +112,48 @@ const ClaimOraiX: FunctionComponent = () => {
               </div>
             </div>
             <div className={styles.pairbox_content}>
-              {oraiXAmount && <div>
-                <div className={styles.pairbox_data}>
-                  <span className={styles.pairbox_data_name}>Total ORAIX</span>
-                  <span className={styles.pairbox_data_value}>
-                    {!isLoading &&
-                      !!oraiXAmount &&
-                      parseAmountFromWithDecimal(parseInt((parseInt(oraiXAmount) / 0.4).toString()), 6).toString()}{' '}
-                    {ORAIX_DENOM}
-                  </span>
+              {oraiXAmount && (
+                <div>
+                  <div className={styles.pairbox_data}>
+                    <span className={styles.pairbox_data_name}>
+                      Total ORAIX
+                    </span>
+                    <span className={styles.pairbox_data_value}>
+                      {!isLoading &&
+                        !!oraiXAmount &&
+                        parseAmountFromWithDecimal(
+                          parseInt((parseInt(oraiXAmount) / 0.4).toString()),
+                          6
+                        ).toString()}{' '}
+                      {ORAIX_DENOM}
+                    </span>
+                  </div>
+                  <div className={styles.pairbox_data}>
+                    <span className={styles.pairbox_data_name}>Claimmable</span>
+                    <span className={styles.pairbox_data_value}>
+                      {!isLoading && !isClaimed
+                        ? parseAmountFromWithDecimal(
+                            parseInt(oraiXAmount),
+                            6
+                          ).toString()
+                        : 0}{' '}
+                      {ORAIX_DENOM}
+                    </span>
+                  </div>
+                  <div className={styles.pairbox_data}>
+                    <span className={styles.pairbox_data_name}>Claimed</span>
+                    <span className={styles.pairbox_data_value}>
+                      {!isLoading && isClaimed
+                        ? parseAmountFromWithDecimal(
+                            parseInt(oraiXAmount),
+                            6
+                          ).toString()
+                        : 0}{' '}
+                      {ORAIX_DENOM}
+                    </span>
+                  </div>
                 </div>
-                <div className={styles.pairbox_data}>
-                  <span className={styles.pairbox_data_name}>Claimmable</span>
-                  <span className={styles.pairbox_data_value}>
-                    {!isLoading && !isClaimed
-                      ? parseAmountFromWithDecimal(
-                        parseInt(oraiXAmount),
-                        6
-                      ).toString()
-                      : 0}{' '}
-                    {ORAIX_DENOM}
-                  </span>
-                </div>
-                <div className={styles.pairbox_data}>
-                  <span className={styles.pairbox_data_name}>Claimed</span>
-                  <span className={styles.pairbox_data_value}>
-                    {!isLoading && isClaimed
-                      ? parseAmountFromWithDecimal(
-                        parseInt(oraiXAmount),
-                        6
-                      ).toString()
-                      : 0}{' '}
-                    {ORAIX_DENOM}
-                  </span>
-                </div>
-              </div>
-              }
+              )}
               <div className={styles.pairbox_data}>
                 <span className={styles.pairbox_data_name}>Whitelisted</span>
                 <span className={styles.pairbox_data_value}>
@@ -157,7 +164,7 @@ const ClaimOraiX: FunctionComponent = () => {
             {/* && isMobile() */}
             {!isClaimedLoading && (
               <div>
-                {!isClaimed && !!oraiXAmount && (
+                {!isClaimed && !!oraiXAmount && (isIOS() || isAndroid()) && (
                   <button
                     className={styles.pairbox_btn}
                     onClick={handleClaim}
@@ -210,14 +217,6 @@ const ClaimOraiX: FunctionComponent = () => {
         amount: oraiXAmount,
         proofs,
       });
-      console.log({
-        type: Type.CLAIM_ORAIX,
-        sender: address,
-        stage: networkMapping.stage,
-        amount: oraiXAmount,
-        proofs,
-      });
-      console.log({ msg });
 
       const result = await CosmJs.execute({
         prefix: ORAI,
@@ -282,7 +281,8 @@ const ClaimOraiX: FunctionComponent = () => {
     });
     const { data } = (
       await axios.get(
-        `${network.lcd
+        `${
+          network.lcd
         }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`
       )
     ).data;
