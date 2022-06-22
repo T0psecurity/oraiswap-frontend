@@ -10,6 +10,7 @@ import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/owallet.png';
 import { isMobile, isIOS, isAndroid } from '@walletconnect/browser-utils';
 
+const ORAIX_CLAIM_URL = process.env.REACT_APP_ORAIX_CLAIM_URL;
 const cx = cn.bind(style);
 
 interface ConnectWalletModalProps {
@@ -51,10 +52,10 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
                 href={
                   isAndroid()
                     ? `app.owallet.oauth://google/open_url?url=${encodeURIComponent(
-                        'https://oraidex.io'
+                        ORAIX_CLAIM_URL || 'https://oraidex.io'
                       )}`
                     : `owallet://open_url?url=${encodeURIComponent(
-                        'https://oraidex.io'
+                        ORAIX_CLAIM_URL || 'https://oraidex.io'
                       )}`
                 }
               >
