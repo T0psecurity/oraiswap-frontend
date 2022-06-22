@@ -298,7 +298,7 @@ const ClaimOraiX: FunctionComponent = () => {
     const { data } = (
       await axios.get(
         `${network.lcd
-        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`
+        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`, { cache: false }
       )
     ).data;
     console.log('data is claimed: ', data.is_claimed);
