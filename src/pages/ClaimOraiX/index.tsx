@@ -234,6 +234,7 @@ const ClaimOraiX: FunctionComponent = () => {
         });
         setClaimLoading(false);
         setIsClaimed(true);
+        setUserNetWork(userNetwork);
       }, 5000);
     } catch (error: any) {
       console.log('error message handle claim: ', error);
