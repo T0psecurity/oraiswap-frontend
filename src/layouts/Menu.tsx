@@ -84,17 +84,22 @@ const Menu: React.FC<{}> = React.memo((props) => {
           className={
             styles.menu_item + (link === to ? ` ${styles.active}` : '')
           }
-          onClick={() => onClick(to)}
+          onClick={() => {
+            setOpen(!open);
+            onClick(to);
+          }}
         >
           {icon}
           <Text className={styles.menu_item_text}>{title}</Text>
         </a>
       );
-
     return (
       <Link
         to={to}
-        onClick={() => onClick(to)}
+        onClick={() => {
+          setOpen(!open);
+          onClick(to);
+        }}
         className={styles.menu_item + (link === to ? ` ${styles.active}` : '')}
       >
         {icon}
