@@ -29,7 +29,7 @@ const arrayToken = [
     name: 'ATOM (OraiDEX)',
   },
   {
-    denom: 'atom-cosmos-hub',
+    denom: 'cosmos',
     name: 'ATOM (Cosmos Hub)',
   },
   {
