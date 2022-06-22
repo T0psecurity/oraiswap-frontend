@@ -190,7 +190,7 @@ const ClaimOraiX: FunctionComponent = () => {
           </div>
         )}
         <div style={{ position: 'absolute', bottom: '5%', fontSize: 18 }}>
-          To claim ORAIX from the Claimable section, please use the OWallet app
+        To claim ORAIX on mobile, please use the OWallet app
           ( {' '}
           <a
             style={{ color: 'green' }}
