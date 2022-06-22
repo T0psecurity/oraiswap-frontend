@@ -52,6 +52,9 @@
   &_pair_name {
     font-weight: 600;
     font-size: 22px;
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
   }
 
   &_pair_apr {
@@ -100,6 +103,9 @@
   line-height: '100%';
   text-align: 'center';
   text-transform: uppercase;
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
 }
 
 .pairbox_oraix_bonus {

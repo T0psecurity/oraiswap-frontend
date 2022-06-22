@@ -125,10 +125,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Link>
           )}
           <div className={styles.menu_items}>
-            <RequireAuthButton
-              address={address}
-              setAddress={setAddress}              
-            >
+            <RequireAuthButton address={address} setAddress={setAddress}>
               {address && (
                 <div className={styles.token_info}>
                   <AvatarPlaceholder
@@ -150,7 +147,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                           denom: ORAI,
                         }}
                         className={styles.token_balance}
-                        decimalScale={6}                        
+                        decimalScale={6}
                       />
                     )}
                   </div>
@@ -221,18 +218,17 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => { },
+              () => {},
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}
-            {
-              mobileMode && renderLink(
+            {mobileMode &&
+              renderLink(
                 '/claim-oraix',
                 'Claim OraiX',
                 setLink,
                 <Wallet style={{ width: 30, height: 30 }} />
-              )
-            }
+              )}
           </div>
         </div>
 
