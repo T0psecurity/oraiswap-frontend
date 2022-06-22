@@ -198,11 +198,6 @@ const ClaimOraiX: FunctionComponent = () => {
     refetchOnReconnect: false,
   };
 
-  useEffect(() => {
-    fetchClaimOraiX();
-    fetchIsClaimed();
-  },[isSelect])
-
   const handleClaim = async () => {
     try {
       setClaimLoading(true);
