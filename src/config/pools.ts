@@ -19,6 +19,7 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     },
     {
       contract_addr: 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5',
+      // contract_addr: '',
       asset_denoms: [ORAI, 'oraix']
     },
     {

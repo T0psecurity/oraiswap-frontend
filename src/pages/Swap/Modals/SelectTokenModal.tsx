@@ -13,6 +13,7 @@ interface ModalProps {
   isCloseBtn?: boolean;
   listToken: any[];
   setToken: (denom: string) => void;
+  icon?: boolean;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({
@@ -20,7 +21,8 @@ const SelectTokenModal: FC<ModalProps> = ({
   close,
   open,
   listToken,
-  setToken
+  setToken,
+  icon
 }) => {
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
@@ -39,7 +41,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                   close();
                 }}
               >
-                <option.Icon className={cx('logo')} />
+                {!icon && <option.Icon className={cx('logo')} />}
                 <div className={cx('grow')}>
                   <div>{option.title || option.name}</div>
                 </div>
