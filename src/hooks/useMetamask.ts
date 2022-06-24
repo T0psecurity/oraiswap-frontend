@@ -6,7 +6,7 @@ import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import useGlobalState from './useGlobalState';
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 56],
+  supportedChainIds: [1, 56]
 });
 
 export function useEagerConnect(isInactive) {
@@ -32,10 +32,12 @@ export function useEagerConnect(isInactive) {
   useEffect(() => {
     if (!window.ethereum || isInactive) return;
     (async function () {
-      const chainId = await window.ethereum.request({ method: 'eth_chainId', params: [] });
-      // alert(`chain id: ${chainId}`)
-      const accounts = await window.ethereum.request({ method: 'eth_accounts', params: [], chainId });
-      // alert(`accounts: ${accounts}`)
+      // passe cointype 60 for ethereum or let it use default param
+      const accounts = await window.ethereum.request({
+        method: 'eth_accounts',
+        params: [60]
+      });
+
       setMetamaskAddress(web3React.account || accounts[0]);
     })();
   }, [web3React.account]);
