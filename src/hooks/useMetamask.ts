@@ -4,6 +4,7 @@ import { InjectedConnector } from '@web3-react/injected-connector';
 import { useLocation } from 'react-router-dom';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import useGlobalState from './useGlobalState';
+import { isMobile } from '@walletconnect/browser-utils';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 56],
@@ -30,7 +31,7 @@ export function useEagerConnect(isInactive) {
   }, [pathname]);
 
   useEffect(() => {
-    if (!window.ethereum || isInactive) return;
+    if (!window.ethereum || isInactive || isMobile()) return;
     (async function () {
       const chainId = await window.ethereum.request({ method: 'eth_chainId', params: [] });
       // alert(`chain id: ${chainId}`)
