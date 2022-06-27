@@ -26,8 +26,8 @@ const collectWallet = async (chainId?: string) => {
     throw 'You have to install Keplr first if you do not use a mnemonic to sign transactions';
   }
   // use keplr instead
-  if (chainId) return keplr.getOfflineSigner(chainId);
-  return keplr.getOfflineSigner(network.chainId);
+  if (chainId) return await keplr.getOfflineSignerAuto(chainId);
+  return await keplr.getOfflineSignerAuto(network.chainId);
 };
 
 class CosmJs {
