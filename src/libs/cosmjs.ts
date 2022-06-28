@@ -28,12 +28,10 @@ const collectWallet = async (chainId?: string) => {
     throw 'You have to install Keplr first if you do not use a mnemonic to sign transactions';
   }
   // use keplr instead
-  if (chainId) return await keplr.getOfflineSignerAuto(chainId);
-  return await keplr.getOfflineSignerAuto(network.chainId);
+  return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
 };
 
 class CosmJs {
-
   static async execute(data: {
     prefix?: string;
     walletAddr: string;
@@ -50,7 +48,7 @@ class CosmJs {
         if (key.isNanoLedger) return this.executeAmino(data);
         return this.executeDirect(data);
       } else {
-        throw "You need to install Keplr to execute the contract"
+        throw 'You need to install Keplr to execute the contract';
       }
     } catch (error) {
       console.log('error in executing contract: ' + error);

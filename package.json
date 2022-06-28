@@ -35,6 +35,8 @@
     "create-hash": "^1.2.0",
     "firebase-tools": "^10.2.2",
     "jsbi": "^4.2.0",
+    "postinstall-postinstall": "^2.1.0",
+    "patch-package": "^6.4.7",
     "prettier": "^2.1.2",
     "ramda": "^0.27.1",
     "react": "^17.0.2",
@@ -95,7 +97,6 @@
     "react-scripts": "4.0.3",
     "secretjs": "^0.17.5",
     "source-map-explorer": "^2.5.0",
-    "typescript": "4.2.4",
-    "patch-package": "^6.4.7"
+    "typescript": "4.2.4"
   }
 }
