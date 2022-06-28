@@ -3,7 +3,7 @@ import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargat
 import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
 import { OfflineSigner, GasPrice as GasPriceAmino } from '@cosmjs/launchpad';
-import { SigningCosmWasmClient } from './cosmwasm-launchpad';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-launchpad';
 /**
  * The options of an .instantiate() call.
  * All properties are optional.
@@ -59,7 +59,7 @@ class CosmJs {
         network.lcd,
         walletAddr,
         wallet as OfflineSigner,
-        GasPriceAmino.fromString(gasAmount.amount + gasAmount.denom),
+        GasPrice.fromString(gasAmount.amount + gasAmount.denom),
         gasLimits
       );
 
