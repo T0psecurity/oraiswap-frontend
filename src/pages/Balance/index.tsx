@@ -12,7 +12,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
-import { ibcInfos } from 'config/ibcInfos';
+import { ibcInfos, oraicbain2atom } from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
@@ -430,7 +430,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       const key = await window.Keplr.getKeplrKey();
-      if (key.isNanoLedger) throw "This feature has not supported Ledger device yet!"
+      if (key.isNanoLedger && ibcInfo.channel === oraicbain2atom) throw "This feature has not supported Ledger device yet!"
 
       const result = await client.sendIbcTokens(
         fromAddress,

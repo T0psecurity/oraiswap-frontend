@@ -6,7 +6,7 @@ import {
 } from './constants';
 import { network, NetworkKey } from './networks';
 
-const [atom2oraichain, oraicbain2atom] =
+export const [atom2oraichain, oraicbain2atom] =
   process.env.REACT_APP_ATOM_ORAICHAIN_CHANNELS.split(/\s+/);
 const [terra2oraichain, oraicbain2terra] =
   process.env.REACT_APP_TERRA_ORAICHAIN_CHANNELS.split(/\s+/);
