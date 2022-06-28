@@ -29,7 +29,7 @@ const arrayToken = [
     name: 'ATOM (OraiDEX)',
   },
   {
-    denom: 'atom-cosmos-hub',
+    denom: 'cosmos',
     name: 'ATOM (Cosmos Hub)',
   },
   {
@@ -64,7 +64,8 @@ type objNetworkKey = keyof typeof objNetwork;
 
 const ClaimOraiX: FunctionComponent = () => {
   const [claimLoading, setClaimLoading] = useState(false);
-  const [address] = useGlobalState('address');
+  // const [address] = useGlobalState('address');
+  const address = "orai1dtyk0z4mmfqsh78q59p8h2aujnldxu9naflf3s"
   const [claimed, setIsClaimed] = useState(false);
   // const { network: userNetwork } = useParams();
   const [userNetwork, setUserNetWork] = useState('orai');
