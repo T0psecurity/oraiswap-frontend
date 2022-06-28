@@ -2,6 +2,8 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
 import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
+import { OfflineSigner, GasPrice as GasPriceAmino } from '@cosmjs/launchpad';
+import { SigningCosmWasmClient } from './cosmwasm-launchpad';
 /**
  * The options of an .instantiate() call.
  * All properties are optional.
@@ -31,6 +33,52 @@ const collectWallet = async (chainId?: string) => {
 };
 
 class CosmJs {
+  static async executeAmino({
+    address,
+    handleMsg,
+    handleOptions,
+    gasAmount,
+    gasLimits = { exec: 2000000 },
+    prefix,
+    walletAddr
+  }: {
+    prefix?: string;
+    walletAddr: string;
+    address: string;
+    handleMsg: string;
+    handleOptions?: HandleOptions;
+    gasAmount: { amount: string; denom: string };
+    gasLimits?: { exec: number };
+  }) {
+    try {
+      if (await window.Keplr.getKeplr())
+        await window.Keplr.suggestChain(network.chainId);
+      const wallet = await collectWallet();
+
+      const client = new SigningCosmWasmClient(
+        network.lcd,
+        walletAddr,
+        wallet as OfflineSigner,
+        GasPriceAmino.fromString(gasAmount.amount + gasAmount.denom),
+        gasLimits
+      );
+
+      const input = JSON.parse(handleMsg);
+
+      const result = await client.execute(
+        address,
+        input,
+        '',
+        handleOptions?.funds
+      );
+
+      return result;
+    } catch (error) {
+      console.log('error in executing contract: ' + error);
+      throw error;
+    }
+  }
+
   /**
    * A wrapper method to execute a smart contract
    * @param args - an object containing essential parameters to execute contract
