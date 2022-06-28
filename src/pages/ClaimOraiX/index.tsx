@@ -52,7 +52,7 @@ const arrayToken = [
 
 const objNetwork = {
   osmo: { network: 'osmo', stage: 27 },
-  orai: { network: 'orai', stage: 26 },
+  orai: { network: 'orai', stage: +(process.env.REACT_APP_ORAIX_ORAI_STAGE) || 26 },
   airi: { network: 'orai', stage: 21 },
   cosmos: { network: 'cosmos', stage: 23 },
   juno: { network: 'juno', stage: 24 },
