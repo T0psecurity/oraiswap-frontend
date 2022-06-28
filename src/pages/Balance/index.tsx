@@ -357,6 +357,9 @@ const Balance: React.FC<BalanceProps> = () => {
         { registry: gravityRegistry }
       );
 
+      const key = await window.Keplr.getKeplrKey();
+      if (key.isNanoLedger) throw "This feature has not supported Ledger device yet!"
+
       const message = {
         typeUrl: '/gravity.v1.MsgSendToEth',
         value: MsgSendToEth.fromPartial({
@@ -425,6 +428,9 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.rpc,
         offlineSigner
       );
+
+      const key = await window.Keplr.getKeplrKey();
+      if (key.isNanoLedger) throw "This feature has not supported Ledger device yet!"
 
       const result = await client.sendIbcTokens(
         fromAddress,
