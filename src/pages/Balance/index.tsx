@@ -430,7 +430,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       const key = await window.Keplr.getKeplrKey();
-      if (key.isNanoLedger && ibcInfo.channel === oraicbain2atom) throw "This feature has not supported Ledger device yet!"
+      if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
 
       const result = await client.sendIbcTokens(
         fromAddress,
