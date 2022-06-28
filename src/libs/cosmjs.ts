@@ -33,6 +33,31 @@ const collectWallet = async (chainId?: string) => {
 };
 
 class CosmJs {
+
+  static async execute(data: {
+    prefix?: string;
+    walletAddr: string;
+    address: string;
+    handleMsg: string;
+    handleOptions?: HandleOptions;
+    gasAmount: { amount: string; denom: string };
+    gasLimits?: { exec: number };
+  }) {
+    try {
+      if (await window.Keplr.getKeplr()) {
+        await window.Keplr.suggestChain(network.chainId);
+        const key = await window.Keplr.getKeplrKey(network.chainId);
+        if (key.isNanoLedger) return this.executeAmino(data);
+        return this.executeDirect(data);
+      } else {
+        throw "You need to install Keplr to execute the contract"
+      }
+    } catch (error) {
+      console.log('error in executing contract: ' + error);
+      throw error;
+    }
+  }
+
   static async executeAmino({
     address,
     handleMsg,
@@ -51,8 +76,7 @@ class CosmJs {
     gasLimits?: { exec: number };
   }) {
     try {
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(network.chainId);
+      await window.Keplr.suggestChain(network.chainId);
       const wallet = await collectWallet();
 
       const client = new SigningCosmWasmClient(
@@ -84,7 +108,7 @@ class CosmJs {
    * @param args - an object containing essential parameters to execute contract
    * @returns - transaction hash after executing the contract
    */
-  static async execute({
+  static async executeDirect({
     address,
     handleMsg,
     handleOptions,
@@ -102,8 +126,6 @@ class CosmJs {
     gasLimits?: { exec: number };
   }) {
     try {
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(network.chainId);
       const wallet = await collectWallet();
       const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
         network.rpc,
