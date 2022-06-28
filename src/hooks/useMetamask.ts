@@ -7,7 +7,7 @@ import useGlobalState from './useGlobalState';
 import { isMobile } from '@walletconnect/browser-utils';
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 56],
+  supportedChainIds: [1, 56]
 });
 
 export function useEagerConnect(isInactive) {
@@ -33,11 +33,18 @@ export function useEagerConnect(isInactive) {
   useEffect(() => {
     if (!window.ethereum || isInactive || isMobile()) return;
     (async function () {
-      const chainId = await window.ethereum.request({ method: 'eth_chainId', params: [] });
-      // alert(`chain id: ${chainId}`)
-      const accounts = await window.ethereum.request({ method: 'eth_accounts', params: [], chainId });
-      // alert(`accounts: ${accounts}`)
-      setMetamaskAddress(web3React.account || accounts[0]);
+      if (isMobile())
+        await window.ethereum.request!({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: BSC_CHAIN_ID }]
+        });
+      // passe cointype 60 for ethereum or let it use default param
+      const accounts = await window.ethereum.request({
+        method: 'eth_accounts',
+        params: [60]
+      });
+
+      setMetamaskAddress(web3React.account || accounts?.[0]);
     })();
   }, [web3React.account]);
 }

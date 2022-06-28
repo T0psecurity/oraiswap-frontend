@@ -40,7 +40,7 @@ async function getWallet(chainId: string) {
   if (await window.Keplr.getKeplr()) await window.Keplr.suggestChain(chainId);
   else throw 'Cannot get Keplr to get account';
 
-  const wallet = await collectWallet(chainId);
+  const wallet = await collectWallet(chainId) as OfflineDirectSigner;
   const accounts = await wallet.getAccounts();
   return { accounts, wallet };
 }
@@ -307,7 +307,7 @@ export default class KawaiiverseJs {
         await axios.get(
           `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`
         )
-      ).data;   
+      ).data;
 
       const { signDirect } = createMessageConvertIbcTransferERC20(
         { chainId: chainIdNumber, cosmosChainId: subnetwork.chainId },

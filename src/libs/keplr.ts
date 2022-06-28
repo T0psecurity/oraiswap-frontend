@@ -14,7 +14,7 @@ const hash160 = (buffer: Uint8Array) => {
 };
 
 export default class Keplr {
-  constructor() {}
+  constructor() { }
 
   disconnect() {
     // clear data?
@@ -75,7 +75,7 @@ export default class Keplr {
     });
   }
 
-  private async getKeplrKey(chainId?: string): Promise<Key | undefined> {
+  async getKeplrKey(chainId?: string): Promise<Key | undefined> {
     chainId = chainId ?? network.chainId;
     if (!chainId) return undefined;
     const keplr = await this.getKeplr();

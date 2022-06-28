@@ -42,7 +42,7 @@ export const embedChainInfos: ChainInfo[] = [
       average: 0.000025,
       high: 0.00004,
     },
-    features: ['stargate', 'no-legacy-stdTx', 'ibc-transfer', 'cosmwasm'],
+    features: ['stargate', 'ibc-transfer', 'cosmwasm'],
   },
   {
     rpc: ORAI_BRIDGE_RPC,
