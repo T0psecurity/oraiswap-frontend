@@ -58,7 +58,7 @@ export const embedChainInfos: ChainInfo[] = [
         'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png',
     },
     bip44: {
-      coinType: 330,
+      coinType: 118,
     },
     bech32Config: Bech32Address.defaultBech32Config(ORAI_BRIDGE_PREFIX),
     get currencies() {
