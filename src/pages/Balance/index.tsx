@@ -115,6 +115,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const getKwtSubnetAddress = async () => {
     try {
+      const key = await window.Keplr.getKeplrKey();
+      // TODO: need to support nano ledger for kwt with cointype 60
+      if (key.isNanoLedger) {
+        setKwtSubnetAddress('')
+        return;
+      }
       let address = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
       const { address_eth } = (
         await axios.get(

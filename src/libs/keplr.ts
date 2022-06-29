@@ -90,7 +90,6 @@ export default class Keplr {
     chainId = chainId ?? network.chainId;
     const token = filteredTokens.find((token) => token.chainId === chainId);
     if (!token) return;
-
     const key = await this.getKeplrKey(chainId);
     return key?.bech32Address;
   }
