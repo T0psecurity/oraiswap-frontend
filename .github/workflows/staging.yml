@@ -48,8 +48,8 @@ jobs:
         run: yarn install
       - name: Copy env
         run: cp .env.example .env
-      - name: remove a node_module
-        run: rm -rf node_modules/@cosmjs/cosmwasm-launchpad
+      - name: remove node_modules
+        run: rm -rf node_modules
       #- name: Copy env
       #  run: 'echo "$ENV_VAR" > .env'
       #  shell: bash
