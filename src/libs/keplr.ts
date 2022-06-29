@@ -25,8 +25,8 @@ export default class Keplr {
     return window.keplr;
   }
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
-    return this.keplr.getOfflineSigner(chainId);
+  async getOfflineSigner(chainId: string): Promise<OfflineSigner | OfflineDirectSigner> {
+    return this.keplr.getOfflineSignerAuto(chainId);
   }
 
   async suggestChain(chainId: string) {

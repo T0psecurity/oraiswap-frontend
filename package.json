@@ -56,7 +56,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "preinstall": "rm -rf node_modules/@cosmjs/cosmwasm-launchpad",
     "postinstall": "patch-package && cd node_modules/babel-preset-react-app",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
   },

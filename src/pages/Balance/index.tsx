@@ -349,7 +349,7 @@ const Balance: React.FC<BalanceProps> = () => {
         .minus(ORAI_BRIDGE_EVM_FEE)
         .toFixed(0);
 
-      const offlineSigner = window.Keplr.getOfflineSigner(fromToken.chainId);
+      const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
@@ -422,7 +422,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
-      const offlineSigner = window.Keplr.getOfflineSigner(fromToken.chainId);
+      const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
