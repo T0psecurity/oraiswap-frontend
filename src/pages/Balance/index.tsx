@@ -434,10 +434,7 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.rpc,
         offlineSigner
       );
-
-      const key = await window.Keplr.getKeplrKey();
-      if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
-
+      // if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
       const result = await client.sendIbcTokens(
         fromAddress,
         toAddress,
