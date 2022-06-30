@@ -115,6 +115,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const getKwtSubnetAddress = async () => {
     try {
+      const key = await window.Keplr.getKeplrKey();
+      // TODO: need to support nano ledger for kwt with cointype 60
+      if (key.isNanoLedger) {
+        setKwtSubnetAddress('')
+        return;
+      }
       let address = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
       const { address_eth } = (
         await axios.get(
@@ -349,7 +355,7 @@ const Balance: React.FC<BalanceProps> = () => {
         .minus(ORAI_BRIDGE_EVM_FEE)
         .toFixed(0);
 
-      const offlineSigner = window.Keplr.getOfflineSigner(fromToken.chainId);
+      const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
@@ -422,16 +428,13 @@ const Balance: React.FC<BalanceProps> = () => {
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
-      const offlineSigner = window.Keplr.getOfflineSigner(fromToken.chainId);
+      const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner
       );
-
-      const key = await window.Keplr.getKeplrKey();
-      if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
-
+      // if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
       const result = await client.sendIbcTokens(
         fromAddress,
         toAddress,

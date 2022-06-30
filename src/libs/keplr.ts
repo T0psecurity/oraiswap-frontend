@@ -25,8 +25,8 @@ export default class Keplr {
     return window.keplr;
   }
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
-    return this.keplr.getOfflineSigner(chainId);
+  async getOfflineSigner(chainId: string): Promise<OfflineSigner | OfflineDirectSigner> {
+    return this.keplr.getOfflineSignerAuto(chainId);
   }
 
   async suggestChain(chainId: string) {
@@ -90,7 +90,6 @@ export default class Keplr {
     chainId = chainId ?? network.chainId;
     const token = filteredTokens.find((token) => token.chainId === chainId);
     if (!token) return;
-
     const key = await this.getKeplrKey(chainId);
     return key?.bech32Address;
   }
