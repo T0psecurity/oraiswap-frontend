@@ -52,9 +52,9 @@ const arrayToken = [
 
 const objNetwork = {
   osmo: { network: 'osmo', stage: 27 },
-  orai: { network: 'orai', stage: 26 },
+  orai: { network: 'orai', stage: 10 },
   airi: { network: 'orai', stage: 21 },
-  cosmos: { network: 'cosmos', stage: 23 },
+  cosmos: { network: 'cosmos', stage: 11 },
   juno: { network: 'juno', stage: 24 },
   'atom-oraidex': { network: 'orai', stage: 22 },
   'kwt-milky': { network: 'orai', stage: 25 },
