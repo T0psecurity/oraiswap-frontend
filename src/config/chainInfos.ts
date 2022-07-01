@@ -87,7 +87,7 @@ export const embedChainInfos: ChainInfo[] = [
       coinGeckoId: 'oraie',
     },
     bip44: {
-      coinType: 118,
+      coinType: 60,
     },
     bech32Config: Bech32Address.defaultBech32Config('oraie'),
     get currencies() {
