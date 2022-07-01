@@ -37,6 +37,7 @@ export const embedChainInfos: ChainInfo[] = [
     get feeCurrencies() {
       return [this.stakeCurrency];
     },
+    walletUrlForStaking: "https://scan.orai.io/validators",
     gasPriceStep: {
       low: 0,
       average: 0.000025,
@@ -86,7 +87,7 @@ export const embedChainInfos: ChainInfo[] = [
       coinGeckoId: 'oraie',
     },
     bip44: {
-      coinType: 60,
+      coinType: 118,
     },
     bech32Config: Bech32Address.defaultBech32Config('oraie'),
     get currencies() {
