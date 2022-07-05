@@ -2,7 +2,11 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
 import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
-import { OfflineSigner, GasPrice as GasPriceAmino } from '@cosmjs/launchpad';
+import {
+  OfflineSigner,
+  GasPrice as GasPriceAmino,
+  isBroadcastTxFailure,
+} from '@cosmjs/launchpad';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-launchpad';
 import * as tx_4 from '@cosmjs/cosmwasm-stargate/build/codec/cosmwasm/wasm/v1beta1/tx';
 import * as encoding_1 from '@cosmjs/encoding';
@@ -47,7 +51,7 @@ const collectWallet = async (chainId?: string) => {
   return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
 };
 
-const _executeMultiple = async (
+const executeMultipleDirectClient = async (
   senderAddress: string,
   msgs: Msg[],
   memo = '',
@@ -80,6 +84,41 @@ const _executeMultiple = async (
   }
   return {
     logs: stargate_1.logs.parseRawLog(result.rawLog),
+    transactionHash: result.transactionHash,
+  };
+};
+
+const executeMultipleAminoClient = async (
+  msgs: Msg[],
+  memo = '',
+  client: SigningCosmWasmClient
+) => {
+  const executeMsgs = msgs.map(
+    ({ handleMsg, transferAmount, contractAddress }) => {
+      return {
+        type: 'wasm/MsgExecuteContract',
+        value: {
+          sender: client.signerAddress,
+          contract: contractAddress,
+          msg: handleMsg,
+          sent_funds: transferAmount || [],
+        },
+      };
+    }
+  );
+
+  const result = await client.signAndBroadcast(
+    executeMsgs,
+    client.fees.exec,
+    memo
+  );
+  if (isBroadcastTxFailure(result)) {
+    throw new Error(
+      `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Code: ${result.code}; Raw log: ${result.rawLog}`
+    );
+  }
+  return {
+    logs: result.logs,
     transactionHash: result.transactionHash,
   };
 };
@@ -118,8 +157,8 @@ class CosmJs {
     try {
       if (await window.Keplr.getKeplr()) {
         await window.Keplr.suggestChain(network.chainId);
-        // const key = await window.Keplr.getKeplrKey(network.chainId);
-        // if (key.isNanoLedger) return this.executeAmino(data);
+        const key = await window.Keplr.getKeplrKey(network.chainId);
+        if (key.isNanoLedger) return this.executeMultipleAmino(data);
         return this.executeMultipleDirect(data);
       } else {
         throw 'You need to install Keplr to execute the contract';
@@ -167,6 +206,50 @@ class CosmJs {
         '',
         handleOptions?.funds
       );
+
+      return result;
+    } catch (error) {
+      console.log('error in executing contract: ' + error);
+      throw error;
+    }
+  }
+
+  static async executeMultipleAmino({
+    msgs,
+    gasAmount,
+    gasLimits = { exec: 2000000 },
+    prefix,
+    walletAddr,
+  }: {
+    prefix?: string;
+    walletAddr: string;
+    msgs: ExecuteMultipleMsg[];
+    gasAmount: { amount: string; denom: string };
+    gasLimits?: { exec: number };
+  }) {
+    try {
+      await window.Keplr.suggestChain(network.chainId);
+      const wallet = await collectWallet();
+
+      const client = new SigningCosmWasmClient(
+        network.lcd,
+        walletAddr,
+        wallet as OfflineSigner,
+        GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+        gasLimits
+      );
+
+      const input: Msg[] = msgs.map(
+        ({ handleMsg, handleOptions, contractAddress }) => {
+          return {
+            handleMsg: JSON.parse(handleMsg),
+            transferAmount: handleOptions?.funds,
+            contractAddress,
+          };
+        }
+      );
+
+      const result = await executeMultipleAminoClient(input, '', client);
 
       return result;
     } catch (error) {
@@ -263,7 +346,7 @@ class CosmJs {
           };
         }
       );
-      const result = await _executeMultiple(
+      const result = await executeMultipleDirectClient(
         walletAddr,
         input,
         undefined,
