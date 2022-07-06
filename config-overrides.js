@@ -28,9 +28,9 @@ module.exports = {
       (plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin'
     );
 
-    config.experiments = {
-      lazyCompilation: env === 'development'
-    };
+    // config.experiments = {
+    //   lazyCompilation: env === 'development'
+    // };
 
     // add dll
     const vendorManifest = path.resolve(
