@@ -153,7 +153,7 @@ const ClaimOraiX: FunctionComponent = () => {
               <div className={styles.pairbox_data}>
                 <span className={styles.pairbox_data_name}>Whitelisted</span>
                 <span className={styles.pairbox_data_value}>
-                  {!!oraiXAmount?.claimableAmount ? 'TRUE' : 'FALSE'}
+                  {`${!!oraiXAmount?.totalClaimAmount}`.toUpperCase()}
                 </span>
               </div>
             </div>
