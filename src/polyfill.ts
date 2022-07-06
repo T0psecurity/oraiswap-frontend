@@ -5,6 +5,9 @@ import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { isMobile } from '@walletconnect/browser-utils';
 import _BigInt from 'big-integer';
 
+window.Buffer = require('buffer').Buffer;
+window.process = require('process/browser');
+
 // polyfill for keplr extension
 if (!window.browser || !window.browser.storage) {
   const { LocalKVStore } = require('@keplr-wallet/common/build/kv-store/local');
