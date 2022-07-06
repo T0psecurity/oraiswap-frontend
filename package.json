@@ -75,9 +75,11 @@
   "resolutions": {
     "react-error-overlay": "6.0.9"
   },
-  "nohoist": [
-    "**/babel-preset-react-app/@babel/runtime"
-  ],
+  "workspace": {
+    "nohoist": [
+      "**/babel-preset-react-app/@babel/runtime"
+    ]
+  },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
