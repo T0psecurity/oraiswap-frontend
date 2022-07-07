@@ -51,7 +51,7 @@
   "scripts": {
     "vendor": "node scripts/vendor.js",
     "start": "cross-env GENERATE_SOURCEMAP=false react-app-rewired start",
-    "build": "react-app-rewired build",
+    "build": "cross-env GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true react-app-rewired build",
     "test": "react-app-rewired test",
     "postinstall": "node -e 'require(\"fs\").copyFileSync(\"patches/cosmwasmclient.js\",\"node_modules/@cosmjs/cosmwasm-launchpad/build/cosmwasmclient.js\")'",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
