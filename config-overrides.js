@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 const { execSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
 
@@ -81,19 +82,26 @@ module.exports = {
     return function (proxy, allowedHost) {
       // Create the default config by calling configFunction with the proxy/allowedHost parameters
       const config = configFunction(proxy, allowedHost);
-      config.static = [paths.appPublic, path.resolve('vendor')];
+      config.static = [path.resolve('vendor'), paths.appPublic];
       return config;
     };
   },
   webpack: function (config, env) {
     config.resolve.fallback = fallback;
 
-    const isDevelopment = (env = 'development');
+    const isDevelopment = env === 'development';
 
     // do not check issues
     config.plugins = config.plugins.filter(
       (plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin'
     );
+
+    config.optimization.minimizer[0] = new TerserPlugin({
+      minify: TerserPlugin.swcMinify,
+      // `terserOptions` options will be passed to `swc` (`@swc/core`)
+      // Link to options - https://swc.rs/docs/config-js-minify
+      terserOptions: {}
+    });
 
     // config.experiments = {
     //   lazyCompilation: env === 'development'
