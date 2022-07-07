@@ -15,12 +15,15 @@ const webpack = require('webpack');
 const path = require('path');
 const package = require('../package.json');
 const { fallback } = require('../config-overrides');
-const ignores = ['@babel/helper-plugin-test-runner', 'firebase'];
-
-const vendorPath = path.resolve(paths.appPublic, 'vendor');
+const ignores = [];
+const isDevelopment = process.env.NODE_ENV === 'development';
+const vendorPath = path.resolve(
+  isDevelopment ? 'vendor' : paths.appPublic,
+  'vendor'
+);
 
 const config = {
-  mode: 'production',
+  mode: process.env.NODE_ENV,
   target: 'web',
   entry: {
     vendor: Object.keys(package.dependencies).filter(
