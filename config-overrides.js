@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
-const TerserPlugin = require('terser-webpack-plugin');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const { execSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
 
@@ -19,12 +19,10 @@ const fallback = {
   stream: require.resolve('stream-browserify')
 };
 
-const rewiredSWC = (config) => {
+const rewiredEsbuild = (config) => {
   const useTypeScript = fs.existsSync(paths.appTsConfig);
-  const isDevelopment = process.env.BABEL_ENV !== 'production';
-  const isFastRefresh = process.env.FAST_REFRESH !== 'false';
 
-  // replace babel-loader to swc-loader
+  // replace babel-loader to esbuild-loader
   for (const { oneOf } of config.module.rules) {
     if (oneOf) {
       let babelLoaderIndex = -1;
@@ -42,34 +40,38 @@ const rewiredSWC = (config) => {
         oneOf.splice(babelLoaderIndex, 0, {
           test: /\.(js|mjs|jsx|ts|tsx)$/,
           include: [paths.appSrc],
-          loader: require.resolve('swc-loader'),
+          loader: require.resolve('esbuild-loader'),
           options: {
-            jsc: {
-              target: 'es2015',
-              externalHelpers: true,
-              transform: {
-                react: {
-                  runtime: 'automatic',
-                  development: isDevelopment,
-                  refresh: isDevelopment && isFastRefresh
-                }
-              },
-              parser: useTypeScript
-                ? {
-                    syntax: 'typescript',
-                    tsx: true,
-                    decorators: true,
-                    dynamicImport: true
-                  }
-                : {
-                    syntax: 'ecmascript',
-                    jsx: true,
-                    dynamicImport: true
-                  }
-            }
+            loader: useTypeScript ? 'tsx' : 'jsx',
+            target: 'es2015'
           }
         });
       }
+    }
+  }
+
+  // replace minimizer
+  for (const [index, minimizer] of Object.entries(config.optimization.minimizer)
+    .slice()
+    .reverse()) {
+    const options = {
+      target: 'es2015',
+      css: true
+    };
+    // replace TerserPlugin to ESBuildMinifyPlugin
+    if (minimizer.constructor.name === 'TerserPlugin') {
+      config.optimization.minimizer.splice(
+        index,
+        1,
+        new ESBuildMinifyPlugin(options)
+      );
+    }
+    // remove OptimizeCssAssetsWebpackPlugin
+    if (
+      options.css &&
+      minimizer.constructor.name === 'OptimizeCssAssetsWebpackPlugin'
+    ) {
+      config.optimization.minimizer.splice(index, 1);
     }
   }
 
@@ -96,17 +98,6 @@ module.exports = {
       (plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin'
     );
 
-    config.optimization.minimizer[0] = new TerserPlugin({
-      minify: TerserPlugin.swcMinify,
-      // `terserOptions` options will be passed to `swc` (`@swc/core`)
-      // Link to options - https://swc.rs/docs/config-js-minify
-      terserOptions: {}
-    });
-
-    // config.experiments = {
-    //   lazyCompilation: env === 'development'
-    // };
-
     // add dll
     const vendorManifest = path.resolve(
       isDevelopment ? 'vendor' : paths.appPublic,
@@ -129,6 +120,6 @@ module.exports = {
       })
     );
 
-    return rewiredSWC(config);
+    return rewiredEsbuild(config);
   }
 };
