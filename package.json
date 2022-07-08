@@ -7,9 +7,9 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "0.25.0",
-    "@cosmjs/crypto": "^0.26.5",
-    "@cosmjs/proto-signing": "^0.26.5",
-    "@cosmjs/stargate": "^0.26.5",
+    "@cosmjs/crypto": "0.26.5",
+    "@cosmjs/proto-signing": "0.26.5",
+    "@cosmjs/stargate": "0.26.5",
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/cosmos": "^0.9.12",
     "@keplr-wallet/types": "^0.9.12",
