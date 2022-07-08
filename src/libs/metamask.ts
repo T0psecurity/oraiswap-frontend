@@ -8,7 +8,13 @@ import {
 import GravityABI from 'config/abi/gravity.json';
 import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
-import { BEP20_ORAI, BSC_CHAIN_ID, ERC20_ORAI, ETHEREUM_CHAIN_ID } from 'config/constants';
+import {
+  BEP20_ORAI,
+  BSC_CHAIN_ID,
+  ERC20_ORAI,
+  ETHEREUM_CHAIN_ID,
+} from 'config/constants';
+import { ethers } from 'ethers';
 
 export default class Metamask {
   constructor() {}
@@ -102,16 +108,15 @@ export default class Metamask {
     if (!token || !token.contractAddress) return '0';
 
     try {
-      const provider =
-        token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
+      const provider = new ethers.providers.JsonRpcProvider(token.rpc);
 
-      const web3 = new Web3(provider);
-      const tokenInst = new web3.eth.Contract(
-        tokenABI as AbiItem[],
-        token.contractAddress
+      const tokenInst = new ethers.Contract(
+        token.contractAddress,
+        tokenABI as any,
+        provider as any
       );
-      const balance = await tokenInst.methods.balanceOf(address).call();
-      return balance;
+      const balance = await tokenInst.balanceOf(address);
+      return ethers.utils.parseUnits(ethers.utils.formatUnits(balance));
     } catch (ex) {
       return '0';
     }
