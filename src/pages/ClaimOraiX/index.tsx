@@ -1,7 +1,5 @@
-import Big from 'big.js';
-import React, { FunctionComponent, memo, useEffect, useState } from 'react';
+import { FunctionComponent, memo, useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
-import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'rest/request';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
@@ -13,7 +11,6 @@ import { parseAmountFromWithDecimal, reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import { generateClaimMsg, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
-import { isMobile, isIOS, isAndroid } from '@walletconnect/browser-utils';
 import SelectTokenModal from '../Swap/Modals/SelectTokenModal';
 import styles from './index.module.scss';
 import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_light.svg';
@@ -51,13 +48,13 @@ const arrayToken = [
 ];
 
 const objNetwork = {
-  osmo: { network: 'osmo', stage: 27 },
-  orai: { network: 'orai', stage: 26 },
-  airi: { network: 'orai', stage: 21 },
-  cosmos: { network: 'cosmos', stage: 23 },
-  juno: { network: 'juno', stage: 24 },
-  'atom-oraidex': { network: 'orai', stage: 22 },
-  'kwt-milky': { network: 'orai', stage: 25 },
+  osmo: { network: 'osmo' },
+  orai: { network: 'orai' },
+  airi: { network: 'orai' },
+  cosmos: { network: 'cosmos' },
+  juno: { network: 'juno' },
+  'atom-oraidex': { network: 'orai' },
+  'kwt-milky': { network: 'orai' },
 };
 
 type objNetworkKey = keyof typeof objNetwork;
@@ -80,7 +77,7 @@ const ClaimOraiX: FunctionComponent = () => {
     }
   };
 
-  const ClaimOraiXBox = memo<Object>(({ }) => {
+  const ClaimOraiXBox = memo<Object>(({}) => {
     return (
       <>
         {address && !!networkConvert && (
@@ -91,13 +88,14 @@ const ClaimOraiX: FunctionComponent = () => {
               </div>
               <div className={styles.pairbox_pair}>
                 <div className={styles.pairbox_pair_name}>
-                  {`${address &&
+                  {`${
+                    address &&
                     reduceString(
                       getAddressStrFromAnotherAddr(address)!,
                       networkConvert.length + 5,
                       10
                     )
-                    }`}
+                  }`}
                 </div>
                 <div
                   className={styles.pairbox_modal}
@@ -110,7 +108,7 @@ const ClaimOraiX: FunctionComponent = () => {
               </div>
             </div>
             <div className={styles.pairbox_content}>
-              {oraiXAmount && (
+              {!!oraiXAmount?.totalClaimAmount && (
                 <div>
                   <div className={styles.pairbox_data}>
                     <span className={styles.pairbox_data_name}>
@@ -120,7 +118,7 @@ const ClaimOraiX: FunctionComponent = () => {
                       {!isLoading &&
                         !!oraiXAmount &&
                         parseAmountFromWithDecimal(
-                          parseInt((parseInt(oraiXAmount) / 0.4).toString()),
+                          oraiXAmount.totalClaimAmount,
                           6
                         ).toString()}{' '}
                       {ORAIX_DENOM}
@@ -129,11 +127,11 @@ const ClaimOraiX: FunctionComponent = () => {
                   <div className={styles.pairbox_data}>
                     <span className={styles.pairbox_data_name}>Claimable</span>
                     <span className={styles.pairbox_data_value}>
-                      {!isLoading && !isClaimed
+                      {!isLoading
                         ? parseAmountFromWithDecimal(
-                          parseInt(oraiXAmount),
-                          6
-                        ).toString()
+                            oraiXAmount.claimableAmount,
+                            6
+                          ).toString()
                         : 0}{' '}
                       {ORAIX_DENOM}
                     </span>
@@ -141,11 +139,11 @@ const ClaimOraiX: FunctionComponent = () => {
                   <div className={styles.pairbox_data}>
                     <span className={styles.pairbox_data_name}>Claimed</span>
                     <span className={styles.pairbox_data_value}>
-                      {!isLoading && isClaimed
+                      {!isLoading
                         ? parseAmountFromWithDecimal(
-                          parseInt(oraiXAmount),
-                          6
-                        ).toString()
+                            oraiXAmount.claimedAmount,
+                            6
+                          ).toString()
                         : 0}{' '}
                       {ORAIX_DENOM}
                     </span>
@@ -155,57 +153,57 @@ const ClaimOraiX: FunctionComponent = () => {
               <div className={styles.pairbox_data}>
                 <span className={styles.pairbox_data_name}>Whitelisted</span>
                 <span className={styles.pairbox_data_value}>
-                  {oraiXAmount ? 'TRUE' : 'FALSE'}
+                  {!isLoading &&
+                    `${!!oraiXAmount?.totalClaimAmount}`.toUpperCase()}
                 </span>
               </div>
             </div>
             {/* && isMobile() */}
-            {!isClaimedLoading && (
-              <div>
-                {!isClaimed && !!oraiXAmount && (
-                  <button
-                    className={styles.pairbox_btn}
-                    onClick={handleClaim}
-                    disabled={claimLoading}
+
+            <div>
+              {!!oraiXAmount?.claimableAmount && (
+                <button
+                  className={styles.pairbox_btn}
+                  onClick={handleClaim}
+                  disabled={claimLoading}
+                >
+                  <div
+                    style={{
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
                   >
-                    <div
-                      style={{
-                        height: '100%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      {claimLoading && (
-                        <div style={{ marginRight: 5 }}>
-                          <Loader width={25} height={25} />
-                        </div>
-                      )}
-                      <div>Claim {ORAIX_DENOM}</div>
-                    </div>
-                  </button>
-                )}
-              </div>
-            )}
+                    {claimLoading && (
+                      <div style={{ marginRight: 5 }}>
+                        <Loader width={25} height={25} />
+                      </div>
+                    )}
+                    <div>Claim {ORAIX_DENOM}</div>
+                  </div>
+                </button>
+              )}
+            </div>
           </div>
         )}
         <div style={{ position: 'absolute', bottom: '5%', fontSize: 18 }}>
-        To claim ORAIX on mobile, please use the OWallet app
-          ( {' '}
+          To claim ORAIX on mobile, please use the OWallet app
+          ({' '}
           <a
             style={{ color: 'green' }}
             href="https://apps.apple.com/app/owallet/id1626035069"
           >
             iOS
-          </a>
-          {' '} / {' '}
+          </a>{' '}
+          /{' '}
           <a
             style={{ color: 'green' }}
             href="https://play.google.com/store/apps/details?id=com.io.owallet"
           >
             Android
-          </a>
-          {' '} )
+          </a>{' '}
+          )
         </div>
       </>
     );
@@ -226,22 +224,29 @@ const ClaimOraiX: FunctionComponent = () => {
       // get merkle proof
       const { data: proofs } = await fetchProof();
 
-      const msg = generateClaimMsg({
-        type: Type.CLAIM_ORAIX,
-        sender: address,
-        stage: networkMapping.stage,
-        amount: oraiXAmount,
-        proofs,
-      });
+      const msgs = Object.entries(oraiXAmount.stageAmount).map(
+        ([stage, amount]) => {
+          const { contract: contractAddress, msg } = generateClaimMsg({
+            type: Type.CLAIM_ORAIX,
+            sender: address,
+            stage: +stage,
+            amount: amount.toString(),
+            proofs: proofs[stage],
+          });
+          return {
+            contractAddress,
+            handleMsg: msg.toString(),
+          };
+        }
+      );
 
-      const result = await CosmJs.execute({
+      const result = await CosmJs.executeMultiple({
         prefix: ORAI,
-        address: msg.contract,
         walletAddr: address,
-        handleMsg: msg.msg.toString(),
+        msgs,
         gasAmount: { denom: ORAI, amount: '0' },
       });
-      console.log('result swap tx hash: ', result);
+      console.log('result tx hash: ', result);
 
       setTimeout(() => {
         displayToast(TToastType.TX_SUCCESSFUL, {
@@ -260,57 +265,129 @@ const ClaimOraiX: FunctionComponent = () => {
     }
   };
 
+  const { data: networkInfo } = useQuery(
+    ['network-info', userNetwork],
+    () => fetchNetworkInfo(),
+    useQueryConfig
+  );
   const { data: oraiXAmount, isLoading: isLoading } = useQuery(
-    ['claim-oraix', address, claimed, userNetwork],
-    () => fetchClaimOraiX(),
-    useQueryConfig
+    ['claim-oraix', address, claimed, userNetwork, networkInfo],
+    () => fetchClaimAmountOraiX(),
+    { ...useQueryConfig, enabled: useQueryConfig.enabled && !!networkInfo }
   );
 
-  console.log({ oraiXAmount });
-
-  const { data: isClaimed, isLoading: isClaimedLoading } = useQuery(
-    ['is-claimed', address, claimed, userNetwork],
-    () => fetchIsClaimed(),
-    useQueryConfig
-  );
-
-  async function fetchClaimOraiX() {
+  async function fetchNetworkInfo(): Promise<{
+    stages: [number];
+    based_stage: number;
+  }> {
     try {
       const result = await axios.get(
-        `${ORAIX_CLAIM_URL}/proof/amount/${userNetwork}?address=${address}`
+        `${ORAIX_CLAIM_URL}/proof/stage/${userNetwork}`
       );
       if (result.status === 404) return undefined;
-      const { data: amount } = result.data;
-      return amount;
+      const { data } = result.data;
+      return data;
+    } catch (error) {
+      console.log('error fetch network info: ', error);
+      return undefined;
+    }
+  }
+
+  async function fetchClaimAmountOraiX() {
+    try {
+      let claimedAmount = 0,
+        claimableAmount = 0,
+        totalClaimAmount = 0,
+        stageAmount = {};
+      const stages = networkInfo.stages;
+      const result = await axios.post(
+        `${ORAIX_CLAIM_URL}/proof/amount?address=${address}`,
+        { stages }
+      );
+      if (result.status === 404) return undefined;
+      const { data } = result.data;
+
+      await Promise.all(
+        Object.entries(data).map(async ([stage, amount]) => {
+          if (+stage === networkInfo.based_stage)
+            totalClaimAmount = +amount / 0.4;
+          const isClaimed = await fetchIsClaimed(+stage);
+          if (!!isClaimed) {
+            claimedAmount += +amount;
+
+            return;
+          }
+
+          const isValidStage = await fetchIsValidStage(+stage);
+          if (!isValidStage) {
+            return;
+          }
+          stageAmount[stage] = +amount;
+          claimableAmount += +amount;
+        })
+      );
+
+      return {
+        totalClaimAmount,
+        stageAmount,
+        claimedAmount,
+        claimableAmount,
+      };
     } catch (error) {
       console.log('error fetch claim oraix: ', error);
       return undefined;
     }
   }
 
-  async function fetchIsClaimed() {
+  async function fetchIsClaimed(stage: number) {
     const msg = JSON.stringify({
       is_claimed: {
+        stage,
         address,
-        stage: objNetwork[userNetwork as objNetworkKey].stage,
       },
     });
     const { data } = (
       await axios.get(
-        `${network.lcd
-        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`, { cache: false }
+        `${
+          network.lcd
+        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
+        { cache: false }
       )
     ).data;
-    console.log('data is claimed: ', data.is_claimed);
 
     return data.is_claimed;
   }
 
-  async function fetchProof() {
-    const res: any = (
+  async function fetchIsValidStage(stage: number) {
+    const msg = JSON.stringify({ merkle_root: { stage } });
+    const { data } = (
       await axios.get(
-        `${ORAIX_CLAIM_URL}/proof/${userNetwork}?address=${address}&amount=${oraiXAmount}`
+        `${
+          network.lcd
+        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
+        { cache: false }
       )
+    ).data;
+    const now = Date.now() / 1000;
+    if (now >= +data.expiration.at_time) return false;
+    if (!data.merkle_root) return false;
+    return true;
+  }
+
+  async function fetchProof() {
+    const stages = Object.entries(oraiXAmount.stageAmount).map(
+      ([stage, amount]) => {
+        return {
+          stage,
+          amount,
+        };
+      }
+    );
+
+    const res: any = (
+      await axios.post(`${ORAIX_CLAIM_URL}/proof?address=${address}`, {
+        stages,
+      })
     ).data;
     return res;
   }
