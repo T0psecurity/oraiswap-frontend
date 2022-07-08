@@ -15,6 +15,7 @@ import {
   BSC_CHAIN_ID,
   BSC_RPC,
   COSMOS_DECIMALS,
+  ERC20_KWT_CHAIN_ID,
   ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
@@ -268,7 +269,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       {
         name: 'ERC20 KWT',
         org: 'Kawaiiverse',
-        chainId: KWT_SUBNETWORK_CHAIN_ID,
+        chainId: ERC20_KWT_CHAIN_ID,
         denom: 'erc20_kwt',
         contractAddress: KAWAII_CONTRACT,
         rpc: KAWAII_SUBNET_RPC,
