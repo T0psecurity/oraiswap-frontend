@@ -93,7 +93,7 @@
     "@types/styled-components": "^5.1.9",
     "esbuild-loader": "^2.19.0",
     "firebase-tools": "^10.2.2",
-    "node-sass": "^7.0.1",
+    "sass": "^1.53.0",
     "react-app-rewired": "^2.2.1",
     "react-scripts": "^5.0.1",
     "source-map-explorer": "^2.5.0",
