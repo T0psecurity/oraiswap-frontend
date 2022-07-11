@@ -62,7 +62,7 @@ jobs:
         run: |
           yarn firebase use default --token ${{ secrets.FIREBASE_TOKEN }}
           yarn firebase target:apply hosting oraiswap-staging oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }}
-          yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m '${{ toJSON(github.event.head_commit.message) }}'
+          yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m '${{github.event.head_commit.message}}'
 
 #      - name: Send discord message
 #        uses: appleboy/discord-action@master
