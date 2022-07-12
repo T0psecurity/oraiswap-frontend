@@ -20,6 +20,7 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import Tooltip from 'components/Tooltip';
 
 type AmountDetail = {
   amount: number;
@@ -157,26 +158,46 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         }}
       >
         {onClickTransfer && (
-          <button
-            className={styles.tfBtn}
-            disabled={transferIbcLoading}
-            onClick={async (event) => {
-              event.stopPropagation();
-              try {
-                const isValid = checkValidAmount();
-                if (!isValid) return;
-                setTransferIbcLoading(true);
-                await onClickTransfer(convertAmount);
-              } finally {
-                setTransferIbcLoading(false);
-              }
-            }}
+          <Tooltip
+            content={
+              toToken.chainId === KWT_SUBNETWORK_CHAIN_ID && (
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ marginBottom: '6px' }}>
+                    [Notice] Keplr recently sent out an update that affected the
+                    current flow of Kawaiiverse, please delete Kawaiiverse in
+                    Keplr and add it again (make sure you have no token left in
+                    Kawaiiverse before deleting). Also remember to set your gas
+                    fee for free transactions.
+                  </div>
+                  <i>
+                    Skip this message if you added Kawaiiverse after July 8,
+                    2022.
+                  </i>
+                </div>
+              )
+            }
           >
-            {transferIbcLoading && <Loader width={20} height={20} />}
-            <span>
-              Transfer to <strong>{toToken.org}</strong>
-            </span>
-          </button>
+            <button
+              className={styles.tfBtn}
+              disabled={transferIbcLoading}
+              onClick={async (event) => {
+                event.stopPropagation();
+                try {
+                  const isValid = checkValidAmount();
+                  if (!isValid) return;
+                  setTransferIbcLoading(true);
+                  await onClickTransfer(convertAmount);
+                } finally {
+                  setTransferIbcLoading(false);
+                }
+              }}
+            >
+              {transferIbcLoading && <Loader width={20} height={20} />}
+              <span>
+                Transfer to <strong>{toToken.org}</strong>
+              </span>
+            </button>
+          </Tooltip>
         )}
         {(() => {
           if (
