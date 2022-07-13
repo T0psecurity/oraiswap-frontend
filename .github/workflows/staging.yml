@@ -25,13 +25,13 @@ jobs:
         uses: styfle/cancel-workflow-action@0.8.0
         with:
           access_token: ${{ github.token }}
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install Yarn
-        run: npm install -g yarn
+      # - name: Install Yarn
+      #   run: npm install -g yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -45,6 +45,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
       - name: Copy env
         run: cp .env.example .env
@@ -58,12 +59,8 @@ jobs:
         env:
           CI: false
       # Deploy master
-      - name: Set firebase project alias
-        run: |
-          yarn firebase use default --token ${{ secrets.FIREBASE_TOKEN }}
-          yarn firebase target:apply hosting oraiswap-staging oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }}
-          yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"
-
+      - name: Deploy to firebase
+        run: yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"
 #      - name: Send discord message
 #        uses: appleboy/discord-action@master
 #        with:
