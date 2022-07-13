@@ -37,7 +37,7 @@ export const embedChainInfos: ChainInfo[] = [
     get feeCurrencies() {
       return [this.stakeCurrency];
     },
-    walletUrlForStaking: "https://scan.orai.io/validators",
+    walletUrlForStaking: 'https://scan.orai.io/validators',
     gasPriceStep: {
       low: 0,
       average: 0.000025,
@@ -101,7 +101,13 @@ export const embedChainInfos: ChainInfo[] = [
       average: 0.000025,
       high: 0.00004,
     },
-    features: ['ibc-transfer', 'ibc-go', 'stargate'],
+    features: [
+      'ibc-transfer',
+      'ibc-go',
+      'stargate',
+      'eth-address-gen',
+      'eth-key-sign',
+    ],
   },
 ];
 

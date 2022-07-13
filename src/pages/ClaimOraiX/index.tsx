@@ -188,8 +188,7 @@ const ClaimOraiX: FunctionComponent = () => {
           </div>
         )}
         <div style={{ position: 'absolute', bottom: '5%', fontSize: 18 }}>
-          To claim ORAIX from the Claimable section, please use the OWallet app
-          ({' '}
+          To claim ORAIX on mobile, please use the OWallet app ({' '}
           <a
             style={{ color: 'green' }}
             href="https://apps.apple.com/app/owallet/id1626035069"
@@ -319,7 +318,7 @@ const ClaimOraiX: FunctionComponent = () => {
           }
 
           const isValidStage = await fetchIsValidStage(+stage);
-          if (!isValidStage) {
+          if (!isValidStage || !+amount) {
             return;
           }
           stageAmount[stage] = +amount;

@@ -93,9 +93,13 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useInactiveListener();
   useEffect(() => {
-    _initEthereum();
-    getKwtSubnetAddress();
+    _initEthereum();    
   }, []);
+
+  useEffect(() => {
+    if (!keplrAddress) return;
+    getKwtSubnetAddress();
+  }, [keplrAddress]);
 
   useEffect(() => {
     loadTokenAmounts();
@@ -127,7 +131,7 @@ const Balance: React.FC<BalanceProps> = () => {
           `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${address}`
         )
       ).data;
-      setKwtSubnetAddress(address_eth);
+      setKwtSubnetAddress(address_eth);      
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
         message: error.message

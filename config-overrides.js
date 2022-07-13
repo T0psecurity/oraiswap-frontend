@@ -9,14 +9,14 @@ const fallback = {
   fs: false,
   tls: false,
   net: false,
-  https: false,
   os: false,
-  http: false,
   url: false,
   path: false,
   assert: false,
+  http: require.resolve('stream-http'),
   crypto: require.resolve('crypto-browserify'),
-  stream: require.resolve('stream-browserify')
+  stream: require.resolve('stream-browserify'),
+  https: require.resolve('https-browserify'),
 };
 
 const rewiredEsbuild = (config) => {
@@ -109,17 +109,17 @@ module.exports = {
       execSync('yarn vendor', {
         stdio: 'inherit',
         env: process.env,
-        cwd: process.cwd()
+        cwd: process.cwd(),
       });
     }
 
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest: vendorManifest
+        manifest: vendorManifest,
       })
     );
 
     return rewiredEsbuild(config);
-  }
+  },
 };

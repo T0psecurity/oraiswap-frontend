@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-20.04 #orai-self-hosted
     strategy:
       matrix:
-        node-version: [14.16.0]
+        node-version: [16.13.2]
 
     steps:
       - name: Cancel Previous Runs
@@ -62,7 +62,7 @@ jobs:
         run: |
           yarn firebase use default --token ${{ secrets.FIREBASE_TOKEN }}
           yarn firebase target:apply hosting oraiswap oraiswap --token ${{ secrets.FIREBASE_TOKEN }}
-          yarn firebase deploy --only hosting:oraiswap --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"
+          yarn firebase deploy --only hosting:oraiswap --token ${{ secrets.FIREBASE_TOKEN }} -m '${{ github.event.head_commit.message }}'
 #      - name: Send discord message
 #        uses: appleboy/discord-action@master
 #        with:
