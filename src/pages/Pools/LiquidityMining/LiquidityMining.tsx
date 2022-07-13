@@ -13,6 +13,7 @@ import Loader from 'components/Loader';
 import _ from 'lodash';
 import { TokenInfo } from 'types/token';
 import useGlobalState from 'hooks/useGlobalState';
+import miningImage from 'assets/images/Liquidity_mining_illus.png';
 
 const cx = cn.bind(styles);
 
@@ -56,7 +57,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   }, [
     JSON.stringify(totalRewardInfoData),
     JSON.stringify(rewardPerSecInfoData),
-    JSON.stringify(stakingPoolInfoData)
+    JSON.stringify(stakingPoolInfoData),
   ]);
 
   const setNewReward = () => {
@@ -90,7 +91,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           ...token,
           amount,
           rewardPerSec: +r.amount,
-          pendingWithdraw
+          pendingWithdraw,
           // usdValue
         };
       } else {
@@ -106,7 +107,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           ...token,
           amount,
           rewardPerSec: +r.amount,
-          pendingWithdraw
+          pendingWithdraw,
           // usdValue
         };
       }
@@ -130,7 +131,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
-        assetToken: assetToken
+        assetToken: assetToken,
       } as WithdrawMining);
 
       const msg = msgs[0];
@@ -145,14 +146,14 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        handleOptions: { funds: msg.sent_funds },
       });
       console.log('result provide tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
+          customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setActionLoading(false);
         setWithdrawTxHash(result.transactionHash);
@@ -165,7 +166,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError
+        message: finalError,
       });
     }
     setActionLoading(false);
@@ -194,16 +195,11 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           </div>
         </>
       </div>
-      <div className={cx('row')} style={{ flexWrap: "wrap" }}>
+      <div className={cx('row')} style={{ flexWrap: 'wrap' }}>
         <>
           <div className={cx('mining')}>
             <div className={cx('container', 'container_mining')}>
-              <img
-                className={cx('icon')}
-                src={
-                  require('assets/images/Liquidity_mining_illus.png').default
-                }
-              />
+              <img className={cx('icon')} src={miningImage} />
               <div className={cx('bonded')}>
                 <div className={cx('label')}>Bonded</div>
                 <div>
@@ -212,7 +208,11 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       amount: rewardInfoFirst
                         ? rewardInfoFirst.bond_amount ?? 0
                         : 0,
-                      denom: `${lpTokenInfoData?.symbol.charAt(0) === 'u' ? lpTokenInfoData?.symbol.substring(1) : lpTokenInfoData?.symbol}` // symbol should not be minimal
+                      denom: `${
+                        lpTokenInfoData?.symbol.charAt(0) === 'u'
+                          ? lpTokenInfoData?.symbol.substring(1)
+                          : lpTokenInfoData?.symbol
+                      }`, // symbol should not be minimal
                     }}
                     className={cx('amount')}
                     decimalScale={6}
@@ -223,7 +223,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={
                           (rewardInfoFirst
                             ? rewardInfoFirst.bond_amount *
-                            pairAmountInfoData.usdAmount
+                              pairAmountInfoData.usdAmount
                             : 0) / +lpTokenInfoData.total_supply
                         }
                         className={cx('amount-usd')}
@@ -237,14 +237,15 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   style={{
                     background: '#2D2938',
                     width: '100%',
-                    height: '1px'
+                    height: '1px',
                     // margin: '16px 0'
                   }}
                 />
                 <div className={cx('bonded-apr')}>
                   <div className={cx('bonded-name')}>Current APR</div>
-                  {pairInfoData.contract_addr === 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <div className={cx('bonded-value')}>200% + ORAIX Bonus</div>}
-                  {pairInfoData.contract_addr !== 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <div className={cx('bonded-value')}>150% + ORAIX Bonus</div>}
+                  <div className={cx('bonded-value')}>
+                    {(pairInfoData?.apr ?? 0).toFixed(2)}%
+                  </div>
                 </div>
                 {/* <div className={cx('bonded-unbouding')}>
                           <div className={cx('bonded-name')}>
@@ -266,7 +267,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={{
                           amount: r.amount,
                           denom: r.denom.toUpperCase(),
-                          decimals: 6
+                          decimals: 6,
                         }}
                         decimalScale={6}
                       />
