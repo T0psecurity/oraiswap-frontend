@@ -1,7 +1,10 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
 import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
-import { PoolResponse } from 'types/oraiswap_pair/pool_response';
+import {
+  AllPoolAprResponse,
+  PoolResponse,
+} from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
@@ -112,6 +115,20 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
 async function fetchPool(pairAddr: string): Promise<PoolResponse> {
   const data = await querySmart(pairAddr, { pool: {} });
   return data;
+}
+
+async function fetchAllPoolApr(): Promise<AllPoolAprResponse> {
+  const { data } = await axios.get(
+    `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr/all`
+  );
+  return data.data;
+}
+
+async function fetchPoolApr(contract_addr: string): Promise<number> {
+  const { data } = await axios.get(
+    `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`
+  );
+  return data.data;
 }
 
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
@@ -791,4 +808,6 @@ export {
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
   fetchDistributionInfo,
+  fetchAllPoolApr,
+  fetchPoolApr,
 };

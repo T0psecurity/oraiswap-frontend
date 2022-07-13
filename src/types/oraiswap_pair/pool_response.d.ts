@@ -36,3 +36,7 @@ export interface Asset {
   info: AssetInfo;
   [k: string]: unknown;
 }
+
+export interface AllPoolAprResponse {
+  [contract_addr: string]: number;
+}

@@ -4,7 +4,12 @@ import { Button, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { getPair, Pair, pairs } from 'config/pools';
-import { fetchPairInfo, fetchPoolInfoAmount, fetchTokenInfo } from 'rest/api';
+import {
+  fetchAllPoolApr,
+  fetchPairInfo,
+  fetchPoolInfoAmount,
+  fetchTokenInfo,
+} from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
@@ -15,11 +20,11 @@ import { STABLE_DENOM } from 'config/constants';
 
 const { Search } = Input;
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
-  oraiPrice
+  oraiPrice,
 }) => {
   return (
     <div className={styles.header}>
@@ -48,7 +53,7 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({
   );
 };
 
-const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
+const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate, apr }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) =>
     filteredTokens.find((token) => token.denom === denom)
@@ -86,8 +91,7 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate }) => {
       <div className={styles.pairbox_content}>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>APR</span>
-          {pair.contract_addr === 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <span className={styles.pairbox_data_value}>200%</span>}
-          {pair.contract_addr !== 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5' && <span className={styles.pairbox_data_value}>150%</span>}
+          <span className={styles.pairbox_data_value}>{apr.toFixed(2)}%</span>
         </div>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>
@@ -156,7 +160,7 @@ const ListPools = memo<{
             width: 420,
             background: '#1E1E21',
             borderRadius: '8px',
-            padding: '10px'
+            padding: '10px',
           }}
         />
         {/* <div
@@ -181,6 +185,7 @@ type PairInfoData = {
   commissionRate: string;
   fromToken: any;
   toToken: any;
+  apr: number;
 } & PoolInfo;
 
 const Pools: React.FC<PoolsProps> = () => {
@@ -188,7 +193,10 @@ const Pools: React.FC<PoolsProps> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
 
-  const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
+  const fetchPairInfoData = async (
+    pair: Pair,
+    apr: number
+  ): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
       filteredTokens.find((token) => token.denom === denom)
     );
@@ -196,12 +204,12 @@ const Pools: React.FC<PoolsProps> = () => {
     try {
       const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
         fetchTokenInfo(fromToken!),
-        fetchTokenInfo(toToken!)
+        fetchTokenInfo(toToken!),
       ]);
 
       const [poolData, infoData] = await Promise.all([
         fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-        fetchPairInfo([fromTokenInfoData, toTokenInfoData])
+        fetchPairInfo([fromTokenInfoData, toTokenInfoData]),
       ]);
 
       return {
@@ -210,7 +218,8 @@ const Pools: React.FC<PoolsProps> = () => {
         pair,
         commissionRate: infoData.commission_rate,
         fromToken,
-        toToken
+        toToken,
+        apr,
       };
     } catch (ex) {
       console.log(ex);
@@ -218,7 +227,12 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
-    const poolList = _.compact(await Promise.all(pairs.map(fetchPairInfoData)));
+    const aprList = await fetchAllPoolApr();
+    const poolList = _.compact(
+      await Promise.all(
+        pairs.map((p) => fetchPairInfoData(p, aprList[p.contract_addr]))
+      )
+    );
     const oraiUstPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     )!;
