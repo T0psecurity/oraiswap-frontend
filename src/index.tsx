@@ -14,13 +14,25 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID
+  ORAI_BRIDGE_CHAIN_ID,
 } from 'config/constants';
+import * as Sentry from '@sentry/react';
+import { BrowserTracing } from '@sentry/tracing';
 
 // enable Keplr
 window.Keplr = new Keplr();
 window.Metamask = new Metamask();
 const queryClient = new QueryClient();
+
+Sentry.init({
+  dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
+  integrations: [new BrowserTracing()],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
 
 const startApp = async () => {
   try {
@@ -36,7 +48,7 @@ const startApp = async () => {
     console.log(ex);
   }
 
-  window.ReactNativeWebView?.postMessage('foo bar hello hello')
+  window.ReactNativeWebView?.postMessage('foo bar hello hello');
   render(
     <StrictMode>
       <ToastProvider>

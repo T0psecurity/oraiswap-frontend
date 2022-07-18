@@ -15,6 +15,8 @@
     "@keplr-wallet/types": "^0.9.12",
     "@oraichain/kawaiiverse-txs": "0.0.1",
     "@saberhq/token-utils": "^1.12.69",
+    "@sentry/react": "^7.7.0",
+    "@sentry/tracing": "^7.7.0",
     "@sunnyag/react-coingecko": "^2.1.0",
     "@tharsis/proto": "^0.1.17",
     "@tharsis/provider": "^0.2.4",
