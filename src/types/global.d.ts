@@ -152,10 +152,11 @@ declare global {
       REACT_APP_DEPRECATED: string;
       REACT_APP_ORAIX_CLAIM_URL: string;
       REACT_APP_ORAIX_CLAIM_CONTRACT: string;
+      REACT_APP_SENTRY_ENVIRONMENT: string;
     }
   }
 }
 
 declare module 'crypto-hashing';
 
-export { };
+export {};
