@@ -89,10 +89,12 @@ const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate, apr }) => {
         </div>
       </div>
       <div className={styles.pairbox_content}>
-        <div className={styles.pairbox_data}>
-          <span className={styles.pairbox_data_name}>APR</span>
-          <span className={styles.pairbox_data_value}>{apr.toFixed(2)}%</span>
-        </div>
+        {!!apr && (
+          <div className={styles.pairbox_data}>
+            <span className={styles.pairbox_data_name}>APR</span>
+            <span className={styles.pairbox_data_value}>{apr.toFixed(2)}%</span>
+          </div>
+        )}
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>
           <span className={styles.pairbox_data_value}>

@@ -241,12 +241,14 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                     // margin: '16px 0'
                   }}
                 />
-                <div className={cx('bonded-apr')}>
-                  <div className={cx('bonded-name')}>Current APR</div>
-                  <div className={cx('bonded-value')}>
-                    {(pairInfoData?.apr ?? 0).toFixed(2)}%
+                {!!pairInfoData?.apr && (
+                  <div className={cx('bonded-apr')}>
+                    <div className={cx('bonded-name')}>Current APR</div>
+                    <div className={cx('bonded-value')}>
+                      {(pairInfoData?.apr).toFixed(2)}%
+                    </div>
                   </div>
-                </div>
+                )}
                 {/* <div className={cx('bonded-unbouding')}>
                           <div className={cx('bonded-name')}>
                             Unbonding Duration

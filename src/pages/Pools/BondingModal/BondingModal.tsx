@@ -28,6 +28,7 @@ interface ModalProps {
   liquidityValue: number;
   assetToken: any;
   setTxHash: any;
+  pairInfoData: any;
 }
 
 const BondingModal: FC<ModalProps> = ({
@@ -38,7 +39,8 @@ const BondingModal: FC<ModalProps> = ({
   lpTokenBalance,
   liquidityValue,
   assetToken,
-  setTxHash
+  setTxHash,
+  pairInfoData,
 }) => {
   const [bondAmount, setBondAmount] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -53,7 +55,7 @@ const BondingModal: FC<ModalProps> = ({
 
     if (parsedAmount <= 0 || parsedAmount > lpTokenBalance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Amount is invalid!'
+        message: 'Amount is invalid!',
       });
 
     setActionLoading(true);
@@ -64,7 +66,7 @@ const BondingModal: FC<ModalProps> = ({
         sender: address,
         amount: parsedAmount,
         lpToken: lpTokenInfoData.contractAddress!,
-        assetToken
+        assetToken,
       });
 
       // const msgs = await generateMiningMsgs({
@@ -84,14 +86,14 @@ const BondingModal: FC<ModalProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        handleOptions: { funds: msg.sent_funds },
       });
       console.log('result provide tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
+          customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setTxHash(result.transactionHash);
       }
@@ -102,7 +104,7 @@ const BondingModal: FC<ModalProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError
+        message: finalError,
       });
     } finally {
       setActionLoading(false);
@@ -121,22 +123,16 @@ const BondingModal: FC<ModalProps> = ({
         <div className={cx('title')}>Bond LP tokens</div>
 
         <div className={cx('detail')}>
-          <div className={cx('row')}>
-            <div className={cx('row-title')}>
-              <span>Current APR</span>
-              {/* <TooltipIcon /> */}
+          {!!pairInfoData?.apr && (
+            <div className={cx('row')}>
+              <div className={cx('row-title')}>
+                <span>Current APR</span>
+              </div>
+              <span className={cx('row-des', 'highlight')}>
+                {(pairInfoData?.apr).toFixed(2)}%
+              </span>
             </div>
-            <span className={cx('row-des', 'highlight')}>
-              150% + ORAIX Bonus
-            </span>
-          </div>
-          {/* <div className={cx('row')}>
-            <div className={cx('row-title')}>
-              <span>Unbonding Duration</span>
-              <TooltipIcon />
-            </div>
-            <span className={cx('row-des')}>7 days</span>
-          </div> */}
+          )}
         </div>
         <div className={cx('supply')}>
           <div className={cx('header')}>
@@ -146,7 +142,7 @@ const BondingModal: FC<ModalProps> = ({
             <TokenBalance
               balance={{
                 amount: lpTokenBalance,
-                denom: `${lpTokenInfoData?.symbol}`
+                denom: `${lpTokenInfoData?.symbol}`,
               }}
               decimalScale={6}
               prefix="Balance: "

@@ -467,6 +467,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               liquidityValue={liquidity1Usd + liquidity2Usd}
               assetToken={assetToken}
               setTxHash={setBondingTxHash}
+              pairInfoData={pairInfoData}
             />
           )}
           {isOpenUnbondModal && (
