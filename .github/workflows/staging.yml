@@ -15,14 +15,14 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    runs-on: ubuntu-20.04 #orai-self-hosted #self-hosted #ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.14.0]
+        node-version: [16]
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ github.token }}
       - uses: actions/checkout@v3
@@ -30,43 +30,26 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      # - name: Install Yarn
-      #   run: npm install -g yarn
+      - name: Install Yarn
+        run: npm install -g yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v2
-        id: yarn-cache
+      - uses: actions/cache@v3
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
-          path: |
-            ${{ steps.yarn-cache-dir-path.outputs.dir }}
-            ./node_modules/
-          key: ${{ runner.os }}-yarn-${{ hashFiles('./yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          path: '**/node_modules'
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
       - name: Install Dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn install
+        run: yarn
       - name: Copy env
         run: cp .env.example .env
       - name: Set Sentry environment
-        run: export REACT_APP_SENTRY_ENVIRONMENT='staging'
-      #- name: Copy env
-      #  run: 'echo "$ENV_VAR" > .env'
-      #  shell: bash
-      #  env:
-      #    ENV_VAR: ${{secrets.ENV_MAINNET}}
+        run: echo "REACT_APP_SENTRY_ENVIRONMENT=staging" >> .env 
       - name: Build Production
         run: yarn build
         env:
           CI: false
-      # Deploy master
       - name: Deploy to firebase
         run: yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"
-#      - name: Send discord message
-#        uses: appleboy/discord-action@master
-#        with:
-#          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
-#          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-#          username: "GitBot"
-#          message: "Deployed to production."
