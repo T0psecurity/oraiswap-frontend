@@ -46,7 +46,7 @@ jobs:
       - name: Copy env
         run: cp .env.example .env
       - name: Set Sentry environment
-        run: echo "REACT_APP_SENTRY_ENVIRONMENT=production" >> .env 
+        run: echo "\nREACT_APP_SENTRY_ENVIRONMENT=production" >> .env 
       - name: Build Production
         run: yarn build
         env:
