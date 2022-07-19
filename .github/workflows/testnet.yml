@@ -15,7 +15,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    runs-on: orai-swarm
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [16]
