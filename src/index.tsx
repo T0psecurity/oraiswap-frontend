@@ -43,9 +43,17 @@ const startApp = async () => {
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
-      await window.Keplr.suggestChain(network.chainId);
-      await window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID);
-      await window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID);
+
+      await Promise.race([
+        Promise.all([
+          window.Keplr.suggestChain(network.chainId),
+          window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID),
+          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID)
+        ]),
+        new Promise((resolve) => {
+          setTimeout(resolve, 5000);
+        })
+      ]);
     }
   } catch (ex) {
     console.log(ex);
