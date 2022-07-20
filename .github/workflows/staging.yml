@@ -30,8 +30,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install Yarn
-        run: npm install -g yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -46,7 +44,7 @@ jobs:
       - name: Copy env
         run: cp .env.example .env
       - name: Set Sentry environment
-        run: echo "REACT_APP_SENTRY_ENVIRONMENT=staging" >> .env 
+        run: echo "REACT_APP_SENTRY_ENVIRONMENT=staging" >> .env
       - name: Build Production
         run: yarn build
         env:
