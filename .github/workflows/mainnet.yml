@@ -45,11 +45,10 @@ jobs:
         run: yarn
       - name: Copy env
         run: cp .env.example .env
-      - name: Set Sentry environment
-        run: echo "REACT_APP_SENTRY_ENVIRONMENT=production" >> .env 
       - name: Build Production
         run: yarn build
         env:
+          REACT_APP_SENTRY_ENVIRONMENT: production
           CI: false
       - name: Deploy to firebase
         run: yarn firebase deploy --only hosting:oraiswap --token ${{ secrets.FIREBASE_TOKEN }} -m '${{ github.event.head_commit.message }}'
