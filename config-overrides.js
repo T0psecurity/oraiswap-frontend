@@ -13,15 +13,15 @@ const fallback = {
   url: false,
   path: false,
   assert: false,
-  http: require.resolve('stream-http'),
+  http: false,
   crypto: require.resolve('crypto-browserify'),
   stream: require.resolve('stream-browserify'),
-  https: require.resolve('https-browserify'),
+  https: require.resolve('https-browserify')
 };
 
 const rewiredEsbuild = (config) => {
   const useTypeScript = fs.existsSync(paths.appTsConfig);
-
+  const target = 'es2020';
   // replace babel-loader to esbuild-loader
   for (const { oneOf } of config.module.rules) {
     if (oneOf) {
@@ -43,7 +43,7 @@ const rewiredEsbuild = (config) => {
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: useTypeScript ? 'tsx' : 'jsx',
-            target: 'es2015'
+            target
           }
         });
       }
@@ -55,7 +55,7 @@ const rewiredEsbuild = (config) => {
     .slice()
     .reverse()) {
     const options = {
-      target: 'es2015',
+      target,
       css: true
     };
     // replace TerserPlugin to ESBuildMinifyPlugin
@@ -109,17 +109,17 @@ module.exports = {
       execSync('yarn vendor', {
         stdio: 'inherit',
         env: process.env,
-        cwd: process.cwd(),
+        cwd: process.cwd()
       });
     }
 
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest: vendorManifest,
+        manifest: vendorManifest
       })
     );
 
     return rewiredEsbuild(config);
-  },
+  }
 };
