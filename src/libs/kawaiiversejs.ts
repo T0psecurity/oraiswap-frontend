@@ -80,9 +80,9 @@ async function submit({
   return result;
 }
 
-function createTxIBCMsgTransferStrategy(data: { chainId: number, cosmosChainId: string, senderInfo: any, fee: any, params: any }, isCustom?: { customMessages: any[] }) {
+function createTxIBCMsgTransferStrategy(data: { chainId: number, cosmosChainId: string, senderInfo: any, fee: any, params: any }, isCustom: { customMessages?: any[] }) {
   const { chainId, cosmosChainId, senderInfo, fee, params } = data;
-  if (isCustom) return createMsgIbcCustom({ chainId, cosmosChainId },
+  if (isCustom.customMessages) return createMsgIbcCustom({ chainId, cosmosChainId },
     senderInfo,
     fee,
     `sender - ${senderInfo.accountAddress}; receiver - ${params.receiver}`,
