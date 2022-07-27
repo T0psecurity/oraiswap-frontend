@@ -57,7 +57,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.tokenInfo}>
             <div className={styles.tokenName}>{token.name}</div>
             <div className={styles.tokenOrg}>
-              <span className={styles.tokenOrgTxt}>{token.org}</span>
+              <span className={styles.tokenOrgTxt}> {token.bridgeNetworkIdentifier ? `${token.org} (${token.bridgeNetworkIdentifier})` : token.org}</span>
             </div>
           </div>
         </div>

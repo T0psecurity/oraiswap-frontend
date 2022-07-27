@@ -13,6 +13,7 @@ import {
   AIRI_BSC_CONTRACT,
   BEP20_ORAI,
   BSC_CHAIN_ID,
+  BSC_ORG,
   BSC_RPC,
   COSMOS_DECIMALS,
   ERC20_ORAI,
@@ -24,6 +25,7 @@ import {
   KAWAII_RPC,
   KAWAII_SUBNET_RPC,
   KWT_BSC_CONTRACT,
+  KWT_DENOM,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
@@ -37,20 +39,31 @@ import {
   USDT_BSC_CONTRACT,
 } from './constants';
 
+export type Erc20Cw20Map = {
+  erc20Type: string;
+  decimals: {
+    erc20Decimals: number,
+    cw20Decimals: number,
+  };
+  erc20Denom: string;
+}
+
 export type TokenItemType = {
   name: string;
   org?:
-    | 'Terra'
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaiiverse';
+  | 'Terra'
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum'
+  | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
+  erc20Cw20Map?: Erc20Cw20Map[];
+  bridgeNetworkIdentifier?: string;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   chainId: string;
   coinType?: number;
@@ -59,17 +72,17 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna'
-    | 'oraix'
-    | 'tether'
-    | 'kawaii-islands';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna'
+  | 'oraix'
+  | 'tether'
+  | 'kawaii-islands';
   cosmosBased: Boolean;
 };
 
@@ -137,12 +150,13 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: OSMO,
       },
       {
-        name: 'BEP20 ORAI',
+        name: 'ORAI',
         prefix: ORAI_BRIDGE_PREFIX,
         org: 'OraiBridge',
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
         denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
+        bridgeNetworkIdentifier: BSC_ORG,
         rpc: ORAI_BRIDGE_RPC,
         lcd: ORAI_BRIDGE_LCD,
         decimals: EVM_DECIMALS,
@@ -151,12 +165,13 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: ORAI,
       },
       {
-        name: 'BEP20 AIRI',
+        name: 'AIRI',
         prefix: ORAI_BRIDGE_PREFIX,
         org: 'OraiBridge',
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
         denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + AIRI_BSC_CONTRACT,
+        bridgeNetworkIdentifier: BSC_ORG,
         rpc: ORAI_BRIDGE_RPC,
         lcd: ORAI_BRIDGE_LCD,
         decimals: EVM_DECIMALS,
@@ -165,12 +180,13 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: AIRI,
       },
       {
-        name: 'BEP20 USDT',
+        name: 'USDT',
         prefix: ORAI_BRIDGE_PREFIX,
         org: 'OraiBridge',
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
         denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + USDT_BSC_CONTRACT,
+        bridgeNetworkIdentifier: BSC_ORG,
         rpc: ORAI_BRIDGE_RPC,
         lcd: ORAI_BRIDGE_LCD,
         decimals: EVM_DECIMALS,
@@ -179,12 +195,13 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: USDT,
       },
       {
-        name: 'BEP20 KWT',
+        name: 'KWT',
         prefix: ORAI_BRIDGE_PREFIX,
         org: 'OraiBridge',
         chainId: ORAI_BRIDGE_CHAIN_ID,
+        bridgeNetworkIdentifier: BSC_ORG,
         coinType: 118,
-        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + KWT_BSC_CONTRACT,
+        denom: KWT_DENOM,
         rpc: ORAI_BRIDGE_RPC,
         lcd: ORAI_BRIDGE_LCD,
         decimals: EVM_DECIMALS,
@@ -205,8 +222,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       //   Icon: ORAI
       // },
       {
-        name: 'BEP20 ORAI',
-        org: 'BNB Chain',
+        name: 'ORAI',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: BEP20_ORAI,
         contractAddress: ORAI_BSC_CONTRACT,
@@ -217,8 +234,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: ORAI,
       },
       {
-        name: 'BEP20 AIRI',
-        org: 'BNB Chain',
+        name: 'AIRI',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: 'bep20_airi',
         contractAddress: AIRI_BSC_CONTRACT,
@@ -229,8 +246,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: AIRI,
       },
       {
-        name: 'BEP20 USDT',
-        org: 'BNB Chain',
+        name: 'USDT',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: 'bep20_usdt',
         contractAddress: USDT_BSC_CONTRACT,
@@ -241,8 +258,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: USDT,
       },
       {
-        name: 'BEP20 KWT',
-        org: 'BNB Chain',
+        name: 'KWT',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: 'bep20_kwt',
         contractAddress: KWT_BSC_CONTRACT,
@@ -287,6 +304,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         denom: 'orai',
         coingeckoId: 'oraichain-token',
+        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM }],
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -343,6 +361,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'airight',
         denom: 'airi',
         contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
+        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM }],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
         chainId: 'Oraichain',
@@ -358,6 +377,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'tether',
         denom: STABLE_DENOM,
         contractAddress: process.env.REACT_APP_USDT_CONTRACT,
+        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM, }],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
         chainId: 'Oraichain',
@@ -393,52 +413,68 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       //   cosmosBased: true,
       //   Icon: ETH
       // },
+      // {
+      //   name: 'ORAI',
+      //   org: 'Oraichain',
+      //   prefix: 'orai',
+      //   coingeckoId: 'oraichain-token',
+      //   denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM,
+      //   decimals: EVM_DECIMALS,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   cosmosBased: true,
+      //   Icon: ORAI,
+      // },
+      // {
+      //   name: 'AIRI',
+      //   org: 'Oraichain',
+      //   prefix: 'orai',
+      //   coingeckoId: 'airight',
+      //   denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
+      //   decimals: EVM_DECIMALS,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   cosmosBased: true,
+      //   Icon: AIRI,
+      // },
+      // {
+      //   name: 'USDT',
+      //   org: 'Oraichain',
+      //   prefix: 'orai',
+      //   coingeckoId: 'tether',
+      //   denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
+      //   decimals: EVM_DECIMALS,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   cosmosBased: true,
+      //   Icon: USDT,
+      // },
+      // {
+      //   name: 'KWT',
+      //   org: 'Oraichain',
+      //   prefix: 'orai',
+      //   coingeckoId: 'kawaii-islands',
+      //   denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
+      //   decimals: EVM_DECIMALS,
+      //   chainId: 'Oraichain',
+      //   rpc: 'https://rpc.orai.io',
+      //   lcd: 'https://lcd.orai.io',
+      //   cosmosBased: true,
+      //   Icon: KWT,
+      // },
       {
-        name: 'BEP20 ORAI',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coingeckoId: 'oraichain-token',
-        denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM,
-        decimals: EVM_DECIMALS,
-        chainId: 'Oraichain',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        cosmosBased: true,
-        Icon: ORAI,
-      },
-      {
-        name: 'BEP20 AIRI',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coingeckoId: 'airight',
-        denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
-        decimals: EVM_DECIMALS,
-        chainId: 'Oraichain',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        cosmosBased: true,
-        Icon: AIRI,
-      },
-      {
-        name: 'BEP20 USDT',
-        org: 'Oraichain',
-        prefix: 'orai',
-        coingeckoId: 'tether',
-        denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
-        decimals: EVM_DECIMALS,
-        chainId: 'Oraichain',
-        rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
-        cosmosBased: true,
-        Icon: USDT,
-      },
-      {
-        name: 'BEP20 KWT',
+        name: 'KWT',
         org: 'Oraichain',
         prefix: 'orai',
         coingeckoId: 'kawaii-islands',
-        denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
-        decimals: EVM_DECIMALS,
+        denom: 'kwt',
+        contractAddress: process.env.REACT_APP_KWT_CONTRACT,
+        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM, }],
+        decimals: COSMOS_DECIMALS,
+        coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
@@ -470,8 +506,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 

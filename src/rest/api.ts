@@ -1,5 +1,5 @@
 import { network } from 'config/networks';
-import { TokenItemType } from 'config/bridgeTokens';
+import { Erc20Cw20Map, filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
 import {
   AllPoolAprResponse,
@@ -10,6 +10,8 @@ import { ORAI } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
+import { parseAmountFromWithDecimal, parseAmountToWithDecimal } from 'libs/utils';
+import Big from 'big.js';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -44,9 +46,8 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${
-    lcd ?? network.lcd
-  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  const url = `${lcd ?? network.lcd
+    }/wasm/v1beta1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -85,7 +86,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     symbol: '',
     name: tokenSwap.name,
     contractAddress: tokenSwap.contractAddress,
-    decimals: 6,
+    decimals: tokenSwap.decimals,
     icon: '',
     denom: tokenSwap.denom,
     verified: false,
@@ -134,7 +135,7 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-      '0'
+    '0'
   );
 }
 
@@ -288,13 +289,10 @@ async function fetchNativeTokenBalance(
   denom: string = ORAI,
   lcd?: string
 ) {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
   const res: any = (await axios.get(url)).data;
-  const amount =
-    res.balances.find((balance: { denom: string }) => balance.denom === denom)
-      ?.amount ?? 0;
+  const amount = res.balance.amount;
   return parseInt(amount);
 }
 
@@ -306,6 +304,79 @@ async function fetchBalance(
 ): Promise<number> {
   if (!tokenAddr) return fetchNativeTokenBalance(walletAddr, denom, lcd);
   else return fetchTokenBalance(tokenAddr, walletAddr, lcd);
+}
+
+async function fetchBalanceWithMapping(
+  walletAddr: string,
+  tokenInfo: TokenItemType,
+): Promise<number> {
+  var finalBalance = 0;
+  // get all native balances that are from oraibridge (ibc/...)
+  for (let mapping of tokenInfo.erc20Cw20Map) {
+    let balance = await fetchBalance(walletAddr, mapping.erc20Denom);
+    // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
+    finalBalance += parseAmountToWithDecimal(parseAmountFromWithDecimal(balance, mapping.decimals.erc20Decimals).toNumber(), mapping.decimals.cw20Decimals).toNumber();
+  }
+  // fetch original balance (can be cw20 or native like ORAI). No need to parse since these will have decimal = 6 automatically
+  if (!tokenInfo.contractAddress) finalBalance += await fetchBalance(walletAddr, tokenInfo.denom);
+  else finalBalance += await fetchBalance(walletAddr, tokenInfo.denom, tokenInfo.contractAddress);
+  return finalBalance;
+}
+
+async function generateConvertErc20Cw20Message(tokenInfo: TokenItemType, sender: string) {
+  var msgConverts: any[] = [];
+  if (!tokenInfo.erc20Cw20Map) return [];
+  // we convert all mapped tokens to cw20 to unify the token
+  for (let mapping of tokenInfo.erc20Cw20Map) {
+    const balance = new Big((await fetchBalance(sender, mapping.erc20Denom))).toFixed(0);
+    // reset so we convert using native first
+    tokenInfo.contractAddress = undefined;
+    tokenInfo.denom = mapping.erc20Denom;
+    if (balance > "0") {
+      const msgConvert = (await generateConvertMsgs({
+        type: Type.CONVERT_TOKEN,
+        sender,
+        inputAmount: balance,
+        inputToken: tokenInfo
+      }))[0];
+      msgConverts.push(msgConvert)
+    }
+  }
+  return msgConverts;
+}
+
+async function generateConvertCw20Erc20Message(tokenInfo: TokenItemType, sender: string, sendCoin: Coin) {
+  var msgConverts: any[] = [];
+  if (!tokenInfo.erc20Cw20Map) return [];
+  // we convert all mapped tokens to cw20 to unify the token
+  for (let mapping of tokenInfo.erc20Cw20Map) {
+    var balance: string;
+    // optimize. Only convert if not enough balance & match denom
+    if (mapping.erc20Denom !== sendCoin.denom) continue;
+    balance = new Big((await fetchBalance(sender, sendCoin.denom))).toFixed(0);
+    // if this wallet already has enough native ibc bridge balance => no need to convert reverse
+    if (balance >= sendCoin.amount) break;
+
+    if (!tokenInfo.contractAddress) balance = new Big((await fetchBalance(sender, tokenInfo.denom))).toFixed(0);
+    else balance = new Big((await fetchBalance(sender, '', tokenInfo.contractAddress))).toFixed(0);
+    if (balance > "0") {
+      const outputToken: TokenItemType = {
+        ...tokenInfo,
+        denom: mapping.erc20Denom,
+        contractAddress: undefined,
+        decimals: mapping.decimals.erc20Decimals
+      }
+      const msgConvert = (await generateConvertMsgs({
+        type: Type.CONVERT_TOKEN_REVERSE,
+        sender,
+        inputAmount: balance,
+        inputToken: tokenInfo,
+        outputToken
+      }))[0];
+      msgConverts.push(msgConvert)
+    }
+  }
+  return msgConverts;
 }
 
 const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
@@ -346,27 +417,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo,
-          },
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo,
         },
-      ]
+      },
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo,
-          },
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo,
         },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo,
-          },
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo,
         },
-      ];
+      },
+    ];
 };
 
 async function simulateSwap(query: {
@@ -810,4 +881,7 @@ export {
   fetchDistributionInfo,
   fetchAllPoolApr,
   fetchPoolApr,
+  fetchBalanceWithMapping,
+  generateConvertErc20Cw20Message,
+  generateConvertCw20Erc20Message
 };

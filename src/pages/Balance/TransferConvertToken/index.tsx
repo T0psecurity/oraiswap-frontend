@@ -1,6 +1,6 @@
 import { Input } from 'antd';
 import classNames from 'classnames';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styles from './index.module.scss';
 import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
@@ -16,6 +16,7 @@ import {
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
+  BSC_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
 } from 'config/constants';
@@ -56,13 +57,16 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferIbcLoading, setTransferIbcLoading] = useState(false);
 
-  const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
+
+  // const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
+  const name = token.name;
   const ibcConvertToken = filteredTokens.find(
     (t) =>
       t.cosmosBased &&
       (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) &&
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
+
   const maxAmount = parseAmountFrom(
     amountDetail?.amount ?? 0,
     token?.decimals
@@ -219,8 +223,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const to = filteredTokens.find(
                         (t) =>
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name === token.name
+                          t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
                       );
+                      console.log("to token: ", to)
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);
@@ -287,13 +292,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <span>
                     Transfer To{' '}
                     <strong>
-                      {token.name.match(/BEP20/)
+                      {token.bridgeNetworkIdentifier && token.bridgeNetworkIdentifier === BSC_ORG
                         ? 'Binance Smart Chain'
                         : 'Ethereum'}
                     </strong>
                   </span>
                 </button>
-                <small
+                {/* <small
                   style={{
                     backgroundColor: '#C69A24',
                     color: '#95452d',
@@ -302,7 +307,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   }}
                 >
                   Congested
-                </small>
+                </small> */}
               </>
             );
           }
@@ -314,7 +319,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           ) {
             return (
               <>
-                <button
+                {/* <button
                   className={styles.tfBtn}
                   disabled={convertLoading}
                   onClick={async (event) => {
@@ -334,7 +339,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     Convert To
                     <strong style={{ marginLeft: 5 }}>{name}</strong>
                   </span>
-                </button>
+                </button> */}
                 <button
                   disabled={transferLoading}
                   className={styles.tfBtn}
@@ -347,8 +352,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const to = filteredTokens.find(
                         (t) =>
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name === token.name
+                          t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
                       );
+
+                      // convert reverse before transferring
+
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);

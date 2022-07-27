@@ -76,7 +76,8 @@
     ]
   },
   "resolutions": {
-    "react-error-overlay": "6.0.9"
+    "react-error-overlay": "6.0.9",
+    "@types/react": "17.0.43"
   },
   "devDependencies": {
     "@babel/runtime": "^7.18.6",

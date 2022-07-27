@@ -41,6 +41,7 @@ export const BSC_RPC = 'https://bsc-dataseed.binance.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
 export const ORAICHAIN_ID = 'Oraichain';
+export const BSC_ORG = 'BNB Chain';
 
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
@@ -56,6 +57,7 @@ export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
 export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
 export const KWT_BSC_CONTRACT = '0x257a8d1E03D17B8535a182301f15290F11674b53';
 export const ORAIX_DENOM = 'ORAIX';
+export const KWT_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + KWT_BSC_CONTRACT;
 
 // Kawaiiverse subnetwork
 export const KAWAII_RPC = 'https://tendermint1.kawaii.global';

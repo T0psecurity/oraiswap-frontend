@@ -2,6 +2,8 @@ import { is } from 'ramda';
 import bech32 from 'bech32';
 import Big from 'big.js';
 import { Fraction } from '@saberhq/token-utils';
+import { TokenItemType } from 'config/bridgeTokens';
+import { COSMOS_DECIMALS } from 'config/constants';
 
 /* object */
 export const record = <T, V>(
@@ -135,3 +137,11 @@ export const parseAmountFromWithDecimal = (
 export const reduceString = (str: string, from: number, end: number) => {
   return str ? str.substring(0, from) + " ... " + str.substring(str.length - end) : "-";
 };
+
+export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
+  var messages: any[] = mainMsg ? [mainMsg] : [];
+  messages.unshift(...preMessages.flat(1));
+  console.log("messages in build multiple messages: ", messages)
+  messages = messages.map(msg => ({ contractAddress: msg.contract, handleMsg: msg.msg.toString(), handleOptions: { funds: msg.sent_funds } }));
+  return messages;
+}
