@@ -6,7 +6,8 @@ import {
   createMessageConvertCoin,
   createMessageConvertERC20,
   createTxIBCMsgTransfer,
-  createMessageConvertIbcTransferERC20
+  createMessageConvertIbcTransferERC20,
+  createMsgIbcCustom,
 } from '@oraichain/kawaiiverse-txs';
 import Long from 'long';
 import { createTxRaw } from '@tharsis/proto';
@@ -77,6 +78,23 @@ async function submit({
   const client = await StargateClient.connect(rpc);
   const result = await client.broadcastTx(txRaw);
   return result;
+}
+
+function createTxIBCMsgTransferStrategy(data: { chainId: number, cosmosChainId: string, senderInfo: any, fee: any, params: any }, isCustom?: { customMessages: any[] }) {
+  const { chainId, cosmosChainId, senderInfo, fee, params } = data;
+  if (isCustom) return createMsgIbcCustom({ chainId, cosmosChainId },
+    senderInfo,
+    fee,
+    `sender - ${senderInfo.accountAddress}; receiver - ${params.receiver}`,
+    params, isCustom.customMessages
+  );
+  return createTxIBCMsgTransfer(
+    { chainId, cosmosChainId },
+    senderInfo,
+    fee,
+    `sender - ${senderInfo.accountAddress}; receiver - ${params.receiver}`,
+    params
+  );
 }
 
 export default class KawaiiverseJs {
@@ -205,6 +223,7 @@ export default class KawaiiverseJs {
     gasAmount,
     gasLimits = { exec: 2400000 },
     ibcInfo,
+    customMessages,
   }: {
     sender: string;
     gasAmount: { amount: string; denom: string };
@@ -218,6 +237,7 @@ export default class KawaiiverseJs {
       receiver: string;
       timeoutTimestamp: number;
     };
+    customMessages?: any[],
   }) {
     try {
       const subnetwork = kawaiiTokens[0];
@@ -238,12 +258,11 @@ export default class KawaiiverseJs {
         revisionHeight: 0,
       };
 
-      const { signDirect } = createTxIBCMsgTransfer(
-        { chainId: chainIdNumber, cosmosChainId: subnetwork.chainId },
-        senderInfo,
-        fee,
-        `sender - ${senderInfo.accountAddress}; receiver - ${params.receiver}`,
-        params
+
+      const { signDirect } = createTxIBCMsgTransferStrategy({
+        chainId: chainIdNumber, cosmosChainId: subnetwork.chainId, fee, params, senderInfo
+      },
+        { customMessages },
       );
 
       return submit({

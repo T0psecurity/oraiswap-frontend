@@ -541,11 +541,20 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      const amount = coin(
+      var amount = coin(
         parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
         fromToken.denom
       );
+
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+      var customMessages: any[];
+
+      // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
+      if (fromToken.erc20Cw20Map) {
+        const msgConvertReverses = await generateConvertCw20Erc20Message(fromToken, fromAddress, amount);
+        const executeContractMsgs = getExecuteContractMsgs(fromAddress, parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses)));
+        customMessages = executeContractMsgs.map(msg => ({ message: msg.value, path: msg.typeUrl.substring(1) }));
+      }
 
       const result = await KawaiiverseJs.transferIBC({
         sender: fromAddress,
@@ -558,7 +567,8 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: fromAddress,
           receiver: toAddress,
           timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
-        }
+        },
+        customMessages
       });
 
       processTxResult(
