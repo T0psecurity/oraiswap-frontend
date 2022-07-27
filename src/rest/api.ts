@@ -188,8 +188,9 @@ async function fetchPairInfoRaw(assetInfos: [any, any]): Promise<PairInfo> {
 async function fetchTokenBalance(
   tokenAddr: string,
   walletAddr: string,
-  lcd?: string
-): Promise<number> {
+  lcd?: string,
+  shouldKeepOriginal?: boolean,
+): Promise<number | string> {
   const data = await querySmart(
     tokenAddr,
     {
@@ -197,6 +198,7 @@ async function fetchTokenBalance(
     },
     lcd
   );
+  if (shouldKeepOriginal) return data.balance;
   return parseInt(data.balance);
 }
 
@@ -287,12 +289,14 @@ async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
 async function fetchNativeTokenBalance(
   walletAddr: string,
   denom: string = ORAI,
-  lcd?: string
-) {
+  lcd?: string,
+  shouldKeepOriginal?: boolean,
+): Promise<number | string> {
   const url = `${lcd ?? network.lcd
     }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
   const res: any = (await axios.get(url)).data;
   const amount = res.balance.amount;
+  if (shouldKeepOriginal) return amount;
   return parseInt(amount);
 }
 
@@ -302,8 +306,8 @@ async function fetchBalance(
   tokenAddr?: string,
   lcd?: string
 ): Promise<number> {
-  if (!tokenAddr) return fetchNativeTokenBalance(walletAddr, denom, lcd);
-  else return fetchTokenBalance(tokenAddr, walletAddr, lcd);
+  if (!tokenAddr) return await fetchNativeTokenBalance(walletAddr, denom, lcd) as number;
+  else return await fetchTokenBalance(tokenAddr, walletAddr, lcd) as number;
 }
 
 async function fetchBalanceWithMapping(
@@ -328,7 +332,7 @@ async function generateConvertErc20Cw20Message(tokenInfo: TokenItemType, sender:
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    const balance = new Big((await fetchBalance(sender, mapping.erc20Denom))).toFixed(0);
+    const balance = new Big((await fetchNativeTokenBalance(sender, mapping.erc20Denom, null, true))).toFixed(0);
     // reset so we convert using native first
     tokenInfo.contractAddress = undefined;
     tokenInfo.denom = mapping.erc20Denom;
@@ -353,12 +357,12 @@ async function generateConvertCw20Erc20Message(tokenInfo: TokenItemType, sender:
     var balance: string;
     // optimize. Only convert if not enough balance & match denom
     if (mapping.erc20Denom !== sendCoin.denom) continue;
-    balance = new Big((await fetchBalance(sender, sendCoin.denom))).toFixed(0);
+    balance = new Big((await fetchNativeTokenBalance(sender, sendCoin.denom, null, true))).toFixed(0);
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
     if (balance >= sendCoin.amount) break;
 
-    if (!tokenInfo.contractAddress) balance = new Big((await fetchBalance(sender, tokenInfo.denom))).toFixed(0);
-    else balance = new Big((await fetchBalance(sender, '', tokenInfo.contractAddress))).toFixed(0);
+    if (!tokenInfo.contractAddress) balance = new Big((await fetchNativeTokenBalance(sender, tokenInfo.denom, null, true))).toFixed(0);
+    else balance = new Big((await fetchTokenBalance(tokenInfo.contractAddress, sender, null, true))).toFixed(0);
     if (balance > "0") {
       const outputToken: TokenItemType = {
         ...tokenInfo,
