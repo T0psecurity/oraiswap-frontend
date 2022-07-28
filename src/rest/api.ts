@@ -566,7 +566,6 @@ async function generateContractMessages(
         contractAddr = swapQuery.fromInfo.contractAddress;
       }
       break;
-    // TODO: provide liquidity and withdraw liquidity
     case Type.PROVIDE:
       const provideQuery = params as ProvideQuery;
       const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(

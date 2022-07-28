@@ -513,7 +513,6 @@ export const tokens = tokensMap[network.id].map((tokens) =>
 
 export const filteredTokens = _.uniqBy(
   _.flatten(tokens).filter(
-    // TODO: contractAddress for ethereum use different method
     (token) =>
       // !token.contractAddress &&
       token.denom && token.cosmosBased && token.coingeckoId
@@ -524,7 +523,6 @@ export const filteredTokens = _.uniqBy(
 export const cw20Tokens = _.uniqBy(
   _.flatten(filteredTokens).filter(
     // filter cosmos based tokens to collect tokens that have contract addresses
-    // TODO: contractAddress for ethereum use different method
     (token) =>
       // !token.contractAddress &&
       token.contractAddress
@@ -534,7 +532,6 @@ export const cw20Tokens = _.uniqBy(
 
 export const evmTokens = _.uniqBy(
   _.flatten(tokens).filter(
-    // TODO: contractAddress for ethereum use different method
     (token) =>
       // !token.contractAddress &&
       token.denom &&
