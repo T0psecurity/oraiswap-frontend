@@ -22,9 +22,10 @@ import {
   tokens
 } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { fetchBalance, generateConvertMsgs, Type } from 'rest/api';
+import { fetchBalance, fetchBalanceWithMapping, generateConvertCw20Erc20Message, generateConvertMsgs, Type } from 'rest/api';
 import Content from 'layouts/Content';
 import {
+  buildMultipleMessages,
   getUsd,
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
@@ -43,7 +44,7 @@ import {
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE
 } from 'config/constants';
-import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import gravityRegistry from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
@@ -53,9 +54,11 @@ import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
-import { isMobile } from '@walletconnect/browser-utils';
+import { MsgTransfer } from '../../../node_modules/cosmjs-types/ibc/applications/transfer/v1/tx';
+import Long from 'long';
+import cosmwasmRegistry from 'libs/cosmwasm-registry';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetail = {
   amount: number;
@@ -93,7 +96,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useInactiveListener();
   useEffect(() => {
-    _initEthereum();    
+    _initEthereum();
   }, []);
 
   useEffect(() => {
@@ -131,7 +134,7 @@ const Balance: React.FC<BalanceProps> = () => {
           `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${address}`
         )
       ).data;
-      setKwtSubnetAddress(address_eth);      
+      setKwtSubnetAddress(address_eth);
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
         message: error.message
@@ -159,7 +162,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (!addr) throw new Error('Addr is undefined');
       // using this way we no need to enable other network
-      const amount = await fetchBalance(
+      const amount = token.erc20Cw20Map ? await fetchBalanceWithMapping(addr, token) : await fetchBalance(
         addr,
         token.denom,
         token.contractAddress,
@@ -399,32 +402,91 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const transferIBC = async (
+  const transferIbcCustom = async (
     fromToken: TokenItemType,
     toToken: TokenItemType,
     transferAmount: number
   ) => {
-    try {
-      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) return;
-      await window.Keplr.suggestChain(toToken.chainId);
-      // enable from to send transaction
-      await window.Keplr.suggestChain(fromToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-      if (!fromAddress || !toAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login keplr!'
-        });
-        return;
+
+    if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) return;
+    await window.Keplr.suggestChain(toToken.chainId);
+    // enable from to send transaction
+    await window.Keplr.suggestChain(fromToken.chainId);
+    const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+    const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+    if (!fromAddress || !toAddress) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Please login keplr!'
+      });
+      return;
+    }
+
+    var amount = coin(
+      parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+      fromToken.denom
+    );
+
+    const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+
+    // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
+    if (!fromToken.erc20Cw20Map) await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
+    else {
+      // TODO: need to have filter to check denom & decimal of appropirate network (ERC20 or BEP20)
+      amount = coin(
+        parseAmountToWithDecimal(transferAmount, fromToken.erc20Cw20Map[0].decimals.erc20Decimals).toFixed(0),
+        fromToken.erc20Cw20Map[0].erc20Denom
+      );
+      const msgConvertReverses = await generateConvertCw20Erc20Message(fromToken, fromAddress, amount);
+      const executeContractMsgs = getExecuteContractMsgs(fromAddress, parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses)));
+
+      // get raw ibc tx
+      const msgTransfer = {
+        typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+        value: MsgTransfer.fromPartial({
+          sourcePort: ibcInfo.source, sourceChannel: ibcInfo.channel, token: amount, sender: fromAddress, receiver: toAddress, timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout).multiply(1000000000)
+        })
       }
 
-      const amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
-        fromToken.denom
+      const offlineSigner = await window.Keplr.getOfflineSigner(
+        fromToken.chainId
       );
-      const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner,
+        { registry: cosmwasmRegistry }
+      );
+
+      try {
+        const result = await client.signAndBroadcast(fromAddress, [...executeContractMsgs, msgTransfer], {
+          gas: '300000',
+          amount: []
+        });
+        processTxResult(fromToken, result);
+      } catch (ex: any) {
+        console.log("error in transfer ibc custom: ", ex);
+        displayToast(TToastType.TX_FAILED, {
+          message: ex.message
+        });
+      }
+    }
+  }
+
+  const transferIBC = async (
+    data: {
+      fromToken: TokenItemType
+      fromAddress: string,
+      toAddress: string,
+      amount: Coin,
+      ibcInfo: IBCInfo,
+    }
+  ) => {
+
+    const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
+
+    try {
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
@@ -434,6 +496,7 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.rpc,
         offlineSigner
       );
+
       // if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
       const result = await client.sendIbcTokens(
         fromAddress,
@@ -478,11 +541,20 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      const amount = coin(
+      var amount = coin(
         parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
         fromToken.denom
       );
+
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+      var customMessages: any[];
+
+      // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
+      if (fromToken.erc20Cw20Map) {
+        const msgConvertReverses = await generateConvertCw20Erc20Message(fromToken, fromAddress, amount);
+        const executeContractMsgs = getExecuteContractMsgs(fromAddress, parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses)));
+        customMessages = executeContractMsgs.map(msg => ({ message: msg.value, path: msg.typeUrl.substring(1) }));
+      }
 
       const result = await KawaiiverseJs.transferIBC({
         sender: fromAddress,
@@ -495,7 +567,8 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: fromAddress,
           receiver: toAddress,
           timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
-        }
+        },
+        customMessages
       });
 
       processTxResult(
@@ -649,7 +722,7 @@ const Balance: React.FC<BalanceProps> = () => {
     ) {
       await transferIBCKwt(from, to, fromAmount);
     } else if (from.cosmosBased) {
-      await transferIBC(from, to, fromAmount);
+      await transferIbcCustom(from, to, fromAmount);
     } else {
       await transferEvmToIBC(fromAmount);
     }
@@ -864,7 +937,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, from, to)
+                              onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -945,15 +1018,15 @@ const Balance: React.FC<BalanceProps> = () => {
                           token={t}
                           onClick={onClickTokenTo}
                           convertToken={convertToken}
-                          transferIBC={transferIBC}
+                          transferIBC={transferIbcCustom}
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}

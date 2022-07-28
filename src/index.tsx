@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
@@ -33,7 +33,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 1.0
   });
 }
 
@@ -43,15 +43,22 @@ const startApp = async () => {
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
-      await window.Keplr.suggestChain(network.chainId);
-      await window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID);
-      await window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID);
+
+      await Promise.race([
+        Promise.all([
+          window.Keplr.suggestChain(network.chainId),
+          window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID),
+          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID)
+        ]),
+        new Promise((resolve) => {
+          setTimeout(resolve, 5000);
+        })
+      ]);
     }
   } catch (ex) {
     console.log(ex);
   }
 
-  window.ReactNativeWebView?.postMessage('foo bar hello hello');
   render(
     <StrictMode>
       <ToastProvider>
@@ -67,5 +74,9 @@ const startApp = async () => {
     document.getElementById('oraiswap')
   );
 };
+
+window.addEventListener('error', (event) => {
+  alert(JSON.stringify(event))
+});
 
 startApp();

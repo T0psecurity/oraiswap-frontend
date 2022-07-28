@@ -10,18 +10,21 @@ import {
   fetchExchangeRate,
   fetchTaxRate,
   fetchTokenInfo,
+  fetchBalanceWithMapping,
   generateContractMessages,
+  generateConvertMsgs,
   simulateSwap,
-  SwapQuery
+  SwapQuery,
+  generateConvertErc20Cw20Message
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { buildMultipleMessages, parseAmount, parseAmountToWithDecimal, parseDisplayAmount } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
 import NumberFormat from 'react-number-format';
-import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
+import { filteredTokens, TokenItemType, tokens, cw20Tokens } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
@@ -100,12 +103,13 @@ const Swap: React.FC = () => {
   } = useQuery(
     ['from-token-balance', fromToken, txHash],
     () =>
-      fetchBalance(
-        address,
-        fromToken!.denom,
-        fromToken!.contractAddress,
-        fromToken!.lcd
-      ),
+      fromToken.erc20Cw20Map ? fetchBalanceWithMapping(address, fromToken) :
+        fetchBalance(
+          address,
+          fromToken!.denom,
+          fromToken!.contractAddress,
+          fromToken!.lcd,
+        ),
     { enabled: !!address && !!fromToken }
   );
 
@@ -117,12 +121,13 @@ const Swap: React.FC = () => {
   } = useQuery(
     ['to-token-balance', toToken, txHash],
     () =>
-      fetchBalance(
-        address,
-        toToken!.denom,
-        toToken!.contractAddress,
-        toToken!.lcd
-      ),
+      toToken.erc20Cw20Map ? fetchBalanceWithMapping(address, toToken) :
+        fetchBalance(
+          address,
+          toToken!.denom,
+          toToken!.contractAddress,
+          toToken!.lcd,
+        ),
     { enabled: !!address && !!toToken }
   );
 
@@ -195,28 +200,30 @@ const Swap: React.FC = () => {
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+
+      var _fromAmount = parseAmountToWithDecimal(fromAmount, fromTokenInfoData.decimals).toFixed(0);
+
+      // hard copy of from & to token info data to prevent data from changing when calling the function
+      const msgConvertsFrom = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(fromTokenInfoData)), address);
+      const msgConvertTo = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(toTokenInfoData)), address);
+
       const msgs = await generateContractMessages({
         type: Type.SWAP,
         sender: address,
-        amount: parseAmount(fromAmount, fromTokenInfoData?.decimals),
+        amount: _fromAmount,
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!
       } as SwapQuery);
 
-      // const msgs = await generateConvertMsgs({ type: Type.CONVERT_TOKEN, fromToken: fromTokenInfoData, fromAmount: "1", sender: `${walletAddr}` })
       const msg = msgs[0];
-      console.log(
-        'msgs: ',
-        msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      );
 
-      const result = await CosmJs.execute({
+      var messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
+
+      const result = await CosmJs.executeMultiple({
         prefix: ORAI,
-        address: msg.contract,
         walletAddr: address,
-        handleMsg: msg.msg.toString(),
+        msgs: messages,
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
       console.log('result swap tx hash: ', result);
 
@@ -275,6 +282,7 @@ const Swap: React.FC = () => {
               <TokenBalance
                 balance={{
                   amount: fromTokenBalance,
+                  decimals: fromTokenInfoData?.decimals,
                   denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
@@ -385,9 +393,9 @@ const Swap: React.FC = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input

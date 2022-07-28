@@ -51,13 +51,25 @@ const collectWallet = async (chainId?: string) => {
   return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
 };
 
-const executeMultipleDirectClient = async (
+const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
+  console.log("messages in parse execute contract: ", msgs);
+  return msgs.map(
+    ({ handleMsg, handleOptions, contractAddress }) => {
+      return {
+        handleMsg: JSON.parse(handleMsg),
+        transferAmount: handleOptions?.funds,
+        contractAddress,
+      };
+    }
+  )
+}
+
+const getExecuteContractMsgs = (
   senderAddress: string,
   msgs: Msg[],
-  memo = '',
-  client: cosmwasm.SigningCosmWasmClient
 ) => {
-  const executeContractMsgs = msgs.map(
+
+  return msgs.map(
     ({ handleMsg, transferAmount, contractAddress }) => {
       return {
         typeUrl: '/cosmwasm.wasm.v1beta1.MsgExecuteContract',
@@ -70,6 +82,15 @@ const executeMultipleDirectClient = async (
       };
     }
   );
+}
+
+const executeMultipleDirectClient = async (
+  senderAddress: string,
+  msgs: Msg[],
+  memo = '',
+  client: cosmwasm.SigningCosmWasmClient
+) => {
+  const executeContractMsgs = getExecuteContractMsgs(senderAddress, msgs);
 
   const result = await client.signAndBroadcast(
     senderAddress,
@@ -360,6 +381,6 @@ class CosmJs {
   }
 }
 
-export { collectWallet };
+export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple };
 
 export default CosmJs;

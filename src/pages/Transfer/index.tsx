@@ -7,13 +7,15 @@ import { useQuery } from 'react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
+  fetchBalanceWithMapping,
   fetchTokenInfo,
   generateContractMessages,
+  generateConvertErc20Cw20Message,
   TransferQuery
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { buildMultipleMessages, parseAmount, parseDisplayAmount } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
@@ -79,7 +81,7 @@ const Transfer: React.FC = () => {
   } = useQuery(
     ['from-token-balance', fromToken, txHash],
     () =>
-      fetchBalance(
+      fromToken.erc20Cw20Map ? fetchBalanceWithMapping(address, fromToken) : fetchBalance(
         address,
         fromToken!.denom,
         fromToken!.contractAddress,
@@ -105,14 +107,17 @@ const Transfer: React.FC = () => {
         recipientAddress
       } as TransferQuery);
 
+      const msgConvertsFrom = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(fromTokenInfoData)), address);
+
       const msg = msgs[0];
-      const result = await CosmJs.execute({
+
+      var messages = buildMultipleMessages(msg, msgConvertsFrom);
+
+      const result = await CosmJs.executeMultiple({
         prefix: ORAI,
-        address: msg?.contract,
+        msgs: messages,
         walletAddr: address,
-        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
       if (result) {
         console.log('in correct result');

@@ -8,30 +8,20 @@ on:
   push:
     branches: [develop]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16]
-
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.10.0
         with:
           access_token: ${{ github.token }}
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install Yarn
-        run: npm install -g yarn
+          node-version: 16
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -43,13 +33,12 @@ jobs:
       - name: Install Dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn
-      - name: Copy env
-        run: cp .env.example .env
-      - name: Set Sentry environment
-        run: echo "REACT_APP_SENTRY_ENVIRONMENT=staging" >> .env 
       - name: Build Production
-        run: yarn build
+        run: |
+          cp .env.example .env
+          yarn build
         env:
+          REACT_APP_SENTRY_ENVIRONMENT: staging
           CI: false
       - name: Deploy to firebase
         run: yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"

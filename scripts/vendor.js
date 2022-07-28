@@ -63,8 +63,6 @@ if (process.env.NODE_PATH) {
   console.log();
 }
 
-console.log('Creating an optimized production build...');
-
 const compiler = webpack(config);
 
 compiler.run((err, stats) => {

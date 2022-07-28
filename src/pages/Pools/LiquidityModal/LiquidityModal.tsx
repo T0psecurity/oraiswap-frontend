@@ -12,17 +12,20 @@ import {
   generateContractMessages,
   fetchTokenAllowance,
   ProvideQuery,
+  generateConvertMsgs,
+  fetchBalanceWithMapping,
+  generateConvertErc20Cw20Message,
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { getUsd } from 'libs/utils';
+import { buildMultipleMessages, getUsd, parseAmountToWithDecimal } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { DECIMAL_FRACTION, ORAI } from 'config/constants';
+import { DECIMAL_FRACTION, KWT_DENOM, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
@@ -117,7 +120,7 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-balance', token1?.denom, txHash],
     () =>
-      fetchBalance(
+      token1?.erc20Cw20Map ? fetchBalanceWithMapping(address, token1) : fetchBalance(
         address,
         token1!.denom,
         token1!.contractAddress,
@@ -137,7 +140,7 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-balance', token2?.denom, txHash],
     () =>
-      fetchBalance(
+      token2?.erc20Cw20Map ? fetchBalanceWithMapping(address, token2) : fetchBalance(
         address,
         token2!.denom,
         token2!.contractAddress,
@@ -205,6 +208,34 @@ const LiquidityModal: FC<ModalProps> = ({
     );
     return t;
   };
+
+  // const sortKwtPair = (amount1: number, amount2: number) => {
+  //   if (token1InfoData.denom === KWT_DENOM) {
+  //     return [
+  //       {
+  //         token: token2InfoData,
+  //         amount: amount2,
+  //       },
+  //       {
+  //         token: token1InfoData,
+  //         amount: amount1,
+  //       },
+  //     ];
+  //   } else if (token2InfoData.denom === KWT_DENOM) {
+  //     return [
+  //       {
+  //         token: token1InfoData,
+  //         amount: amount1,
+  //       },
+  //       {
+  //         token: token2InfoData,
+  //         amount: amount2,
+  //       },
+  //     ];
+  //   } else {
+  //     return false;
+  //   }
+  // };
 
   const onChangeAmount1 = (floatValue: string) => {
     setRecentInput(1);
@@ -306,6 +337,10 @@ const LiquidityModal: FC<ModalProps> = ({
           address
         );
 
+      // hard copy of from & to token info data to prevent data from changing when calling the function
+      const firstTokenConverts = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(token1)), address);
+      const secTokenConverts = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(token2)), address);
+
       const msgs = await generateContractMessages({
         type: Type.PROVIDE,
         sender: address,
@@ -318,17 +353,12 @@ const LiquidityModal: FC<ModalProps> = ({
 
       const msg = msgs[0];
 
-      // console.log(
-      //   'msgs: ',
-      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      // );
+      var messages = buildMultipleMessages(msg, firstTokenConverts, secTokenConverts);
 
-      const result = await CosmJs.execute({
-        address: msg.contract,
+      const result = await CosmJs.executeMultiple({
+        msgs: messages,
         walletAddr: address,
-        handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds } as HandleOptions,
       });
       console.log('result provide tx hash: ', result);
 
@@ -353,6 +383,105 @@ const LiquidityModal: FC<ModalProps> = ({
       setActionLoading(false);
     }
   };
+
+  // const handleAddLiquidityWithKWT = async (
+  //   pairedAmount: number,
+  //   pairedToken: TokenItemType,
+  //   kwtAmount: number,
+  //   kwtToken: TokenItemType
+  // ) => {
+  //   if (!pairInfoData?.pair) return;
+  //   setActionLoading(true);
+  //   displayToast(TToastType.TX_BROADCASTING);
+
+  //   try {
+  //     const _kwtAmount = parseAmountToWithDecimal(
+  //       kwtAmount,
+  //       kwtToken.decimals
+  //     ).toFixed(0);
+
+  //     const convertNativeKwtMsg = (
+  //       await generateConvertMsgs({
+  //         type: Type.CONVERT_TOKEN,
+  //         sender: address,
+  //         inputAmount: _kwtAmount,
+  //         inputToken: kwtToken,
+  //       })
+  //     )[0];
+  //     const increaseAllowanceKwtMsg = (
+  //       await generateContractMessages({
+  //         type: Type.INCREASE_ALLOWANCE,
+  //         amount: '9'.repeat(30),
+  //         sender: address,
+  //         spender: pairInfoData!.contract_addr,
+  //         token: kwtToken?.contractAddress,
+  //       })
+  //     )[0];
+
+  //     const provideLiqMsg = (
+  //       await generateContractMessages({
+  //         type: Type.PROVIDE,
+  //         sender: address,
+  //         fromInfo: pairedToken,
+  //         toInfo: kwtToken,
+  //         fromAmount: pairedAmount,
+  //         toAmount: kwtAmount,
+  //         pair: pairInfoData.pair.contract_addr,
+  //       } as ProvideQuery)
+  //     )[0];
+  //     const msgs = [
+  //       {
+  //         contractAddress: convertNativeKwtMsg.contract,
+  //         handleMsg: convertNativeKwtMsg.toString(),
+  //         handleOptions: {
+  //           funds: convertNativeKwtMsg.sent_funds,
+  //         } as HandleOptions,
+  //       },
+  //       {
+  //         contractAddress: increaseAllowanceKwtMsg.contract,
+  //         handleMsg: increaseAllowanceKwtMsg.toString(),
+  //         handleOptions: {
+  //           funds: increaseAllowanceKwtMsg.sent_funds,
+  //         } as HandleOptions,
+  //       },
+  //       {
+  //         contractAddress: provideLiqMsg.contract,
+  //         handleMsg: provideLiqMsg.toString(),
+  //         handleOptions: { funds: provideLiqMsg.sent_funds } as HandleOptions,
+  //       },
+  //     ];
+
+  //     console.log('msgs: ', msgs);
+
+  //     const result = await CosmJs.executeMultiple({
+  //       prefix: ORAI,
+  //       walletAddr: address,
+  //       msgs,
+  //       gasAmount: { denom: ORAI, amount: '0' },
+  //     });
+  //     console.log('result provide tx hash: ', result);
+
+  //     if (result) {
+  //       console.log('in correct result');
+  //       displayToast(TToastType.TX_SUCCESSFUL, {
+  //         customLink: `${network.explorer}/txs/${result.transactionHash}`,
+  //       });
+
+  //       setTxHash(result.transactionHash);
+  //     }
+  //   } catch (error) {
+  //     console.log('error in swap form: ', error);
+  //     let finalError = '';
+  //     if (typeof error === 'string' || error instanceof String) {
+  //       finalError = error as string;
+  //     } else finalError = String(error);
+  //     displayToast(TToastType.TX_FAILED, {
+  //       message: finalError,
+  //     });
+  //   } finally {
+  //     setActionLoading(false);
+  //   }
+  // };
 
   const handleWithdrawLiquidity = async (amount: number) => {
     if (!pairInfoData?.pair) return;
@@ -492,7 +621,7 @@ const LiquidityModal: FC<ModalProps> = ({
       <div className={cx('swap-icon')}>
         <img
           src={require('assets/icons/fluent_add.svg').default}
-          onClick={() => {}}
+          onClick={() => { }}
         />
       </div>
       <div className={cx('supply')}>
@@ -593,9 +722,9 @@ const LiquidityModal: FC<ModalProps> = ({
       </div>
       {(() => {
         const amount1 = +parseAmount(
-            amountToken1.toString(),
-            token1InfoData!.decimals
-          ),
+          amountToken1.toString(),
+          token1InfoData!.decimals
+        ),
           amount2 = +parseAmount(
             amountToken2.toString(),
             token2InfoData!.decimals
@@ -620,7 +749,17 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('swap-btn', {
               disabled: disabled,
             })}
-            onClick={() => handleAddLiquidity(amount1, amount2)}
+            onClick={() => {
+              // const sortedKwtPair = sortKwtPair(amount1, amount2);
+              // if (!sortedKwtPair) return handleAddLiquidity(amount1, amount2);
+              return handleAddLiquidity(amount1, amount2);
+              // return handleAddLiquidityWithKWT(
+              //   sortKwtPair[0].amount,
+              //   sortKwtPair[0].token,
+              //   sortKwtPair[1].amount,
+              //   sortKwtPair[1].token
+              // );
+            }}
             disabled={disabled}
           >
             {actionLoading && <Loader width={20} height={20} />}
@@ -737,7 +876,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token1Amount) /
-                      +lpTokenInfoData!.total_supply
+                    +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -767,7 +906,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token2Amount) /
-                      +lpTokenInfoData!.total_supply
+                    +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
