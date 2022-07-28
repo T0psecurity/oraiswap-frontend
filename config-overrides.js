@@ -13,10 +13,10 @@ const fallback = {
   url: false,
   path: false,
   assert: false,
-  http: false,
+  http: require.resolve('stream-http'),
   crypto: require.resolve('crypto-browserify'),
   stream: require.resolve('stream-browserify'),
-  https: require.resolve('https-browserify')
+  https: require.resolve('https-browserify'),
 };
 
 const rewiredEsbuild = (config) => {
