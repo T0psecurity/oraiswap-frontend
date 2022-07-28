@@ -75,7 +75,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const checkValidAmount = () => {
     if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Invalid ammount!',
+        message: 'Invalid amount!',
       });
       return false;
     }
@@ -314,7 +314,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+            token.chainId !== ORAI_BRIDGE_CHAIN_ID && token.erc20Cw20Map &&
             name
           ) {
             return (
