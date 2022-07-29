@@ -717,7 +717,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
         <div className={cx('row')}>
           <div className={cx('row-title')}>
-            <span>Estimated Received LP asset</span>
+            <span>Estimated received LP asset</span>
           </div>
           <TokenBalance
             balance={{
