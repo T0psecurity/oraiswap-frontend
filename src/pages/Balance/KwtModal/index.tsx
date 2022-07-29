@@ -17,7 +17,7 @@ const KwtModal: FC<ModalProps> = () => {
       className={cx('modal')}
     >
       <img
-        src="https://cdn.discordapp.com/attachments/973546340128788480/984774220275925013/Kawaiiverse-token-flow-op2.png"
+        src="https://cdn.discordapp.com/attachments/973546340128788480/1002407867766296636/Kawaiiverse_token_flow.png"
         width="100%"
       />
     </Modal>
