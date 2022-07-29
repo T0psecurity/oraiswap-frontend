@@ -1,9 +1,8 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
-import { TooltipIcon } from 'components/Tooltip';
-import { pairs, getPair } from 'config/pools';
+import { getPair } from 'config/pools';
 import { useQuery } from 'react-query';
 import {
   fetchBalance,
@@ -12,20 +11,19 @@ import {
   generateContractMessages,
   fetchTokenAllowance,
   ProvideQuery,
-  generateConvertMsgs,
   fetchBalanceWithMapping,
   generateConvertErc20Cw20Message,
 } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleMessages, getUsd, parseAmountToWithDecimal } from 'libs/utils';
+import { buildMultipleMessages, getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { DECIMAL_FRACTION, KWT_DENOM, ORAI } from 'config/constants';
+import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
@@ -76,6 +74,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
+  const [estimatedLP, setEstimatedLP] = useState(0);
 
   let {
     data: pairAmountInfoData,
@@ -120,12 +119,14 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-balance', token1?.denom, txHash],
     () =>
-      token1?.erc20Cw20Map ? fetchBalanceWithMapping(address, token1) : fetchBalance(
-        address,
-        token1!.denom,
-        token1!.contractAddress,
-        token1!.lcd
-      ),
+      token1?.erc20Cw20Map
+        ? fetchBalanceWithMapping(address, token1)
+        : fetchBalance(
+            address,
+            token1!.denom,
+            token1!.contractAddress,
+            token1!.lcd
+          ),
     {
       enabled: !!address && !!token1,
       refetchOnWindowFocus: false,
@@ -140,12 +141,14 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-balance', token2?.denom, txHash],
     () =>
-      token2?.erc20Cw20Map ? fetchBalanceWithMapping(address, token2) : fetchBalance(
-        address,
-        token2!.denom,
-        token2!.contractAddress,
-        token2!.lcd
-      ),
+      token2?.erc20Cw20Map
+        ? fetchBalanceWithMapping(address, token2)
+        : fetchBalance(
+            address,
+            token2!.denom,
+            token2!.contractAddress,
+            token2!.lcd
+          ),
     {
       enabled: !!address && !!token2,
       refetchOnWindowFocus: false,
@@ -209,44 +212,27 @@ const LiquidityModal: FC<ModalProps> = ({
     return t;
   };
 
-  // const sortKwtPair = (amount1: number, amount2: number) => {
-  //   if (token1InfoData.denom === KWT_DENOM) {
-  //     return [
-  //       {
-  //         token: token2InfoData,
-  //         amount: amount2,
-  //       },
-  //       {
-  //         token: token1InfoData,
-  //         amount: amount1,
-  //       },
-  //     ];
-  //   } else if (token2InfoData.denom === KWT_DENOM) {
-  //     return [
-  //       {
-  //         token: token1InfoData,
-  //         amount: amount1,
-  //       },
-  //       {
-  //         token: token2InfoData,
-  //         amount: amount2,
-  //       },
-  //     ];
-  //   } else {
-  //     return false;
-  //   }
-  // };
-
   const onChangeAmount1 = (floatValue: string) => {
     setRecentInput(1);
     setAmountToken1(floatValue);
     setAmountToken2(`${+floatValue / pairAmountInfoData?.ratio!}`);
+    const amount1 = +parseAmount(floatValue, token1InfoData!.decimals);
+    const estimatedLP =
+      (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
+      +lpTokenInfoData.total_supply;
+    setEstimatedLP(estimatedLP);
   };
 
   const onChangeAmount2 = (floatValue: string) => {
     setRecentInput(2);
     setAmountToken2(floatValue);
     setAmountToken1(`${+floatValue * pairAmountInfoData?.ratio!}`);
+
+    const amount2 = +parseAmount(floatValue, token2InfoData!.decimals);
+    const estimatedLP =
+      (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
+      +lpTokenInfoData.total_supply;
+    setEstimatedLP(estimatedLP);
   };
 
   const getPairAmountInfo = async () => {
@@ -338,8 +324,14 @@ const LiquidityModal: FC<ModalProps> = ({
         );
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const firstTokenConverts = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(token1)), address);
-      const secTokenConverts = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(token2)), address);
+      const firstTokenConverts = await generateConvertErc20Cw20Message(
+        JSON.parse(JSON.stringify(token1)),
+        address
+      );
+      const secTokenConverts = await generateConvertErc20Cw20Message(
+        JSON.parse(JSON.stringify(token2)),
+        address
+      );
 
       const msgs = await generateContractMessages({
         type: Type.PROVIDE,
@@ -353,7 +345,11 @@ const LiquidityModal: FC<ModalProps> = ({
 
       const msg = msgs[0];
 
-      var messages = buildMultipleMessages(msg, firstTokenConverts, secTokenConverts);
+      var messages = buildMultipleMessages(
+        msg,
+        firstTokenConverts,
+        secTokenConverts
+      );
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
@@ -621,7 +617,7 @@ const LiquidityModal: FC<ModalProps> = ({
       <div className={cx('swap-icon')}>
         <img
           src={require('assets/icons/fluent_add.svg').default}
-          onClick={() => { }}
+          onClick={() => {}}
         />
       </div>
       <div className={cx('supply')}>
@@ -709,7 +705,6 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Received LP asset</span>
-            {/* <TooltipIcon /> */}
           </div>
           <TokenBalance
             balance={{
@@ -719,12 +714,25 @@ const LiquidityModal: FC<ModalProps> = ({
             decimalScale={6}
           />
         </div>
+
+        <div className={cx('row')}>
+          <div className={cx('row-title')}>
+            <span>Estimated Received LP asset</span>
+          </div>
+          <TokenBalance
+            balance={{
+              amount: estimatedLP ? estimatedLP : 0,
+              denom: lpTokenInfoData?.symbol ?? '',
+            }}
+            decimalScale={6}
+          />
+        </div>
       </div>
       {(() => {
         const amount1 = +parseAmount(
-          amountToken1.toString(),
-          token1InfoData!.decimals
-        ),
+            amountToken1.toString(),
+            token1InfoData!.decimals
+          ),
           amount2 = +parseAmount(
             amountToken2.toString(),
             token2InfoData!.decimals
@@ -876,7 +884,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token1Amount) /
-                    +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -906,7 +914,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token2Amount) /
-                    +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
