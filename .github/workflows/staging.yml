@@ -39,6 +39,7 @@ jobs:
           yarn build
         env:
           REACT_APP_SENTRY_ENVIRONMENT: staging
+          REACT_APP_IS_SHOW_TRANSFER: true
           CI: false
       - name: Deploy to firebase
         run: yarn firebase deploy --only hosting:oraiswap-staging --token ${{ secrets.FIREBASE_TOKEN }} -m "${{ github.event.head_commit.message }}"
