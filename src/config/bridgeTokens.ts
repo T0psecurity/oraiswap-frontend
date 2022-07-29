@@ -42,23 +42,23 @@ import {
 export type Erc20Cw20Map = {
   erc20Type: string;
   decimals: {
-    erc20Decimals: number,
-    cw20Decimals: number,
+    erc20Decimals: number;
+    cw20Decimals: number;
   };
   erc20Denom: string;
-}
+};
 
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Terra'
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -72,17 +72,17 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna'
-  | 'oraix'
-  | 'tether'
-  | 'kawaii-islands';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna'
+    | 'oraix'
+    | 'tether'
+    | 'kawaii-islands';
   cosmosBased: Boolean;
 };
 
@@ -304,7 +304,16 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         denom: 'orai',
         coingeckoId: 'oraichain-token',
-        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM }],
+        erc20Cw20Map: [
+          {
+            erc20Type: BSC_CHAIN_ID,
+            decimals: {
+              erc20Decimals: EVM_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS,
+            },
+            erc20Denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM,
+          },
+        ],
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -361,7 +370,16 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'airight',
         denom: 'airi',
         contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
-        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM }],
+        erc20Cw20Map: [
+          {
+            erc20Type: BSC_CHAIN_ID,
+            decimals: {
+              erc20Decimals: EVM_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS,
+            },
+            erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
+          },
+        ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
         chainId: 'Oraichain',
@@ -377,7 +395,16 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'tether',
         denom: STABLE_DENOM,
         contractAddress: process.env.REACT_APP_USDT_CONTRACT,
-        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM, }],
+        erc20Cw20Map: [
+          {
+            erc20Type: BSC_CHAIN_ID,
+            decimals: {
+              erc20Decimals: EVM_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS,
+            },
+            erc20Denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
+          },
+        ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
         chainId: 'Oraichain',
@@ -472,7 +499,16 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'kawaii-islands',
         denom: 'kwt',
         contractAddress: process.env.REACT_APP_KWT_CONTRACT,
-        erc20Cw20Map: [{ erc20Type: BSC_CHAIN_ID, decimals: { erc20Decimals: EVM_DECIMALS, cw20Decimals: COSMOS_DECIMALS }, erc20Denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM, }],
+        erc20Cw20Map: [
+          {
+            erc20Type: BSC_CHAIN_ID,
+            decimals: {
+              erc20Decimals: EVM_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS,
+            },
+            erc20Denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
+          },
+        ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
         chainId: 'Oraichain',
@@ -506,8 +542,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 
