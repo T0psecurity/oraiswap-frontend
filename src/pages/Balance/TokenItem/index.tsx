@@ -4,8 +4,10 @@ import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
+import { TooltipIcon } from 'components/Tooltip';
 
-type AmountDetail = {
+export type AmountDetail = {
+  subAmounts?: { [key: string]: number };
   amount: number;
   usd: number;
 };
@@ -57,7 +59,11 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.tokenInfo}>
             <div className={styles.tokenName}>{token.name}</div>
             <div className={styles.tokenOrg}>
-              <span className={styles.tokenOrgTxt}> {token.bridgeNetworkIdentifier ? `${token.org} (${token.bridgeNetworkIdentifier})` : token.org}</span>
+              <span className={styles.tokenOrgTxt}>
+                {token.bridgeNetworkIdentifier
+                  ? `${token.org} (${token.bridgeNetworkIdentifier})`
+                  : token.org}
+              </span>
             </div>
           </div>
         </div>
@@ -76,6 +82,29 @@ const TokenItem: React.FC<TokenItemProps> = ({
             className={styles.subLabel}
             decimalScale={2}
           />
+        </div>
+        <div className={styles.infoIcon}>
+          {!!amountDetail?.subAmounts && <TooltipIcon
+            content={
+              <div className={styles.tooltipAmount}>
+                {Object.keys(amountDetail?.subAmounts).map((name, idx) => (
+                  <div key={idx} className={styles.row}>
+                    <div>{name}</div>
+                    <TokenBalance
+                      balance={{
+                        amount: amountDetail.subAmounts[name],
+                        denom: '',
+                        decimals: token.decimals,
+                      }}
+                      className={styles.tokenAmount}
+                      decimalScale={Math.min(6, token.decimals)}
+                    />
+                  </div>
+                ))}
+              </div>
+            }
+            placement="bottom-end"
+          />}
         </div>
       </div>
       <div>

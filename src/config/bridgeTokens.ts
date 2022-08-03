@@ -40,6 +40,7 @@ import {
 } from './constants';
 
 export type Erc20Cw20Map = {
+  prefix: string;
   erc20Type: string;
   decimals: {
     erc20Decimals: number;
@@ -306,6 +307,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'oraichain-token',
         erc20Cw20Map: [
           {
+            prefix: 'BEP20',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -372,6 +374,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
         erc20Cw20Map: [
           {
+            prefix: 'BEP20',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -397,6 +400,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         contractAddress: process.env.REACT_APP_USDT_CONTRACT,
         erc20Cw20Map: [
           {
+            prefix: 'BEP20',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -501,6 +505,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         contractAddress: process.env.REACT_APP_KWT_CONTRACT,
         erc20Cw20Map: [
           {
+            prefix: 'BEP20',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,

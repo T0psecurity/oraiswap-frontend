@@ -52,7 +52,7 @@ import { useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
-import TokenItem from './TokenItem';
+import TokenItem, { AmountDetail } from './TokenItem';
 import KwtModal from './KwtModal';
 import { MsgTransfer } from '../../../node_modules/cosmjs-types/ibc/applications/transfer/v1/tx';
 import Long from 'long';
@@ -60,10 +60,7 @@ import cosmwasmRegistry from 'libs/cosmwasm-registry';
 
 interface BalanceProps { }
 
-type AmountDetail = {
-  amount: number;
-  usd: number;
-};
+
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -162,17 +159,27 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (!addr) throw new Error('Addr is undefined');
       // using this way we no need to enable other network
-      const amount = token.erc20Cw20Map ? await fetchBalanceWithMapping(addr, token) : await fetchBalance(
-        addr,
-        token.denom,
-        token.contractAddress,
-        token.lcd
-      );
-
-      const amountDetail: AmountDetail = {
-        amount,
-        usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
-      };
+      let amountDetail: AmountDetail
+      if (!!token.erc20Cw20Map) {
+        const { amount, subAmounts } = await fetchBalanceWithMapping(addr, token)
+        amountDetail = {
+          subAmounts,
+          amount,
+          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+        };
+      }
+      else {
+        const amount = await fetchBalance(
+          addr,
+          token.denom,
+          token.contractAddress,
+          token.lcd
+        );
+        amountDetail = {
+          amount,
+          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+        };
+      }
 
       return [token.denom, amountDetail];
     } catch (ex) {
