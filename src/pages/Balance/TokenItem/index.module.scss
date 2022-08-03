@@ -310,12 +310,17 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
   padding: 5px 10px;
 
   .row {
     display: flex;
     justify-content: space-between;
     gap: 30px;
+    text-align: left;
+
+    .description {
+      color: gray;
+    }
   }
 }

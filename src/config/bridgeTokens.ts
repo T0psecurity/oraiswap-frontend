@@ -41,6 +41,7 @@ import {
 
 export type Erc20Cw20Map = {
   prefix: string;
+  description: string;
   erc20Type: string;
   decimals: {
     erc20Decimals: number;
@@ -308,6 +309,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         erc20Cw20Map: [
           {
             prefix: 'BEP20',
+            description: 'Ibc token from BNB chain',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -375,6 +377,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         erc20Cw20Map: [
           {
             prefix: 'BEP20',
+            description: 'Ibc token from BNB chain',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -401,6 +404,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         erc20Cw20Map: [
           {
             prefix: 'BEP20',
+            description: 'Ibc token from BNB chain',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -506,6 +510,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         erc20Cw20Map: [
           {
             prefix: 'BEP20',
+            description: 'Ibc token from BNB chain',
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,

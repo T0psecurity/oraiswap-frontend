@@ -82,20 +82,28 @@ const TokenItem: React.FC<TokenItemProps> = ({
             {!!amountDetail?.subAmounts && <TooltipIcon
               content={
                 <div className={styles.tooltipAmount}>
-                  {Object.keys(amountDetail?.subAmounts).map((name, idx) => (
-                    <div key={idx} className={styles.row}>
-                      <div>{name}</div>
-                      <TokenBalance
-                        balance={{
-                          amount: amountDetail.subAmounts[name],
-                          denom: '',
-                          decimals: token.decimals,
-                        }}
-                        className={styles.tokenAmount}
-                        decimalScale={Math.min(6, token.decimals)}
-                      />
-                    </div>
-                  ))}
+                  {Object.keys(amountDetail?.subAmounts).map((name, idx) => {
+                    let description: string
+                    if (name !== token.name) description = token.erc20Cw20Map[0]?.description
+
+                    return (
+                      <div key={idx} className={styles.row}>
+                        <div>
+                          <div>{name}</div>
+                          {!!description && <div className={styles.description}>({description})</div>}
+                        </div>
+                        <TokenBalance
+                          balance={{
+                            amount: amountDetail.subAmounts[name],
+                            denom: '',
+                            decimals: token.decimals,
+                          }}
+                          className={styles.tokenAmount}
+                          decimalScale={Math.min(6, token.decimals)}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
               }
               placement="bottom-end"
