@@ -102,8 +102,8 @@ const Swap: React.FC = () => {
     isLoading: isFromTokenBalanceLoading
   } = useQuery(
     ['from-token-balance', fromToken, txHash],
-    () =>
-      fromToken.erc20Cw20Map ? fetchBalanceWithMapping(address, fromToken) :
+    async () =>
+      fromToken.erc20Cw20Map ? (await fetchBalanceWithMapping(address, fromToken)).amount :
         fetchBalance(
           address,
           fromToken!.denom,
@@ -120,8 +120,8 @@ const Swap: React.FC = () => {
     isLoading: isLoadingToTokenBalance
   } = useQuery(
     ['to-token-balance', toToken, txHash],
-    () =>
-      toToken.erc20Cw20Map ? fetchBalanceWithMapping(address, toToken) :
+    async () =>
+      toToken.erc20Cw20Map ? (await fetchBalanceWithMapping(address, toToken)).amount :
         fetchBalance(
           address,
           toToken!.denom,

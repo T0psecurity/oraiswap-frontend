@@ -80,13 +80,14 @@ const Transfer: React.FC = () => {
     isLoading: isFromTokenBalanceLoading
   } = useQuery(
     ['from-token-balance', fromToken, txHash],
-    () =>
-      fromToken.erc20Cw20Map ? fetchBalanceWithMapping(address, fromToken) : fetchBalance(
+    async () =>
+      fromToken.erc20Cw20Map ? (await fetchBalanceWithMapping(address, fromToken)).amount : fetchBalance(
         address,
         fromToken!.denom,
         fromToken!.contractAddress,
         fromToken!.lcd
-      ),
+      )
+    ,
     { enabled: !!address && !!fromToken }
   );
 

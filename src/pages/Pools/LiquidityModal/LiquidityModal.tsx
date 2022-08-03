@@ -118,15 +118,15 @@ const LiquidityModal: FC<ModalProps> = ({
     isLoading: isToken1BalanceLoading,
   } = useQuery(
     ['token-balance', token1?.denom, txHash],
-    () =>
+    async () =>
       token1?.erc20Cw20Map
-        ? fetchBalanceWithMapping(address, token1)
+        ? (await fetchBalanceWithMapping(address, token1)).amount
         : fetchBalance(
-            address,
-            token1!.denom,
-            token1!.contractAddress,
-            token1!.lcd
-          ),
+          address,
+          token1!.denom,
+          token1!.contractAddress,
+          token1!.lcd
+        ),
     {
       enabled: !!address && !!token1,
       refetchOnWindowFocus: false,
@@ -140,15 +140,15 @@ const LiquidityModal: FC<ModalProps> = ({
     isLoading: isLoadingToken2Balance,
   } = useQuery(
     ['token-balance', token2?.denom, txHash],
-    () =>
+    async () =>
       token2?.erc20Cw20Map
-        ? fetchBalanceWithMapping(address, token2)
+        ? (await fetchBalanceWithMapping(address, token2)).amount
         : fetchBalance(
-            address,
-            token2!.denom,
-            token2!.contractAddress,
-            token2!.lcd
-          ),
+          address,
+          token2!.denom,
+          token2!.contractAddress,
+          token2!.lcd
+        ),
     {
       enabled: !!address && !!token2,
       refetchOnWindowFocus: false,
@@ -617,7 +617,7 @@ const LiquidityModal: FC<ModalProps> = ({
       <div className={cx('swap-icon')}>
         <img
           src={require('assets/icons/fluent_add.svg').default}
-          onClick={() => {}}
+          onClick={() => { }}
         />
       </div>
       <div className={cx('supply')}>
@@ -730,9 +730,9 @@ const LiquidityModal: FC<ModalProps> = ({
       </div>
       {(() => {
         const amount1 = +parseAmount(
-            amountToken1.toString(),
-            token1InfoData!.decimals
-          ),
+          amountToken1.toString(),
+          token1InfoData!.decimals
+        ),
           amount2 = +parseAmount(
             amountToken2.toString(),
             token2InfoData!.decimals
@@ -884,7 +884,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token1Amount) /
-                      +lpTokenInfoData!.total_supply
+                    +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -914,7 +914,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token2Amount) /
-                      +lpTokenInfoData!.total_supply
+                    +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
