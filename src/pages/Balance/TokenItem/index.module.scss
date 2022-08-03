@@ -140,6 +140,12 @@
       flex-direction: column;
       display: flex;
       align-items: flex-end;
+
+      .row {
+        display: flex;
+        gap: 0px;
+        align-items: center;
+      }
     }
 
     .tokenAmount {
@@ -147,10 +153,6 @@
       font-size: 22px;
     }
 
-    .infoIcon {
-      position: absolute;
-      right: 6px;
-    }
   }
 
   &.active {
@@ -309,11 +311,11 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  min-width: 200px;
   padding: 5px 10px;
 
   .row {
     display: flex;
     justify-content: space-between;
+    gap: 30px;
   }
 }

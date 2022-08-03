@@ -68,44 +68,47 @@ const TokenItem: React.FC<TokenItemProps> = ({
           </div>
         </div>
         <div className={styles.tokenBalance}>
-          <TokenBalance
-            balance={{
-              amount: amountDetail ? amountDetail.amount.toString() : '0',
-              denom: '',
-              decimals: token.decimals,
-            }}
-            className={styles.tokenAmount}
-            decimalScale={Math.min(6, token.decimals)}
-          />
+          <div className={styles.row}>
+            <TokenBalance
+              balance={{
+                amount: amountDetail ? amountDetail.amount.toString() : '0',
+                denom: '',
+                decimals: token.decimals,
+              }}
+              className={styles.tokenAmount}
+              decimalScale={Math.min(6, token.decimals)}
+            />
+
+            {!!amountDetail?.subAmounts && <TooltipIcon
+              content={
+                <div className={styles.tooltipAmount}>
+                  {Object.keys(amountDetail?.subAmounts).map((name, idx) => (
+                    <div key={idx} className={styles.row}>
+                      <div>{name}</div>
+                      <TokenBalance
+                        balance={{
+                          amount: amountDetail.subAmounts[name],
+                          denom: '',
+                          decimals: token.decimals,
+                        }}
+                        className={styles.tokenAmount}
+                        decimalScale={Math.min(6, token.decimals)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              }
+              placement="bottom-end"
+            />}
+
+          </div>
           <TokenBalance
             balance={amountDetail ? amountDetail.usd : 0}
             className={styles.subLabel}
             decimalScale={2}
           />
         </div>
-        <div className={styles.infoIcon}>
-          {!!amountDetail?.subAmounts && <TooltipIcon
-            content={
-              <div className={styles.tooltipAmount}>
-                {Object.keys(amountDetail?.subAmounts).map((name, idx) => (
-                  <div key={idx} className={styles.row}>
-                    <div>{name}</div>
-                    <TokenBalance
-                      balance={{
-                        amount: amountDetail.subAmounts[name],
-                        denom: '',
-                        decimals: token.decimals,
-                      }}
-                      className={styles.tokenAmount}
-                      decimalScale={Math.min(6, token.decimals)}
-                    />
-                  </div>
-                ))}
-              </div>
-            }
-            placement="bottom-end"
-          />}
-        </div>
+
       </div>
       <div>
         {active && (
