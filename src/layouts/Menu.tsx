@@ -195,27 +195,24 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
             </RequireAuthButton>
-            {new Date().getTime() > 1655908200000 &&
-              renderLink(
-                // 21h30 22/6/22
-                '/claim-oraix',
-                'Claim ORAIX',
-                setLink,
-                <Wallet style={{ width: 30, height: 30 }} />
-              )}
+            {new Date().getTime() > 1655908200000 && renderLink( // 21h30 22/6/22
+              '/claim-oraix',
+              'Claim ORAIX',
+              setLink,
+              <Wallet style={{ width: 30, height: 30 }} />
+            )}
             {renderLink(
               '/swap',
               'Swap',
               setLink,
               <Swap style={{ width: 30, height: 30 }} />
             )}
-            {process.env.REACT_APP_IS_SHOW_TRANSFER === 'true' &&
-              renderLink(
-                '/transfer',
-                'Transfer CW20 Tokens',
-                setLink,
-                <Transfer style={{ width: 30, height: 30 }} />
-              )}
+            {renderLink(
+              '/transfer',
+              'Transfer CW20 Tokens',
+              setLink,
+              <Transfer style={{ width: 30, height: 30 }} />
+            )}
             {renderLink(
               '/pools',
               'Pools',
@@ -231,7 +228,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => {},
+              () => { },
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}

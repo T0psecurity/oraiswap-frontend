@@ -154,7 +154,6 @@ declare global {
       REACT_APP_ORAIX_CLAIM_CONTRACT: string;
       REACT_APP_SENTRY_ENVIRONMENT: string;
       REACT_APP_KWT_CONTRACT: string;
-      REACT_APP_IS_SHOW_TRANSFER: string;
     }
   }
 }
