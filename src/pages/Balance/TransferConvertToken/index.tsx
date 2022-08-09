@@ -13,6 +13,7 @@ import {
 import {
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
+  parseBep20Erc20Name,
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
@@ -319,27 +320,30 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           ) {
             return (
               <>
-                {/* <button
-                  className={styles.tfBtn}
-                  disabled={convertLoading}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setConvertLoading(true);
-                      await convertToken(convertAmount, token, 'nativeToCw20');
-                    } finally {
-                      setConvertLoading(false);
-                    }
-                  }}
-                >
-                  {convertLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Convert To
-                    <strong style={{ marginLeft: 5 }}>{name}</strong>
-                  </span>
-                </button> */}
+                {token.bridgeNetworkIdentifier && (
+                  <button
+                    className={styles.tfBtn}
+                    disabled={convertLoading}
+                    onClick={async (event) => {
+                      event.stopPropagation();
+                      try {
+                        const isValid = checkValidAmount();
+                        if (!isValid) return;
+                        setConvertLoading(true);
+                        await convertToken(convertAmount, token, 'nativeToCw20');
+                      } finally {
+                        setConvertLoading(false);
+                      }
+                    }}
+                  >
+                    {convertLoading && <Loader width={20} height={20} />}
+                    <span>
+                      Convert To
+                      <strong style={{ marginLeft: 5 }}>{parseBep20Erc20Name(name)}</strong>
+                    </span>
+                  </button>
+                )
+                }
                 <button
                   disabled={transferLoading}
                   className={styles.tfBtn}
@@ -349,7 +353,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!isValid) return;
                       setTransferLoading(true);
-                      const name = token.name.replace(/(BEP20|ERC20)\s+/, '');
+                      const name = parseBep20Erc20Name(token.name);
                       const to = filteredTokens.find(
                         (t) =>
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
