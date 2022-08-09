@@ -414,7 +414,8 @@ const Balance: React.FC<BalanceProps> = () => {
     toToken: TokenItemType,
     transferAmount: number
   ) => {
-
+    console.log("from token: ", fromToken)
+    console.log("to token: ", toToken)
     if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) return;

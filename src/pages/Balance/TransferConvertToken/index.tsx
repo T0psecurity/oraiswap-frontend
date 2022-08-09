@@ -18,6 +18,7 @@ import Loader from 'components/Loader';
 import {
   BSC_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
+  ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -63,7 +64,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const ibcConvertToken = filteredTokens.find(
     (t) =>
       t.cosmosBased &&
-      (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) &&
+      (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) && token.chainId === ORAICHAIN_ID &&
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
 
@@ -225,7 +226,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
                           t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
                       );
-                      console.log("to token: ", to)
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);
@@ -314,7 +314,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID && token.erc20Cw20Map &&
+            token.chainId !== ORAI_BRIDGE_CHAIN_ID && (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
             name
           ) {
             return (
@@ -349,14 +349,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!isValid) return;
                       setTransferLoading(true);
+                      const name = token.name.replace(/(BEP20|ERC20)\s+/, '');
                       const to = filteredTokens.find(
                         (t) =>
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                          t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
                       );
 
                       // convert reverse before transferring
-
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);
