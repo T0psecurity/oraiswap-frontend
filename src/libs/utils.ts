@@ -138,10 +138,13 @@ export const reduceString = (str: string, from: number, end: number) => {
   return str ? str.substring(0, from) + " ... " + str.substring(str.length - end) : "-";
 };
 
+export const parseBep20Erc20Name = (name: string) => {
+  return name.replace(/(BEP20|ERC20)\s+/, '');
+}
+
 export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
   var messages: any[] = mainMsg ? [mainMsg] : [];
   messages.unshift(...preMessages.flat(1));
-  console.log("messages in build multiple messages: ", messages)
   messages = messages.map(msg => ({ contractAddress: msg.contract, handleMsg: msg.msg.toString(), handleOptions: { funds: msg.sent_funds } }));
   return messages;
 }

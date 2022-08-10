@@ -75,8 +75,4 @@ const startApp = async () => {
   );
 };
 
-window.addEventListener('error', (event) => {
-  alert(JSON.stringify(event))
-});
-
 startApp();

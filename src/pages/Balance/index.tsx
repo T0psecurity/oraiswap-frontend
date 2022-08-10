@@ -29,7 +29,8 @@ import {
   getUsd,
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
-  parseAmountToWithDecimal
+  parseAmountToWithDecimal,
+  parseBep20Erc20Name
 } from 'libs/utils';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
@@ -414,7 +415,8 @@ const Balance: React.FC<BalanceProps> = () => {
     toToken: TokenItemType,
     transferAmount: number
   ) => {
-
+    console.log("from token: ", fromToken)
+    console.log("to token: ", toToken)
     if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) return;
@@ -809,7 +811,7 @@ const Balance: React.FC<BalanceProps> = () => {
     from: TokenItemType
   ) => {
     if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
-      const name = from.name.replace(/(BEP20|ERC20)\s+/, '');
+      const name = parseBep20Erc20Name(from.name);
       return toTokens.find((t) => t.name.includes(name));
     }
 
@@ -999,7 +1001,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   {toTokens
                     .filter((t) => {
                       if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
-                        const name = from.name.replace(/(BEP20|ERC20)\s+/, '');
+                        const name = parseBep20Erc20Name(from.name);
                         return t.name.includes(name);
                       }
                       return (
@@ -1009,7 +1011,7 @@ const Balance: React.FC<BalanceProps> = () => {
                       );
                     })
                     .map((t: TokenItemType) => {
-                      const name = t.name.replace(/(BEP20|ERC20)\s+/, '');
+                      const name = parseBep20Erc20Name(t.name);
                       const transferToToken = fromTokens.find(
                         (t) =>
                           t.cosmosBased &&
